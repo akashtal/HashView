@@ -18,6 +18,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.hashview.app",
+      googleServicesFile: "./GoogleService-Info.plist",
       infoPlist: {
         NSLocationWhenInUseUsageDescription:
           "HashView needs your location to verify you are physically present at a business when posting a review (Geofencing) and to find nearby businesses.",
@@ -40,6 +41,7 @@ export default {
 
     android: {
       package: "com.hashview.apps",
+      googleServicesFile: "./google-services.json",
       versionCode: 21,
       usesCleartextTraffic: true,
       adaptiveIcon: {
@@ -70,6 +72,9 @@ export default {
       [
         "expo-build-properties",
         {
+          "ios": {
+            "useFrameworks": "static"
+          },
           "android": {
             "minSdkVersion": 24,
             "compileSdkVersion": 35,
@@ -100,18 +105,7 @@ export default {
           cameraPermission: "Allow HashView to access your camera to capture photos for listings and scan QR codes."
         }
       ],
-      [
-        "expo-font",
-        {
-          "fonts": [
-            "./assets/fonts/Ionicons.ttf",
-            "./assets/fonts/MaterialIcons.ttf",
-            "./assets/fonts/MaterialCommunityIcons.ttf",
-            "./assets/fonts/FontAwesome.ttf",
-            "./assets/fonts/Feather.ttf"
-          ]
-        }
-      ],
+      "expo-font",
       "expo-asset",
       "expo-secure-store",
       [
@@ -121,7 +115,8 @@ export default {
           resizeMode: "contain",
           backgroundColor: "#210059"
         }
-      ]
+      ],
+      "@react-native-firebase/app"
     ],
 
     extra: {

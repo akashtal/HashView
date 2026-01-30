@@ -8,6 +8,7 @@ const Notification = require('../models/Notification.model');
 const { sendPushNotification, sendBulkNotifications } = require('../utils/notification');
 const { sendEmail } = require('../utils/emailService');
 const { generateBusinessQRCode } = require('../utils/qrcode');
+const { syncGoogleRatingsForBusiness } = require('./externalReviews.controller');
 
 // @desc    Get admin dashboard stats
 // @route   GET /api/admin/dashboard
@@ -363,6 +364,23 @@ exports.createBusiness = async (req, res, next) => {
     const business = await Business.create(businessData);
 
     console.log(`✅ Admin created business: ${business.name} (${owner ? 'with owner' : 'without owner'})`);
+
+    // Auto-sync Google ratings in background (if Google Business name is provided)
+    if (googleBusinessName && googleBusinessName.trim()) {
+      console.log(`🔄 Auto-syncing Google ratings for business: ${business._id}`);
+      // Call sync in background without blocking the response
+      syncGoogleRatingsForBusiness(business._id.toString(), true)
+        .then(result => {
+          if (result.success) {
+            console.log(`✅ Auto-sync completed for business: ${business._id} - Rating: ${result.data.rating}, Count: ${result.data.reviewCount}`);
+          } else {
+            console.log(`⚠️  Auto-sync failed for business: ${business._id} - ${result.error}`);
+          }
+        })
+        .catch(err => {
+          console.error(`❌ Auto-sync error for business: ${business._id}`, err.message);
+        });
+    }
 
     res.status(201).json({
       success: true,

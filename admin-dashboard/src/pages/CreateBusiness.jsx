@@ -88,6 +88,14 @@ const CreateBusiness = () => {
   const [searchingAddress, setSearchingAddress] = useState(false);
   const searchTimeoutRef = useRef(null);
 
+  // Google Business search
+  const [googleBusinessQuery, setGoogleBusinessQuery] = useState('');
+  const [googleBusinessSuggestions, setGoogleBusinessSuggestions] = useState([]);
+  const [showGoogleBusinessSuggestions, setShowGoogleBusinessSuggestions] = useState(false);
+  const [searchingGoogleBusiness, setSearchingGoogleBusiness] = useState(false);
+  const [selectedGoogleBusiness, setSelectedGoogleBusiness] = useState(null);
+  const googleBusinessTimeoutRef = useRef(null);
+
   // Images
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState('');
@@ -247,6 +255,108 @@ const CreateBusiness = () => {
       postcode: getComponent(['postal_code']),
       country: getComponent(['country']) || 'United Kingdom'
     };
+  };
+
+  // Search Google businesses using Places Autocomplete
+  const searchGoogleBusinesses = useCallback((query) => {
+    if (!query || query.trim().length < 3 || !autocompleteServiceRef.current) {
+      setGoogleBusinessSuggestions([]);
+      setShowGoogleBusinessSuggestions(false);
+      return;
+    }
+
+    setSearchingGoogleBusiness(true);
+
+    autocompleteServiceRef.current.getPlacePredictions(
+      {
+        input: query,
+        componentRestrictions: { country: 'gb' },
+        types: ['establishment']
+      },
+      (predictions, status) => {
+        setSearchingGoogleBusiness(false);
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+          setGoogleBusinessSuggestions(predictions.slice(0, 5).map(pred => ({
+            id: pred.place_id,
+            description: pred.description,
+            place_id: pred.place_id,
+            name: pred.structured_formatting?.main_text || pred.description.split(',')[0]
+          })));
+          setShowGoogleBusinessSuggestions(true);
+        } else {
+          setGoogleBusinessSuggestions([]);
+          setShowGoogleBusinessSuggestions(false);
+        }
+      }
+    );
+  }, []);
+
+  // Debounced Google business search
+  useEffect(() => {
+    if (googleBusinessTimeoutRef.current) {
+      clearTimeout(googleBusinessTimeoutRef.current);
+    }
+
+    googleBusinessTimeoutRef.current = setTimeout(() => {
+      if (googleBusinessQuery) {
+        searchGoogleBusinesses(googleBusinessQuery);
+      }
+    }, 500);
+
+    return () => {
+      if (googleBusinessTimeoutRef.current) {
+        clearTimeout(googleBusinessTimeoutRef.current);
+      }
+    };
+  }, [googleBusinessQuery, searchGoogleBusinesses]);
+
+  // Select Google business and fetch details
+  const selectGoogleBusiness = (suggestion) => {
+    if (!placesServiceRef.current || !suggestion.place_id) {
+      console.error('PlacesService not available or no place_id');
+      return;
+    }
+
+    setSearchingGoogleBusiness(true);
+
+    placesServiceRef.current.getDetails(
+      {
+        placeId: suggestion.place_id,
+        fields: ['name', 'formatted_address', 'rating', 'user_ratings_total', 'place_id']
+      },
+      (place, status) => {
+        setSearchingGoogleBusiness(false);
+
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && place) {
+          const businessData = {
+            name: place.name,
+            placeId: place.place_id,
+            address: place.formatted_address,
+            rating: place.rating || 0,
+            reviewCount: place.user_ratings_total || 0
+          };
+
+          setSelectedGoogleBusiness(businessData);
+          setGoogleBusinessQuery(place.name);
+          setFormData(prev => ({
+            ...prev,
+            googleBusinessName: place.name
+          }));
+          setShowGoogleBusinessSuggestions(false);
+          setGoogleBusinessSuggestions([]);
+          console.log('✅ Selected Google business:', businessData);
+        } else {
+          console.error('Failed to get place details:', status);
+        }
+      }
+    );
+  };
+
+  // Clear Google business selection
+  const clearGoogleBusinessSelection = () => {
+    setSelectedGoogleBusiness(null);
+    setGoogleBusinessQuery('');
+    setFormData(prev => ({ ...prev, googleBusinessName: '' }));
   };
 
   // Select address from suggestions - uses PlacesService to get details
@@ -1046,16 +1156,74 @@ const CreateBusiness = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Google Business Name</label>
-              <input
-                type="text"
-                name="googleBusinessName"
-                value={formData.googleBusinessName}
-                onChange={handleChange}
-                placeholder="My Restaurant, New York"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              />
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Google Business Name
+                <span className="text-xs text-gray-500 ml-2">(Optional - helps auto-fetch ratings)</span>
+              </label>
+
+              <div className="relative">
+                <input
+                  type="text"
+                  value={googleBusinessQuery}
+                  onChange={(e) => setGoogleBusinessQuery(e.target.value)}
+                  placeholder="Search for your business on Google..."
+                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  disabled={!!selectedGoogleBusiness}
+                />
+                {searchingGoogleBusiness && (
+                  <Loader2 className="absolute right-3 top-2.5 w-5 h-5 text-gray-400 animate-spin" />
+                )}
+              </div>
+
+              {/* Google Business Suggestions */}
+              {showGoogleBusinessSuggestions && googleBusinessSuggestions.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                  {googleBusinessSuggestions.map((suggestion) => (
+                    <button
+                      key={suggestion.id}
+                      type="button"
+                      onClick={() => selectGoogleBusiness(suggestion)}
+                      className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                    >
+                      <div className="font-medium text-gray-900">{suggestion.name}</div>
+                      <div className="text-xs text-gray-500 mt-1">{suggestion.description}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Selected Google Business Preview */}
+              {selectedGoogleBusiness && (
+                <div className="mt-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Check className="w-5 h-5 text-green-600" />
+                        <span className="font-semibold text-green-900">{selectedGoogleBusiness.name}</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">{selectedGoogleBusiness.address}</p>
+                      <div className="flex items-center gap-3 mt-2">
+                        <div className="flex items-center">
+                          <span className="text-yellow-500 mr-1">★</span>
+                          <span className="font-medium">{selectedGoogleBusiness.rating.toFixed(1)}</span>
+                        </div>
+                        <span className="text-sm text-gray-500">({selectedGoogleBusiness.reviewCount} reviews)</span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={clearGoogleBusinessSelection}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-green-700 mt-3">
+                    ✓ Google rating and reviews will be auto-synced after business creation
+                  </p>
+                </div>
+              )}
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">TripAdvisor URL</label>

@@ -1,0 +1,20 @@
+# Code owners for automatic review requests
+
+# Default owners for everything in the repo
+*       @your-github-username
+
+# Backend code
+/backend/**  @backend-team @your-github-username
+
+# Frontend mobile app
+/frontend/** @frontend-team @your-github-username
+
+# Admin dashboard
+/admin-dashboard/** @frontend-team @your-github-username
+
+# CI/CD workflows
+/.github/** @devops-team @your-github-username
+
+# Documentation
+/*.md @documentation-team @your-github-username
+

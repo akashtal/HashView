@@ -1,0 +1,59 @@
+{
+  "cli": {
+    "version": ">= 5.9.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false,
+        "buildConfiguration": "Release"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://hashview.44.249.50.162.nip.io/api",
+        "EXPO_PUBLIC_SOCKET_URL": "https://hashview.44.249.50.162.nip.io",
+        "EXPO_PUBLIC_API_TIMEOUT": "30000"
+      }
+    },
+    "production": {
+      "android": {
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleRelease",
+        "enableProguardInReleaseBuilds": true
+      },
+      "ios": {
+        "simulator": false,
+        "buildConfiguration": "Release",
+        "distribution": "store"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://hashview.44.249.50.162.nip.io/api",
+        "EXPO_PUBLIC_SOCKET_URL": "https://hashview.44.249.50.162.nip.io",
+        "EXPO_PUBLIC_API_TIMEOUT": "30000"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "your-apple-id@example.com",
+        "ascAppId": "your-app-store-connect-app-id",
+        "appleTeamId": "your-apple-team-id"
+      }
+    }
+  }
+}
