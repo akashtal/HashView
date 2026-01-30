@@ -16,6 +16,8 @@ import { Ionicons as Icon } from '@expo/vector-icons';
 import PhoneInput from 'react-native-phone-number-input';
 import { LinearGradient } from 'expo-linear-gradient';
 import COLORS from '../../config/colors';
+import GoogleSignInButton from '../../components/auth/GoogleSignInButton';
+import FacebookSignInButton from '../../components/auth/FacebookSignInButton';
 
 export default function SignUpScreen({ navigation, route }) {
   const dispatch = useDispatch();
@@ -225,7 +227,7 @@ export default function SignUpScreen({ navigation, route }) {
           {/* Sign Up Form Card */}
           <View className="flex-1 bg-white rounded-t-3xl px-6 pt-6">
             {/* Header */}
-            <View className="items-center mb-6">
+            <View className="items-center mb-5">
               <LinearGradient
                 colors={config.gradientColors}
                 className="rounded-full p-3 mb-3"
@@ -238,6 +240,18 @@ export default function SignUpScreen({ navigation, route }) {
               <Text className="text-gray-600 text-sm mt-1">
                 {config.subtitle}
               </Text>
+            </View>
+
+            {/* OAuth Sign-In Options */}
+            <View className="mb-5">
+              <GoogleSignInButton role={role} style={{ marginBottom: 12 }} />
+              <FacebookSignInButton role={role} />
+
+              <View className="flex-row items-center my-4">
+                <View className="flex-1 h-[1px] bg-gray-300" />
+                <Text className="mx-3 text-gray-500 font-medium text-sm">OR REGISTER WITH EMAIL</Text>
+                <View className="flex-1 h-[1px] bg-gray-300" />
+              </View>
             </View>
 
             {/* Name Input */}

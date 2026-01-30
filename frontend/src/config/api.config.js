@@ -5,12 +5,12 @@ export const API_CONFIG = {
   // BASE_URL: 'http://localhost:5001/api',
   // SOCKET_URL: 'http://localhost:5001',
 
-  //BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://hashview.44.249.50.162.nip.io/api',
-  BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'http://10.200.237.97:5001/api',
+  BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://hashview.44.249.50.162.nip.io/api',
+  // BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'http://10.200.237.97:5001/api',
   // SECONDARY_BASE_URL: 'https://hashview-backend.onrender.com/api',
 
-  // SOCKET_URL: process.env.EXPO_PUBLIC_SOCKET_URL || 'https://hashview.44.249.50.162.nip.io',
-  SOCKET_URL: process.env.EXPO_PUBLIC_SOCKET_URL || 'http://10.200.237.97:5001',
+  SOCKET_URL: process.env.EXPO_PUBLIC_SOCKET_URL || 'https://hashview.44.249.50.162.nip.io',
+  // SOCKET_URL: process.env.EXPO_PUBLIC_SOCKET_URL || 'http://10.200.237.97:5001',
   // SECONDARY_SOCKET_URL: 'https://hashview-backend.onrender.com',
 
   TIMEOUT: parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT || '60000', 10),

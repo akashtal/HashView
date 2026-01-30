@@ -186,16 +186,11 @@ const businessSchema = new mongoose.Schema({
     sunday: { open: String, close: String, closed: Boolean }
   },
   socialMedia: {
-    facebook: String,
-    instagram: String,
-    twitter: String,
     website: String
   },
   externalProfiles: {
     tripAdvisor: {
       profileUrl: String,
-      rating: Number,
-      reviewCount: Number,
       lastSynced: Date,
       commonNinjaWidgetId: String, // Common Ninja widget ID for TripAdvisor reviews
       commonNinjaWidgetUrl: String // Widget URL for embedding

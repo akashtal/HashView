@@ -17,6 +17,8 @@ import { login } from '../../store/slices/authSlice';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import COLORS from '../../config/colors';
+import GoogleSignInButton from '../../components/auth/GoogleSignInButton';
+import FacebookSignInButton from '../../components/auth/FacebookSignInButton';
 
 export default function LoginScreen({ navigation, route }) {
   const dispatch = useDispatch();
@@ -169,7 +171,7 @@ export default function LoginScreen({ navigation, route }) {
           {/* Login Form Card */}
           <View className="flex-1 bg-white rounded-t-3xl px-6 pt-8">
             {/* Header */}
-            <View className="items-center mb-8">
+            <View className="items-center mb-6">
               <LinearGradient
                 colors={config.gradientColors}
                 className="rounded-full p-4 mb-4"
@@ -182,6 +184,18 @@ export default function LoginScreen({ navigation, route }) {
               <Text className="text-gray-600 mt-2">
                 Sign in to continue
               </Text>
+            </View>
+
+            {/* OAuth Sign-In Options */}
+            <View className="mb-6">
+              <GoogleSignInButton role={role} style={{ marginBottom: 12 }} />
+              <FacebookSignInButton role={role} />
+
+              <View className="flex-row items-center my-5">
+                <View className="flex-1 h-[1px] bg-gray-300" />
+                <Text className="mx-3 text-gray-500 font-medium">OR</Text>
+                <View className="flex-1 h-[1px] bg-gray-300" />
+              </View>
             </View>
 
             {/* Email Input */}

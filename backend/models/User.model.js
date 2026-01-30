@@ -82,6 +82,21 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Business'
   }],
+  // Firebase OAuth fields
+  firebaseUid: {
+    type: String,
+    unique: true,
+    sparse: true // Allows null values while maintaining uniqueness
+  },
+  authProvider: {
+    type: String,
+    enum: ['email', 'google', 'facebook'],
+    default: 'email'
+  },
+  avatar: {
+    type: String,
+    default: null
+  },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
   emailVerificationToken: String,

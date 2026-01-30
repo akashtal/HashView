@@ -170,14 +170,10 @@ exports.registerBusiness = async (req, res, next) => {
       businessData.openingHours = openingHours;
     }
 
-    // Handle social media (only add if at least one field is provided)
-    const { facebook, instagram, twitter } = req.body;
-    if (website || facebook || instagram || twitter) {
+    // Handle social media (only website is supported)
+    if (website) {
       businessData.socialMedia = {
-        website: website || '',
-        facebook: facebook || '',
-        instagram: instagram || '',
-        twitter: twitter || ''
+        website: website || ''
       };
     }
 

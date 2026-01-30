@@ -203,7 +203,7 @@ exports.createBusiness = async (req, res, next) => {
       name, ownerName, firstName, lastName, email, phone, category, description,
       address, buildingNumber, street, city, county, postcode, country, landmark,
       latitude, longitude, radius,
-      website, facebook, instagram, twitter,
+      website,
       tripAdvisorUrl, googleBusinessName,
       openingHours, ownerId, skipOwnerCreation
     } = req.body;
@@ -328,13 +328,10 @@ exports.createBusiness = async (req, res, next) => {
       businessData.openingHours = openingHours;
     }
 
-    // Handle social media
-    if (website || facebook || instagram || twitter) {
+    // Handle social media (only website is supported)
+    if (website) {
       businessData.socialMedia = {
-        website: website || '',
-        facebook: facebook || '',
-        instagram: instagram || '',
-        twitter: twitter || ''
+        website: website || ''
       };
     }
 
@@ -397,8 +394,8 @@ exports.updateBusiness = async (req, res, next) => {
       'name', 'description', 'email', 'phone', 'category',
       'address', 'latitude', 'longitude', 'radius',
       'openingHours', 'socialMedia', 'status', 'kycStatus',
-      'logo', 'coverImage', 'images', 'website', 'facebook',
-      'instagram', 'twitter', 'tripAdvisorUrl', 'googleBusinessName'
+      'logo', 'coverImage', 'images', 'website',
+      'tripAdvisorUrl', 'googleBusinessName'
     ];
 
     allowedFields.forEach(field => {
@@ -421,14 +418,10 @@ exports.updateBusiness = async (req, res, next) => {
       }
     });
 
-    // Handle socialMedia separately
-    if (req.body.website || req.body.facebook || req.body.instagram || req.body.twitter) {
+    // Handle socialMedia separately (only website is supported)
+    if (req.body.website !== undefined) {
       updates.socialMedia = {
-        ...(business.socialMedia || {}),
-        website: req.body.website !== undefined ? req.body.website : (business.socialMedia?.website || ''),
-        facebook: req.body.facebook !== undefined ? req.body.facebook : (business.socialMedia?.facebook || ''),
-        instagram: req.body.instagram !== undefined ? req.body.instagram : (business.socialMedia?.instagram || ''),
-        twitter: req.body.twitter !== undefined ? req.body.twitter : (business.socialMedia?.twitter || '')
+        website: req.body.website
       };
     }
 

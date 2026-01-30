@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Save, MapPin, Search, Clock, Image, X,
   ChevronDown, Check, Building2, Phone, Mail, User, Globe,
-  Facebook, Instagram, Twitter, ExternalLink, Plus, Loader2
+  ExternalLink, Plus, Loader2
 } from 'lucide-react';
 import { adminApi } from '../api/adminApi';
 import LocationPicker from '../components/LocationPicker';
@@ -71,9 +71,6 @@ const CreateBusiness = () => {
     website: '',
     tripAdvisorUrl: '',
     googleBusinessName: '',
-    facebook: '',
-    instagram: '',
-    twitter: '',
 
     // Status
     status: 'active',
@@ -429,9 +426,6 @@ const CreateBusiness = () => {
         website: formData.website,
         tripAdvisorUrl: formData.tripAdvisorUrl,
         googleBusinessName: formData.googleBusinessName,
-        facebook: formData.facebook,
-        instagram: formData.instagram,
-        twitter: formData.twitter,
 
         // Status
         status: formData.status,
@@ -1074,34 +1068,7 @@ const CreateBusiness = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Facebook className="w-4 h-4 inline mr-1" />
-                Facebook
-              </label>
-              <input
-                type="url"
-                name="facebook"
-                value={formData.facebook}
-                onChange={handleChange}
-                placeholder="https://facebook.com/yourbusiness"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Instagram className="w-4 h-4 inline mr-1" />
-                Instagram
-              </label>
-              <input
-                type="url"
-                name="instagram"
-                value={formData.instagram}
-                onChange={handleChange}
-                placeholder="https://instagram.com/yourbusiness"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              />
-            </div>
+
           </div>
         </div>
 

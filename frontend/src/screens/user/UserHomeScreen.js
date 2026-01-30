@@ -95,6 +95,13 @@ export default function UserHomeScreen({ navigation }) {
   // Distance filter state
   const [distanceFilter, setDistanceFilter] = useState(null);
 
+  // Business visibility modal
+  const [visibilityModal, setVisibilityModal] = useState({
+    visible: false,
+    hasOwner: false,
+    businessName: ''
+  });
+
   // Track active filters count
   const activeFiltersCount = useMemo(() => {
     let count = 0;
@@ -442,9 +449,25 @@ export default function UserHomeScreen({ navigation }) {
           {/* Header */}
           <View className="px-4 pt-4 pb-3">
             <View className="flex-row items-center justify-between mb-1.5">
-              <Text className="text-[15px] font-semibold text-[#5e399e] flex-1 pr-2" numberOfLines={1}>
-                {item.name}
-              </Text>
+              <View className="flex-row items-center flex-1 pr-2">
+                <Text className="text-[15px] font-semibold text-[#5e399e]" numberOfLines={1}>
+                  {item.name}
+                </Text>
+                {/* Business Visibility Info Icon */}
+                <TouchableOpacity
+                  onPress={() => {
+                    setVisibilityModal({
+                      visible: true,
+                      hasOwner: !!item.owner,
+                      businessName: item.name
+                    });
+                  }}
+                  className="ml-1.5"
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Icon name="information-circle-outline" size={16} color="#5e399e" style={{ opacity: 0.7 }} />
+                </TouchableOpacity>
+              </View>
               <Text className="text-[14px] text-[#5e399e]" style={{ opacity: 0.8 }} numberOfLines={1}>
                 {locationText}
               </Text>
@@ -918,6 +941,58 @@ export default function UserHomeScreen({ navigation }) {
             </View>
           </TouchableOpacity>
         </TouchableOpacity>
+      </Modal>
+
+      {/* Business Visibility Info Modal */}
+      <Modal
+        visible={visibilityModal.visible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setVisibilityModal({ ...visibilityModal, visible: false })}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50 px-5">
+          <View className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <View className="items-center mb-4">
+              <View className="bg-blue-50 rounded-full p-4 mb-3">
+                <Icon
+                  name={visibilityModal.hasOwner ? "business-outline" : "shield-checkmark-outline"}
+                  size={32}
+                  color={visibilityModal.hasOwner ? COLORS.secondary : "#3B82F6"}
+                />
+              </View>
+              <Text className="text-lg font-bold text-gray-900 text-center mb-2">
+                {visibilityModal.businessName}
+              </Text>
+              <View className={`px-3 py-1.5 rounded-full ${visibilityModal.hasOwner ? 'bg-green-50' : 'bg-blue-50'}`}>
+                <Text className={`text-sm font-semibold ${visibilityModal.hasOwner ? 'text-green-700' : 'text-blue-700'}`}>
+                  {visibilityModal.hasOwner ? 'Public Business' : 'Private Business'}
+                </Text>
+              </View>
+            </View>
+
+            <View className="bg-gray-50 rounded-xl p-4 mb-5">
+              <Text className="text-gray-700 text-center text-sm leading-5">
+                {visibilityModal.hasOwner
+                  ? "This business was created and is managed by a business owner. It's publicly available to all users."
+                  : "This business was created by an admin. It's available for browsing but may not have an active owner account."}
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => setVisibilityModal({ ...visibilityModal, visible: false })}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={[COLORS.secondary, COLORS.secondaryDark]}
+                className="py-3.5 rounded-xl items-center justify-center"
+              >
+                <Text className="text-white font-bold text-base">
+                  Got it
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
     </View>
   );

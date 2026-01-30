@@ -10,11 +10,6 @@ export default function BusinessDashboardScreen({ navigation }) {
   const [business, setBusiness] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [syncing, setSyncing] = React.useState(false);
-  const [tripAdvisorModalVisible, setTripAdvisorModalVisible] = React.useState(false);
-  const [tripAdvisorData, setTripAdvisorData] = React.useState({
-    rating: '',
-    reviewCount: ''
-  });
   const [unreadNotifications, setUnreadNotifications] = React.useState(0);
   const [redemptionStats, setRedemptionStats] = React.useState(null);
   const [loadingStats, setLoadingStats] = React.useState(false);
@@ -93,58 +88,7 @@ export default function BusinessDashboardScreen({ navigation }) {
     }
   };
 
-  const handleOpenTripAdvisorModal = () => {
-    setTripAdvisorData({
-      rating: business?.externalProfiles?.tripAdvisor?.rating?.toString() || '',
-      reviewCount: business?.externalProfiles?.tripAdvisor?.reviewCount?.toString() || ''
-    });
-    setTripAdvisorModalVisible(true);
-  };
 
-  const handleUpdateTripAdvisorRating = async () => {
-    if (!tripAdvisorData.rating || !tripAdvisorData.reviewCount) {
-      Alert.alert('Error', 'Please enter both rating and review count');
-      return;
-    }
-
-    const rating = parseFloat(tripAdvisorData.rating);
-    const reviewCount = parseInt(tripAdvisorData.reviewCount);
-
-    if (isNaN(rating) || rating < 0 || rating > 5) {
-      Alert.alert('Error', 'Rating must be between 0 and 5');
-      return;
-    }
-
-    if (isNaN(reviewCount) || reviewCount < 0) {
-      Alert.alert('Error', 'Review count must be a positive number');
-      return;
-    }
-
-    try {
-      setSyncing(true);
-      const response = await ApiService.updateTripAdvisorRating(business._id, rating, reviewCount);
-
-      if (response.success) {
-        await fetchBusinessData();
-        setTripAdvisorModalVisible(false);
-        Alert.alert('Success', 'TripAdvisor rating updated successfully!');
-      }
-    } catch (error) {
-      console.error('TripAdvisor update error:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to update TripAdvisor rating');
-    } finally {
-      setSyncing(false);
-    }
-  };
-
-  const handleOpenTripAdvisorProfile = () => {
-    const url = business?.externalProfiles?.tripAdvisor?.profileUrl;
-    if (url) {
-      Linking.openURL(url).catch(() => {
-        Alert.alert('Error', 'Could not open TripAdvisor profile');
-      });
-    }
-  };
 
   if (loading) {
     return (
@@ -340,44 +284,23 @@ export default function BusinessDashboardScreen({ navigation }) {
               </View>
             )}
 
-            {/* TripAdvisor Rating Section */}
+            {/* TripAdvisor Link Section (Rating display removed, link only) */}
             {business.externalProfiles?.tripAdvisor?.profileUrl && (
               <View className="mt-4 pt-4 border-t border-gray-100">
-                <View className="flex-row items-center justify-between mb-2">
-                  <View className="flex-row items-center">
-                    <Icon name="airplane" size={20} color="#00AA6C" />
-                    <Text className="text-sm font-semibold text-gray-700 ml-2">TripAdvisor Rating</Text>
-                  </View>
-                  {business.externalProfiles?.tripAdvisor?.lastSynced && (
-                    <Text className="text-xs text-gray-400">
-                      Updated {new Date(business.externalProfiles.tripAdvisor.lastSynced).toLocaleDateString()}
-                    </Text>
-                  )}
-                </View>
-                <View className="flex-row items-center justify-between mb-3">
-                  <View className="flex-row items-center">
-                    <Text className="text-xl font-bold text-gray-900 mr-2">
-                      {business.externalProfiles?.tripAdvisor?.rating?.toFixed(1) || 'N/A'}
-                    </Text>
-                    <Icon name="star" size={16} style={{ color: '#00AA6C' }} />
-                    <Text className="text-sm text-gray-600 ml-2">
-                      ({business.externalProfiles?.tripAdvisor?.reviewCount || 0} reviews)
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={handleOpenTripAdvisorModal}
-                    className="px-4 py-2 rounded-lg flex-row items-center"
-                    style={{ backgroundColor: '#E8F5F1' }}
-                  >
-                    <Icon name="create-outline" size={16} color="#00AA6C" />
-                    <Text className="text-xs font-semibold ml-1" style={{ color: '#00AA6C' }}>
-                      Edit
-                    </Text>
-                  </TouchableOpacity>
+                <View className="flex-row items-center mb-3">
+                  <Icon name="airplane" size={20} color="#00AA6C" />
+                  <Text className="text-sm font-semibold text-gray-700 ml-2">TripAdvisor</Text>
                 </View>
                 <TouchableOpacity
-                  onPress={handleOpenTripAdvisorProfile}
-                  className="flex-row items-center justify-center py-2 rounded-lg"
+                  onPress={() => {
+                    const url = business?.externalProfiles?.tripAdvisor?.profileUrl;
+                    if (url) {
+                      Linking.openURL(url).catch(() => {
+                        Alert.alert('Error', 'Could not open TripAdvisor profile');
+                      });
+                    }
+                  }}
+                  className="flex-row items-center justify-center py-3 rounded-lg"
                   style={{ backgroundColor: '#F0F9FF', borderWidth: 1, borderColor: '#00AA6C' }}
                 >
                   <Icon name="open-outline" size={14} color="#00AA6C" />
@@ -549,75 +472,7 @@ export default function BusinessDashboardScreen({ navigation }) {
         </View>
       </ScrollView>
 
-      {/* TripAdvisor Rating Edit Modal */}
-      <Modal
-        visible={tripAdvisorModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setTripAdvisorModalVisible(false)}
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          className="flex-1"
-        >
-          <View className="flex-1 justify-end bg-black/50">
-            <View className="bg-white rounded-t-3xl p-6">
-              <View className="flex-row justify-between items-center mb-6">
-                <Text className="text-2xl font-bold text-gray-900">Edit TripAdvisor Rating</Text>
-                <TouchableOpacity onPress={() => setTripAdvisorModalVisible(false)}>
-                  <Icon name="close" size={28} color="#6B7280" />
-                </TouchableOpacity>
-              </View>
 
-              <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                {/* Rating */}
-                <View className="mb-4">
-                  <Text className="text-gray-900 font-semibold mb-2">Rating (0-5) *</Text>
-                  <TextInput
-                    className="bg-gray-50 rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
-                    placeholder="e.g., 4.5"
-                    placeholderTextColor="#9CA3AF"
-                    keyboardType="decimal-pad"
-                    value={tripAdvisorData.rating}
-                    onChangeText={(value) => setTripAdvisorData({ ...tripAdvisorData, rating: value })}
-                  />
-                </View>
-
-                {/* Review Count */}
-                <View className="mb-6">
-                  <Text className="text-gray-900 font-semibold mb-2">Review Count *</Text>
-                  <TextInput
-                    className="bg-gray-50 rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
-                    placeholder="e.g., 150"
-                    placeholderTextColor="#9CA3AF"
-                    keyboardType="number-pad"
-                    value={tripAdvisorData.reviewCount}
-                    onChangeText={(value) => setTripAdvisorData({ ...tripAdvisorData, reviewCount: value })}
-                  />
-                </View>
-
-                {/* Submit Button */}
-                <TouchableOpacity
-                  onPress={handleUpdateTripAdvisorRating}
-                  disabled={syncing}
-                  activeOpacity={0.8}
-                >
-                  <LinearGradient
-                    colors={['#00AA6C', '#008C57']}
-                    className="rounded-xl py-4 items-center"
-                  >
-                    {syncing ? (
-                      <ActivityIndicator size="small" color="#FFF" />
-                    ) : (
-                      <Text className="text-white font-bold text-lg">Update Rating</Text>
-                    )}
-                  </LinearGradient>
-                </TouchableOpacity>
-              </ScrollView>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
     </View >
   );
 }

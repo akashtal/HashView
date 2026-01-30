@@ -21,6 +21,7 @@ const businessCouponRoutes = require('./routes/businessCoupon.routes');
 const categoryRoutes = require('./routes/category.routes');
 const adminRoutes = require('./routes/admin.routes');
 const notificationRoutes = require('./routes/notification.routes');
+const oauthRoutes = require('./routes/oauth.routes');
 const chatRoutes = require('./routes/chat.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const externalReviewsRoutes = require('./routes/externalReviews.routes');
@@ -91,6 +92,7 @@ app.get('/health', (req, res) => {
 const supportRoutes = require('./routes/support.routes');
 
 app.use('/api/auth', authRoutes);
+app.use('/api/auth/oauth', oauthRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/business', businessRoutes);
 app.use('/api', businessUpdateRoutes);

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "728856865659",
+    "project_id": "hashviewapp",
+    "storage_bucket": "hashviewapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:728856865659:android:1066c529915eaab4142bde",
+        "android_client_info": {
+          "package_name": "com.hashview.apps"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1wY65JQOvFu8qUji8oyxai5L_xf1Oyuc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
