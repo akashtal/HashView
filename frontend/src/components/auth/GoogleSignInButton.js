@@ -10,7 +10,7 @@ import { API_URL } from '../../config/api.config';
 
 // Configure Google Sign-In (call once in App.js or here)
 GoogleSignin.configure({
-    webClientId: '728856865659-99ir3p87coklg49f74cjqhqoigel1vue.apps.googleusercontent.com', // From GoogleService-Info.plist CLIENT_ID
+    webClientId: '728856865659-m9cj8v3oi6bmok3573d0a8a8bd8tpi9s.apps.googleusercontent.com', // From GoogleService-Info.plist CLIENT_ID
 });
 
 export default function GoogleSignInButton({ role = 'customer', style }) {

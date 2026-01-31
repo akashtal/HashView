@@ -70,8 +70,36 @@ export default function BusinessDetailScreen({ navigation, route }) {
     }
   };
 
-  const handleToggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+  const handleToggleFavorite = async () => {
+    try {
+      const OneSignalService = require('../../services/onesignal.service');
+      const newFavoriteState = !isFavorite;
+
+      setIsFavorite(newFavoriteState);
+
+      // Update OneSignal tags
+      if (newFavoriteState) {
+        // User favorited the business
+        await OneSignalService.setUserTags({
+          [`favorite_${displayBusiness._id}`]: 'true'
+        });
+        console.log(`✅ User tagged for favorite business: ${displayBusiness._id}`);
+      } else {
+        // User unfavorited the business
+        await OneSignalService.deleteTags([`favorite_${displayBusiness._id}`]);
+        console.log(`✅ User tag removed for unfavorite business: ${displayBusiness._id}`);
+      }
+
+      // TODO: Also save favorite to backend if you have a favorites API
+      // await fetch(`${API_CONFIG.BASE_URL}/favorites`, {
+      //   method: newFavoriteState ? 'POST' : 'DELETE',
+      //   body: JSON.stringify({ businessId: displayBusiness._id })
+      // });
+    } catch (error) {
+      console.error('Error updating favorite:', error);
+      // Revert state on error
+      setIsFavorite(!isFavorite);
+    }
   };
 
   const handleImagePress = (imageUrl) => {

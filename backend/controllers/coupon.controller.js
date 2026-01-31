@@ -9,17 +9,17 @@ const crypto = require('crypto');
 exports.getCoupons = async (req, res, next) => {
   try {
     const { status } = req.query;
-    
+
     const query = { user: req.user.id };
     if (status) query.status = status;
-    
+
     // CRITICAL FIX: Only return non-expired coupons
     query.validUntil = { $gte: new Date() };
 
     const coupons = await Coupon.find(query)
       .populate('business', 'name logo address phone email category')
       .sort({ createdAt: -1 });
-    
+
     // Ensure qrCodeData is included for all coupons
     for (const coupon of coupons) {
       if (!coupon.qrCodeData && coupon._id) {
@@ -189,7 +189,7 @@ exports.verifyCoupon = async (req, res, next) => {
 
     // Get business to check ownership
     const business = await Business.findById(coupon.business._id);
-    
+
     if (business.owner.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
@@ -222,7 +222,8 @@ exports.verifyCoupon = async (req, res, next) => {
 exports.redeemCoupon = async (req, res, next) => {
   try {
     const coupon = await Coupon.findById(req.params.id)
-      .populate('business');
+      .populate('business')
+      .populate('user', 'name');
 
     if (!coupon) {
       return res.status(404).json({
@@ -233,7 +234,7 @@ exports.redeemCoupon = async (req, res, next) => {
 
     // Check business ownership
     const business = await Business.findById(coupon.business._id);
-    
+
     if (business.owner.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
@@ -254,6 +255,34 @@ exports.redeemCoupon = async (req, res, next) => {
     coupon.redeemedAt = new Date();
     coupon.redeemedBy = req.user.id;
     await coupon.save();
+
+    // Send OneSignal notification to business owner
+    try {
+      const OneSignalService = require('../services/onesignal.service');
+
+      const discountText = coupon.rewardType === 'percentage'
+        ? `${coupon.rewardValue}% OFF`
+        : coupon.rewardType === 'fixed'
+          ? `₹${coupon.rewardValue} OFF`
+          : coupon.rewardType;
+
+      await OneSignalService.sendToUser(
+        business.owner.toString(),
+        '🎟️ Coupon Redeemed!',
+        `${coupon.user.name} redeemed ${discountText} coupon`,
+        {
+          type: 'coupon_redeemed',
+          screen: 'CouponAnalytics',
+          couponId: coupon._id.toString(),
+          businessId: business._id.toString()
+        }
+      );
+
+      console.log(`✅ OneSignal notification sent for coupon redemption`);
+    } catch (error) {
+      console.error('❌ Failed to send coupon redemption notification:', error);
+      // Don't fail the request if notification fails
+    }
 
     res.status(200).json({
       success: true,

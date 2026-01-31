@@ -406,6 +406,9 @@ exports.updateBusiness = async (req, res, next) => {
       });
     }
 
+    // Track status change for notification
+    const oldStatus = business.status;
+
     // Admin can update any field
     const updates = {};
     const allowedFields = [
@@ -462,6 +465,43 @@ exports.updateBusiness = async (req, res, next) => {
       updates,
       { new: true, runValidators: true }
     ).populate('owner', 'name email phone');
+
+    // Send OneSignal notification if status changed
+    const newStatus = updatedBusiness.status;
+    if (oldStatus !== newStatus && (newStatus === 'active' || newStatus === 'rejected')) {
+      try {
+        const OneSignalService = require('../services/onesignal.service');
+
+        if (newStatus === 'active') {
+          await OneSignalService.sendToUser(
+            updatedBusiness.owner._id.toString(),
+            '🎉 Business Approved!',
+            `Congratulations! ${updatedBusiness.name} is now live on HashView`,
+            {
+              type: 'business_approved',
+              screen: 'BusinessDashboard',
+              businessId: updatedBusiness._id.toString()
+            }
+          );
+          console.log(`✅ OneSignal notification sent for business approval`);
+        } else if (newStatus === 'rejected') {
+          await OneSignalService.sendToUser(
+            updatedBusiness.owner._id.toString(),
+            '❌ Business Update Required',
+            `Your business ${updatedBusiness.name} needs attention. Please check details.`,
+            {
+              type: 'business_rejected',
+              screen: 'BusinessDashboard',
+              businessId: updatedBusiness._id.toString()
+            }
+          );
+          console.log(`✅ OneSignal notification sent for business rejection`);
+        }
+      } catch (error) {
+        console.error('❌ Failed to send business status notification:', error);
+        // Don't fail the request if notification fails
+      }
+    }
 
     res.status(200).json({
       success: true,
@@ -798,7 +838,7 @@ exports.updateReviewStatus = async (req, res, next) => {
   }
 };
 
-// @desc    Send push notification (ENHANCED - Full Admin Control)
+// @desc    Send push notification (ENHANCED - Full Admin Control with OneSignal)
 // @route   POST /api/admin/notifications/send
 // @access  Private (Admin)
 exports.sendNotification = async (req, res, next) => {
@@ -820,59 +860,59 @@ exports.sendNotification = async (req, res, next) => {
       });
     }
 
+    // Import OneSignal service
+    const OneSignalService = require('../services/onesignal.service');
+
     let sentCount = 0;
     let recipientList = [];
+    let oneSignalResponse;
 
     // Load BusinessOwner model once (used in multiple cases)
     const BusinessOwner = require('../models/BusinessOwner.model');
 
     switch (recipientType) {
       case 'all_users':
-        // Get ALL active users (not just those with push tokens)
+        console.log('   📊 Sending to all users via OneSignal tags');
+
+        // Send via OneSignal to all users with tag user_type=customer
+        oneSignalResponse = await OneSignalService.sendToTags(
+          [{ "field": "tag", "key": "user_type", "relation": "=", "value": "customer" }],
+          title,
+          message,
+          { type: 'admin_broadcast', ...data }
+        );
+
+        // Get ALL active users for notification history
         const allUsers = await User.find({
           role: 'customer',
           status: 'active'
-        }).select('_id pushToken');
-
-        console.log(`   📊 Found ${allUsers.length} total active users`);
+        }).select('_id');
 
         recipientList = allUsers.map(u => u._id);
-
-        // Send push notifications to those with tokens
-        const usersWithTokens = allUsers.filter(u => u.pushToken);
-        console.log(`   📱 ${usersWithTokens.length} users have push tokens`);
-
-        if (usersWithTokens.length > 0) {
-          const userIdsWithTokens = usersWithTokens.map(u => u._id);
-          await sendBulkNotifications(userIdsWithTokens, title, message, data);
-          console.log(`   ✅ Push notifications sent to ${usersWithTokens.length} users`);
-        }
-
         sentCount = recipientList.length;
+        console.log(`   ✅ OneSignal notification sent to all users via tags`);
         console.log(`   💾 Will save ${sentCount} notification records`);
         break;
 
       case 'all_businesses':
-        // Get ALL active business owners (not just those with push tokens)
+        console.log('   📊 Sending to all business owners via OneSignal tags');
+
+        // Send via OneSignal to all business owners with tag user_type=business_owner
+        oneSignalResponse = await OneSignalService.sendToTags(
+          [{ "field": "tag", "key": "user_type", "relation": "=", "value": "business_owner" }],
+          title,
+          message,
+          { type: 'admin_broadcast', ...data }
+        );
+
+        // Get ALL active business owners for notification history
         const allBusinessOwners = await BusinessOwner.find({
           status: 'active'
-        }).select('_id pushToken');
-
-        console.log(`   📊 Found ${allBusinessOwners.length} total active business owners`);
+        }).select('_id');
 
         recipientList = allBusinessOwners.map(b => b._id);
-
-        // Send push notifications to those with tokens
-        const ownersWithTokens = allBusinessOwners.filter(o => o.pushToken);
-        console.log(`   📱 ${ownersWithTokens.length} business owners have push tokens`);
-
-        if (ownersWithTokens.length > 0) {
-          const ownerIdsWithTokens = ownersWithTokens.map(o => o._id);
-          await sendBulkNotifications(ownerIdsWithTokens, title, message, data);
-          console.log(`   ✅ Push notifications sent to ${ownersWithTokens.length} business owners`);
-        }
-
         sentCount = recipientList.length;
+        console.log(`   ✅ OneSignal notification sent to all business owners via tags`);
         console.log(`   💾 Will save ${sentCount} notification records`);
         break;
 
@@ -885,14 +925,19 @@ exports.sendNotification = async (req, res, next) => {
           });
         }
 
-        console.log(`   📊 Sending to ${recipientIds.length} specific user(s)`);
+        console.log(`   📊 Sending to ${recipientIds.length} specific user(s) via OneSignal`);
+
+        // Send via OneSignal to specific users
+        oneSignalResponse = await OneSignalService.sendToUsers(
+          recipientIds,
+          title,
+          message,
+          { type: 'admin_broadcast', ...data }
+        );
 
         recipientList = recipientIds;
-        for (const userId of recipientIds) {
-          await sendPushNotification(userId, title, message, data);
-        }
         sentCount = recipientIds.length;
-        console.log(`   ✅ Push notifications sent to ${sentCount} specific user(s)`);
+        console.log(`   ✅ OneSignal notification sent to ${sentCount} specific user(s)`);
         break;
 
       case 'specific_business':
@@ -904,17 +949,31 @@ exports.sendNotification = async (req, res, next) => {
           });
         }
 
-        console.log(`   📊 Sending to ${recipientIds.length} specific business(es)`);
+        console.log(`   📊 Sending to ${recipientIds.length} specific business(es) via OneSignal`);
 
+        // Get business owners for the selected businesses
+        const ownerIds = [];
         for (const businessId of recipientIds) {
           const business = await Business.findById(businessId).select('owner');
           if (business && business.owner) {
-            await sendPushNotification(business.owner, title, message, { ...data, businessId });
-            recipientList.push(business.owner);
-            sentCount++;
+            ownerIds.push(business.owner.toString());
           }
         }
-        console.log(`   ✅ Push notifications sent to ${sentCount} business owner(s)`);
+
+        if (ownerIds.length > 0) {
+          // Send via OneSignal to business owners
+          oneSignalResponse = await OneSignalService.sendToUsers(
+            ownerIds,
+            title,
+            message,
+            { type: 'admin_broadcast', ...data }
+          );
+
+          recipientList = ownerIds;
+          sentCount = ownerIds.length;
+        }
+
+        console.log(`   ✅ OneSignal notification sent to ${sentCount} business owner(s)`);
         break;
 
       default:

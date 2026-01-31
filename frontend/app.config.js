@@ -70,6 +70,12 @@ export default {
     plugins: [
       "expo-dev-client",
       [
+        "onesignal-expo-plugin",
+        {
+          mode: "development" // Change to "production" for production builds
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "ios": {
@@ -120,6 +126,7 @@ export default {
     ],
 
     extra: {
+      oneSignalAppId: "2656b51b-bf6d-446d-8258-42f7cbacb2ab",
       eas: {
         projectId: "d4838e65-984b-45e4-b2d8-a03d28a6fb43"
       }

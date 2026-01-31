@@ -52,15 +52,13 @@ export default function AppNavigator() {
     let isMounted = true;
     const initializeApp = async () => {
       try {
-        // Race between loadUser and a timeout
-        const loadUserPromise = dispatch(loadUser()).unwrap();
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Initialization timeout')), 15000)
-        );
-
-        await Promise.race([loadUserPromise, timeoutPromise]);
+        // Try to load user, but don't fail if no token exists (first time user)
+        await dispatch(loadUser()).unwrap();
       } catch (error) {
-        console.log('Initialization failed or timed out:', error);
+        // Silently ignore token errors for first-time users
+        if (!error.message?.includes('No token found')) {
+          console.log('Initialization error:', error.message);
+        }
       } finally {
         if (isMounted) {
           setIsReady(true);

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApiService from '../../services/api.service';
+import OneSignalService from '../../services/onesignal.service';
 
 // Async thunks
 export const login = createAsyncThunk(
@@ -23,6 +24,17 @@ export const login = createAsyncThunk(
 
       await AsyncStorage.setItem('token', response.token);
       await AsyncStorage.setItem('user', JSON.stringify(response.user));
+
+      // Set OneSignal user identity
+      if (response.user && !response.user.isGuest) {
+        OneSignalService.setExternalUserId(response.user._id);
+        OneSignalService.setEmail(response.user.email);
+        OneSignalService.setUserTags({
+          user_type: response.user.role || 'customer',
+          user_name: response.user.name,
+        });
+      }
+
       return response;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -85,6 +97,11 @@ export const logout = createAsyncThunk(
   async () => {
     await AsyncStorage.removeItem('token');
     await AsyncStorage.removeItem('user');
+
+    // Clear OneSignal identity
+    OneSignalService.removeExternalUserId();
+    OneSignalService.logoutEmail();
+    OneSignalService.clearAllTags();
   }
 );
 

@@ -445,13 +445,31 @@ exports.createReview = async (req, res, next) => {
       { type: 'coupon', couponId: coupon._id.toString() }
     );
 
-    // Notify business owner
-    await sendPushNotification(
-      business.owner,
-      'New Review',
-      `${req.user.name} left a ${rating}-star review for ${business.name}`,
-      { type: 'review', reviewId: review._id.toString() }
-    );
+    // Notify business owner with OneSignal
+    try {
+      const OneSignalService = require('../services/onesignal.service');
+      const User = require('../models/User.model');
+
+      // Get user details for notification
+      const user = await User.findById(req.user.id).select('name');
+
+      await OneSignalService.sendToUser(
+        business.owner.toString(),
+        '⭐ New Review!',
+        `${user.name} left a ${rating}-star review for ${business.name}`,
+        {
+          type: 'review',
+          screen: 'BusinessDashboard',
+          reviewId: review._id.toString(),
+          businessId: businessId.toString()
+        }
+      );
+
+      console.log(`✅ OneSignal notification sent to business owner for new review`);
+    } catch (error) {
+      console.error('❌ Failed to send review notification:', error);
+      // Don't fail the request if notification fails
+    }
 
     res.status(201).json({
       success: true,

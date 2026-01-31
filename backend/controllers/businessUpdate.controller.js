@@ -9,9 +9,9 @@ exports.getBusinessUpdates = async (req, res, next) => {
     const { businessId } = req.params;
     const { type } = req.query; // Filter by type: 'offer', 'update', 'announcement'
 
-    const query = { 
-      business: businessId, 
-      isActive: true 
+    const query = {
+      business: businessId,
+      isActive: true
     };
 
     if (type) {
@@ -67,6 +67,43 @@ exports.createBusinessUpdate = async (req, res, next) => {
       validUntil,
       createdBy: req.user.id
     });
+
+    // Send push notification for announcements and offers
+    if (type === 'announcement' || type === 'offer') {
+      try {
+        const OneSignalService = require('../services/onesignal.service');
+
+        // Create notification title and message
+        let notificationTitle = `📢 ${business.name}`;
+        let notificationMessage = title;
+
+        if (type === 'offer' && discountValue > 0) {
+          const discountText = discountType === 'percentage'
+            ? `${discountValue}% OFF`
+            : `₹${discountValue} OFF`;
+          notificationMessage = `${discountText} - ${title}`;
+        }
+
+        // Send to users who have favorited this business
+        // Using tag: favorite_business_[businessId]
+        await OneSignalService.sendToTags(
+          [{ "field": "tag", "key": `favorite_${businessId}`, "relation": "exists" }],
+          notificationTitle,
+          notificationMessage,
+          {
+            type: type,
+            screen: 'BusinessDetail',
+            businessId: businessId.toString(),
+            updateId: update._id.toString()
+          }
+        );
+
+        console.log(`✅ Push notification sent for business ${type}: ${business.name}`);
+      } catch (error) {
+        console.error('❌ Failed to send push notification for business update:', error);
+        // Don't fail the request if notification fails
+      }
+    }
 
     res.status(201).json({
       success: true,
