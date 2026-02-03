@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, StatusBar, Image, Dimensions, Linking, Share, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StatusBar, Image, Dimensions, Linking, Share, Modal } from 'react-native';
+import ToastService from '../../utils/ToastService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -7,6 +8,7 @@ import { getBusiness } from '../../store/slices/businessSlice';
 import { getBusinessReviews } from '../../store/slices/reviewSlice';
 import COLORS from '../../config/colors';
 import { API_CONFIG } from '../../config/api.config';
+import ApiService from '../../services/api.service';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -29,12 +31,22 @@ export default function BusinessDetailScreen({ navigation, route }) {
       setQrBusiness(business);
       dispatch(getBusinessReviews({ businessId: business._id, params: { limit: 5 } }));
       fetchBusinessUpdates(business._id);
+
+      // Check if business is in user favorites
+      if (user && user.favoritePlaces && user.favoritePlaces.includes(business._id)) {
+        setIsFavorite(true);
+      }
     } else if (businessId) {
       dispatch(getBusiness(businessId));
       dispatch(getBusinessReviews({ businessId, params: { limit: 5 } }));
       fetchBusinessUpdates(businessId);
+
+      // Check if business is in user favorites
+      if (user && user.favoritePlaces && user.favoritePlaces.includes(businessId)) {
+        setIsFavorite(true);
+      }
     }
-  }, [businessId, business, fromQR]);
+  }, [businessId, business, fromQR, user]);
 
   const fetchBusinessUpdates = async (busId) => {
     try {
@@ -72,33 +84,25 @@ export default function BusinessDetailScreen({ navigation, route }) {
 
   const handleToggleFavorite = async () => {
     try {
-      const OneSignalService = require('../../services/onesignal.service');
+      // Optimistic update
       const newFavoriteState = !isFavorite;
-
       setIsFavorite(newFavoriteState);
 
-      // Update OneSignal tags
-      if (newFavoriteState) {
-        // User favorited the business
-        await OneSignalService.setUserTags({
-          [`favorite_${displayBusiness._id}`]: 'true'
-        });
-        console.log(`✅ User tagged for favorite business: ${displayBusiness._id}`);
-      } else {
-        // User unfavorited the business
-        await OneSignalService.deleteTags([`favorite_${displayBusiness._id}`]);
-        console.log(`✅ User tag removed for unfavorite business: ${displayBusiness._id}`);
-      }
+      const response = await ApiService.toggleFavoriteBusiness(displayBusiness._id);
 
-      // TODO: Also save favorite to backend if you have a favorites API
-      // await fetch(`${API_CONFIG.BASE_URL}/favorites`, {
-      //   method: newFavoriteState ? 'POST' : 'DELETE',
-      //   body: JSON.stringify({ businessId: displayBusiness._id })
-      // });
+      if (response.success) {
+        ToastService.showSuccess(
+          newFavoriteState ? 'Added to Favorites' : 'Removed from Favorites',
+          newFavoriteState
+            ? `You will now receive updates from ${displayBusiness.name}`
+            : `You will no longer receive updates from ${displayBusiness.name}`
+        );
+      }
     } catch (error) {
       console.error('Error updating favorite:', error);
       // Revert state on error
       setIsFavorite(!isFavorite);
+      ToastService.showError('Error', 'Failed to update favorites');
     }
   };
 
@@ -116,7 +120,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
     const url = displayBusiness?.externalProfiles?.tripAdvisor?.profileUrl;
     if (url) {
       Linking.openURL(url).catch(() => {
-        Alert.alert('Error', 'Could not open TripAdvisor profile');
+        ToastService.showError('Error', 'Could not open TripAdvisor profile');
       });
     }
   };
@@ -127,21 +131,21 @@ export default function BusinessDetailScreen({ navigation, route }) {
 
     if (googleProfile.profileUrl) {
       Linking.openURL(googleProfile.profileUrl).catch(() => {
-        Alert.alert('Error', 'Could not open Google Business profile');
+        ToastService.showError('Error', 'Could not open Google Business profile');
       });
     } else if (googleProfile.placeId) {
       const url = `https://search.google.com/local/reviews?placeid=${googleProfile.placeId}`;
       Linking.openURL(url).catch(() => {
-        Alert.alert('Error', 'Could not open Google Business profile');
+        ToastService.showError('Error', 'Could not open Google Business profile');
       });
     } else if (displayBusiness.name && displayBusiness.address?.fullAddress) {
       const searchQuery = encodeURIComponent(`${displayBusiness.name} ${displayBusiness.address.fullAddress}`);
       const url = `https://www.google.com/search?q=${searchQuery}`;
       Linking.openURL(url).catch(() => {
-        Alert.alert('Error', 'Could not open Google Search');
+        ToastService.showError('Error', 'Could not open Google Search');
       });
     } else {
-      Alert.alert('Info', 'Google Business profile link not available');
+      ToastService.showInfo('Info', 'Google Business profile link not available');
     }
   };
 
@@ -193,6 +197,20 @@ export default function BusinessDetailScreen({ navigation, route }) {
               className="bg-white/95 w-12 h-12 rounded-full items-center justify-center shadow-lg"
             >
               <Icon name="arrow-back" size={26} color="#111" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Favorite Button */}
+          <View className="absolute top-12 right-5">
+            <TouchableOpacity
+              onPress={handleToggleFavorite}
+              className="bg-white/95 w-12 h-12 rounded-full items-center justify-center shadow-lg"
+            >
+              <Icon
+                name={isFavorite ? "heart" : "heart-outline"}
+                size={26}
+                color={isFavorite ? "#EF4444" : "#111"}
+              />
             </TouchableOpacity>
           </View>
 

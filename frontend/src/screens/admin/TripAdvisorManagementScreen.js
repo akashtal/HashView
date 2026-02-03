@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function TripAdvisorManagementScreen({ navigation }) {
   const [businesses, setBusinesses] = useState([]);
@@ -73,19 +74,19 @@ export default function TripAdvisorManagementScreen({ navigation }) {
 
   const handleSave = async () => {
     if (!formData.rating || !formData.reviewCount) {
-      Alert.alert('Error', 'Please enter both rating and review count');
+      ToastService.showWarning('Required', 'Please enter both rating and review count');
       return;
     }
 
     const rating = parseFloat(formData.rating);
     if (rating < 0 || rating > 5) {
-      Alert.alert('Error', 'Rating must be between 0 and 5');
+      ToastService.showWarning('Invalid Rating', 'Rating must be between 0 and 5');
       return;
     }
 
     try {
       await ApiService.updateTripAdvisorRating(editModal._id, formData.rating, formData.reviewCount);
-      
+
       // Update profile URL if provided
       if (formData.profileUrl && formData.profileUrl !== editModal.externalProfiles?.tripAdvisor?.profileUrl) {
         await ApiService.adminUpdateBusiness(editModal._id, {
@@ -93,12 +94,12 @@ export default function TripAdvisorManagementScreen({ navigation }) {
         });
       }
 
-      Alert.alert('Success', 'TripAdvisor rating updated successfully');
+      ToastService.showSuccess('Success', 'TripAdvisor rating updated successfully');
       setEditModal(null);
       fetchBusinesses();
     } catch (error) {
       console.error('Error updating TripAdvisor:', error);
-      Alert.alert('Error', error.message || 'Failed to update TripAdvisor rating');
+      ToastService.showError('Error', error.message || 'Failed to update TripAdvisor rating');
     }
   };
 

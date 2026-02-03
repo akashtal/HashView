@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function ViewReviewsScreen({ navigation, route }) {
   const { businessId } = route.params;
@@ -35,23 +36,23 @@ export default function ViewReviewsScreen({ navigation, route }) {
       const params = filterRating ? { rating: filterRating } : {};
       const response = await ApiService.getBusinessReviews(businessId, params);
       setReviews(response.reviews || []);
-      
+
       // Calculate stats
       if (response.reviews && response.reviews.length > 0) {
         const total = response.reviews.length;
         const sum = response.reviews.reduce((acc, r) => acc + r.rating, 0);
         const average = sum / total;
-        
+
         const breakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
         response.reviews.forEach(r => {
           breakdown[r.rating]++;
         });
-        
+
         setStats({ average, total, breakdown });
       }
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Failed to load reviews');
+      ToastService.showError('Error', 'Failed to load reviews');
     } finally {
       setLoading(false);
     }
@@ -118,7 +119,7 @@ export default function ViewReviewsScreen({ navigation, route }) {
         <View className="flex-1 mx-3 h-2 bg-gray-200 rounded-full overflow-hidden">
           <View
             className="h-full rounded-full"
-            style={{ 
+            style={{
               width: `${percentage}%`,
               backgroundColor: COLORS.secondary
             }}
@@ -132,7 +133,7 @@ export default function ViewReviewsScreen({ navigation, route }) {
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
-      
+
       {/* Header */}
       <LinearGradient
         colors={[COLORS.primary, COLORS.primaryDark]}

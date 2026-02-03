@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function CategoryManagementScreen({ navigation }) {
   const [categories, setCategories] = useState([]);
@@ -41,7 +42,7 @@ export default function CategoryManagementScreen({ navigation }) {
       setCategories(response.data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
-      Alert.alert('Error', 'Failed to load categories');
+      ToastService.showError('Error', 'Failed to load categories');
     } finally {
       setLoading(false);
     }
@@ -70,23 +71,23 @@ export default function CategoryManagementScreen({ navigation }) {
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
-      Alert.alert('Error', 'Please enter category name');
+      ToastService.showWarning('Required', 'Please enter category name');
       return;
     }
 
     try {
       if (editingCategory) {
         await ApiService.updateCategory(editingCategory._id, formData);
-        Alert.alert('Success', 'Category updated successfully');
+        ToastService.showSuccess('Success', 'Category updated successfully');
       } else {
         await ApiService.createCategory(formData);
-        Alert.alert('Success', 'Category created successfully');
+        ToastService.showSuccess('Success', 'Category created successfully');
       }
       setModalVisible(false);
       fetchCategories();
     } catch (error) {
       console.error('Error saving category:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to save category');
+      ToastService.showError('Error', error.response?.data?.message || 'Failed to save category');
     }
   };
 
@@ -102,11 +103,11 @@ export default function CategoryManagementScreen({ navigation }) {
           onPress: async () => {
             try {
               await ApiService.deleteCategory(category._id);
-              Alert.alert('Success', 'Category deleted');
+              ToastService.showSuccess('Success', 'Category deleted');
               fetchCategories();
             } catch (error) {
               console.error('Error deleting category:', error);
-              Alert.alert('Error', 'Failed to delete category');
+              ToastService.showError('Error', 'Failed to delete category');
             }
           }
         }
@@ -122,7 +123,7 @@ export default function CategoryManagementScreen({ navigation }) {
       fetchCategories();
     } catch (error) {
       console.error('Error toggling category:', error);
-      Alert.alert('Error', 'Failed to update category status');
+      ToastService.showError('Error', 'Failed to update category status');
     }
   };
 

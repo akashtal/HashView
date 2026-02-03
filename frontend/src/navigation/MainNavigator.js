@@ -23,6 +23,7 @@ import AccountSettingsScreen from '../screens/user/AccountSettingsScreen';
 import ChangePasswordScreen from '../screens/user/ChangePasswordScreen';
 import DeleteAccountScreen from '../screens/user/DeleteAccountScreen';
 import VerifyEmailScreen from '../screens/user/VerifyEmailScreen';
+import FavoritesScreen from '../screens/user/FavoritesScreen';
 
 // Business Screens
 import BusinessDashboardScreen from '../screens/business/BusinessDashboardScreen';
@@ -75,6 +76,7 @@ function UserStack() {
       <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
       <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} />
       <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
+      <Stack.Screen name="Favorites" component={FavoritesScreen} />
     </Stack.Navigator>
   );
 }
@@ -142,54 +144,76 @@ function BusinessStack() {
       <Stack.Screen name="CouponQRScanner" component={CouponQRScannerScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
+      <Stack.Screen name="Favorites" component={FavoritesScreen} />
     </Stack.Navigator>
   );
 }
 
 // No separate admin stack needed - admins just see analytics + profile
 
+// Admin Stack with navigation screens
+function AdminDashboardStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="DashboardHome" component={AdminDashboardScreen} />
+      <Stack.Screen name="CategoryManagement" component={CategoryManagementScreen} />
+      <Stack.Screen name="BusinessManagement" component={BusinessManagementScreen} />
+      <Stack.Screen name="UserManagement" component={UserManagementScreen} />
+      <Stack.Screen name="AdminCouponManagement" component={AdminCouponManagementScreen} />
+      <Stack.Screen name="ReviewManagement" component={ReviewManagementScreen} />
+      <Stack.Screen name="TripAdvisorManagement" component={TripAdvisorManagementScreen} />
+      <Stack.Screen name="NotificationManagement" component={NotificationManagementScreen} />
+      <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function AdminProfileStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,  // Hide navigator header, screens have their own
+      }}
+    >
+      <Stack.Screen name="ProfileHome" component={ProfileScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} />
+      <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
+      <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} />
+      <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+      <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
+    </Stack.Navigator>
+  );
+}
+
+// Business Profile Stack with navigation screens
+function BusinessProfileStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,  // Hide navigator header, screens have their own
+      }}
+    >
+      <Stack.Screen name="ProfileHome" component={ProfileScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} />
+      <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
+      <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} />
+      <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+      <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
+      <Stack.Screen name="Favorites" component={FavoritesScreen} />
+    </Stack.Navigator>
+  );
+}
+
 export default function MainNavigator() {
   const { user } = useSelector((state) => state.auth);
-
-  // Admin Stack with navigation screens
-  function AdminDashboardStack() {
-    return (
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="DashboardHome" component={AdminDashboardScreen} />
-        <Stack.Screen name="CategoryManagement" component={CategoryManagementScreen} />
-        <Stack.Screen name="BusinessManagement" component={BusinessManagementScreen} />
-        <Stack.Screen name="UserManagement" component={UserManagementScreen} />
-        <Stack.Screen name="AdminCouponManagement" component={AdminCouponManagementScreen} />
-        <Stack.Screen name="ReviewManagement" component={ReviewManagementScreen} />
-        <Stack.Screen name="TripAdvisorManagement" component={TripAdvisorManagementScreen} />
-        <Stack.Screen name="NotificationManagement" component={NotificationManagementScreen} />
-        <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
-      </Stack.Navigator>
-    );
-  }
-
-  function AdminProfileStack() {
-    return (
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,  // Hide navigator header, screens have their own
-        }}
-      >
-        <Stack.Screen name="ProfileHome" component={ProfileScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-        <Stack.Screen name="Notifications" component={NotificationsScreen} />
-        <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
-        <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} />
-        <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
-        <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
-      </Stack.Navigator>
-    );
-  }
 
   if (user?.role === 'admin') {
     // Admin has full management capabilities
@@ -218,26 +242,6 @@ export default function MainNavigator() {
           options={{ title: 'Profile' }}
         />
       </Tab.Navigator>
-    );
-  }
-
-  // Business Profile Stack with navigation screens
-  function BusinessProfileStack() {
-    return (
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,  // Hide navigator header, screens have their own
-        }}
-      >
-        <Stack.Screen name="ProfileHome" component={ProfileScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-        <Stack.Screen name="Notifications" component={NotificationsScreen} />
-        <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
-        <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} />
-        <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
-        <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
-      </Stack.Navigator>
     );
   }
 

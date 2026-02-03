@@ -76,7 +76,7 @@ const businessOwnerSchema = new mongoose.Schema({
   },
   authProvider: {
     type: String,
-    enum: ['email', 'google', 'facebook'],
+    enum: ['email', 'google', 'apple', 'facebook'],
     default: 'email'
   },
   avatar: {

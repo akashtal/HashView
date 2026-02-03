@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function CouponManagementScreen({ navigation, route }) {
   const { businessId } = route.params;
@@ -42,7 +43,7 @@ export default function CouponManagementScreen({ navigation, route }) {
       // Fetch template
       const templateResponse = await ApiService.getBusinessCouponTemplate(businessId);
       setTemplate(templateResponse.template || null);
-      
+
       // Fetch issued coupons
       const couponsResponse = await ApiService.getBusinessCoupons(businessId);
       setIssuedCoupons(couponsResponse.coupons || []);
@@ -61,7 +62,7 @@ export default function CouponManagementScreen({ navigation, route }) {
 
   const handleCreateTemplate = async () => {
     if (!formData.discountValue) {
-      Alert.alert('Error', 'Please enter discount value');
+      ToastService.showWarning('Validation Error', 'Please enter discount value');
       return;
     }
 
@@ -75,7 +76,7 @@ export default function CouponManagementScreen({ navigation, route }) {
         maxDiscountAmount: parseFloat(formData.maxDiscount) || null
       });
 
-      Alert.alert(
+      ToastService.showSuccess(
         'Success',
         'Coupon template created! Customers will receive this coupon when they review your business.'
       );
@@ -83,7 +84,7 @@ export default function CouponManagementScreen({ navigation, route }) {
       resetForm();
       fetchData();
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to create coupon template');
+      ToastService.showError('Error', error.message || 'Failed to create coupon template');
     }
   };
 
@@ -156,12 +157,10 @@ export default function CouponManagementScreen({ navigation, route }) {
         <View className="flex-row items-center justify-between mb-4">
           <View>
             <Text className="text-lg font-bold text-gray-900">Active Template</Text>
-            <View className={`mt-2 px-3 py-1 rounded-full self-start ${
-              template.isActive ? 'bg-green-100' : 'bg-gray-100'
-            }`}>
-              <Text className={`text-xs font-semibold ${
-                template.isActive ? 'text-green-700' : 'text-gray-700'
+            <View className={`mt-2 px-3 py-1 rounded-full self-start ${template.isActive ? 'bg-green-100' : 'bg-gray-100'
               }`}>
+              <Text className={`text-xs font-semibold ${template.isActive ? 'text-green-700' : 'text-gray-700'
+                }`}>
                 {template.isActive ? 'Active' : 'Inactive'}
               </Text>
             </View>
@@ -178,7 +177,7 @@ export default function CouponManagementScreen({ navigation, route }) {
 
         <View className="border-t border-gray-100 pt-4">
           <Text className="text-sm text-gray-700 mb-3">{template.description}</Text>
-          
+
           {template.minPurchaseAmount > 0 && (
             <View className="flex-row items-center mb-2">
               <Icon name="cart-outline" size={16} color="#6B7280" />
@@ -187,7 +186,7 @@ export default function CouponManagementScreen({ navigation, route }) {
               </Text>
             </View>
           )}
-          
+
           {template.maxDiscountAmount && (
             <View className="flex-row items-center mb-2">
               <Icon name="trending-down-outline" size={16} color="#6B7280" />
@@ -224,7 +223,7 @@ export default function CouponManagementScreen({ navigation, route }) {
               Edit Template
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             onPress={() => setModalVisible(true)}
             className="flex-1 rounded-xl py-3 items-center"
@@ -243,23 +242,23 @@ export default function CouponManagementScreen({ navigation, route }) {
     return (
       <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
         <Text className="text-lg font-bold text-gray-900 mb-4">Coupon Statistics</Text>
-        
+
         <View className="flex-row flex-wrap">
           <View className="w-1/2 mb-4">
             <Text className="text-2xl font-bold text-gray-900">{stats.total}</Text>
             <Text className="text-xs text-gray-500">Total Issued</Text>
           </View>
-          
+
           <View className="w-1/2 mb-4">
             <Text className="text-2xl font-bold text-blue-600">{stats.active}</Text>
             <Text className="text-xs text-gray-500">Active</Text>
           </View>
-          
+
           <View className="w-1/2">
             <Text className="text-2xl font-bold text-green-600">{stats.redeemed}</Text>
             <Text className="text-xs text-gray-500">Redeemed</Text>
           </View>
-          
+
           <View className="w-1/2">
             <Text className="text-2xl font-bold" style={{ color: COLORS.secondary }}>
               {stats.redemptionRate}%
@@ -299,7 +298,7 @@ export default function CouponManagementScreen({ navigation, route }) {
                 <Text className="text-xs font-semibold">{status.text}</Text>
               </View>
             </View>
-            
+
             <View className="flex-row items-center mb-1">
               <Icon name="person-outline" size={14} color="#6B7280" />
               <Text className="text-xs text-gray-600 ml-1">
@@ -322,8 +321,8 @@ export default function CouponManagementScreen({ navigation, route }) {
               {status.text === 'Active'
                 ? `${hoursLeft}h ${minutesLeft}m left`
                 : status.text === 'Expired'
-                ? 'Expired'
-                : 'Used'}
+                  ? 'Expired'
+                  : 'Used'}
             </Text>
             <Text className="text-xs text-gray-400 mt-1">
               {new Date(coupon.createdAt).toLocaleDateString()}
@@ -370,20 +369,18 @@ export default function CouponManagementScreen({ navigation, route }) {
             onPress={() => setActiveTab('template')}
             className={`flex-1 py-2 rounded-lg ${activeTab === 'template' ? 'bg-white' : ''}`}
           >
-            <Text className={`text-center font-semibold ${
-              activeTab === 'template' ? 'text-orange-500' : 'text-white'
-            }`}>
+            <Text className={`text-center font-semibold ${activeTab === 'template' ? 'text-orange-500' : 'text-white'
+              }`}>
               Template
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             onPress={() => setActiveTab('issued')}
             className={`flex-1 py-2 rounded-lg ${activeTab === 'issued' ? 'bg-white' : ''}`}
           >
-            <Text className={`text-center font-semibold ${
-              activeTab === 'issued' ? 'text-orange-500' : 'text-white'
-            }`}>
+            <Text className={`text-center font-semibold ${activeTab === 'issued' ? 'text-orange-500' : 'text-white'
+              }`}>
               Issued ({issuedCoupons.length})
             </Text>
           </TouchableOpacity>
@@ -419,7 +416,7 @@ export default function CouponManagementScreen({ navigation, route }) {
             )}
           </>
         )}
-        
+
         <View className="h-6" />
       </ScrollView>
 
@@ -450,17 +447,15 @@ export default function CouponManagementScreen({ navigation, route }) {
                     <TouchableOpacity
                       key={type}
                       onPress={() => setFormData({ ...formData, discountType: type })}
-                      className={`rounded-xl px-4 py-2 mr-2 mb-2 border-2 ${
-                        formData.discountType === type ? 'border-orange-500' : 'border-gray-200'
-                      }`}
+                      className={`rounded-xl px-4 py-2 mr-2 mb-2 border-2 ${formData.discountType === type ? 'border-orange-500' : 'border-gray-200'
+                        }`}
                       style={{ backgroundColor: formData.discountType === type ? '#FFF9F0' : '#F9FAFB' }}
                     >
-                      <Text className={`font-semibold ${
-                        formData.discountType === type ? 'text-orange-600' : 'text-gray-700'
-                      }`}>
+                      <Text className={`font-semibold ${formData.discountType === type ? 'text-orange-600' : 'text-gray-700'
+                        }`}>
                         {type === 'percentage' ? 'Percentage' :
-                         type === 'fixed' ? 'Fixed' :
-                         type === 'buy1get1' ? 'Buy 1 Get 1' : 'Free Drink'}
+                          type === 'fixed' ? 'Fixed' :
+                            type === 'buy1get1' ? 'Buy 1 Get 1' : 'Free Drink'}
                       </Text>
                     </TouchableOpacity>
                   ))}

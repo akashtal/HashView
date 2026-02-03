@@ -16,6 +16,7 @@ import { Ionicons as Icon } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function EditBusinessInfoScreen({ navigation, route }) {
   const { businessId } = route.params;
@@ -82,7 +83,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
-      Alert.alert('Error', 'Failed to load business categories');
+      ToastService.showError('Error', 'Failed to load business categories');
     } finally {
       setLoadingCategories(false);
     }
@@ -140,7 +141,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
       }
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Failed to load business data');
+      ToastService.showError('Error', 'Failed to load business data');
     } finally {
       setLoading(false);
     }
@@ -165,14 +166,13 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please grant permission to access photos');
+        ToastService.showWarning('Permission Required', 'Please grant permission to access photos');
         return;
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: type !== 'gallery',
-        aspect: type === 'logo' ? [1, 1] : type === 'coverImage' ? [16, 9] : undefined,
+        allowsEditing: false,
         quality: 0.8,
         allowsMultipleSelection: type === 'gallery'
       });
@@ -189,7 +189,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         }
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to pick image');
+      ToastService.showError('Error', 'Failed to pick image');
     }
   };
 
@@ -286,7 +286,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
 
   const handleSave = async () => {
     if (!formData.name || !formData.email || !formData.phone) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      ToastService.showWarning('Validation Error', 'Please fill in all required fields');
       return;
     }
 
@@ -306,7 +306,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
           setUploadedImages(prev => ({ ...prev, logo: logoData }));
           console.log('✅ Logo uploaded:', logoData.url);
         } catch (error) {
-          Alert.alert('Upload Error', `Failed to upload logo: ${error.message}`);
+          ToastService.showError('Upload Error', `Failed to upload logo: ${error.message}`);
           setSaving(false);
           setUploadingImages(false);
           return;
@@ -320,7 +320,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
           setUploadedImages(prev => ({ ...prev, coverImage: coverImageData }));
           console.log('✅ Cover image uploaded:', coverImageData.url);
         } catch (error) {
-          Alert.alert('Upload Error', `Failed to upload cover image: ${error.message}`);
+          ToastService.showError('Upload Error', `Failed to upload cover image: ${error.message}`);
           setSaving(false);
           setUploadingImages(false);
           return;
@@ -346,7 +346,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
           console.log(`✅ Gallery images uploaded: ${uploadedNewGallery.length} new images`);
         } catch (error) {
           console.error('Failed to upload gallery images:', error);
-          Alert.alert('Upload Warning', 'Some gallery images failed to upload. Continuing with update...');
+          ToastService.showWarning('Upload Warning', 'Some gallery images failed to upload. Continuing with update...');
         }
       }
 
@@ -430,11 +430,10 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         console.log('✅ Business images updated in database');
       }
 
-      Alert.alert('Success', 'Business information updated successfully', [
-        { text: 'OK', onPress: () => navigation.goBack() }
-      ]);
+      ToastService.showSuccess('Success', 'Business information updated successfully');
+      navigation.goBack();
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to update business');
+      ToastService.showError('Error', error.message || 'Failed to update business');
     } finally {
       setSaving(false);
       setUploadingImages(false);

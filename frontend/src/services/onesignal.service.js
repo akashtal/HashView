@@ -1,99 +1,101 @@
 import OneSignal from 'react-native-onesignal';
 
 class OneSignalService {
-    // Get OneSignal Player ID (device identifier)
+    // Get OneSignal Subscription ID (v5 replacement for Player ID)
     async getPlayerId() {
-        const deviceState = await OneSignal.getDeviceState();
-        return deviceState?.userId; // This is the OneSignal Player ID
+        return OneSignal.User.pushSubscription.getPushSubscriptionId();
     }
 
     // Set user tags for segmentation
     setUserTags(tags) {
-        OneSignal.sendTags(tags);
+        OneSignal.User.addTags(tags);
         console.log('✅ OneSignal tags set:', tags);
     }
 
     // Remove user tags
     deleteUserTags(keys) {
-        OneSignal.deleteTags(keys);
+        OneSignal.User.removeTags(keys);
     }
 
     // Get user tags
     async getUserTags() {
-        return await OneSignal.getTags();
+        return OneSignal.User.getTags();
     }
 
     // Set external user ID (your database user ID)
     setExternalUserId(userId) {
-        OneSignal.setExternalUserId(userId.toString());
-        console.log('✅ OneSignal external user ID set:', userId);
+        // v5 uses login()
+        OneSignal.login(userId.toString());
+        console.log('✅ OneSignal external user ID set (login):', userId);
     }
 
     // Remove external user ID (on logout)
     removeExternalUserId() {
-        OneSignal.removeExternalUserId();
-        console.log('✅ OneSignal external user ID removed');
+        // v5 uses logout()
+        OneSignal.logout();
+        console.log('✅ OneSignal logout');
     }
 
     // Set email for email campaigns
     setEmail(email) {
-        OneSignal.setEmail(email);
+        OneSignal.User.addEmail(email);
     }
 
     // Logout email
     logoutEmail() {
-        OneSignal.logoutEmail();
+        OneSignal.User.removeEmail();
     }
 
     // Disable/Enable notifications
     disableNotifications() {
-        OneSignal.disablePush(true);
+        OneSignal.User.pushSubscription.optOut();
     }
 
     enableNotifications() {
-        OneSignal.disablePush(false);
+        OneSignal.User.pushSubscription.optIn();
     }
 
     // Check if user subscribed to notifications
     async isSubscribed() {
-        const deviceState = await OneSignal.getDeviceState();
-        return deviceState?.isSubscribed || false;
+        return OneSignal.User.pushSubscription.getOptedIn();
     }
 
     // Prompt for notification permission
     promptPermission() {
-        OneSignal.promptForPushNotificationsWithUserResponse();
+        OneSignal.Notifications.requestPermission(true);
     }
 
     // Get notification permission status
     async getPermissionStatus() {
-        const deviceState = await OneSignal.getDeviceState();
-        return deviceState?.notificationPermissionStatus;
+        return OneSignal.Notifications.getPermissionStatus();
     }
 
     // Increment session count tag
     async incrementSessionCount() {
-        const tags = await OneSignal.getTags();
-        const currentCount = parseInt(tags.session_count || '0');
-        OneSignal.sendTag('session_count', (currentCount + 1).toString());
+        const tags = await OneSignal.User.getTags();
+        const currentCount = parseInt(tags?.session_count || '0');
+        OneSignal.User.addTag('session_count', (currentCount + 1).toString());
     }
 
     // Track custom events (for analytics)
     sendOutcome(outcomeName, value = null) {
+        // v5 uses Session.addOutcome
         if (value) {
-            OneSignal.sendOutcomeWithValue(outcomeName, value);
+            OneSignal.Session.addOutcomeWithValue(outcomeName, value);
         } else {
-            OneSignal.sendOutcome(outcomeName);
+            OneSignal.Session.addOutcome(outcomeName);
         }
     }
 
     // Clear all tags (useful for logout)
     async clearAllTags() {
-        const tags = await OneSignal.getTags();
-        const tagKeys = Object.keys(tags);
-        if (tagKeys.length > 0) {
-            OneSignal.deleteTags(tagKeys);
-            console.log('✅ OneSignal tags cleared');
+        const tags = await OneSignal.User.getTags();
+        if (tags) {
+            const tagKeys = Object.keys(tags);
+            if (tagKeys.length > 0) {
+                OneSignal.User.removeTags(tagKeys);
+                console.log('✅ OneSignal tags cleared');
+            }
         }
     }
 }

@@ -11,14 +11,14 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
-import { showMessage } from 'react-native-flash-message';
 import { useSelector } from 'react-redux';
+import ToastService from '../../utils/ToastService';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
 
 export default function AccountSettingsScreen({ navigation }) {
   const { user } = useSelector((state) => state.auth);
-  
+
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState({
     emailVerified: user?.emailVerified || false,
@@ -32,21 +32,16 @@ export default function AccountSettingsScreen({ navigation }) {
     try {
       setLoading(true);
       await ApiService.sendEmailOTP({ email: user.email });
-      
-      showMessage({
-        message: 'Verification Email Sent!',
-        description: 'Please check your inbox and follow the instructions',
-        type: 'success',
-      });
-      
+
+      ToastService.showSuccess(
+        'Verification Email Sent!',
+        'Please check your inbox and follow the instructions'
+      );
+
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      showMessage({
-        message: 'Failed to send email',
-        description: error.message,
-        type: 'danger',
-      });
+      ToastService.showError('Error', 'Failed to send email');
     }
   };
 
@@ -58,19 +53,12 @@ export default function AccountSettingsScreen({ navigation }) {
     try {
       // Save to backend
       await ApiService.updateAccountSettings({ [key]: newValue });
-      
-      showMessage({
-        message: 'Setting Updated',
-        type: 'success',
-        duration: 2000,
-      });
+
+      ToastService.showSuccess('Setting Updated', '');
     } catch (error) {
       // Revert on error
       setSettings({ ...settings, [key]: !newValue });
-      showMessage({
-        message: 'Failed to update setting',
-        type: 'danger',
-      });
+      ToastService.showError('Error', 'Failed to update setting');
     }
   };
 
@@ -86,21 +74,16 @@ export default function AccountSettingsScreen({ navigation }) {
             try {
               setLoading(true);
               await ApiService.exportUserData();
-              
-              showMessage({
-                message: 'Data Export Requested',
-                description: 'You will receive an email with your data shortly',
-                type: 'success',
-              });
-              
+
+              ToastService.showSuccess(
+                'Data Export Requested',
+                'You will receive an email with your data shortly'
+              );
+
               setLoading(false);
             } catch (error) {
               setLoading(false);
-              showMessage({
-                message: 'Export Failed',
-                description: error.message,
-                type: 'danger',
-              });
+              ToastService.showError('Export Failed', error.message);
             }
           }
         }
@@ -121,15 +104,14 @@ export default function AccountSettingsScreen({ navigation }) {
             try {
               setLoading(true);
               await ApiService.deactivateAccount();
-              
-              showMessage({
-                message: 'Account Deactivated',
-                description: 'Your account has been temporarily deactivated',
-                type: 'info',
-              });
-              
+
+              ToastService.showInfo(
+                'Account Deactivated',
+                'Your account has been temporarily deactivated'
+              );
+
               setLoading(false);
-              
+
               // Logout after deactivation
               setTimeout(() => {
                 navigation.reset({
@@ -139,11 +121,7 @@ export default function AccountSettingsScreen({ navigation }) {
               }, 2000);
             } catch (error) {
               setLoading(false);
-              showMessage({
-                message: 'Deactivation Failed',
-                description: error.message,
-                type: 'danger',
-              });
+              ToastService.showError('Deactivation Failed', error.message);
             }
           }
         }
@@ -154,7 +132,7 @@ export default function AccountSettingsScreen({ navigation }) {
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
-      
+
       {/* Header */}
       <LinearGradient
         colors={[COLORS.primary, COLORS.primaryDark]}
@@ -194,7 +172,7 @@ export default function AccountSettingsScreen({ navigation }) {
                 </View>
                 <Text className="text-sm text-gray-500 ml-7">{user?.email}</Text>
               </View>
-              
+
               {user?.emailVerified ? (
                 <View className="flex-row items-center">
                   <Icon name="checkmark-circle" size={20} color="#10B981" />

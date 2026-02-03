@@ -1,4 +1,4 @@
-import { showMessage } from 'react-native-flash-message';
+import ToastService from './ToastService';
 
 /**
  * Parse backend validation errors from various error formats
@@ -93,60 +93,40 @@ export const showErrorMessage = (error, options = {}) => {
         description = `${allErrors.slice(0, 2).join('\n')}\n+${allErrors.length - 2} more issues`;
     }
 
-    showMessage({
-        message: options.title || 'Error',
-        description: description || message,
-        type: 'danger',
-        icon: 'danger',
-        duration: options.duration || 4000,
-        floating: true,
-        ...options,
-    });
+    ToastService.showError(
+        options.title || 'Error',
+        description || message
+    );
 };
 
 /**
  * Show success message
  */
 export const showSuccessMessage = (message, description = '', options = {}) => {
-    showMessage({
-        message: message || 'Success',
-        description,
-        type: 'success',
-        icon: 'success',
-        duration: options.duration || 3000,
-        floating: true,
-        ...options,
-    });
+    ToastService.showSuccess(
+        message || 'Success',
+        description
+    );
 };
 
 /**
  * Show warning message
  */
 export const showWarningMessage = (message, description = '', options = {}) => {
-    showMessage({
-        message: message || 'Warning',
-        description,
-        type: 'warning',
-        icon: 'warning',
-        duration: options.duration || 3500,
-        floating: true,
-        ...options,
-    });
+    ToastService.showWarning(
+        message || 'Warning',
+        description
+    );
 };
 
 /**
  * Show info message
  */
 export const showInfoMessage = (message, description = '', options = {}) => {
-    showMessage({
-        message: message || 'Info',
-        description,
-        type: 'info',
-        icon: 'info',
-        duration: options.duration || 3000,
-        floating: true,
-        ...options,
-    });
+    ToastService.showInfo(
+        message || 'Info',
+        description
+    );
 };
 
 export default {

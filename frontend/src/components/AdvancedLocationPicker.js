@@ -13,6 +13,7 @@ import {
   Keyboard,
   FlatList
 } from 'react-native';
+import ToastService from '../utils/ToastService';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -159,7 +160,7 @@ export default function AdvancedLocationPicker({
       setLoadingLocation(true);
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Allow location access to find your position.');
+        ToastService.showInfo('Permission Denied', 'Allow location access to find your position.');
         return;
       }
 
@@ -176,7 +177,7 @@ export default function AdvancedLocationPicker({
       mapRef.current?.animateToRegion(newRegion, 1000);
       setRegion(newRegion);
     } catch (error) {
-      Alert.alert('Error', 'Could not get current location');
+      ToastService.showError('Error', 'Could not get current location');
     } finally {
       setLoadingLocation(false);
     }

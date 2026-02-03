@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function CouponQRScannerScreen({ navigation, route }) {
   const { businessId } = route.params || {};
@@ -31,7 +32,7 @@ export default function CouponQRScannerScreen({ navigation, route }) {
 
   const handleBarCodeScanned = async ({ type, data }) => {
     if (scanned || loading) return;
-    
+
     setScanned(true);
     setLoading(true);
 
@@ -43,37 +44,16 @@ export default function CouponQRScannerScreen({ navigation, route }) {
       try {
         qrData = typeof data === 'string' ? JSON.parse(data) : data;
       } catch (e) {
-        Alert.alert(
-          'Invalid QR Code',
-          'This QR code is not a valid coupon QR code.',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                setScanned(false);
-                setLoading(false);
-              }
-            }
-          ]
-        );
+        ToastService.showError('Invalid QR Code', 'This QR code is not a valid coupon QR code.');
+        setScanned(false);
+        setLoading(false);
         return;
       }
 
-      // Check if it's a coupon QR code
       if (qrData.type !== 'coupon' || !qrData.couponId) {
-        Alert.alert(
-          'Invalid QR Code',
-          'This QR code is not a valid coupon QR code.',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                setScanned(false);
-                setLoading(false);
-              }
-            }
-          ]
-        );
+        ToastService.showError('Invalid QR Code', 'This QR code is not a valid coupon QR code.');
+        setScanned(false);
+        setLoading(false);
         return;
       }
 
@@ -85,35 +65,15 @@ export default function CouponQRScannerScreen({ navigation, route }) {
         setSuccessModalVisible(true);
         setLoading(false);
       } else {
-        Alert.alert(
-          'Error',
-          response.message || 'Failed to redeem coupon',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                setScanned(false);
-                setLoading(false);
-              }
-            }
-          ]
-        );
+        ToastService.showError('Error', response.message || 'Failed to redeem coupon');
+        setScanned(false);
+        setLoading(false);
       }
     } catch (error) {
       console.error('❌ QR Scan Error:', error);
-      Alert.alert(
-        'Error',
-        error.message || 'Failed to process QR code',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              setScanned(false);
-              setLoading(false);
-            }
-          }
-        ]
-      );
+      ToastService.showError('Error', error.message || 'Failed to process QR code');
+      setScanned(false);
+      setLoading(false);
     }
   };
 

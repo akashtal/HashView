@@ -1,6 +1,7 @@
 const User = require('../models/User.model');
 const Review = require('../models/Review.model');
 const Coupon = require('../models/Coupon.model');
+const BusinessOwner = require('../models/BusinessOwner.model'); // Added for check in updateAccountSettings
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
@@ -23,6 +24,7 @@ exports.getProfile = async (req, res, next) => {
         phoneVerified: user.phoneVerified,
         status: user.status,
         createdAt: user.createdAt,
+        favoritePlaces: user.favoritePlaces, // Include favorites
         ...(user.role === 'business' && { businesses: user.businesses }),
         ...(user.role === 'customer' && { location: user.location })
       }
@@ -44,7 +46,7 @@ exports.updateProfile = async (req, res, next) => {
 
     if (name) user.name = name;
     if (phone) user.phone = phone;
-    
+
     // Only update location for customers (User collection has location field)
     if (location && user.role === 'customer') {
       user.location = {
@@ -70,9 +72,84 @@ exports.updateProfile = async (req, res, next) => {
         phoneVerified: user.phoneVerified,
         status: user.status,
         createdAt: user.createdAt,
+        favoritePlaces: user.favoritePlaces,
         ...(user.role === 'business' && { businesses: user.businesses }),
         ...(user.role === 'customer' && { location: user.location })
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Toggle favorite business
+// @route   PUT /api/users/favorites/:businessId
+// @access  Private (Customer)
+exports.toggleFavoriteBusiness = async (req, res, next) => {
+  try {
+    const { businessId } = req.params;
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Initialize favoritePlaces if undefined
+    if (!user.favoritePlaces) {
+      user.favoritePlaces = [];
+    }
+
+    const businessIndex = user.favoritePlaces.indexOf(businessId);
+
+    let isFavorited = false;
+    if (businessIndex > -1) {
+      // Remove from favorites
+      user.favoritePlaces.splice(businessIndex, 1);
+      isFavorited = false;
+    } else {
+      // Add to favorites
+      user.favoritePlaces.push(businessId);
+      isFavorited = true;
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      isFavorited,
+      message: isFavorited ? 'Added to favorites' : 'Removed from favorites',
+      favorites: user.favoritePlaces
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get user favorite businesses
+// @route   GET /api/users/favorites
+// @access  Private
+exports.getFavoriteBusinesses = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id)
+      .populate({
+        path: 'favoritePlaces',
+        select: 'name logo category address rating coverImage openStatus isOpenNow'
+      });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: user.favoritePlaces.length,
+      favorites: user.favoritePlaces
     });
   } catch (error) {
     next(error);
@@ -115,17 +192,17 @@ exports.getUserReviews = async (req, res, next) => {
 exports.getUserCoupons = async (req, res, next) => {
   try {
     const { status } = req.query;
-    
+
     const query = { user: req.user.id };
     if (status) query.status = status;
-    
+
     // CRITICAL FIX: Only return non-expired coupons
     query.validUntil = { $gte: new Date() };
 
     const coupons = await Coupon.find(query)
       .populate('business', 'name logo address phone email category')
       .sort({ createdAt: -1 });
-    
+
     // Ensure qrCodeData is included for all coupons
     for (const coupon of coupons) {
       if (!coupon.qrCodeData && coupon._id) {
@@ -169,7 +246,7 @@ exports.getRewardHistory = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-    
+
     // Ensure qrCodeData is included for all coupons
     for (const coupon of coupons) {
       if (!coupon.qrCodeData && coupon._id) {
@@ -315,7 +392,7 @@ exports.changePassword = async (req, res, next) => {
 exports.updateAccountSettings = async (req, res, next) => {
   try {
     const updates = req.body;
-    
+
     // Find user (check both User and BusinessOwner models)
     let user = await User.findById(req.user.id);
     if (!user) {
@@ -336,7 +413,7 @@ exports.updateAccountSettings = async (req, res, next) => {
 
     // Update allowed settings
     const allowedSettings = [
-      'twoFactorAuth', 'loginAlerts', 'dataSharing', 
+      'twoFactorAuth', 'loginAlerts', 'dataSharing',
       'marketingEmails', 'pushNotifications', 'emailNotifications'
     ];
 
@@ -369,7 +446,7 @@ exports.exportUserData = async (req, res, next) => {
     // Find user (check both models)
     let user = await User.findById(req.user.id).select('-passwordHash');
     let isBusinessOwner = false;
-    
+
     if (!user) {
       user = await BusinessOwner.findById(req.user.id).select('-passwordHash').populate('businesses');
       isBusinessOwner = true;
@@ -440,7 +517,7 @@ exports.deactivateAccount = async (req, res, next) => {
     // Find user (check both models)
     let user = await User.findById(req.user.id);
     let isBusinessOwner = false;
-    
+
     if (!user) {
       user = await BusinessOwner.findById(req.user.id);
       isBusinessOwner = true;
@@ -492,7 +569,7 @@ exports.deleteAccount = async (req, res, next) => {
     // Find user (check both models)
     let user = await User.findById(req.user.id);
     let isBusinessOwner = false;
-    
+
     if (!user) {
       user = await BusinessOwner.findById(req.user.id);
       isBusinessOwner = true;
@@ -549,4 +626,3 @@ exports.deleteAccount = async (req, res, next) => {
     next(error);
   }
 };
-

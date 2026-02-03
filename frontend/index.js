@@ -1,3 +1,4 @@
+console.log("🔥 JS ENTRY POINT HIT - index.js is running");
 import { registerRootComponent } from 'expo';
 import App from './App';
 

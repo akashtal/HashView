@@ -1,5 +1,7 @@
 const BusinessUpdate = require('../models/BusinessUpdate.model');
 const Business = require('../models/Business.model');
+const User = require('../models/User.model');
+const { sendBulkNotifications } = require('../utils/notification');
 
 // @desc    Get all updates/offers for a business
 // @route   GET /api/business/:businessId/updates
@@ -71,8 +73,6 @@ exports.createBusinessUpdate = async (req, res, next) => {
     // Send push notification for announcements and offers
     if (type === 'announcement' || type === 'offer') {
       try {
-        const OneSignalService = require('../services/onesignal.service');
-
         // Create notification title and message
         let notificationTitle = `📢 ${business.name}`;
         let notificationMessage = title;
@@ -85,20 +85,29 @@ exports.createBusinessUpdate = async (req, res, next) => {
         }
 
         // Send to users who have favorited this business
-        // Using tag: favorite_business_[businessId]
-        await OneSignalService.sendToTags(
-          [{ "field": "tag", "key": `favorite_${businessId}`, "relation": "exists" }],
-          notificationTitle,
-          notificationMessage,
-          {
-            type: type,
-            screen: 'BusinessDetail',
-            businessId: businessId.toString(),
-            updateId: update._id.toString()
-          }
-        );
+        // Find users who have favorited this business
+        console.log(`📊 Searching for users who favorited business ${businessId}...`);
+        const users = await User.find({ favoritePlaces: businessId }).select('_id');
+        console.log(`📊 Found ${users.length} users to notify`);
 
-        console.log(`✅ Push notification sent for business ${type}: ${business.name}`);
+        if (users.length > 0) {
+          const userIds = users.map(user => user._id);
+
+          await sendBulkNotifications(
+            userIds,
+            notificationTitle,
+            notificationMessage,
+            {
+              type: 'business_update',
+              businessId: businessId.toString(),
+              updateId: update._id.toString(),
+              screen: 'BusinessDetail' // For frontend navigation
+            }
+          );
+          console.log(`✅ Push notification sent for business ${type}: ${business.name} to ${users.length} users`);
+        } else {
+          console.log(`⚠️ No users found to notify for business ${businessId}`);
+        }
       } catch (error) {
         console.error('❌ Failed to send push notification for business update:', error);
         // Don't fail the request if notification fails
@@ -193,4 +202,3 @@ exports.deleteBusinessUpdate = async (req, res, next) => {
     next(error);
   }
 };
-

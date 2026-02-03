@@ -10,6 +10,7 @@ import {
   Alert,
   Platform
 } from 'react-native';
+import ToastService from '../utils/ToastService';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -52,7 +53,7 @@ export default function LocationPicker({ visible, onClose, onSelectLocation, ini
 
   const searchLocation = async () => {
     if (!searchQuery.trim()) {
-      Alert.alert('Error', 'Please enter a location to search');
+      ToastService.showError('Error', 'Please enter a location to search');
       return;
     }
 
@@ -73,11 +74,11 @@ export default function LocationPicker({ visible, onClose, onSelectLocation, ini
         setMarkerCoordinate({ latitude, longitude });
         getAddressFromCoordinates({ latitude, longitude });
       } else {
-        Alert.alert('Not Found', 'Location not found. Please try a different search.');
+        ToastService.showInfo('Not Found', 'Location not found. Please try a different search.');
       }
     } catch (error) {
       console.error('Search error:', error);
-      Alert.alert('Error', 'Failed to search location. Please try again.');
+      ToastService.showError('Error', 'Failed to search location. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -89,7 +90,7 @@ export default function LocationPicker({ visible, onClose, onSelectLocation, ini
       const { status } = await Location.requestForegroundPermissionsAsync();
 
       if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Location permission is required');
+        ToastService.showInfo('Permission Denied', 'Location permission is required');
         return;
       }
 
@@ -115,7 +116,7 @@ export default function LocationPicker({ visible, onClose, onSelectLocation, ini
       });
     } catch (error) {
       console.error('Error getting current location:', error);
-      Alert.alert('Error', 'Failed to get current location');
+      ToastService.showError('Error', 'Failed to get current location');
     } finally {
       setLoading(false);
     }

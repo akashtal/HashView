@@ -70,6 +70,7 @@ export default function AnimatedSplashScreen({ onAnimationComplete, isReady }) {
   // Handle splash completion once ready
   useEffect(() => {
     if (isReady) {
+      console.log('✨ App ready! Starting exit animation...');
       // Fade out and complete
       const timer = setTimeout(() => {
         opacity.value = withTiming(0, {
@@ -77,13 +78,17 @@ export default function AnimatedSplashScreen({ onAnimationComplete, isReady }) {
           easing: Easing.ease,
         });
         setTimeout(() => {
-          SplashScreen.hideAsync().catch(console.warn);
+          console.log('👋 Hiding native splash screen now');
+          SplashScreen.hideAsync().catch((e) => console.warn('Error hiding splash:', e));
           if (onAnimationComplete) {
+            console.log('🏁 Animation complete callback called');
             onAnimationComplete();
           }
         }, 500);
       }, 1000); // Give a bit of time for the entry animation to feel natural
       return () => clearTimeout(timer);
+    } else {
+      console.log('⏳ AnimatedSplashScreen waiting for isReady prop...');
     }
   }, [isReady]);
 

@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function UserManagementScreen({ navigation }) {
   const [users, setUsers] = useState([]);
@@ -61,7 +62,7 @@ export default function UserManagementScreen({ navigation }) {
 
   const handleToggleStatus = async (userId, currentStatus) => {
     const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
-    
+
     Alert.alert(
       `${newStatus === 'suspended' ? 'Suspend' : 'Activate'} User`,
       `Are you sure you want to ${newStatus === 'suspended' ? 'suspend' : 'activate'} this user?`,
@@ -75,7 +76,7 @@ export default function UserManagementScreen({ navigation }) {
               fetchUsers();
             } catch (error) {
               console.error('Error updating user status:', error);
-              Alert.alert('Error', 'Failed to update user status');
+              ToastService.showError('Error', 'Failed to update user status');
             }
           }
         }
@@ -96,10 +97,10 @@ export default function UserManagementScreen({ navigation }) {
             try {
               await ApiService.adminDeleteUser(userId);
               fetchUsers();
-              Alert.alert('Success', 'User deleted successfully');
+              ToastService.showSuccess('Success', 'User deleted successfully');
             } catch (error) {
               console.error('Error deleting user:', error);
-              Alert.alert('Error', 'Failed to delete user');
+              ToastService.showError('Error', 'Failed to delete user');
             }
           }
         }

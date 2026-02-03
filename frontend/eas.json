@@ -32,8 +32,7 @@
     "production": {
       "android": {
         "buildType": "app-bundle",
-        "gradleCommand": ":app:bundleRelease",
-        "enableProguardInReleaseBuilds": true
+        "gradleCommand": ":app:bundleRelease"
       },
       "ios": {
         "simulator": false,

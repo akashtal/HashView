@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  ScrollView, 
-  TouchableOpacity, 
-  TextInput, 
-  ActivityIndicator, 
-  Alert, 
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
+  Alert,
   StatusBar,
   Modal,
   FlatList
@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function NotificationManagementScreen({ navigation }) {
   const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ export default function NotificationManagementScreen({ navigation }) {
     recipientType: 'all_users', // 'all_users', 'all_businesses', 'specific_user', 'specific_business'
     recipientIds: []
   });
-  
+
   const [users, setUsers] = useState([]);
   const [businesses, setBusinesses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -57,9 +58,9 @@ export default function NotificationManagementScreen({ navigation }) {
   const getFilteredItems = () => {
     const items = formData.recipientType === 'specific_user' ? users : businesses;
     if (!searchQuery.trim()) return items;
-    
+
     const query = searchQuery.toLowerCase();
-    return items.filter(item => 
+    return items.filter(item =>
       item.name?.toLowerCase().includes(query) ||
       item.email?.toLowerCase().includes(query) ||
       (formData.recipientType === 'specific_user' ? item.phoneNumber?.toLowerCase().includes(query) : item.category?.toLowerCase().includes(query))
@@ -89,13 +90,13 @@ export default function NotificationManagementScreen({ navigation }) {
 
   const handleSend = async () => {
     if (!formData.title.trim() || !formData.message.trim()) {
-      Alert.alert('Error', 'Please fill in title and message');
+      ToastService.showWarning('Required', 'Please fill in title and message');
       return;
     }
 
-    if ((formData.recipientType === 'specific_user' || formData.recipientType === 'specific_business') 
-        && formData.recipientIds.length === 0) {
-      Alert.alert('Error', 'Please select at least one recipient');
+    if ((formData.recipientType === 'specific_user' || formData.recipientType === 'specific_business')
+      && formData.recipientIds.length === 0) {
+      ToastService.showWarning('Required', 'Please select at least one recipient');
       return;
     }
 
@@ -117,7 +118,7 @@ export default function NotificationManagementScreen({ navigation }) {
               };
 
               const response = await ApiService.sendAdminNotification(payload);
-              Alert.alert('Success', response.message || 'Notification sent successfully!');
+              ToastService.showSuccess('Success', response.message || 'Notification sent successfully!');
               setFormData({
                 title: '',
                 message: '',
@@ -125,7 +126,7 @@ export default function NotificationManagementScreen({ navigation }) {
                 recipientIds: []
               });
             } catch (error) {
-              Alert.alert('Error', error.message || 'Failed to send notification');
+              ToastService.showError('Error', error.message || 'Failed to send notification');
             } finally {
               setLoading(false);
             }
@@ -153,7 +154,7 @@ export default function NotificationManagementScreen({ navigation }) {
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
-      
+
       {/* Header */}
       <LinearGradient
         colors={[COLORS.primary, COLORS.primaryDark]}
@@ -239,8 +240,8 @@ export default function NotificationManagementScreen({ navigation }) {
                 <View className="flex-row items-center flex-1">
                   <Icon name="search" size={20} color={COLORS.primary} />
                   <Text className="text-gray-600 ml-2">
-                    {formData.recipientIds.length > 0 
-                      ? `${formData.recipientIds.length} selected` 
+                    {formData.recipientIds.length > 0
+                      ? `${formData.recipientIds.length} selected`
                       : 'Search and select...'}
                   </Text>
                 </View>
@@ -412,7 +413,7 @@ export default function NotificationManagementScreen({ navigation }) {
                 </TouchableOpacity>
               )}
             </View>
-            
+
             {formData.recipientIds.length > 0 && (
               <Text className="text-sm text-primary-600 font-semibold mt-2">
                 {formData.recipientIds.length} selected
@@ -434,7 +435,7 @@ export default function NotificationManagementScreen({ navigation }) {
                   <View className="flex-1 mr-3">
                     <Text className="text-gray-900 font-semibold">{item.name}</Text>
                     <Text className="text-gray-500 text-sm mt-1">
-                      {formData.recipientType === 'specific_user' 
+                      {formData.recipientType === 'specific_user'
                         ? (item.email || item.phoneNumber)
                         : (item.category || item.address?.city)}
                     </Text>

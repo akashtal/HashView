@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
-import { showMessage } from 'react-native-flash-message';
 import ApiService from '../../services/api.service';
+import ToastService from '../../utils/ToastService';
 import COLORS from '../../config/colors';
 
 export default function HelpSupportScreen({ navigation }) {
@@ -80,11 +80,10 @@ export default function HelpSupportScreen({ navigation }) {
 
   const handleSubmitTicket = async () => {
     if (!contactForm.subject.trim() || !contactForm.message.trim()) {
-      showMessage({
-        message: 'Validation Error',
-        description: 'Please fill in both subject and message',
-        type: 'warning',
-      });
+      ToastService.showWarning(
+        'Validation Error',
+        'Please fill in both subject and message'
+      );
       return;
     }
 
@@ -94,11 +93,10 @@ export default function HelpSupportScreen({ navigation }) {
       // API call to submit support ticket
       await ApiService.submitSupportTicket(contactForm);
 
-      showMessage({
-        message: 'Ticket Submitted!',
-        description: 'Our support team will get back to you within 24 hours',
-        type: 'success',
-      });
+      ToastService.showSuccess(
+        'Ticket Submitted!',
+        'Our support team will get back to you within 24 hours'
+      );
 
       // Clear form
       setContactForm({ subject: '', message: '' });
@@ -106,11 +104,7 @@ export default function HelpSupportScreen({ navigation }) {
       setSending(false);
     } catch (error) {
       setSending(false);
-      showMessage({
-        message: 'Submission Failed',
-        description: error.message || 'Failed to submit ticket',
-        type: 'danger',
-      });
+      ToastService.showError('Submission Failed', error.message || 'Failed to submit ticket');
     }
   };
 

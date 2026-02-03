@@ -45,6 +45,7 @@ const reviewSlice = createSlice({
     loading: false,
     error: null,
     successMessage: null,
+    createdCoupon: null, // Store the earned coupon
   },
   reducers: {
     clearError: (state) => {
@@ -52,6 +53,9 @@ const reviewSlice = createSlice({
     },
     clearSuccessMessage: (state) => {
       state.successMessage = null;
+    },
+    clearCreatedCoupon: (state) => {
+      state.createdCoupon = null;
     },
   },
   extraReducers: (builder) => {
@@ -64,6 +68,10 @@ const reviewSlice = createSlice({
         state.loading = false;
         state.successMessage = action.payload.message;
         state.reviews.unshift(action.payload.review);
+        // Store the coupon if one was awarded
+        if (action.payload.coupon) {
+          state.createdCoupon = action.payload.coupon;
+        }
       })
       .addCase(createReview.rejected, (state, action) => {
         state.loading = false;
@@ -96,6 +104,6 @@ const reviewSlice = createSlice({
   },
 });
 
-export const { clearError, clearSuccessMessage } = reviewSlice.actions;
+export const { clearError, clearSuccessMessage, clearCreatedCoupon } = reviewSlice.actions;
 export default reviewSlice.reducer;
 

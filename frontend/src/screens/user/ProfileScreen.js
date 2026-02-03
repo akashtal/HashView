@@ -131,6 +131,11 @@ export default function ProfileScreen({ navigation }) {
           onPress: () => navigation.navigate('Coupons')
         },
         {
+          title: 'My Favorites',
+          icon: 'heart-outline',
+          onPress: () => navigation.navigate('Favorites')
+        },
+        {
           title: 'Notifications',
           icon: 'notifications-outline',
           onPress: () => navigation.navigate('Notifications')

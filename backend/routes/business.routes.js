@@ -42,5 +42,9 @@ router.put('/:id/images', protect, authorize('business'), updateBusinessImages);
 router.put('/:id/tripadvisor-rating', protect, authorize('business', 'admin'), updateTripAdvisorRating);
 router.get('/my/businesses', protect, authorize('business'), getMyBusinesses);
 
+// Business notifications
+const { sendBusinessNotification } = require('../controllers/notification.controller');
+router.post('/notifications/send', protect, authorize('business'), sendBusinessNotification);
+
 module.exports = router;
 

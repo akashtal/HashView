@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function ReviewManagementScreen({ navigation }) {
   const [reviews, setReviews] = useState([]);
@@ -63,10 +64,10 @@ export default function ReviewManagementScreen({ navigation }) {
     try {
       await ApiService.adminUpdateReviewStatus(reviewId, { status: newStatus });
       fetchReviews();
-      Alert.alert('Success', `Review ${newStatus} successfully`);
+      ToastService.showSuccess('Success', `Review ${newStatus} successfully`);
     } catch (error) {
       console.error('Error updating review status:', error);
-      Alert.alert('Error', 'Failed to update review status');
+      ToastService.showError('Error', 'Failed to update review status');
     }
   };
 
@@ -204,10 +205,10 @@ export default function ReviewManagementScreen({ navigation }) {
                   <View
                     className="px-2 py-1 rounded-lg"
                     style={{
-                      backgroundColor: 
+                      backgroundColor:
                         review.status === 'active' ? '#ECFDF5' :
-                        review.status === 'flagged' ? '#FFF7ED' :
-                        '#FEF2F2'
+                          review.status === 'flagged' ? '#FFF7ED' :
+                            '#FEF2F2'
                     }}
                   >
                     <Text
@@ -215,8 +216,8 @@ export default function ReviewManagementScreen({ navigation }) {
                       style={{
                         color:
                           review.status === 'active' ? '#10B981' :
-                          review.status === 'flagged' ? '#F59E0B' :
-                          '#EF4444'
+                            review.status === 'flagged' ? '#F59E0B' :
+                              '#EF4444'
                       }}
                     >
                       {review.status || 'active'}

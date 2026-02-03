@@ -10,8 +10,9 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
-import { showMessage } from 'react-native-flash-message';
+
 import ApiService from '../../services/api.service';
+import ToastService from '../../utils/ToastService';
 import COLORS from '../../config/colors';
 
 export default function ChangePasswordScreen({ navigation }) {
@@ -55,11 +56,10 @@ export default function ChangePasswordScreen({ navigation }) {
 
   const handleChangePassword = async () => {
     if (!validateForm()) {
-      showMessage({
-        message: 'Validation Error',
-        description: 'Please fix the errors before continuing',
-        type: 'warning',
-      });
+      ToastService.showWarning(
+        'Validation Error',
+        'Please fix the errors before continuing'
+      );
       return;
     }
 
@@ -71,14 +71,13 @@ export default function ChangePasswordScreen({ navigation }) {
         newPassword: formData.newPassword,
       });
 
-      showMessage({
-        message: 'Password Changed!',
-        description: 'Your password has been updated successfully',
-        type: 'success',
-      });
+      ToastService.showSuccess(
+        'Password Changed!',
+        'Your password has been updated successfully'
+      );
 
       setLoading(false);
-      
+
       // Clear form
       setFormData({
         currentPassword: '',
@@ -94,23 +93,19 @@ export default function ChangePasswordScreen({ navigation }) {
     } catch (error) {
       setLoading(false);
       console.error('Change password error:', error);
-      showMessage({
-        message: 'Password Change Failed',
-        description: error.message || 'Failed to change password',
-        type: 'danger',
-      });
+      ToastService.showError('Password Change Failed', error.message || 'Failed to change password');
     }
   };
 
   const getPasswordStrength = (password) => {
     if (!password) return { strength: 'none', color: '#D1D5DB', text: '' };
-    
+
     let strength = 0;
-    
+
     // Length check
     if (password.length >= 8) strength += 1;
     if (password.length >= 12) strength += 1;
-    
+
     // Character variety checks
     if (/[a-z]/.test(password)) strength += 1;
     if (/[A-Z]/.test(password)) strength += 1;
@@ -127,7 +122,7 @@ export default function ChangePasswordScreen({ navigation }) {
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
-      
+
       {/* Header */}
       <LinearGradient
         colors={[COLORS.primary, COLORS.primaryDark]}
@@ -227,7 +222,7 @@ export default function ChangePasswordScreen({ navigation }) {
                 />
               </TouchableOpacity>
             </View>
-            
+
             {/* Password Strength Indicator */}
             {formData.newPassword.length > 0 && (
               <View className="mt-2">
@@ -247,10 +242,10 @@ export default function ChangePasswordScreen({ navigation }) {
                           passwordStrength.strength === 'weak' && level === 1
                             ? passwordStrength.color
                             : passwordStrength.strength === 'medium' && level <= 2
-                            ? passwordStrength.color
-                            : passwordStrength.strength === 'strong'
-                            ? passwordStrength.color
-                            : '#E5E7EB'
+                              ? passwordStrength.color
+                              : passwordStrength.strength === 'strong'
+                                ? passwordStrength.color
+                                : '#E5E7EB'
                       }}
                     />
                   ))}
@@ -300,7 +295,7 @@ export default function ChangePasswordScreen({ navigation }) {
                 {errors.confirmPassword}
               </Text>
             )}
-            
+
             {/* Match Indicator */}
             {formData.confirmPassword.length > 0 && (
               <View className="flex-row items-center mt-2">
@@ -366,7 +361,7 @@ export default function ChangePasswordScreen({ navigation }) {
           <Text className="text-lg font-bold text-gray-900 mb-3">
             Password Best Practices
           </Text>
-          
+
           <View className="space-y-3">
             {[
               'Use a unique password for each account',

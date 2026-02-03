@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
-import { showMessage } from 'react-native-flash-message';
 import { useDispatch, useSelector } from 'react-redux';
+import ToastService from '../../utils/ToastService';
 import ApiService from '../../services/api.service';
 import { logout } from '../../store/slices/authSlice';
 import COLORS from '../../config/colors';
@@ -47,11 +47,10 @@ export default function DeleteAccountScreen({ navigation }) {
 
   const handleDeleteAccount = () => {
     if (!password.trim()) {
-      showMessage({
-        message: 'Password Required',
-        description: 'Please enter your password to confirm account deletion',
-        type: 'warning',
-      });
+      ToastService.showWarning(
+        'Password Required',
+        'Please enter your password to confirm account deletion'
+      );
       return;
     }
 
@@ -79,12 +78,10 @@ export default function DeleteAccountScreen({ navigation }) {
         feedback: reason
       });
 
-      showMessage({
-        message: 'Account Deleted',
-        description: 'Your account has been permanently deleted',
-        type: 'info',
-        duration: 3000,
-      });
+      ToastService.showInfo(
+        'Account Deleted',
+        'Your account has been permanently deleted'
+      );
 
       setLoading(false);
 
@@ -96,18 +93,14 @@ export default function DeleteAccountScreen({ navigation }) {
     } catch (error) {
       setLoading(false);
       console.error('Delete account error:', error);
-      showMessage({
-        message: 'Deletion Failed',
-        description: error.message || 'Failed to delete account. Please verify your password.',
-        type: 'danger',
-      });
+      ToastService.showError('Deletion Failed', error.message || 'Failed to delete account. Please verify your password.');
     }
   };
 
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor="#DC2626" />
-      
+
       {/* Header */}
       <LinearGradient
         colors={['#DC2626', '#B91C1C']}

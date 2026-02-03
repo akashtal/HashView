@@ -15,6 +15,7 @@ import { Ionicons as Icon } from '@expo/vector-icons';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -36,10 +37,9 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
       setAnalytics(response.analytics);
     } catch (error) {
       console.error('Failed to load analytics:', error);
-      Alert.alert(
+      ToastService.showError(
         'Error',
-        error.response?.data?.message || 'Failed to load analytics. Please try again.',
-        [{ text: 'OK' }]
+        error.response?.data?.message || 'Failed to load analytics. Please try again.'
       );
     } finally {
       setLoading(false);
@@ -76,7 +76,7 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
-      
+
       {/* Header */}
       <LinearGradient
         colors={[COLORS.primary, COLORS.primaryDark]}
@@ -97,9 +97,8 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
               onPress={() => setTimeRange(range)}
               className={`flex-1 py-2 rounded-lg ${timeRange === range ? 'bg-white' : ''}`}
             >
-              <Text className={`text-center font-semibold capitalize ${
-                timeRange === range ? 'text-orange-500' : 'text-white'
-              }`}>
+              <Text className={`text-center font-semibold capitalize ${timeRange === range ? 'text-orange-500' : 'text-white'
+                }`}>
                 {range === 'week' ? 'Week' : range === 'month' ? 'Month' : 'Year'}
               </Text>
             </TouchableOpacity>
@@ -107,7 +106,7 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
         </View>
       </LinearGradient>
 
-      <ScrollView 
+      <ScrollView
         className="flex-1"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
@@ -221,7 +220,7 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
           <View className="px-6 mt-4">
             <View className="bg-white rounded-2xl p-4 shadow-sm">
               <Text className="text-lg font-bold text-gray-900 mb-4">Rating Distribution</Text>
-              
+
               {[5, 4, 3, 2, 1].map((rating) => {
                 const count = analytics.ratingDistribution[rating] || 0;
                 const total = analytics.totalReviews || 1;
@@ -302,7 +301,7 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
         <View className="px-6 mt-4 mb-6">
           <View className="bg-white rounded-2xl p-4 shadow-sm">
             <Text className="text-lg font-bold text-gray-900 mb-4">Quick Stats</Text>
-            
+
             <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
               <Text className="text-gray-600">Total Views</Text>
               <Text className="text-lg font-bold text-gray-900">{analytics?.totalViews || 0}</Text>

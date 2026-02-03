@@ -531,12 +531,27 @@ exports.getNearbyBusinesses = async (req, res, next) => {
       }
     }
 
+    // Pagination
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+
     console.log(`   🔍 Executing MongoDB $near query with maxDistance: ${maxDistance}m`);
+
+    // Count total matching documents for pagination metadata (expensive for $near, may skip or use estimation)
+    // Note: $near does not support count() efficiently with query modifiers sometimes, but we try.
+    // For geospatial, usually we limit the total query anyway.
+
     const businesses = await Business.find(query)
       .select('-documents')
-      .limit(50);
+      .skip(skip)
+      .limit(limit);
 
-    console.log(`   📊 MongoDB returned ${businesses.length} businesses`);
+    // Get total count (without skip/limit)
+    // Note: Counting large geospatial queries can be slow.
+    const total = await Business.countDocuments(query);
+
+    console.log(`   📊 MongoDB returned ${businesses.length} businesses (Page ${page}, Limit ${limit})`);
 
     // Calculate distance for each business and add to response
     const businessesWithDistance = businesses.map((business, index) => {
@@ -570,20 +585,26 @@ exports.getNearbyBusinesses = async (req, res, next) => {
     if (businessesWithDistance.length > 0) {
       const distances = businessesWithDistance.map(b => b.distance).filter(d => d !== undefined);
       if (distances.length > 0) {
-        console.log(`   📊 Distance range: ${Math.min(...distances).toFixed(2)}km - ${Math.max(...distances).toFixed(2)}km`);
+        const minDistance = Math.min(...distances);
+        const maxDistanceFound = Math.max(...distances);
+        console.log(`      📏 Distance range: ${minDistance.toFixed(2)}km - ${maxDistanceFound.toFixed(2)}km`);
       }
+    } else {
+      console.log('      ⚠️ No businesses found with valid coordinates in range');
     }
 
     res.status(200).json({
       success: true,
       count: businessesWithDistance.length,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
       businesses: businessesWithDistance,
       filters: {
+        radius: maxDistance,
         ratingSource: ratingSource || null,
         minRating: minRating || null,
-        category: category || null,
-        distance: distance || null,
-        maxDistance: `${maxDistance / 1000}km`
+        category: category || null
       }
     });
   } catch (error) {
@@ -643,14 +664,21 @@ exports.getAllActiveBusinesses = async (req, res, next) => {
       }
     }
 
+    const page = parseInt(req.query.page, 10) || 1;
+    const queryLimit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * queryLimit;
+
     console.log('   📊 MongoDB query:', JSON.stringify(query, null, 2));
 
     const businesses = await Business.find(query)
       .select('-documents')
-      .limit(parseInt(limit) || 100)
+      .skip(skip)
+      .limit(queryLimit)
       .sort({ 'rating.average': -1 }); // Sort by highest rated first
 
-    console.log(`   ✅ Found ${businesses.length} businesses`);
+    const total = await Business.countDocuments(query);
+
+    console.log(`   ✅ Found ${businesses.length} businesses (Page ${page}, Limit ${queryLimit})`);
     businesses.forEach((b, i) => {
       console.log(`      ${i + 1}. ${b.name} - Google: ${b.externalProfiles?.googleBusiness?.rating || 'N/A'}, HashView: ${b.rating?.average || 0}`);
     });
@@ -658,6 +686,9 @@ exports.getAllActiveBusinesses = async (req, res, next) => {
     res.status(200).json({
       success: true,
       count: businesses.length,
+      total,
+      totalPages: Math.ceil(total / queryLimit),
+      currentPage: page,
       businesses,
       filters: {
         ratingSource: ratingSource || null,

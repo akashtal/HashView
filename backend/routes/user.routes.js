@@ -19,11 +19,14 @@ const { uploadProfile } = require('../config/cloudinary');
 // All routes require authentication
 router.use(protect);
 
+// Public routes
 router.get('/profile', getProfile);
 router.put('/profile', updateProfile);
 router.get('/reviews', getUserReviews);
 router.get('/coupons', getUserCoupons);
 router.get('/rewards', getRewardHistory);
+router.get('/favorites', require('../controllers/user.controller').getFavoriteBusinesses);
+router.put('/favorites/:businessId', require('../controllers/user.controller').toggleFavoriteBusiness);
 
 // New profile management routes
 router.post('/change-password', changePassword);

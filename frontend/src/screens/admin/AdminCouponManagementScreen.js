@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function AdminCouponManagementScreen({ navigation }) {
   const [coupons, setCoupons] = useState([]);
@@ -28,7 +29,7 @@ export default function AdminCouponManagementScreen({ navigation }) {
       setCoupons(response.data || []);
     } catch (error) {
       console.error('Error fetching coupons:', error);
-      Alert.alert('Error', 'Failed to load coupons');
+      ToastService.showError('Error', 'Failed to load coupons');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -68,10 +69,10 @@ export default function AdminCouponManagementScreen({ navigation }) {
     try {
       await ApiService.adminToggleCouponStatus(couponId, { isActive: !currentStatus });
       fetchCoupons();
-      Alert.alert('Success', `Coupon ${!currentStatus ? 'activated' : 'deactivated'}`);
+      ToastService.showSuccess('Success', `Coupon ${!currentStatus ? 'activated' : 'deactivated'}`);
     } catch (error) {
       console.error('Error toggling coupon:', error);
-      Alert.alert('Error', 'Failed to update coupon status');
+      ToastService.showError('Error', 'Failed to update coupon status');
     }
   };
 
@@ -88,10 +89,10 @@ export default function AdminCouponManagementScreen({ navigation }) {
             try {
               await ApiService.adminDeleteCoupon(couponId);
               fetchCoupons();
-              Alert.alert('Success', 'Coupon deleted');
+              ToastService.showSuccess('Success', 'Coupon deleted');
             } catch (error) {
               console.error('Error deleting coupon:', error);
-              Alert.alert('Error', 'Failed to delete coupon');
+              ToastService.showError('Error', 'Failed to delete coupon');
             }
           }
         }
@@ -228,13 +229,13 @@ export default function AdminCouponManagementScreen({ navigation }) {
                         </View>
                       )}
                     </View>
-                    
+
                     <Text className="text-base font-bold text-gray-900 mb-1">
                       {getDiscountDisplay(coupon)}
                     </Text>
-                    
+
                     <Text className="text-sm text-gray-600 mb-2">{coupon.business?.name || 'Unknown Business'}</Text>
-                    
+
                     {coupon.description && (
                       <Text className="text-xs text-gray-500">{coupon.description}</Text>
                     )}

@@ -10,9 +10,10 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
-import { showMessage } from 'react-native-flash-message';
+
 import { useDispatch, useSelector } from 'react-redux';
 import ApiService from '../../services/api.service';
+import ToastService from '../../utils/ToastService';
 import { updateUser } from '../../store/slices/authSlice';
 import COLORS from '../../config/colors';
 
@@ -48,25 +49,20 @@ export default function VerifyEmailScreen({ navigation }) {
   const sendOTP = async () => {
     try {
       setSending(true);
-      
+
       await ApiService.sendEmailOTP({ email: user.email });
-      
-      showMessage({
-        message: 'OTP Sent!',
-        description: `Verification code sent to ${user.email}`,
-        type: 'success',
-      });
+
+      ToastService.showSuccess(
+        'OTP Sent!',
+        `Verification code sent to ${user.email}`
+      );
 
       setTimer(60);
       setCanResend(false);
       setSending(false);
     } catch (error) {
       setSending(false);
-      showMessage({
-        message: 'Failed to send OTP',
-        description: error.message,
-        type: 'danger',
-      });
+      ToastService.showError('Error', error.message || 'Failed to send OTP');
     }
   };
 
@@ -91,13 +87,12 @@ export default function VerifyEmailScreen({ navigation }) {
 
   const handleVerify = async () => {
     const otpCode = otp.join('');
-    
+
     if (otpCode.length !== 6) {
-      showMessage({
-        message: 'Invalid OTP',
-        description: 'Please enter the 6-digit code',
-        type: 'warning',
-      });
+      ToastService.showWarning(
+        'Invalid OTP',
+        'Please enter the 6-digit code'
+      );
       return;
     }
 
@@ -112,11 +107,10 @@ export default function VerifyEmailScreen({ navigation }) {
       // Update user in Redux to mark email as verified
       dispatch(updateUser({ ...user, emailVerified: true }));
 
-      showMessage({
-        message: 'Email Verified!',
-        description: 'Your email has been successfully verified',
-        type: 'success',
-      });
+      ToastService.showSuccess(
+        'Email Verified!',
+        'Your email has been successfully verified'
+      );
 
       setLoading(false);
 
@@ -127,12 +121,8 @@ export default function VerifyEmailScreen({ navigation }) {
 
     } catch (error) {
       setLoading(false);
-      showMessage({
-        message: 'Verification Failed',
-        description: error.message || 'Invalid or expired OTP',
-        type: 'danger',
-      });
-      
+      ToastService.showError('Verification Failed', error.message || 'Invalid or expired OTP');
+
       // Clear OTP on error
       setOtp(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
@@ -150,7 +140,7 @@ export default function VerifyEmailScreen({ navigation }) {
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
-      
+
       {/* Header */}
       <LinearGradient
         colors={[COLORS.primary, COLORS.primaryDark]}
@@ -193,7 +183,7 @@ export default function VerifyEmailScreen({ navigation }) {
             <Text className="text-sm font-medium text-gray-700 mb-4 text-center">
               Enter Verification Code
             </Text>
-            
+
             <View className="flex-row justify-between mb-6">
               {otp.map((digit, index) => (
                 <TextInput
@@ -250,8 +240,8 @@ export default function VerifyEmailScreen({ navigation }) {
               disabled={loading || otp.join('').length !== 6}
               className="rounded-xl py-4 items-center"
               style={{
-                backgroundColor: loading || otp.join('').length !== 6 
-                  ? '#D1D5DB' 
+                backgroundColor: loading || otp.join('').length !== 6
+                  ? '#D1D5DB'
                   : COLORS.primary
               }}
             >

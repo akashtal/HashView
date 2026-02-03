@@ -1,3 +1,4 @@
+import ToastService from '../utils/ToastService';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_CONFIG } from '../config/api.config';
@@ -47,6 +48,9 @@ apiClient.interceptors.response.use(
         }
       });
       console.warn('⚠️ Primary server unreachable. Switching to Failover Server (Render)...');
+
+      ToastService.showInfo('Connection Issue', 'Switching to backup server...');
+
       originalRequest._retry = true; // Mark as retried
 
       // Update Base URL to Secondary Request
@@ -59,6 +63,8 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('user');
+      // Token expired or invalid, let auth handling mechanism redirect to login
+      // Preventing multiple toasts for session expiry as it might be annoying
     }
 
     const data = error.response?.data;
@@ -66,6 +72,11 @@ apiClient.interceptors.response.use(
 
     if (data?.reason) {
       errorMessage = `${errorMessage} ${data.reason}`;
+    }
+
+    // Show toast for visible errors (excluding 401 which are handled by redirect typically)
+    if (error.response?.status !== 401 && error.code !== 'ERR_CANCELED') {
+      ToastService.showError('Error', errorMessage);
     }
 
     return Promise.reject(new Error(errorMessage));
@@ -130,6 +141,8 @@ const ApiService = {
   getAllActiveBusinesses: (params) => apiClient.get('/business/all', { params }),
   getNearbyBusinesses: (params) => apiClient.get(API_CONFIG.ENDPOINTS.GET_NEARBY_BUSINESSES, { params }),
   searchBusinesses: (params) => apiClient.get(API_CONFIG.ENDPOINTS.SEARCH_BUSINESSES, { params }),
+  toggleFavoriteBusiness: (businessId) => apiClient.put(`/users/favorites/${businessId}`),
+  getFavoriteBusinesses: () => apiClient.get('/users/favorites'),
 
   // Category APIs
   getCategories: () => apiClient.get('/categories'),

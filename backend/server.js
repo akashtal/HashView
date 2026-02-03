@@ -180,6 +180,15 @@ mongoose.connect(process.env.MONGODB_URI, {
     // Initialize Redis (optional)
     await initializeRedis();
 
+    // CRM-123 FIX: Drop problematic phone index causing Apple Sign-In errors
+    try {
+      await mongoose.connection.collection('users').dropIndex('phone_1');
+      console.log('✅ FIXED: Dropped old users.phone_1 index');
+    } catch (e) {
+      // Ignore if index not found
+      console.log('ℹ️  Index check: ' + e.message);
+    }
+
     // Create default admin account
     await createDefaultAdmin();
   })
@@ -191,9 +200,10 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 // Start Server
 const PORT = process.env.PORT || 5001;
-server.listen(PORT, '127.0.0.1', () => {
+server.listen(PORT, '0.0.0.0', () => {
   logger.info(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
   console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+  console.log(`📡 Server accessible at http://localhost:${PORT} and https://hashview.44.249.50.162.nip.io:${PORT}`);
 });
 
 // Graceful shutdown

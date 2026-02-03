@@ -1,5 +1,7 @@
 const Coupon = require('../models/Coupon.model');
 const Business = require('../models/Business.model');
+const User = require('../models/User.model');
+const { sendPushNotification } = require('../utils/notification');
 const { isCouponValid, calculateDiscount, generateCouponCode } = require('../utils/coupon');
 const crypto = require('crypto');
 
@@ -87,7 +89,6 @@ exports.createCoupon = async (req, res, next) => {
     let targetUserId = userId;
     if (userId && /^\d+$/.test(userId)) {
       // It's a phone number, look up the user
-      const User = require('../models/User.model');
       const user = await User.findOne({ phone: userId });
       if (!user) {
         return res.status(404).json({
@@ -256,18 +257,16 @@ exports.redeemCoupon = async (req, res, next) => {
     coupon.redeemedBy = req.user.id;
     await coupon.save();
 
-    // Send OneSignal notification to business owner
+    // Send notification to business owner
     try {
-      const OneSignalService = require('../services/onesignal.service');
-
       const discountText = coupon.rewardType === 'percentage'
         ? `${coupon.rewardValue}% OFF`
         : coupon.rewardType === 'fixed'
           ? `₹${coupon.rewardValue} OFF`
           : coupon.rewardType;
 
-      await OneSignalService.sendToUser(
-        business.owner.toString(),
+      await sendPushNotification(
+        business.owner,
         '🎟️ Coupon Redeemed!',
         `${coupon.user.name} redeemed ${discountText} coupon`,
         {
@@ -277,8 +276,7 @@ exports.redeemCoupon = async (req, res, next) => {
           businessId: business._id.toString()
         }
       );
-
-      console.log(`✅ OneSignal notification sent for coupon redemption`);
+      console.log(`✅ Notification sent for coupon redemption`);
     } catch (error) {
       console.error('❌ Failed to send coupon redemption notification:', error);
       // Don't fail the request if notification fails
@@ -379,4 +377,3 @@ exports.calculateCouponDiscount = async (req, res, next) => {
     next(error);
   }
 };
-

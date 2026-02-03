@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, MapPin, Phone, Mail, Globe, Star, Edit2, Save, X, Image as ImageIcon, QrCode, Download, Plane } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, MapPin, Phone, Mail, Globe, Star, Edit2, Save, X, Image as ImageIcon, QrCode, Download, Plane, Plus, Trash2 } from 'lucide-react';
 import { adminApi } from '../api/adminApi';
 import { format } from 'date-fns';
 
@@ -26,6 +26,14 @@ const BusinessDetails = () => {
     profileUrl: ''
   });
 
+  // Images state
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState('');
+  const [coverFile, setCoverFile] = useState(null);
+  const [coverPreview, setCoverPreview] = useState('');
+  const [galleryFiles, setGalleryFiles] = useState([]);
+  const [galleryPreviews, setGalleryPreviews] = useState([]);
+
   const categories = [
     'restaurant', 'cafe', 'retail', 'services', 'healthcare',
     'education', 'entertainment', 'salon', 'hotel', 'gym', 'other'
@@ -44,6 +52,14 @@ const BusinessDetails = () => {
         reviewCount: business.externalProfiles?.tripAdvisor?.reviewCount || '',
         profileUrl: business.externalProfiles?.tripAdvisor?.profileUrl || ''
       });
+      // Initialize image previews from existing business data
+      if (business.logo?.url) setLogoPreview(business.logo.url);
+      if (business.coverImage?.url) setCoverPreview(business.coverImage.url);
+      if (business.images?.length > 0) {
+        setGalleryPreviews(business.images.map(img => img.url));
+      } else {
+        setGalleryPreviews([]);
+      }
     }
   }, [business]);
 
@@ -116,6 +132,13 @@ const BusinessDetails = () => {
         status: business.status || 'pending',
         kycStatus: business.kycStatus || 'pending'
       });
+      // Reset images
+      setLogoFile(null);
+      setCoverFile(null);
+      setGalleryFiles([]);
+      setLogoPreview(business.logo?.url || '');
+      setCoverPreview(business.coverImage?.url || '');
+      setGalleryPreviews(business.images?.map(img => img.url) || []);
     }
   };
 
@@ -136,6 +159,73 @@ const BusinessDetails = () => {
         longitude: parseFloat(editFormData.longitude),
         radius: parseInt(editFormData.radius)
       });
+
+      // Handle Image Uploads
+      const businessId = id;
+      let logoUrl = null;
+      let coverUrl = null;
+      let newGalleryUrls = [];
+
+      // Upload Logo if changed
+      if (logoFile) {
+        try {
+          const logoRes = await adminApi.uploadBusinessLogo(businessId, logoFile);
+          logoUrl = logoRes.data?.url || logoRes.data?.data?.url;
+          console.log('Logo uploaded:', logoUrl);
+        } catch (err) {
+          console.error('Logo upload failed:', err);
+        }
+      }
+
+      // Upload Cover if changed
+      if (coverFile) {
+        try {
+          const coverRes = await adminApi.uploadBusinessCover(businessId, coverFile);
+          coverUrl = coverRes.data?.url || coverRes.data?.data?.url;
+          console.log('Cover uploaded:', coverUrl);
+        } catch (err) {
+          console.error('Cover upload failed:', err);
+        }
+      }
+
+      // Upload New Gallery Images
+      if (galleryFiles.length > 0) {
+        try {
+          const galleryRes = await adminApi.uploadBusinessGallery(businessId, galleryFiles);
+          newGalleryUrls = galleryRes.data?.images?.map(img => img.url) || [];
+          console.log('Gallery uploaded:', newGalleryUrls);
+        } catch (err) {
+          console.error('Gallery upload failed:', err);
+        }
+      }
+
+      // Update business with new image URLs if any were uploaded
+      // Note: For gallery, we might want to append or replace. 
+      // Current logic in simpler CRUD usually replaces or appends.
+      // Ideally we should merge with existing images that weren't deleted.
+      // For this implementation, we'll fetch the latest business images first or just append.
+      if (logoUrl || coverUrl || newGalleryUrls.length > 0) {
+        const imageUpdate = {};
+        if (logoUrl) imageUpdate.logo = { url: logoUrl };
+        if (coverUrl) imageUpdate.coverImage = { url: coverUrl };
+
+        // Handle gallery: merge existing (that are still in previews) + new uploads
+        // Since we don't track deleted existing images properly in state (just visual),
+        // we will simple append new ones to the backend.
+        // A better approach would be to send the full list of desired image URLs.
+        if (newGalleryUrls.length > 0) {
+          // We are taking a shortcut: Backend usually appends fast/easy updates.
+          // But business controller just accepts 'images' array.
+          // We should construct the final images array.
+          // Existing images (from business.images) + New URLs
+          const existingUrls = business.images?.map(img => img.url) || [];
+          const finalGallery = [...existingUrls, ...newGalleryUrls].map(url => ({ url }));
+          imageUpdate.images = finalGallery;
+        }
+
+        await adminApi.updateBusiness(businessId, imageUpdate);
+      }
+
       alert('Business updated successfully!');
       setEditing(false);
       fetchBusinessDetails();
@@ -973,9 +1063,109 @@ const BusinessDetails = () => {
           )}
 
           {/* Images */}
-          {(business.logo || business.coverImage || (business.images && business.images.length > 0)) && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Business Images</h2>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Business Images</h2>
+
+            {editing ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Logo Upload */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Business Logo</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition">
+                      {logoPreview ? (
+                        <div className="relative">
+                          <img src={logoPreview} alt="Logo preview" className="w-24 h-24 object-cover rounded-lg mx-auto" />
+                          <button
+                            type="button"
+                            onClick={() => { setLogoFile(null); setLogoPreview(''); }}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="cursor-pointer">
+                          <div className="flex flex-col items-center">
+                            <Plus className="w-8 h-8 text-gray-400 mb-2" />
+                            <span className="text-sm text-gray-500">Click to upload logo</span>
+                            <span className="text-xs text-gray-400 mt-1">Full Image</span>
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleLogoChange}
+                            className="hidden"
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Cover Image Upload */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Cover Image</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition">
+                      {coverPreview ? (
+                        <div className="relative">
+                          <img src={coverPreview} alt="Cover preview" className="w-full h-32 object-cover rounded-lg" />
+                          <button
+                            type="button"
+                            onClick={() => { setCoverFile(null); setCoverPreview(''); }}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="cursor-pointer">
+                          <div className="flex flex-col items-center">
+                            <Plus className="w-8 h-8 text-gray-400 mb-2" />
+                            <span className="text-sm text-gray-500">Click to upload cover</span>
+                            <span className="text-xs text-gray-400 mt-1">Full Image</span>
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleCoverChange}
+                            className="hidden"
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Gallery Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Gallery Images</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                    {galleryPreviews.map((preview, index) => (
+                      <div key={index} className="relative aspect-square">
+                        <img src={preview} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
+                        {/* 
+                         Note: Removing generic gallery images in edit mode is complex to sync 
+                         without robust state management (distinguishing existing vs new).
+                         For now, we disable removing to allow Append-Only for Gallery in this quick edit.
+                        */}
+                      </div>
+                    ))}
+                    <label className="border-2 border-dashed border-gray-300 rounded-lg aspect-square flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 transition">
+                      <Plus className="w-6 h-6 text-gray-400" />
+                      <span className="text-xs text-gray-500 mt-1">Add</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleGalleryChange}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">New gallery images will be appended to existing ones.</p>
+                </div>
+              </div>
+            ) : (
               <div className="space-y-4">
                 {business.logo?.url && (
                   <div>
@@ -999,9 +1189,13 @@ const BusinessDetails = () => {
                     </div>
                   </div>
                 )}
+
+                {(!business.logo?.url && !business.coverImage?.url && (!business.images || business.images.length === 0)) && (
+                  <p className="text-gray-500 italic">No images uploaded.</p>
+                )}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
 
           {/* KYC Documents */}

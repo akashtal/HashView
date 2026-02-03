@@ -28,6 +28,7 @@ import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
 import { parseBackendErrors, showErrorMessage } from '../../utils/errorHandler';
 import ValidatedTextInput from '../../components/common/ValidatedTextInput';
+import ToastService from '../../utils/ToastService';
 
 const GOOGLE_API_KEY =
   process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ||
@@ -138,7 +139,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
 
       if (!GOOGLE_API_KEY) {
         console.error('❌ Google API key not configured');
-        Alert.alert('Configuration Error', 'Google API key is missing. Please contact support.');
+        ToastService.showError('Configuration Error', 'Google API key is missing. Please contact support.');
         setAddressSuggestions([]);
         setShowAddressSuggestions(false);
         return;
@@ -456,7 +457,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
         } else {
           // No categories found - admin needs to create them
           setCategories([{ label: 'No categories available', value: '' }]);
-          Alert.alert(
+          ToastService.showWarning(
             'Categories Not Available',
             'Admin has not created any categories yet. Please contact support.'
           );
@@ -505,14 +506,13 @@ export default function BusinessRegistrationScreen({ navigation }) {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please grant permission to access photos');
+        ToastService.showWarning('Permission Required', 'Please grant permission to access photos');
         return;
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: type !== 'gallery',
-        aspect: type === 'logo' ? [1, 1] : type === 'coverImage' ? [16, 9] : undefined,
+        allowsEditing: false,
         quality: 0.8,
         allowsMultipleSelection: type === 'gallery'
       });
@@ -527,7 +527,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
         }
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to pick image');
+      ToastService.showError('Error', 'Failed to pick image');
     }
   };
 
@@ -887,11 +887,13 @@ export default function BusinessRegistrationScreen({ navigation }) {
           // Notify user if any uploads failed
           if (uploadFailures.length > 0) {
             const failedItems = uploadFailures.join(', ');
-            Alert.alert(
-              'Image Upload Issues',
-              `Your business was registered successfully, but the following images failed to upload:\n\n${failedItems}\n\nYou can add them later from your Business Dashboard.`,
-              [{ text: 'OK' }]
-            );
+            if (uploadFailures.length > 0) {
+              const failedItems = uploadFailures.join(', ');
+              ToastService.showWarning(
+                'Image Upload Issues',
+                `Your business was registered successfully, but the following images failed to upload:\n\n${failedItems}\n\nYou can add them later from your Business Dashboard.`
+              );
+            }
           }
         });
       }

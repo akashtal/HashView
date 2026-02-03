@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   ActivityIndicator, Alert, StatusBar, Platform, AppState, Image
 } from 'react-native';
+import ToastService from '../../utils/ToastService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -10,14 +11,18 @@ import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
 import { Accelerometer } from 'expo-sensors';
 import Constants from 'expo-constants';
-import { createReview, clearSuccessMessage } from '../../store/slices/reviewSlice';
+import { createReview, clearSuccessMessage, clearCreatedCoupon } from '../../store/slices/reviewSlice';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ScratchCardModal from '../../components/ScratchCardModal';
 
 export default function AddReviewScreen({ navigation, route }) {
   const dispatch = useDispatch();
   const { business } = route.params;
-  const { loading, successMessage, error } = useSelector((state) => state.review);
+  const { loading, successMessage, error, createdCoupon } = useSelector((state) => state.review);
+
+  // Modal State
+  const [showScratchCard, setShowScratchCard] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -86,28 +91,33 @@ export default function AddReviewScreen({ navigation, route }) {
   // ==================== SUCCESS/ERROR HANDLING ====================
   useEffect(() => {
     if (successMessage) {
-      Alert.alert('Success!', successMessage + '\n\nYou\'ve earned a coupon!', [
-        {
-          text: 'View Coupon',
-          onPress: () => {
-            dispatch(clearSuccessMessage());
-            navigation.navigate('Coupons');
-          }
-        },
-        {
-          text: 'OK',
-          onPress: () => {
-            dispatch(clearSuccessMessage());
-            navigation.goBack();
-          }
-        }
-      ]);
+      if (createdCoupon) {
+        // If we have a coupon, show the scratch card!
+        setShowScratchCard(true);
+      } else {
+        // Standard success message (e.g. limit reached)
+        ToastService.showSuccess('Success!', successMessage);
+
+        setTimeout(() => {
+          dispatch(clearSuccessMessage());
+          navigation.goBack();
+        }, 1500);
+      }
     }
-  }, [successMessage]);
+  }, [successMessage, createdCoupon]);
+
+  const handleCloseScratchCard = () => {
+    setShowScratchCard(false);
+    dispatch(clearCreatedCoupon());
+    dispatch(clearSuccessMessage());
+
+    // Navigate to coupons page to see the new reward
+    navigation.replace('Coupons', { newCouponId: createdCoupon?._id });
+  };
 
   useEffect(() => {
     if (error) {
-      Alert.alert('Error', error);
+      ToastService.showError('Error', error);
     }
   }, [error]);
 
@@ -505,10 +515,9 @@ export default function AddReviewScreen({ navigation, route }) {
           clearInterval(timerInterval.current);
           setVerificationComplete(true);
           console.log('✅ 30-second verification complete!');
-          Alert.alert(
+          ToastService.showSuccess(
             'Verification Complete! ✅',
-            'You\'ve stayed within the business location for 30 seconds. You can now submit your review!',
-            [{ text: 'Great!', style: 'default' }]
+            'You\'ve stayed within the business location for 30 seconds. You can now submit your review!'
           );
         }
 
@@ -666,7 +675,7 @@ export default function AddReviewScreen({ navigation, route }) {
                     deviceFingerprint: deviceFingerprint
                   });
 
-                  Alert.alert('Report Submitted', 'Our team will review your case. Thank you!');
+                  ToastService.showSuccess('Report Submitted', 'Our team will review your case. Thank you!');
                   navigation.goBack();
                 }
               },
@@ -1408,6 +1417,11 @@ export default function AddReviewScreen({ navigation, route }) {
           </LinearGradient>
         </TouchableOpacity>
       </View>
+      <ScratchCardModal
+        visible={showScratchCard}
+        coupon={createdCoupon}
+        onClose={handleCloseScratchCard}
+      />
     </ScrollView>
   );
 }

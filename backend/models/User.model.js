@@ -82,6 +82,10 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Business'
   }],
+  favoritePlaces: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Business'
+  }],
   // Firebase OAuth fields
   firebaseUid: {
     type: String,
@@ -90,7 +94,7 @@ const userSchema = new mongoose.Schema({
   },
   authProvider: {
     type: String,
-    enum: ['email', 'google', 'facebook'],
+    enum: ['email', 'google', 'apple', 'facebook'],
     default: 'email'
   },
   avatar: {

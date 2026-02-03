@@ -15,8 +15,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
-import { showMessage } from 'react-native-flash-message';
 import ApiService from '../../services/api.service';
+import ToastService from '../../utils/ToastService';
 import { updateUser } from '../../store/slices/authSlice';
 import COLORS from '../../config/colors';
 
@@ -41,7 +41,7 @@ export default function EditProfileScreen({ navigation }) {
       if (Platform.OS !== 'web') {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert(
+          ToastService.showInfo(
             'Permission Required',
             'Sorry, we need camera roll permissions to update your profile picture.'
           );
@@ -104,31 +104,20 @@ export default function EditProfileScreen({ navigation }) {
         // Update Redux store immediately so ProfileScreen shows new image
         dispatch(updateUser({ ...user, profileImage: newImageUrl }));
 
-        showMessage({
-          message: 'Profile picture updated!',
-          type: 'success',
-        });
+        ToastService.showSuccess('Success', 'Profile picture updated!');
 
         setUploading(false);
       }
     } catch (error) {
       setUploading(false);
       console.error('Image upload error:', error);
-      showMessage({
-        message: 'Failed to upload image',
-        description: error.message,
-        type: 'danger',
-      });
+      ToastService.showError('Error', 'Failed to upload image');
     }
   };
 
   const handleSave = async () => {
     if (!validateForm()) {
-      showMessage({
-        message: 'Validation Error',
-        description: 'Please fix the errors before saving',
-        type: 'warning',
-      });
+      ToastService.showError('Validation Error', 'Please fix the errors before saving');
       return;
     }
 
@@ -150,11 +139,7 @@ export default function EditProfileScreen({ navigation }) {
       // Update Redux store
       dispatch(updateUser(response.user));
 
-      showMessage({
-        message: 'Profile Updated!',
-        description: 'Your profile has been updated successfully',
-        type: 'success',
-      });
+      ToastService.showSuccess('Profile Updated!', 'Your profile has been updated successfully');
 
       setLoading(false);
 
@@ -166,11 +151,7 @@ export default function EditProfileScreen({ navigation }) {
     } catch (error) {
       setLoading(false);
       console.error('Update profile error:', error);
-      showMessage({
-        message: 'Update Failed',
-        description: error.message || 'Failed to update profile',
-        type: 'danger',
-      });
+      ToastService.showError('Update Failed', error.message || 'Failed to update profile');
     }
   };
 

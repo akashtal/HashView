@@ -16,6 +16,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_CONFIG } from '../../config/api.config';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function QRScannerScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
@@ -57,11 +58,9 @@ export default function QRScannerScreen({ navigation }) {
           businessId = urlMatch[1];
           console.log('✅ Extracted business ID from URL:', businessId);
         } else {
-          Alert.alert(
-            'Invalid QR Code',
-            'This QR code is not a valid HashView business QR code.',
-            [{ text: 'OK', onPress: () => { setScanned(false); setLoading(false); } }]
-          );
+          ToastService.showError('Invalid QR Code', 'This QR code is not a valid HashView business QR code.');
+          setScanned(false);
+          setLoading(false);
           return;
         }
       } else {
@@ -72,29 +71,23 @@ export default function QRScannerScreen({ navigation }) {
             businessId = qrData.id;
             console.log('✅ Extracted business ID from JSON:', businessId);
           } else {
-            Alert.alert(
-              'Invalid QR Code',
-              'This QR code is not a valid business QR code.',
-              [{ text: 'OK', onPress: () => { setScanned(false); setLoading(false); } }]
-            );
+            ToastService.showError('Invalid QR Code', 'This QR code is not a valid business QR code.');
+            setScanned(false);
+            setLoading(false);
             return;
           }
         } catch (e) {
-          Alert.alert(
-            'Invalid QR Code',
-            'This QR code is not a valid HashView business QR code.',
-            [{ text: 'OK', onPress: () => { setScanned(false); setLoading(false); } }]
-          );
+          ToastService.showError('Invalid QR Code', 'This QR code is not a valid HashView business QR code.');
+          setScanned(false);
+          setLoading(false);
           return;
         }
       }
 
       if (!businessId) {
-        Alert.alert(
-          'Invalid QR Code',
-          'Could not extract business information from QR code.',
-          [{ text: 'OK', onPress: () => { setScanned(false); setLoading(false); } }]
-        );
+        ToastService.showError('Invalid QR Code', 'Could not extract business information from QR code.');
+        setScanned(false);
+        setLoading(false);
         return;
       }
 
@@ -117,26 +110,17 @@ export default function QRScannerScreen({ navigation }) {
           fromQR: true
         });
       } else {
-        Alert.alert(
-          'Error',
-          response.data.message || 'Failed to load business details',
-          [{ text: 'OK', onPress: () => { setScanned(false); setLoading(false); } }]
-        );
+        ToastService.showError('Error', response.data.message || 'Failed to load business details');
+        setScanned(false);
+        setLoading(false);
       }
     } catch (error) {
       console.error('❌ QR Scan Error:', error);
-      Alert.alert(
+      setScanned(false);
+      setLoading(false);
+      ToastService.showError(
         'Error',
-        error.response?.data?.message || error.message || 'Failed to process QR code',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              setScanned(false);
-              setLoading(false);
-            }
-          }
-        ]
+        error.response?.data?.message || error.message || 'Failed to process QR code'
       );
     }
   };

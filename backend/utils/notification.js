@@ -18,11 +18,21 @@ exports.sendPushNotification = async (userId, title, message, data = {}) => {
       status: 'pending'
     });
 
+    console.log(`🚀 Sending push to user ${userId}...`);
+
     // Get user's push token
     const User = require('../models/User.model');
     const user = await User.findById(userId);
 
-    if (!user || !user.pushToken) {
+    if (!user) {
+      console.error(`❌ User ${userId} not found`);
+      return { success: false, message: 'User not found' };
+    }
+
+    console.log(`👤 User found: ${user.email}, Token: ${user.pushToken}`);
+
+    if (!user.pushToken) {
+      console.error(`❌ User ${userId} has no push token`);
       notification.status = 'failed';
       notification.errorMessage = 'User push token not found';
       await notification.save();
@@ -31,6 +41,7 @@ exports.sendPushNotification = async (userId, title, message, data = {}) => {
 
     // Check that push token is valid
     if (!Expo.isExpoPushToken(user.pushToken)) {
+      console.error(`❌ Invalid Expo push token: ${user.pushToken}`);
       notification.status = 'failed';
       notification.errorMessage = 'Invalid push token format';
       await notification.save();
@@ -53,9 +64,12 @@ exports.sendPushNotification = async (userId, title, message, data = {}) => {
 
     for (let chunk of chunks) {
       try {
+        console.log('📤 Sending chunk to Expo...');
         const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+        console.log('✅ Expo API Response:', JSON.stringify(ticketChunk));
         tickets.push(...ticketChunk);
       } catch (error) {
+        console.error('❌ Expo send error:', error);
         logger.error('Error sending push notification chunk:', error);
       }
     }
@@ -105,7 +119,7 @@ exports.checkNotificationReceipts = async () => {
 
         for (let [receiptId, receipt] of Object.entries(receipts)) {
           const notification = notifications.find(n => n.expoTicketId === receiptId);
-          
+
           if (!notification) continue;
 
           if (receipt.status === 'error') {

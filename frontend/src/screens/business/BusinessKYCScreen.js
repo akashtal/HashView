@@ -19,6 +19,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { uploadDocuments } from '../../store/slices/businessSlice';
 import { COLORS } from '../../config/colors';
 import { showErrorMessage, showSuccessMessage } from '../../utils/errorHandler';
+import ToastService from '../../utils/ToastService';
 
 export default function BusinessKYCScreen({ navigation, route }) {
     const dispatch = useDispatch();
@@ -49,7 +50,7 @@ export default function BusinessKYCScreen({ navigation, route }) {
         try {
             const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
             if (status !== 'granted') {
-                Alert.alert('Permission Required', 'Please grant permission to access photos');
+                ToastService.showWarning('Permission Required', 'Please grant permission to access photos');
                 return;
             }
 

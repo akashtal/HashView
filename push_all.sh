@@ -11,3 +11,5 @@ git push origin main
 cd .. || exit
 
 echo "✅ All pushes completed!"
+local.properties
+sdk.dir=/Users/akash/Library/Android/sdk

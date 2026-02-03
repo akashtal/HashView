@@ -19,6 +19,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import COLORS from '../../config/colors';
 import { API_CONFIG } from '../../config/api.config';
+import ToastService from '../../utils/ToastService';
 
 export default function ManageUpdatesScreen({ navigation, route }) {
   const { businessId } = route.params || {};
@@ -55,7 +56,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
       }
     } catch (error) {
       console.error('Error fetching updates:', error);
-      Alert.alert('Error', 'Failed to load updates');
+      ToastService.showError('Error', 'Failed to load updates');
     } finally {
       setLoading(false);
     }
@@ -92,7 +93,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please grant permission to access photos');
+        ToastService.showWarning('Permission Required', 'Please grant permission to access photos');
         return;
       }
 
@@ -107,17 +108,17 @@ export default function ManageUpdatesScreen({ navigation, route }) {
         setFormData({ ...formData, image: result.assets[0] });
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to pick image');
+      ToastService.showError('Error', 'Failed to pick image');
     }
   };
 
   const handleSave = async () => {
     if (!formData.title.trim()) {
-      Alert.alert('Error', 'Please enter a title');
+      ToastService.showWarning('Validation Error', 'Please enter a title');
       return;
     }
     if (!formData.description.trim()) {
-      Alert.alert('Error', 'Please enter a description');
+      ToastService.showWarning('Validation Error', 'Please enter a description');
       return;
     }
 
@@ -127,7 +128,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
       // Get auth token
       const token = await AsyncStorage.getItem('token');
       if (!token) {
-        Alert.alert('Error', 'You are not logged in. Please log in again.');
+        ToastService.showError('Error', 'You are not logged in. Please log in again.');
         return;
       }
 
@@ -165,15 +166,15 @@ export default function ManageUpdatesScreen({ navigation, route }) {
       const data = await response.json();
 
       if (data.success) {
-        Alert.alert('Success', editingUpdate ? 'Update saved successfully' : 'Update created successfully');
+        ToastService.showSuccess('Success', editingUpdate ? 'Update saved successfully' : 'Update created successfully');
         setModalVisible(false);
         fetchUpdates();
       } else {
-        Alert.alert('Error', data.message || 'Failed to save update');
+        ToastService.showError('Error', data.message || 'Failed to save update');
       }
     } catch (error) {
       console.error('Error saving update:', error);
-      Alert.alert('Error', 'Failed to save update');
+      ToastService.showError('Error', 'Failed to save update');
     } finally {
       setSubmitting(false);
     }
@@ -192,7 +193,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
             try {
               const token = await AsyncStorage.getItem('token');
               if (!token) {
-                Alert.alert('Error', 'You are not logged in. Please log in again.');
+                ToastService.showError('Error', 'You are not logged in. Please log in again.');
                 return;
               }
 
@@ -206,14 +207,14 @@ export default function ManageUpdatesScreen({ navigation, route }) {
               const data = await response.json();
 
               if (data.success) {
-                Alert.alert('Success', 'Update deleted successfully');
+                ToastService.showSuccess('Deleted', 'Update deleted successfully');
                 fetchUpdates();
               } else {
-                Alert.alert('Error', 'Failed to delete update');
+                ToastService.showError('Delete Failed', 'Failed to delete update');
               }
             } catch (error) {
               console.error('Error deleting update:', error);
-              Alert.alert('Error', 'Failed to delete update');
+              ToastService.showError('Delete Failed', 'Failed to delete update');
             }
           }
         }
@@ -225,7 +226,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) {
-        Alert.alert('Error', 'You are not logged in. Please log in again.');
+        ToastService.showError('Error', 'You are not logged in. Please log in again.');
         return;
       }
 
@@ -243,11 +244,11 @@ export default function ManageUpdatesScreen({ navigation, route }) {
       if (data.success) {
         fetchUpdates();
       } else {
-        Alert.alert('Error', 'Failed to update status');
+        ToastService.showError('Error', 'Failed to update status');
       }
     } catch (error) {
       console.error('Error toggling status:', error);
-      Alert.alert('Error', 'Failed to update status');
+      ToastService.showError('Error', 'Failed to update status');
     }
   };
 

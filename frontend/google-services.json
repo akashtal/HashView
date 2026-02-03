@@ -12,7 +12,20 @@
           "package_name": "com.hashview.apps"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "728856865659-35j6kjd97b0gabbp3bm3g5g8j1fja03s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hashview.apps",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "728856865659-m9cj8v3oi6bmok3573d0a8a8bd8tpi9s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB1wY65JQOvFu8qUji8oyxai5L_xf1Oyuc"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "728856865659-m9cj8v3oi6bmok3573d0a8a8bd8tpi9s.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "728856865659-99ir3p87coklg49f74cjqhqoigel1vue.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.hashview.app"
+              }
+            }
+          ]
         }
       }
     }

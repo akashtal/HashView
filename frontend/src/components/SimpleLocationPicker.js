@@ -10,6 +10,7 @@ import {
   Alert,
   ScrollView
 } from 'react-native';
+import ToastService from '../utils/ToastService';
 import * as Location from 'expo-location';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import COLORS from '../config/colors';
@@ -26,14 +27,14 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
 
   const searchLocation = async () => {
     if (!searchQuery.trim()) {
-      Alert.alert('Error', 'Please enter a location to search');
+      ToastService.showError('Error', 'Please enter a location to search');
       return;
     }
 
     try {
       setLoading(true);
       const results = await Location.geocodeAsync(searchQuery);
-      
+
       if (results && results.length > 0) {
         // Get addresses for all results
         const resultsWithAddresses = await Promise.all(
@@ -43,12 +44,12 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
                 latitude: result.latitude,
                 longitude: result.longitude
               });
-              
+
               const addr = addressResults[0];
-              const fullAddress = addr 
+              const fullAddress = addr
                 ? `${addr.street || ''}, ${addr.city || ''}, ${addr.region || ''}, ${addr.country || ''}`
                 : `${result.latitude.toFixed(6)}, ${result.longitude.toFixed(6)}`;
-                
+
               return {
                 ...result,
                 address: fullAddress.trim()
@@ -61,15 +62,15 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
             }
           })
         );
-        
+
         setSearchResults(resultsWithAddresses);
       } else {
-        Alert.alert('Not Found', 'No results found. Try a different search term.');
+        ToastService.showInfo('Not Found', 'No results found. Try a different search term.');
         setSearchResults([]);
       }
     } catch (error) {
       console.error('Search error:', error);
-      Alert.alert('Error', 'Failed to search location. Please try again.');
+      ToastService.showError('Error', 'Failed to search location. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -79,9 +80,9 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
     try {
       setLoading(true);
       const { status } = await Location.requestForegroundPermissionsAsync();
-      
+
       if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Location permission is required');
+        ToastService.showInfo('Permission Denied', 'Location permission is required');
         return;
       }
 
@@ -95,7 +96,7 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
       });
 
       const addr = addressResults[0];
-      const fullAddress = addr 
+      const fullAddress = addr
         ? `${addr.street || ''}, ${addr.city || ''}, ${addr.region || ''}, ${addr.country || ''}`
         : 'Current Location';
 
@@ -105,10 +106,10 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
         address: fullAddress.trim()
       });
 
-      Alert.alert('Success', 'Current location detected!');
+      ToastService.showSuccess('Success', 'Current location detected!');
     } catch (error) {
       console.error('Error getting current location:', error);
-      Alert.alert('Error', 'Failed to get current location');
+      ToastService.showError('Error', 'Failed to get current location');
     } finally {
       setLoading(false);
     }
@@ -122,7 +123,7 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
 
   const confirmLocation = () => {
     if (!selectedLocation.latitude || !selectedLocation.longitude) {
-      Alert.alert('Error', 'Please select a location first');
+      ToastService.showError('Error', 'Please select a location first');
       return;
     }
 
@@ -209,11 +210,11 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
                   <Icon name="location" size={24} color={COLORS.primary} />
                   <Text style={styles.selectedLabel}>Lachit Nagar</Text>
                 </View>
-                
+
                 {selectedLocation.address && (
                   <Text style={styles.selectedAddress}>{selectedLocation.address}</Text>
                 )}
-                
+
                 <View style={styles.coordsContainer}>
                   <View style={styles.coordItem}>
                     <Text style={styles.coordLabel}>Latitude:</Text>

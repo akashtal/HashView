@@ -11,13 +11,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import ToastService from '../../utils/ToastService';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import PhoneInput from 'react-native-phone-number-input';
 import { LinearGradient } from 'expo-linear-gradient';
 import COLORS from '../../config/colors';
 import GoogleSignInButton from '../../components/auth/GoogleSignInButton';
-import FacebookSignInButton from '../../components/auth/FacebookSignInButton';
+import AppleSignInButton from '../../components/auth/AppleSignInButton';
 
 export default function SignUpScreen({ navigation, route }) {
   const dispatch = useDispatch();
@@ -245,7 +246,7 @@ export default function SignUpScreen({ navigation, route }) {
             {/* OAuth Sign-In Options */}
             <View className="mb-5">
               <GoogleSignInButton role={role} style={{ marginBottom: 12 }} />
-              <FacebookSignInButton role={role} />
+              <AppleSignInButton role={role} />
 
               <View className="flex-row items-center my-4">
                 <View className="flex-1 h-[1px] bg-gray-300" />

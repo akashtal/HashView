@@ -94,6 +94,18 @@ const businessSlice = createSlice({
     myBusiness: null,
     loading: false,
     error: null,
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalCount: 0,
+      hasMore: false
+    },
+    nearbyPagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalCount: 0,
+      hasMore: false
+    }
   },
   reducers: {
     clearError: (state) => {
@@ -111,7 +123,24 @@ const businessSlice = createSlice({
       })
       .addCase(getAllActiveBusinesses.fulfilled, (state, action) => {
         state.loading = false;
-        state.businesses = action.payload.businesses;
+        const { businesses, currentPage, totalPages, total } = action.payload;
+
+        if (currentPage === 1) {
+          state.businesses = businesses;
+        } else {
+          // Filter out duplicates based on _id
+          const newBusinesses = businesses.filter(
+            newBiz => !state.businesses.some(existingBiz => existingBiz._id === newBiz._id)
+          );
+          state.businesses = [...state.businesses, ...newBusinesses];
+        }
+
+        state.pagination = {
+          currentPage: currentPage || 1,
+          totalPages: totalPages || 1,
+          totalCount: total || 0,
+          hasMore: currentPage < totalPages
+        };
       })
       .addCase(getAllActiveBusinesses.rejected, (state, action) => {
         state.loading = false;
@@ -123,7 +152,23 @@ const businessSlice = createSlice({
       })
       .addCase(getNearbyBusinesses.fulfilled, (state, action) => {
         state.loading = false;
-        state.nearbyBusinesses = action.payload.businesses;
+        const { businesses, currentPage, totalPages, total } = action.payload;
+
+        if (currentPage === 1) {
+          state.nearbyBusinesses = businesses;
+        } else {
+          const newBusinesses = businesses.filter(
+            newBiz => !state.nearbyBusinesses.some(existingBiz => existingBiz._id === newBiz._id)
+          );
+          state.nearbyBusinesses = [...state.nearbyBusinesses, ...newBusinesses];
+        }
+
+        state.nearbyPagination = {
+          currentPage: currentPage || 1,
+          totalPages: totalPages || 1,
+          totalCount: total || 0,
+          hasMore: currentPage < totalPages
+        };
       })
       .addCase(getNearbyBusinesses.rejected, (state, action) => {
         state.loading = false;

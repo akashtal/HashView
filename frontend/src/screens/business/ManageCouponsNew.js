@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function ManageCouponsNew({ navigation, route }) {
   const { businessId } = route.params;
@@ -48,7 +49,7 @@ export default function ManageCouponsNew({ navigation, route }) {
       setCoupons(response.coupons || []);
     } catch (error) {
       console.error('Failed to load coupons:', error);
-      Alert.alert('Error', 'Failed to load coupons');
+      ToastService.showError('Error', 'Failed to load coupons');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -102,19 +103,19 @@ export default function ManageCouponsNew({ navigation, route }) {
   const handleSubmit = async () => {
     // Validation for free items
     const isFreeItem = formData.discountType === 'free_item' || formData.discountType === 'free_drink';
-    
+
     if (!formData.code || !formData.title) {
-      Alert.alert('Error', 'Please fill in Code and Title');
+      ToastService.showWarning('Validation Error', 'Please fill in Code and Title');
       return;
     }
 
     if (isFreeItem && !formData.itemName) {
-      Alert.alert('Error', 'Please enter the item name for free item coupon');
+      ToastService.showWarning('Validation Error', 'Please enter the item name for free item coupon');
       return;
     }
 
     if (!isFreeItem && !formData.discountValue) {
-      Alert.alert('Error', 'Please enter discount value');
+      ToastService.showWarning('Validation Error', 'Please enter discount value');
       return;
     }
 
@@ -137,18 +138,18 @@ export default function ManageCouponsNew({ navigation, route }) {
       if (editingCoupon) {
         // Update existing coupon
         await ApiService.updateBusinessCoupon(editingCoupon._id, payload);
-        Alert.alert('Success', 'Coupon updated successfully!');
+        ToastService.showSuccess('Success', 'Coupon updated successfully!');
       } else {
         // Create new coupon
         await ApiService.createBusinessCoupon(payload);
-        Alert.alert('Success', 'Coupon created successfully!');
+        ToastService.showSuccess('Success', 'Coupon created successfully!');
       }
 
       setModalVisible(false);
       resetForm();
       fetchCoupons();
     } catch (error) {
-      Alert.alert(
+      ToastService.showError(
         'Error',
         error.response?.data?.message || 'Failed to save coupon'
       );
@@ -167,10 +168,10 @@ export default function ManageCouponsNew({ navigation, route }) {
           onPress: async () => {
             try {
               await ApiService.deleteBusinessCoupon(coupon._id);
-              Alert.alert('Success', 'Coupon deleted successfully');
+              ToastService.showSuccess('Delete Success', 'Coupon deleted successfully');
               fetchCoupons();
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete coupon');
+              ToastService.showError('Delete Failed', 'Failed to delete coupon');
             }
           }
         }
@@ -181,10 +182,10 @@ export default function ManageCouponsNew({ navigation, route }) {
   const handleToggleStatus = async (coupon) => {
     try {
       await ApiService.toggleCouponStatus(coupon._id);
-      Alert.alert('Success', `Coupon ${coupon.isActive ? 'deactivated' : 'activated'} successfully`);
+      ToastService.showSuccess('Success', `Coupon ${coupon.isActive ? 'deactivated' : 'activated'} successfully`);
       fetchCoupons();
     } catch (error) {
-      Alert.alert('Error', 'Failed to update coupon status');
+      ToastService.showError('Error', 'Failed to update coupon status');
     }
   };
 
@@ -215,20 +216,18 @@ export default function ManageCouponsNew({ navigation, route }) {
                   {coupon.code}
                 </Text>
               </View>
-              <View className={`rounded-full px-3 py-1 mb-1 ${
-                coupon.isActive ? 'bg-green-100' : 'bg-gray-100'
-              }`}>
-                <Text className={`text-xs font-semibold ${
-                  coupon.isActive ? 'text-green-700' : 'text-gray-700'
+              <View className={`rounded-full px-3 py-1 mb-1 ${coupon.isActive ? 'bg-green-100' : 'bg-gray-100'
                 }`}>
+                <Text className={`text-xs font-semibold ${coupon.isActive ? 'text-green-700' : 'text-gray-700'
+                  }`}>
                   {coupon.isActive ? 'Active' : 'Inactive'}
                 </Text>
               </View>
             </View>
-            
+
             <Text className="text-base font-bold text-gray-900 mb-1">{coupon.title}</Text>
             <Text className="text-sm text-gray-600 mb-2">{coupon.description}</Text>
-            
+
             <View className="flex-row items-center mb-1">
               <Icon name="pricetag-outline" size={14} color="#6B7280" />
               <Text className="text-xs text-gray-600 ml-1">
@@ -274,10 +273,10 @@ export default function ManageCouponsNew({ navigation, route }) {
             onPress={() => handleToggleStatus(coupon)}
             className="flex-1 flex-row items-center justify-center py-2 mr-2 rounded-lg bg-gray-50"
           >
-            <Icon 
-              name={coupon.isActive ? 'pause-circle-outline' : 'play-circle-outline'} 
-              size={18} 
-              color="#6B7280" 
+            <Icon
+              name={coupon.isActive ? 'pause-circle-outline' : 'play-circle-outline'}
+              size={18}
+              color="#6B7280"
             />
             <Text className="text-gray-700 ml-1 font-semibold text-xs">
               {coupon.isActive ? 'Pause' : 'Activate'}
@@ -457,14 +456,12 @@ export default function ManageCouponsNew({ navigation, route }) {
                     <TouchableOpacity
                       key={type.value}
                       onPress={() => setFormData({ ...formData, discountType: type.value })}
-                      className={`rounded-xl px-4 py-2 mr-2 mb-2 border-2 ${
-                        formData.discountType === type.value ? 'border-orange-500' : 'border-gray-200'
-                      }`}
+                      className={`rounded-xl px-4 py-2 mr-2 mb-2 border-2 ${formData.discountType === type.value ? 'border-orange-500' : 'border-gray-200'
+                        }`}
                       style={{ backgroundColor: formData.discountType === type.value ? '#FFF9F0' : '#F9FAFB' }}
                     >
-                      <Text className={`font-semibold text-sm ${
-                        formData.discountType === type.value ? 'text-orange-600' : 'text-gray-700'
-                      }`}>
+                      <Text className={`font-semibold text-sm ${formData.discountType === type.value ? 'text-orange-600' : 'text-gray-700'
+                        }`}>
                         {type.label}
                       </Text>
                     </TouchableOpacity>

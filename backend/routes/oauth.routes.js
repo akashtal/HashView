@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { googleSignIn, facebookSignIn } = require('../controllers/oauth.controller');
+const { googleSignIn, appleSignIn } = require('../controllers/oauth.controller');
 
 // OAuth routes
 router.post('/google', googleSignIn);
-router.post('/facebook', facebookSignIn);
+router.post('/apple', appleSignIn);
 
 module.exports = router;

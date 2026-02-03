@@ -1,16 +1,14 @@
 // For EAS builds, set EXPO_PUBLIC_API_BASE_URL in eas.json
 export const API_CONFIG = {
 
-  // Local development server (uncomment for local testing)
-  // BASE_URL: 'http://localhost:5001/api',
-  // SOCKET_URL: 'http://localhost:5001',
+  // Local development server (ACTIVE - connecting to local backend)
+  // BASE_URL: 'http://10.208.61.97:3001/api',
+  // SOCKET_URL: 'http://10.208.61.97:3001',
 
+  // Production URLs (commented out for now)
   BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://hashview.44.249.50.162.nip.io/api',
-  //BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'http://10.208.61.97:5000/api',
-  // SECONDARY_BASE_URL: 'https://hashview-backend.onrender.com/api',
-
   SOCKET_URL: process.env.EXPO_PUBLIC_SOCKET_URL || 'https://hashview.44.249.50.162.nip.io',
-  //SOCKET_URL: process.env.EXPO_PUBLIC_SOCKET_URL || 'http://10.208.61.97:5000',
+  // SECONDARY_BASE_URL: 'https://hashview-backend.onrender.com/api',
   // SECONDARY_SOCKET_URL: 'https://hashview-backend.onrender.com',
 
   TIMEOUT: parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT || '60000', 10),

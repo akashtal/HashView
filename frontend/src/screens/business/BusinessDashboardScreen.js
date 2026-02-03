@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function BusinessDashboardScreen({ navigation }) {
   const [business, setBusiness] = React.useState(null);
@@ -78,11 +79,11 @@ export default function BusinessDashboardScreen({ navigation }) {
         await fetchBusinessData();
 
         // Show success message
-        alert(`✅ Google ratings synced successfully!\nRating: ${response.data?.rating || 'N/A'}\nReview Count: ${response.data?.reviewCount || 0}`);
+        ToastService.showSuccess('Success', `Google ratings synced successfully!\nRating: ${response.data?.rating || 'N/A'}\nReview Count: ${response.data?.reviewCount || 0}`);
       }
     } catch (error) {
       console.error('Google sync error:', error);
-      alert(`Failed to sync Google ratings: ${error.response?.data?.message || error.message}`);
+      ToastService.showError('Sync Failed', error.response?.data?.message || error.message);
     } finally {
       setSyncing(false);
     }
@@ -296,7 +297,7 @@ export default function BusinessDashboardScreen({ navigation }) {
                     const url = business?.externalProfiles?.tripAdvisor?.profileUrl;
                     if (url) {
                       Linking.openURL(url).catch(() => {
-                        Alert.alert('Error', 'Could not open TripAdvisor profile');
+                        ToastService.showError('Error', 'Could not open TripAdvisor profile');
                       });
                     }
                   }}

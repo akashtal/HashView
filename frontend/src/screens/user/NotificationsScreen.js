@@ -10,8 +10,9 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
-import { showMessage } from 'react-native-flash-message';
+
 import ApiService from '../../services/api.service';
+import ToastService from '../../utils/ToastService';
 import COLORS from '../../config/colors';
 
 export default function NotificationsScreen({ navigation }) {
@@ -32,10 +33,7 @@ export default function NotificationsScreen({ navigation }) {
       setNotifications(response.notifications || []);
     } catch (error) {
       console.error('Fetch notifications error:', error);
-      showMessage({
-        message: 'Failed to load notifications',
-        type: 'danger',
-      });
+      ToastService.showError('Error', 'Failed to load notifications');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -50,19 +48,15 @@ export default function NotificationsScreen({ navigation }) {
   const markAsRead = async (notificationId) => {
     try {
       await ApiService.markAsRead(notificationId);
-      
+
       // Update local state
-      setNotifications(notifications.map(notif => 
-        notif._id === notificationId 
-          ? { ...notif, read: true } 
+      setNotifications(notifications.map(notif =>
+        notif._id === notificationId
+          ? { ...notif, read: true }
           : notif
       ));
 
-      showMessage({
-        message: 'Marked as read',
-        type: 'success',
-        duration: 2000,
-      });
+      ToastService.showSuccess('Marked as read', '');
     } catch (error) {
       console.error('Mark as read error:', error);
     }
@@ -71,20 +65,14 @@ export default function NotificationsScreen({ navigation }) {
   const markAllAsRead = async () => {
     try {
       await ApiService.markAllRead();
-      
+
       // Update all notifications to read
       setNotifications(notifications.map(notif => ({ ...notif, read: true })));
 
-      showMessage({
-        message: 'All notifications marked as read',
-        type: 'success',
-      });
+      ToastService.showSuccess('All notifications marked as read', '');
     } catch (error) {
       console.error('Mark all as read error:', error);
-      showMessage({
-        message: 'Failed to mark all as read',
-        type: 'danger',
-      });
+      ToastService.showError('Error', 'Failed to mark all as read');
     }
   };
 
@@ -120,7 +108,7 @@ export default function NotificationsScreen({ navigation }) {
     if (diffInMins < 60) return `${diffInMins} min ago`;
     if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
     if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-    
+
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
@@ -129,7 +117,7 @@ export default function NotificationsScreen({ navigation }) {
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
-      
+
       {/* Header */}
       <LinearGradient
         colors={[COLORS.primary, COLORS.primaryDark]}
@@ -152,7 +140,7 @@ export default function NotificationsScreen({ navigation }) {
               )}
             </View>
           </View>
-          
+
           {unreadCount > 0 && (
             <TouchableOpacity
               onPress={markAllAsRead}
@@ -171,14 +159,12 @@ export default function NotificationsScreen({ navigation }) {
             <TouchableOpacity
               key={filterType}
               onPress={() => setFilter(filterType)}
-              className={`flex-1 py-2 rounded-full ${
-                filter === filterType ? 'bg-white' : ''
-              }`}
+              className={`flex-1 py-2 rounded-full ${filter === filterType ? 'bg-white' : ''
+                }`}
             >
               <Text
-                className={`text-center font-semibold capitalize ${
-                  filter === filterType ? 'text-gray-900' : 'text-white'
-                }`}
+                className={`text-center font-semibold capitalize ${filter === filterType ? 'text-gray-900' : 'text-white'
+                  }`}
               >
                 {filterType}
               </Text>
@@ -200,11 +186,11 @@ export default function NotificationsScreen({ navigation }) {
             No Notifications
           </Text>
           <Text className="text-gray-500 text-center mt-2">
-            {filter === 'unread' 
+            {filter === 'unread'
               ? "You're all caught up! No unread notifications."
               : filter === 'read'
-              ? "No read notifications yet."
-              : "You'll see notifications here when you receive them."}
+                ? "No read notifications yet."
+                : "You'll see notifications here when you receive them."}
           </Text>
         </View>
       ) : (
@@ -221,14 +207,13 @@ export default function NotificationsScreen({ navigation }) {
           <View className="px-6 py-4">
             {notifications.map((notification, index) => {
               const iconData = getNotificationIcon(notification.type);
-              
+
               return (
                 <TouchableOpacity
                   key={notification._id || index}
                   onPress={() => !notification.read && markAsRead(notification._id)}
-                  className={`bg-white rounded-2xl p-4 mb-3 shadow-sm ${
-                    !notification.read ? 'border-l-4' : ''
-                  }`}
+                  className={`bg-white rounded-2xl p-4 mb-3 shadow-sm ${!notification.read ? 'border-l-4' : ''
+                    }`}
                   style={!notification.read ? { borderLeftColor: iconData.color } : {}}
                 >
                   <View className="flex-row">
@@ -253,16 +238,16 @@ export default function NotificationsScreen({ navigation }) {
                           />
                         )}
                       </View>
-                      
+
                       <Text className="text-sm text-gray-600 mb-2">
                         {notification.message}
                       </Text>
-                      
+
                       <View className="flex-row items-center justify-between">
                         <Text className="text-xs text-gray-400">
                           {formatTimestamp(notification.createdAt)}
                         </Text>
-                        
+
                         {notification.data?.type && (
                           <View
                             className="px-2 py-1 rounded-full"

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, FlatList, RefreshControl, ActivityIndicator, Alert, StatusBar, Image, TextInput, Modal, Keyboard } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, FlatList, RefreshControl, ActivityIndicator, Alert, StatusBar, Image, TextInput, Modal, Keyboard, Platform } from 'react-native';
+import ToastService from '../../utils/ToastService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -217,10 +218,9 @@ export default function UserHomeScreen({ navigation }) {
       if (status === 'granted') {
         await getCurrentLocation();
       } else {
-        Alert.alert(
+        ToastService.showInfo(
           'Location Permission',
-          'Location access is needed to show nearby businesses. You can enable it in your device settings.',
-          [{ text: 'OK' }]
+          'Location access is needed to show nearby businesses.'
         );
       }
     } catch (error) {
@@ -253,6 +253,7 @@ export default function UserHomeScreen({ navigation }) {
       if (currentLocation) {
         params.latitude = currentLocation.latitude;
         params.longitude = currentLocation.longitude;
+        params.page = 1; // Always fetch page 1 on fresh filter
 
         // If no distance filter is set, use Global Radius (20,000km)
         // This ensures "All Businesses" are shown sorted by distance by default
@@ -262,12 +263,54 @@ export default function UserHomeScreen({ navigation }) {
 
         await dispatch(getNearbyBusinesses(params));
       } else {
+        params.page = 1; // Always fetch page 1 on fresh filter
         await dispatch(getAllActiveBusinesses(params));
       }
     } catch (error) {
       console.error('❌ Error fetching businesses:', error);
     }
   }, [ratingFilter, distanceFilter, currentLocation, selectedCategory, dispatch]);
+
+  const { pagination, nearbyPagination } = useSelector((state) => state.business);
+  const currentPagination = hasLocation ? nearbyPagination : pagination;
+
+  const handleLoadMore = useCallback(() => {
+    if (loading || !currentPagination.hasMore) return;
+
+    const nextPage = currentPagination.currentPage + 1;
+    const params = { page: nextPage };
+
+    if (selectedCategory && typeof selectedCategory === 'string' && selectedCategory.trim() !== '') {
+      params.category = selectedCategory.trim();
+    }
+
+    if (ratingFilter.source && ratingFilter.stars) {
+      params.ratingSource = ratingFilter.source;
+      params.minRating = ratingFilter.stars;
+    }
+
+    if (distanceFilter) {
+      params.distance = distanceFilter;
+    }
+
+    if (currentLocation) {
+      params.latitude = currentLocation.latitude;
+      params.longitude = currentLocation.longitude;
+      if (!distanceFilter) params.radius = 20000000;
+      dispatch(getNearbyBusinesses(params));
+    } else {
+      dispatch(getAllActiveBusinesses(params));
+    }
+  }, [loading, currentPagination, selectedCategory, ratingFilter, distanceFilter, currentLocation, dispatch]);
+
+  const renderFooter = () => {
+    if (!loading || refreshing) return null;
+    return (
+      <View className="py-4">
+        <ActivityIndicator size="small" color={COLORS.secondary} />
+      </View>
+    );
+  };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -689,8 +732,7 @@ export default function UserHomeScreen({ navigation }) {
       </View>
 
       <View className="flex-1 px-4 mt-2">
-
-        {loading && !refreshing ? (
+        {loading && !refreshing && displayBusinesses.length === 0 ? (
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="large" color={COLORS.secondary} />
             <Text className="text-gray-500 mt-4">Loading businesses...</Text>
@@ -723,16 +765,14 @@ export default function UserHomeScreen({ navigation }) {
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
             showsVerticalScrollIndicator={false}
-            removeClippedSubviews={true}
-            maxToRenderPerBatch={10}
+            removeClippedSubviews={Platform.OS === 'android'} // Only enable on Android if issues persist
+            initialNumToRender={6}
+            maxToRenderPerBatch={5}
             windowSize={5}
-            initialNumToRender={10}
-            updateCellsBatchingPeriod={50}
-            getItemLayout={(data, index) => ({
-              length: 140,
-              offset: 140 * index,
-              index
-            })}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={renderFooter}
+            contentContainerStyle={{ paddingBottom: 20 }}
           />
         )}
       </View>

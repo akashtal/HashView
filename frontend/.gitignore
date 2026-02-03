@@ -27,4 +27,5 @@ CREATE_ASSETS.md
 %USERPROFILE%
 hashview-upload-certificate.pem
 upload-cert.pem
-upload-certificate.pem
+upload-certificate.pem.expo/
+.expo/

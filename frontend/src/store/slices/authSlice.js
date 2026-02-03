@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApiService from '../../services/api.service';
-import OneSignalService from '../../services/onesignal.service';
+import NotificationService from '../../services/notification.service';
 
 // Async thunks
 export const login = createAsyncThunk(
@@ -25,14 +25,14 @@ export const login = createAsyncThunk(
       await AsyncStorage.setItem('token', response.token);
       await AsyncStorage.setItem('user', JSON.stringify(response.user));
 
-      // Set OneSignal user identity
-      if (response.user && !response.user.isGuest) {
-        OneSignalService.setExternalUserId(response.user._id);
-        OneSignalService.setEmail(response.user.email);
-        OneSignalService.setUserTags({
-          user_type: response.user.role || 'customer',
-          user_name: response.user.name,
-        });
+      // Register push token with backend
+      try {
+        const pushToken = await NotificationService.getExpoPushToken();
+        if (pushToken) {
+          await NotificationService.registerTokenWithBackend(pushToken, response.token);
+        }
+      } catch (error) {
+        console.log('⚠️ Could not register push token:', error);
       }
 
       return response;
@@ -71,6 +71,17 @@ export const register = createAsyncThunk(
       const response = await ApiService.register(userData);
       await AsyncStorage.setItem('token', response.token);
       await AsyncStorage.setItem('user', JSON.stringify(response.user));
+
+      // Register push token with backend
+      try {
+        const pushToken = await NotificationService.getExpoPushToken();
+        if (pushToken) {
+          await NotificationService.registerTokenWithBackend(pushToken, response.token);
+        }
+      } catch (error) {
+        console.log('⚠️ Could not register push token:', error);
+      }
+
       return response;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -85,6 +96,17 @@ export const loginWithPhone = createAsyncThunk(
       const response = await ApiService.loginWithPhone(data);
       await AsyncStorage.setItem('token', response.token);
       await AsyncStorage.setItem('user', JSON.stringify(response.user));
+
+      // Register push token with backend
+      try {
+        const pushToken = await NotificationService.getExpoPushToken();
+        if (pushToken) {
+          await NotificationService.registerTokenWithBackend(pushToken, response.token);
+        }
+      } catch (error) {
+        console.log('⚠️ Could not register push token:', error);
+      }
+
       return response;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -97,11 +119,6 @@ export const logout = createAsyncThunk(
   async () => {
     await AsyncStorage.removeItem('token');
     await AsyncStorage.removeItem('user');
-
-    // Clear OneSignal identity
-    OneSignalService.removeExternalUserId();
-    OneSignalService.logoutEmail();
-    OneSignalService.clearAllTags();
   }
 );
 
@@ -136,6 +153,18 @@ const authSlice = createSlice({
     },
     updateUser: (state, action) => {
       state.user = { ...state.user, ...action.payload };
+    },
+    // OAuth login success (Google/Apple)
+    loginSuccess: (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.error = null;
+
+      // Store in AsyncStorage
+      AsyncStorage.setItem('token', action.payload.token);
+      AsyncStorage.setItem('user', JSON.stringify(action.payload.user));
     },
   },
   extraReducers: (builder) => {
@@ -217,6 +246,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError, updateUser } = authSlice.actions;
+export const { clearError, updateUser, loginSuccess } = authSlice.actions;
 export default authSlice.reducer;
 

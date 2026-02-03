@@ -445,16 +445,15 @@ exports.createReview = async (req, res, next) => {
       { type: 'coupon', couponId: coupon._id.toString() }
     );
 
-    // Notify business owner with OneSignal
+    // Notify business owner
     try {
-      const OneSignalService = require('../services/onesignal.service');
-      const User = require('../models/User.model');
+      const User = require('../models/User.model'); // Doing local require as originally present, but better to move up
 
       // Get user details for notification
       const user = await User.findById(req.user.id).select('name');
 
-      await OneSignalService.sendToUser(
-        business.owner.toString(),
+      await sendPushNotification(
+        business.owner,
         '⭐ New Review!',
         `${user.name} left a ${rating}-star review for ${business.name}`,
         {
@@ -464,8 +463,7 @@ exports.createReview = async (req, res, next) => {
           businessId: businessId.toString()
         }
       );
-
-      console.log(`✅ OneSignal notification sent to business owner for new review`);
+      console.log(`✅ Notification sent to business owner for new review`);
     } catch (error) {
       console.error('❌ Failed to send review notification:', error);
       // Don't fail the request if notification fails
@@ -648,110 +646,3 @@ exports.markHelpful = async (req, res, next) => {
     next(error);
   }
 };
-
-// @desc    Get suspicious activities (Admin only)
-// @route   GET /api/reviews/admin/suspicious-activities
-// @access  Private (Admin)
-exports.getSuspiciousActivities = async (req, res, next) => {
-  try {
-    const { limit = 100, eventType } = req.query;
-
-    let activities = [...suspiciousActivityLog];
-
-    // Filter by event type if specified
-    if (eventType) {
-      activities = activities.filter(a => a.eventType === eventType);
-    }
-
-    // Sort by most recent first
-    activities.sort((a, b) => b.timestamp - a.timestamp);
-
-    // Limit results
-    activities = activities.slice(0, parseInt(limit));
-
-    // Get summary statistics
-    const stats = {
-      total: suspiciousActivityLog.length,
-      byType: {}
-    };
-
-    suspiciousActivityLog.forEach(activity => {
-      stats.byType[activity.eventType] = (stats.byType[activity.eventType] || 0) + 1;
-    });
-
-    res.status(200).json({
-      success: true,
-      count: activities.length,
-      stats,
-      activities
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Get flagged reviews for manual review (Admin only)
-// @route   GET /api/reviews/admin/flagged
-// @access  Private (Admin)
-exports.getFlaggedReviews = async (req, res, next) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
-    const skip = (page - 1) * limit;
-
-    // Find reviews with suspicious metadata
-    const flaggedReviews = await Review.find({
-      $or: [
-        { 'metadata.verificationTime': { $lt: 10 } }, // Quick submissions
-        { 'metadata.locationAccuracy': { $gt: 50 } }, // Poor GPS
-        { 'metadata.locationHistoryCount': { $lt: 2 } }, // Single location
-        { 'metadata.isMockLocation': true } // Mock location
-      ]
-    })
-      .populate('user', 'name email phone')
-      .populate('business', 'name address')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    const total = await Review.countDocuments({
-      $or: [
-        { 'metadata.verificationTime': { $lt: 10 } },
-        { 'metadata.locationAccuracy': { $gt: 50 } },
-        { 'metadata.locationHistoryCount': { $lt: 2 } },
-        { 'metadata.isMockLocation': true }
-      ]
-    });
-
-    res.status(200).json({
-      success: true,
-      count: flaggedReviews.length,
-      total,
-      page,
-      pages: Math.ceil(total / limit),
-      reviews: flaggedReviews
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Clear suspicious activity log (Admin only)
-// @route   DELETE /api/reviews/admin/suspicious-activities
-// @access  Private (Admin)
-exports.clearSuspiciousActivities = async (req, res, next) => {
-  try {
-    const clearedCount = suspiciousActivityLog.length;
-    suspiciousActivityLog.length = 0; // Clear array
-
-    logger.info(`🧹 Suspicious activity log cleared by admin (${clearedCount} entries)`);
-
-    res.status(200).json({
-      success: true,
-      message: `Cleared ${clearedCount} suspicious activity entries`
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-

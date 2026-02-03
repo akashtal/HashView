@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function ManageCouponsScreen({ navigation, route }) {
   const { businessId } = route.params;
@@ -40,7 +41,7 @@ export default function ManageCouponsScreen({ navigation, route }) {
       setCoupons(response.coupons || []);
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Failed to load coupons');
+      ToastService.showError('Error', 'Failed to load coupons');
     } finally {
       setLoading(false);
     }
@@ -48,7 +49,7 @@ export default function ManageCouponsScreen({ navigation, route }) {
 
   const handleCreateCoupon = async () => {
     if (!formData.discountValue) {
-      Alert.alert('Error', 'Please enter discount value');
+      ToastService.showWarning('Validation Error', 'Please enter discount value');
       return;
     }
 
@@ -62,10 +63,9 @@ export default function ManageCouponsScreen({ navigation, route }) {
         maxDiscountAmount: parseFloat(formData.maxDiscount) || null
       });
 
-      Alert.alert(
-        'Success', 
-        'Coupon template created! Customers will receive this coupon when they review your business.',
-        [{ text: 'OK' }]
+      ToastService.showSuccess(
+        'Success',
+        'Coupon template created! Customers will receive this coupon when they review your business.'
       );
       setModalVisible(false);
       setFormData({
@@ -77,14 +77,14 @@ export default function ManageCouponsScreen({ navigation, route }) {
       });
       fetchCoupons();
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to create coupon template');
+      ToastService.showError('Error', error.message || 'Failed to create coupon template');
     }
   };
 
   const getCouponStatus = (coupon) => {
     const now = new Date();
     const validUntil = new Date(coupon.validUntil);
-    
+
     if (coupon.status === 'redeemed') return { text: 'Redeemed', color: 'bg-green-100 text-green-700' };
     if (validUntil < now) return { text: 'Expired', color: 'bg-gray-100 text-gray-700' };
     return { text: 'Active', color: 'bg-blue-100 text-blue-700' };
@@ -179,11 +179,11 @@ export default function ManageCouponsScreen({ navigation, route }) {
           <View className="flex-row items-center">
             <Icon name="time-outline" size={14} color={COLORS.secondary} />
             <Text className="text-xs text-gray-600 ml-1">
-              {status.text === 'Active' 
-                ? `${hoursLeft}h ${minutesLeft}m left` 
-                : status.text === 'Expired' 
-                ? 'Expired' 
-                : 'Redeemed'}
+              {status.text === 'Active'
+                ? `${hoursLeft}h ${minutesLeft}m left`
+                : status.text === 'Expired'
+                  ? 'Expired'
+                  : 'Redeemed'}
             </Text>
           </View>
           <Text className="text-xs text-gray-500">
@@ -202,7 +202,7 @@ export default function ManageCouponsScreen({ navigation, route }) {
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
-      
+
       {/* Header */}
       <LinearGradient
         colors={[COLORS.primary, COLORS.primaryDark]}
@@ -281,17 +281,15 @@ export default function ManageCouponsScreen({ navigation, route }) {
                     <TouchableOpacity
                       key={type}
                       onPress={() => setFormData({ ...formData, discountType: type })}
-                      className={`rounded-xl px-4 py-2 mr-2 mb-2 border-2 ${
-                        formData.discountType === type ? 'border-orange-500' : 'border-gray-200'
-                      }`}
+                      className={`rounded-xl px-4 py-2 mr-2 mb-2 border-2 ${formData.discountType === type ? 'border-orange-500' : 'border-gray-200'
+                        }`}
                       style={{ backgroundColor: formData.discountType === type ? '#FFF9F0' : '#F9FAFB' }}
                     >
-                      <Text className={`font-semibold ${
-                        formData.discountType === type ? 'text-orange-600' : 'text-gray-700'
-                      }`}>
+                      <Text className={`font-semibold ${formData.discountType === type ? 'text-orange-600' : 'text-gray-700'
+                        }`}>
                         {type === 'percentage' ? 'Percentage' :
-                         type === 'fixed' ? 'Fixed' :
-                         type === 'buy1get1' ? 'Buy 1 Get 1' : 'Free Drink'}
+                          type === 'fixed' ? 'Fixed' :
+                            type === 'buy1get1' ? 'Buy 1 Get 1' : 'Free Drink'}
                       </Text>
                     </TouchableOpacity>
                   ))}

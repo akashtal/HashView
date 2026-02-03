@@ -20,6 +20,7 @@ export default {
       bundleIdentifier: "com.hashview.app",
       googleServicesFile: "./GoogleService-Info.plist",
       infoPlist: {
+        UIBackgroundModes: ["remote-notification"],
         NSLocationWhenInUseUsageDescription:
           "HashView needs your location to verify you are physically present at a business when posting a review (Geofencing) and to find nearby businesses.",
         NSLocationAlwaysUsageDescription:
@@ -54,7 +55,10 @@ export default {
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
-        "NOTIFICATIONS"
+        "POST_NOTIFICATIONS",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "WAKE_LOCK"
       ],
       config: {
         googleMaps: {
@@ -70,12 +74,7 @@ export default {
     plugins: [
       "expo-dev-client",
       [
-        "onesignal-expo-plugin",
-        {
-          mode: "development" // Change to "production" for production builds
-        }
-      ],
-      [
+
         "expo-build-properties",
         {
           "ios": {
@@ -98,7 +97,15 @@ export default {
           locationAlwaysAndWhenInUsePermission: "Allow HashView to use your location to find nearby businesses and verify reviews."
         }
       ],
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/HashViewlogo-01.png",
+          "color": "#210059",
+          "sounds": []
+        }
+      ],
+
       [
         "expo-image-picker",
         {
@@ -122,11 +129,11 @@ export default {
           backgroundColor: "#210059"
         }
       ],
-      "@react-native-firebase/app"
+      "@react-native-firebase/app",
+      "expo-apple-authentication"
     ],
 
     extra: {
-      oneSignalAppId: "2656b51b-bf6d-446d-8258-42f7cbacb2ab",
       eas: {
         projectId: "d4838e65-984b-45e4-b2d8-a03d28a6fb43"
       }

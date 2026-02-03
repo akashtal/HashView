@@ -12,13 +12,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import ToastService from '../../utils/ToastService';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../store/slices/authSlice';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import COLORS from '../../config/colors';
 import GoogleSignInButton from '../../components/auth/GoogleSignInButton';
-import FacebookSignInButton from '../../components/auth/FacebookSignInButton';
+import AppleSignInButton from '../../components/auth/AppleSignInButton';
 
 export default function LoginScreen({ navigation, route }) {
   const dispatch = useDispatch();
@@ -95,14 +96,14 @@ export default function LoginScreen({ navigation, route }) {
       console.log('Login successful', { userId: result.user._id, role: result.user.role });
 
       if (result.user.role === 'admin') {
-        Alert.alert('Welcome Admin!', 'Redirecting to admin dashboard...');
+        ToastService.showSuccess('Welcome Admin!', 'Redirecting to admin dashboard...');
       }
     } catch (error) {
       const safeEmail = loginData.email ? loginData.email.trim().toLowerCase() : '';
       console.log('Login failed', { email: safeEmail, role, error: String(error) });
 
       const message = getFriendlyErrorMessage(error);
-      Alert.alert('Login Failed', message);
+      ToastService.showError('Login Failed', message);
     }
   };
 
@@ -189,7 +190,7 @@ export default function LoginScreen({ navigation, route }) {
             {/* OAuth Sign-In Options */}
             <View className="mb-6">
               <GoogleSignInButton role={role} style={{ marginBottom: 12 }} />
-              <FacebookSignInButton role={role} />
+              <AppleSignInButton role={role} />
 
               <View className="flex-row items-center my-5">
                 <View className="flex-1 h-[1px] bg-gray-300" />

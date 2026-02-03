@@ -6,6 +6,7 @@ import { Ionicons as Icon } from '@expo/vector-icons';
 import { logout } from '../../store/slices/authSlice';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import ToastService from '../../utils/ToastService';
 
 export default function BusinessProfileScreen({ navigation }) {
   const dispatch = useDispatch();
@@ -55,10 +56,9 @@ export default function BusinessProfileScreen({ navigation }) {
       icon: 'stats-chart-outline',
       onPress: () => {
         if (myBusinesses.length === 0) {
-          Alert.alert(
+          ToastService.showWarning(
             'No Business Found',
-            'Please register your business first to view analytics.',
-            [{ text: 'OK' }]
+            'Please register your business first to view analytics.'
           );
           return;
         }
@@ -71,10 +71,9 @@ export default function BusinessProfileScreen({ navigation }) {
       icon: 'chatbubbles-outline',
       onPress: () => {
         if (myBusinesses.length === 0) {
-          Alert.alert(
+          ToastService.showWarning(
             'No Business Found',
-            'Please register your business first to view reviews.',
-            [{ text: 'OK' }]
+            'Please register your business first to view reviews.'
           );
           return;
         }
@@ -87,10 +86,9 @@ export default function BusinessProfileScreen({ navigation }) {
       icon: 'gift-outline',
       onPress: () => {
         if (myBusinesses.length === 0) {
-          Alert.alert(
+          ToastService.showWarning(
             'No Business Found',
-            'Please register your business first to manage coupons.',
-            [{ text: 'OK' }]
+            'Please register your business first to manage coupons.'
           );
           return;
         }
@@ -135,7 +133,7 @@ export default function BusinessProfileScreen({ navigation }) {
         className="pt-12 pb-20 px-6"
       >
         <Text className="text-white text-2xl font-bold mb-4">Business Profile</Text>
-        
+
         <View className="bg-white rounded-2xl p-6 shadow-lg -mb-16">
           <View className="items-center">
             {user?.profileImage ? (
@@ -153,7 +151,7 @@ export default function BusinessProfileScreen({ navigation }) {
             )}
             <Text className="text-xl font-bold text-gray-900">{user?.name}</Text>
             <Text className="text-sm text-gray-500 mb-2">{user?.email}</Text>
-            
+
             <View className="rounded-full px-4 py-2 mt-2" style={{ backgroundColor: '#FFF9F0' }}>
               <Text className="text-sm font-semibold capitalize" style={{ color: COLORS.secondary }}>
                 Business Owner

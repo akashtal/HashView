@@ -11,8 +11,9 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
-import { showMessage } from 'react-native-flash-message';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ToastService from '../../utils/ToastService';
 import COLORS from '../../config/colors';
 
 export default function SettingsScreen({ navigation }) {
@@ -34,12 +35,10 @@ export default function SettingsScreen({ navigation }) {
     // Save to AsyncStorage
     try {
       await AsyncStorage.setItem(`setting_${key}`, JSON.stringify(newValue));
-      showMessage({
-        message: 'Setting Updated',
-        description: `${key.replace(/([A-Z])/g, ' $1').trim()} ${newValue ? 'enabled' : 'disabled'}`,
-        type: 'success',
-        duration: 2000,
-      });
+      ToastService.showSuccess(
+        'Setting Updated',
+        `${key.replace(/([A-Z])/g, ' $1').trim()} ${newValue ? 'enabled' : 'disabled'}`
+      );
     } catch (error) {
       console.error('Save setting error:', error);
     }
@@ -49,12 +48,10 @@ export default function SettingsScreen({ navigation }) {
     setSettings({ ...settings, dataUsage: preference });
     try {
       await AsyncStorage.setItem('setting_dataUsage', preference);
-      showMessage({
-        message: 'Data Usage Updated',
-        description: `Data usage set to ${preference}`,
-        type: 'success',
-        duration: 2000,
-      });
+      ToastService.showSuccess(
+        'Data Usage Updated',
+        `Data usage set to ${preference}`
+      );
     } catch (error) {
       console.error('Save data usage error:', error);
     }
@@ -76,16 +73,9 @@ export default function SettingsScreen({ navigation }) {
               const cacheKeys = keys.filter(key => key.startsWith('cache_'));
               await AsyncStorage.multiRemove(cacheKeys);
 
-              showMessage({
-                message: 'Cache Cleared',
-                description: 'All cached data has been cleared',
-                type: 'success',
-              });
+              ToastService.showSuccess('Cache Cleared', 'All cached data has been cleared');
             } catch (error) {
-              showMessage({
-                message: 'Failed to clear cache',
-                type: 'danger',
-              });
+              ToastService.showError('Error', 'Failed to clear cache');
             }
           }
         }
@@ -127,10 +117,7 @@ export default function SettingsScreen({ navigation }) {
                 type: 'success',
               });
             } catch (error) {
-              showMessage({
-                message: 'Failed to reset settings',
-                type: 'danger',
-              });
+              ToastService.showError('Error', 'Failed to reset settings');
             }
           }
         }
