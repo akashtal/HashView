@@ -86,7 +86,7 @@ export default {
             "targetSdkVersion": 35,
             "buildToolsVersion": "35.0.0",
             "extraGradleProps": {
-              "ndkVersion": "28.0.12674087"
+              "ndkVersion": "27.1.12297006"
             }
           }
         }
