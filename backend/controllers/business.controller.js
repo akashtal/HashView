@@ -486,15 +486,6 @@ exports.getNearbyBusinesses = async (req, res, next) => {
     // Show only active businesses on user home page
     const query = {
       status: 'active', // Only show active businesses
-      location: {
-        $near: {
-          $geometry: {
-            type: 'Point',
-            coordinates: [parseFloat(longitude), parseFloat(latitude)]
-          },
-          $maxDistance: maxDistance
-        }
-      }
     };
 
     // Search query (backend handles case-insensitive search)
@@ -542,20 +533,43 @@ exports.getNearbyBusinesses = async (req, res, next) => {
     // Note: $near does not support count() efficiently with query modifiers sometimes, but we try.
     // For geospatial, usually we limit the total query anyway.
 
-    const businesses = await Business.find(query)
-      .select('-documents')
-      .skip(skip)
-      .limit(limit);
+    // Use aggregation for the main results (fixes $near sorting issue)
+    const businesses = await Business.aggregate([
+      {
+        $geoNear: {
+          near: { type: 'Point', coordinates: [parseFloat(longitude), parseFloat(latitude)] },
+          distanceField: "dist.calculated", // Distance in meters
+          maxDistance: maxDistance,
+          query: query, // Apply filters (status, category, search, etc.)
+          spherical: true,
+          key: "location"
+        }
+      },
+      { $skip: skip },
+      { $limit: limit },
+      { $project: { documents: 0 } } // Exclude heavy documents field
+    ]);
 
-    // Get total count (without skip/limit)
-    // Note: Counting large geospatial queries can be slow.
-    const total = await Business.countDocuments(query);
+    // Use $geoWithin for counting (avoids $near sort issues)
+    const countQuery = { ...query };
+    countQuery.location = {
+      $geoWithin: {
+        $centerSphere: [
+          [parseFloat(longitude), parseFloat(latitude)],
+          maxDistance / 6378137 // Convert meters to radians
+        ]
+      }
+    };
+
+    // Get total count
+    const total = await Business.countDocuments(countQuery);
 
     console.log(`   📊 MongoDB returned ${businesses.length} businesses (Page ${page}, Limit ${limit})`);
 
     // Calculate distance for each business and add to response
     const businessesWithDistance = businesses.map((business, index) => {
-      const businessObj = business.toObject();
+      // Aggregation returns POJOs, no need for toObject()
+      const businessObj = business;
       if (business.location && business.location.coordinates && business.location.coordinates.length === 2) {
         const busLon = business.location.coordinates[0];
         const busLat = business.location.coordinates[1];
