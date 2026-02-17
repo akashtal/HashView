@@ -42,9 +42,28 @@ router.put('/:id/images', protect, authorize('business'), updateBusinessImages);
 router.put('/:id/tripadvisor-rating', protect, authorize('business', 'admin'), updateTripAdvisorRating);
 router.get('/my/businesses', protect, authorize('business'), getMyBusinesses);
 
+const mult = require('multer');
+
+// Configure multer for Excel uploads (memory storage for direct parsing)
+const excelStorage = mult.memoryStorage();
+const excelUpload = mult({
+  storage: excelStorage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.includes('excel') || file.mimetype.includes('spreadsheetml') || file.originalname.endsWith('.xlsx')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Please upload only Excel files (.xlsx)'), false);
+    }
+  }
+});
+
 // Business notifications
 const { sendBusinessNotification } = require('../controllers/notification.controller');
 router.post('/notifications/send', protect, authorize('business'), sendBusinessNotification);
+
+// Bulk Upload (Admin only)
+const { bulkUploadBusinesses } = require('../controllers/business.controller');
+router.post('/bulk-upload', protect, authorize('admin'), excelUpload.single('file'), bulkUploadBusinesses);
 
 module.exports = router;
 

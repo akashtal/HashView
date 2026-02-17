@@ -4,6 +4,8 @@ const { generateBusinessQRCode } = require('../utils/qrcode');
 const { getNearbyQuery, calculateDistance } = require('../utils/geolocation');
 const { syncGoogleRatingsForBusiness } = require('../controllers/externalReviews.controller');
 const { cloudinary } = require('../config/cloudinary');
+const ExcelParser = require('../utils/excelParser');
+const { geocodeAddress } = require('../utils/geocoding');
 
 // @desc    Create/Register new business
 // @route   POST /api/business/register
@@ -1376,6 +1378,149 @@ exports.updateTripAdvisorRating = async (req, res, next) => {
       }
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Bulk upload businesses from Excel
+// @route   POST /api/business/bulk-upload
+// @access  Private (Admin only)
+exports.bulkUploadBusinesses = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Please upload an Excel file' });
+    }
+
+    // Parse Excel file
+    const rows = ExcelParser.parseBuffer(req.file.buffer);
+
+    if (!rows || rows.length === 0) {
+      return res.status(400).json({ success: false, message: 'Excel file is empty' });
+    }
+
+    console.log(`\n📊 Bulk Upload: Processing ${rows.length} rows`);
+
+    const results = {
+      total: rows.length,
+      success: 0,
+      failed: 0,
+      errors: []
+    };
+
+    const successData = [];
+
+    // Process each row sequentially to manage Geocoding rate limits
+    // Using for...of loop for async/await
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const rowNum = i + 2; // Excel row number (1-based + 1 header)
+
+      try {
+        // 1. Basic Validation
+        if (!row.Name || !row.Category) {
+          throw new Error('Missing require fields: Name or Category');
+        }
+
+        // 2. Geocoding / Location Strategy
+        let latitude = row.Latitude;
+        let longitude = row.Longitude;
+        let formattedAddress = row.Address;
+
+        // If coordinates missing, try to geocode
+        if (!latitude || !longitude) {
+          // Construct address string for geocoding
+          const addressParts = [
+            row.BuildingNumber,
+            row.Street,
+            row.City,
+            row.Postcode,
+            row.Country || 'United Kingdom'
+          ].filter(Boolean).join(', ');
+
+          if (addressParts.length > 5) { // Minimal check for valid address string
+            try {
+              // Add a small delay to avoid rate limiting (e.g., 200ms)
+              await new Promise(resolve => setTimeout(resolve, 200));
+
+              const geoResult = await geocodeAddress(addressParts, row.Name);
+              latitude = geoResult.latitude;
+              longitude = geoResult.longitude;
+              // If address was vague, we might use the formatted one from Google
+              if (!formattedAddress) formattedAddress = geoResult.formattedAddress;
+            } catch (geoError) {
+              console.warn(`⚠️  Row ${rowNum}: Geocoding failed for "${addressParts}"`);
+              // Proceed without coordinates if we must, or fail? 
+              // Decision: Fail this row if location is strictly required for app functionality
+              throw new Error(`Geocoding failed for address: ${addressParts}. Please provide manual coordinates.`);
+            }
+          } else {
+            throw new Error('No location coordinates and insufficient address details for geocoding');
+          }
+        }
+
+        // 3. Prepare Business Object
+        const businessData = {
+          name: row.Name,
+          description: row.Description || '',
+          category: row.Category.toLowerCase(), // Normalize category
+          phone: row.Phone ? String(row.Phone).replace(/[\s\-\(\)]/g, '') : '',
+          email: row.Email || '',
+          website: row.Website || '',
+
+
+          // Image Handling (URLs only)
+          logo: row.LogoUrl ? { url: row.LogoUrl, publicId: null } : undefined,
+          coverImage: row.CoverImageUrl ? { url: row.CoverImageUrl, publicId: null } : undefined,
+          images: row.GalleryImageUrls ? row.GalleryImageUrls.split(',').map(url => ({ url: url.trim(), publicId: null })) : [],
+
+          owner: req.user.id, // Assigned to Admin who uploads
+          status: 'active',   // Auto-activate bulk uploaded businesses? Or 'pending'? Let's go with 'active' for admin uploads.
+          kycStatus: 'approved', // Admin trusted source
+
+          address: {
+            buildingNumber: row.BuildingNumber || '',
+            street: row.Street || '',
+            city: row.City || '',
+            county: row.County || '',
+            postcode: row.Postcode || '',
+            country: row.Country || 'United Kingdom',
+            fullAddress: formattedAddress || ''
+          },
+
+          location: {
+            type: 'Point',
+            coordinates: [parseFloat(longitude), parseFloat(latitude)]
+          },
+
+          radius: parseInt(row.Radius) || 50,
+        };
+
+        // 4. Create Business
+        const newBusiness = await Business.create(businessData);
+
+        results.success++;
+        successData.push({ row: rowNum, name: newBusiness.name, id: newBusiness._id });
+        console.log(`✅ Row ${rowNum}: Created "${newBusiness.name}"`);
+
+      } catch (error) {
+        results.failed++;
+        results.errors.push({
+          row: rowNum,
+          name: row.Name || 'Unknown',
+          error: error.message
+        });
+        console.error(`❌ Row ${rowNum} Failed:`, error.message);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Processed ${rows.length} businesses. Success: ${results.success}, Failed: ${results.failed}`,
+      results
+    });
+
+  } catch (error) {
+    console.error('❌ Bulk Upload Error:', error);
     next(error);
   }
 };

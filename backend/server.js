@@ -168,6 +168,10 @@ const createDefaultAdmin = async () => {
   }
 };
 
+// Force Node.js to use Google Public DNS for SRV lookups (fixes corporate/ISP DNS issues)
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,

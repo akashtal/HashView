@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Eye, Trash2, Plus } from 'lucide-react';
+import { Search, Eye, Trash2, Plus, Upload, FileSpreadsheet } from 'lucide-react';
 import { adminApi } from '../api/adminApi';
 import { format } from 'date-fns';
 
@@ -8,6 +8,7 @@ const Businesses = () => {
   const navigate = useNavigate();
   const [businesses, setBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [kycFilter, setKycFilter] = useState('');
@@ -53,6 +54,24 @@ const Businesses = () => {
     }
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const response = await adminApi.bulkUploadBusinesses(file);
+      alert(response.data.message || 'Bulk upload completed successfully');
+      fetchBusinesses(); // Refresh list
+    } catch (error) {
+      console.error('Upload Error:', error);
+      alert(error.response?.data?.message || 'Error uploading file');
+    } finally {
+      setIsUploading(false);
+      e.target.value = ''; // Reset input
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -67,6 +86,27 @@ const Businesses = () => {
           <Plus size={20} className="mr-2" />
           Create Business
         </button>
+      </div>
+
+      {/* Bulk Upload Section */}
+      <div className="flex justify-end mb-4">
+        <label className={`px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition flex items-center cursor-pointer ${isUploading ? 'opacity-70 cursor-wait' : ''}`}>
+          {isUploading ? (
+            'Uploading...'
+          ) : (
+            <>
+              <FileSpreadsheet size={20} className="mr-2" />
+              Import Excel
+            </>
+          )}
+          <input
+            type="file"
+            accept=".xlsx, .xls"
+            className="hidden"
+            onChange={handleFileUpload}
+            disabled={isUploading}
+          />
+        </label>
       </div>
 
       {/* Filters */}
@@ -199,30 +239,28 @@ const Businesses = () => {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          business.kycStatus === 'approved'
-                            ? 'bg-green-100 text-green-800'
-                            : business.kycStatus === 'in_review'
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${business.kycStatus === 'approved'
+                          ? 'bg-green-100 text-green-800'
+                          : business.kycStatus === 'in_review'
                             ? 'bg-blue-100 text-blue-800'
                             : business.kycStatus === 'rejected'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}
                       >
                         {business.kycStatus}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          business.status === 'active'
-                            ? 'bg-green-100 text-green-800'
-                            : business.status === 'pending'
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${business.status === 'active'
+                          ? 'bg-green-100 text-green-800'
+                          : business.status === 'pending'
                             ? 'bg-yellow-100 text-yellow-800'
                             : business.status === 'rejected'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}
                       >
                         {business.status}
                       </span>
@@ -285,7 +323,7 @@ const Businesses = () => {
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 };
 

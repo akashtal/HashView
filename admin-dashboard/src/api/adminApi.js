@@ -24,6 +24,13 @@ export const adminApi = {
   generateBusinessQRCode: (businessId) =>
     api.post(`/admin/businesses/${businessId}/generate-qr`),
   deleteBusiness: (businessId) => api.delete(`/admin/businesses/${businessId}`),
+  bulkUploadBusinesses: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/business/bulk-upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
 
   // Business Image Uploads
   uploadBusinessLogo: (businessId, file) => {
