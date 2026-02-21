@@ -11,6 +11,7 @@ import Notifications from './pages/Notifications';
 import Categories from './pages/Categories';
 import Coupons from './pages/Coupons';
 import TripAdvisor from './pages/TripAdvisor';
+import BusinessClaims from './pages/BusinessClaims';
 import Layout from './components/Layout';
 
 function App() {
@@ -73,6 +74,7 @@ function App() {
                   <Route path="/reviews" element={<Reviews />} />
                   <Route path="/tripadvisor" element={<TripAdvisor />} />
                   <Route path="/notifications" element={<Notifications />} />
+                  <Route path="/business-claims" element={<BusinessClaims />} />
                 </Routes>
               </Layout>
             ) : (

@@ -334,7 +334,55 @@ export default function BusinessDetailScreen({ navigation, route }) {
             )}
           </View>
 
-          {/* External Ratings Row - Ultra Compact */}
+          {/* ── Business Claim Status Banner ── */}
+          {(() => {
+            const hasOwner = !!displayBusiness.owner;
+            const claimStatus = displayBusiness.claimRequest?.status;
+            const isApproved = claimStatus === 'approved';
+            const isPending = claimStatus === 'pending';
+
+            if (hasOwner || isApproved) {
+              // ✅ Claimed / Verified
+              return (
+                <View className="flex-row items-center bg-green-50 border border-green-200 rounded-xl px-3 py-2 mb-4">
+                  <Icon name="shield-checkmark" size={16} color="#16A34A" />
+                  <Text className="text-green-700 text-xs font-semibold ml-2">Verified Business — Owner Claimed</Text>
+                </View>
+              );
+            }
+
+            if (isPending) {
+              // 🕐 Claim under review
+              return (
+                <View className="flex-row items-center bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-4">
+                  <Icon name="time-outline" size={16} color="#D97706" />
+                  <Text className="text-amber-700 text-xs font-semibold ml-2">Claim Pending Review</Text>
+                </View>
+              );
+            }
+
+            // ⚠️ Unclaimed — show Claim button only for fully authenticated, non-guest users
+            if (user && !user.isGuest) {
+              return (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('ClaimBusiness', { business: displayBusiness })}
+                  activeOpacity={0.85}
+                  className="flex-row items-center bg-amber-50 border border-amber-300 rounded-xl px-3 py-2 mb-4"
+                >
+                  <Icon name="flag-outline" size={16} color="#B45309" />
+                  <View className="flex-1 ml-2">
+                    <Text className="text-amber-800 text-xs font-bold">Unclaimed Business</Text>
+                    <Text className="text-amber-600 text-[10px]">Is this your business? Claim it now →</Text>
+                  </View>
+                  <Icon name="chevron-forward" size={14} color="#B45309" />
+                </TouchableOpacity>
+              );
+            }
+
+            return null;
+          })()}
+
+          {/* External Links Row */}
           <View className="flex-row gap-2 mb-4">
             {/* Google Rating */}
             {displayBusiness.externalProfiles?.googleBusiness?.rating && (
@@ -365,36 +413,20 @@ export default function BusinessDetailScreen({ navigation, route }) {
               </TouchableOpacity>
             )}
 
-            {/* TripAdvisor Rating */}
-            {displayBusiness.externalProfiles?.tripAdvisor?.rating && (
+            {/* TripAdvisor - Link Only */}
+            {displayBusiness.externalProfiles?.tripAdvisor?.profileUrl && (
               <TouchableOpacity
                 onPress={handleOpenTripAdvisor}
                 activeOpacity={0.7}
-                className="flex-1 bg-[#E8F5F1] rounded-lg px-2 py-1.5 border border-[#A7F3D0] flex-row items-center justify-between"
+                className="flex-1 bg-[#E8F5F1] rounded-lg px-2 py-1.5 border border-[#A7F3D0] flex-row items-center justify-center gap-1.5"
               >
-                <View className="flex-row items-center">
-                  <View className="bg-white w-5 h-5 rounded-full items-center justify-center mr-1.5">
-                    <Image
-                      source={require('../../../assets/tripadvisor.png')}
-                      className="w-3 h-3"
-                      resizeMode="contain"
-                    />
-                  </View>
-                  <View>
-                    <Text className="text-[9px] text-[#00AA6C] font-bold">TripAdvisor</Text>
-                    <View className="flex-row items-center">
-                      <Text className="text-sm font-bold text-gray-900 mr-1">
-                        {displayBusiness.externalProfiles.tripAdvisor.rating.toFixed(1)}
-                      </Text>
-                      <Icon name="star" size={9} color="#FFA500" />
-                    </View>
-                  </View>
-                </View>
-                {displayBusiness.externalProfiles.tripAdvisor.reviewCount && (
-                  <Text className="text-[8px] text-gray-500 font-medium">
-                    ({displayBusiness.externalProfiles.tripAdvisor.reviewCount.toLocaleString()})
-                  </Text>
-                )}
+                <Image
+                  source={require('../../../assets/tripadvisor.png')}
+                  className="w-4 h-4"
+                  resizeMode="contain"
+                />
+                <Text className="text-[11px] text-[#00AA6C] font-bold">View on TripAdvisor</Text>
+                <Icon name="open-outline" size={11} color="#00AA6C" />
               </TouchableOpacity>
             )}
           </View>

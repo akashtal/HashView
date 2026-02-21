@@ -14,6 +14,8 @@ _USERPROFILE_BACKUP_TEMP
 # Dependencies
 # ----------------------------------------
 node_modules/
+**/node_modules/
+
 .pnpm-store/
 .yarn/
 .npm/
@@ -153,3 +155,5 @@ upload-certificate.pem
 # ----------------------------------------
 scripts/
 KEYSTORE_BACKUP*/
+
+ios/

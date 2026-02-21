@@ -24,6 +24,8 @@ import ChangePasswordScreen from '../screens/user/ChangePasswordScreen';
 import DeleteAccountScreen from '../screens/user/DeleteAccountScreen';
 import VerifyEmailScreen from '../screens/user/VerifyEmailScreen';
 import FavoritesScreen from '../screens/user/FavoritesScreen';
+import ClaimBusinessScreen from '../screens/user/ClaimBusinessScreen';
+import TermsAndConditionsScreen from '../screens/auth/TermsAndConditionsScreen';
 
 // Business Screens
 import BusinessDashboardScreen from '../screens/business/BusinessDashboardScreen';
@@ -77,6 +79,8 @@ function UserStack() {
       <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} />
       <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
       <Stack.Screen name="Favorites" component={FavoritesScreen} />
+      <Stack.Screen name="ClaimBusiness" component={ClaimBusinessScreen} />
+      <Stack.Screen name="TermsAndConditions" component={TermsAndConditionsScreen} />
     </Stack.Navigator>
   );
 }

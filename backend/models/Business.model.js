@@ -230,6 +230,25 @@ const businessSchema = new mongoose.Schema({
   verifiedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
+  },
+
+  // Business Claim System
+  claimRequest: {
+    status: {
+      type: String,
+      enum: ['none', 'pending', 'approved', 'rejected'],
+      default: 'none'
+    },
+    requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    requestedAt: Date,
+    businessEmail: String,
+    role: { type: String, enum: ['owner', 'manager', 'other'] },
+    agreedToTerms: { type: Boolean, default: false },
+    verificationMethod: { type: String, enum: ['document', 'phone'] },
+    phoneVerified: { type: Boolean, default: false },
+    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    reviewedAt: Date,
+    rejectionReason: String
   }
 }, {
   timestamps: true

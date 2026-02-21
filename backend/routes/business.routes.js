@@ -13,7 +13,15 @@ const {
   updateBusinessImages,
   getMyBusinesses,
   getBusinessByQRCode,
-  updateTripAdvisorRating
+  updateTripAdvisorRating,
+  // Business Claim
+  claimBusiness,
+  uploadClaimDocuments,
+  sendClaimPhoneOtp,
+  verifyClaimPhoneOtp,
+  getBusinessClaims,
+  reviewBusinessClaim,
+  bulkUploadBusinesses
 } = require('../controllers/business.controller');
 const { protect, authorize } = require('../middleware/auth.middleware');
 const { validate, schemas } = require('../middleware/validation');
@@ -24,6 +32,10 @@ router.get('/all', getAllActiveBusinesses);
 router.get('/nearby', getNearbyBusinesses);
 router.get('/search', searchBusinesses);
 router.post('/qr/scan', getBusinessByQRCode);
+
+// ⚠️  Admin claims must come BEFORE /:id to avoid route shadowing
+router.get('/admin/claims', protect, authorize('admin'), getBusinessClaims);
+
 router.get('/:id', getBusiness);
 
 // Protected routes
@@ -57,13 +69,34 @@ const excelUpload = mult({
   }
 });
 
+// ─── Claim document upload (memory storage → Cloudinary buffer) ───
+const claimUpload = mult({
+  storage: mult.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  fileFilter: (req, file, cb) => {
+    const allowed = /jpeg|jpg|png|pdf/;
+    if (allowed.test(file.mimetype)) cb(null, true);
+    else cb(new Error('Only JPEG, PNG or PDF files are allowed for identity documents.'), false);
+  }
+});
+
+// Business Claim routes (any logged-in user)
+router.post('/:id/claim', protect, claimBusiness);
+router.post('/:id/claim/documents', protect, claimUpload.fields([
+  { name: 'ownerIdProof', maxCount: 1 },
+  { name: 'selfie', maxCount: 1 }
+]), uploadClaimDocuments);
+router.post('/:id/claim/send-phone-otp', protect, sendClaimPhoneOtp);
+router.post('/:id/claim/verify-phone-otp', protect, verifyClaimPhoneOtp);
+
+// Admin Claim management
+router.put('/:id/claim/review', protect, authorize('admin'), reviewBusinessClaim);
+
 // Business notifications
 const { sendBusinessNotification } = require('../controllers/notification.controller');
 router.post('/notifications/send', protect, authorize('business'), sendBusinessNotification);
 
 // Bulk Upload (Admin only)
-const { bulkUploadBusinesses } = require('../controllers/business.controller');
 router.post('/bulk-upload', protect, authorize('admin'), excelUpload.single('file'), bulkUploadBusinesses);
 
 module.exports = router;
-

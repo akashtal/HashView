@@ -2,12 +2,12 @@
 export const API_CONFIG = {
 
   // Local development server (ACTIVE - connecting to local backend)
-  // BASE_URL: 'http://10.208.61.97:3001/api',
-  // SOCKET_URL: 'http://10.208.61.97:3001',
+  BASE_URL: 'http://10.34.16.239:5001/api',
+  SOCKET_URL: 'http://10.34.16.239:5001',
 
   // Production URLs (commented out for now)
-  BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://hashview.44.249.50.162.nip.io/api',
-  SOCKET_URL: process.env.EXPO_PUBLIC_SOCKET_URL || 'https://hashview.44.249.50.162.nip.io',
+  // BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://hashview.44.249.50.162.nip.io/api',
+  // SOCKET_URL: process.env.EXPO_PUBLIC_SOCKET_URL || 'https://hashview.44.249.50.162.nip.io',
   // SECONDARY_BASE_URL: 'https://hashview-backend.onrender.com/api',
   // SECONDARY_SOCKET_URL: 'https://hashview-backend.onrender.com',
 

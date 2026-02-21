@@ -289,8 +289,19 @@ export default function LoginScreen({ navigation, route }) {
               </LinearGradient>
             </TouchableOpacity>
 
+            {/* T&C note */}
+            <Text style={{ textAlign: 'center', fontSize: 11.5, color: '#9CA3AF', marginTop: 12, lineHeight: 17 }}>
+              By signing in you agree to our{' '}
+              <Text
+                onPress={() => navigation.navigate('TermsAndConditions')}
+                style={{ color: COLORS.secondary, fontWeight: '600', textDecorationLine: 'underline' }}
+              >
+                Terms & Conditions
+              </Text>
+            </Text>
+
             {/* Sign Up Link */}
-            <View className="flex-row justify-center items-center mt-8 mb-6">
+            <View className="flex-row justify-center items-center mt-6 mb-6">
               <Text className="text-gray-600">Don't have an account? </Text>
               <TouchableOpacity onPress={() => navigation.navigate('SignUp', { role })}>
                 <Text style={{ color: config.gradientColors[0] }} className="font-bold">

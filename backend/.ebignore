@@ -12,3 +12,5 @@ example.env
 amplify.yml
 test-connection.html
 jest.config.js
+%USERPROFILE%
+logs

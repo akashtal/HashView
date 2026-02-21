@@ -325,6 +325,28 @@ const ApiService = {
   exportUserData: () => apiClient.post('/users/export-data'),
   deactivateAccount: () => apiClient.put('/users/deactivate'),
   deleteAccount: (data) => apiClient.delete('/users/account', { data }),
+
+  // ─── Business Claim APIs ────────────────────────────────────────
+  claimBusiness: (businessId, data) =>
+    apiClient.post(`/business/${businessId}/claim`, data),
+
+  uploadClaimDocuments: (businessId, formData) =>
+    apiClient.post(`/business/${businessId}/claim/documents`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
+  sendClaimPhoneOtp: (businessId) =>
+    apiClient.post(`/business/${businessId}/claim/send-phone-otp`),
+
+  verifyClaimPhoneOtp: (businessId, otp) =>
+    apiClient.post(`/business/${businessId}/claim/verify-phone-otp`, { otp }),
+
+  // Admin claim management
+  getBusinessClaims: (params) =>
+    apiClient.get('/business/admin/claims', { params }),
+
+  reviewBusinessClaim: (businessId, decision, rejectionReason) =>
+    apiClient.put(`/business/${businessId}/claim/review`, { decision, rejectionReason }),
 };
 
 export default ApiService;

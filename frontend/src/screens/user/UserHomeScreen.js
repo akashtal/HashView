@@ -29,15 +29,6 @@ const RatingBadge = ({ source, rating, reviews }) => {
     if (source === 'google') {
       return <Icon name="logo-google" size={14} color="#3B82F6" />;
     }
-    if (source === 'tripadvisor') {
-      return (
-        <Image
-          source={require('../../../assets/tripadvisor.png')}
-          className="w-4 h-4"
-          resizeMode="contain"
-        />
-      );
-    }
     return null;
   };
 
@@ -71,32 +62,17 @@ export default function UserHomeScreen({ navigation }) {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
-
-  /* --- SEARCH FUNCTIONALITY TEMPORARILY DISABLED ---
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const searchTimeout = useRef(null);
-  const [showSearchBar, setShowSearchBar] = useState(false);
-  --- END SEARCH DISABLE --- */
-
-  // Filter modal state
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // Star-based rating filter states
   const [ratingFilter, setRatingFilter] = useState({
     source: null,
     stars: null
   });
-
-  // Distance filter state
   const [distanceFilter, setDistanceFilter] = useState(null);
 
-  // Business visibility modal
   const [visibilityModal, setVisibilityModal] = useState({
     visible: false,
     hasOwner: false,
@@ -496,20 +472,6 @@ export default function UserHomeScreen({ navigation }) {
                 <Text className="text-[15px] font-semibold text-[#5e399e]" numberOfLines={1}>
                   {item.name}
                 </Text>
-                {/* Business Visibility Info Icon */}
-                <TouchableOpacity
-                  onPress={() => {
-                    setVisibilityModal({
-                      visible: true,
-                      hasOwner: !!item.owner,
-                      businessName: item.name
-                    });
-                  }}
-                  className="ml-1.5"
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <Icon name="information-circle-outline" size={16} color="#5e399e" style={{ opacity: 0.7 }} />
-                </TouchableOpacity>
               </View>
               <Text className="text-[14px] text-[#5e399e]" style={{ opacity: 0.8 }} numberOfLines={1}>
                 {locationText}
@@ -519,6 +481,18 @@ export default function UserHomeScreen({ navigation }) {
               <View className="bg-[#FFF1E6] border border-[#FCD9BD] rounded-full px-2 py-0.5">
                 <Text className="text-[14px] font-semibold text-[#e6ba4c]" numberOfLines={2}>{categoryLabel}</Text>
               </View>
+              {/* Claim Status Badge */}
+              {item.owner || item.claimRequest?.status === 'approved' ? (
+                <View className="flex-row items-center bg-green-50 border border-green-200 rounded-full px-1.5 py-0.5">
+                  <Icon name="shield-checkmark" size={10} color="#16A34A" />
+                  <Text className="text-[9px] text-green-700 font-bold ml-0.5">Verified</Text>
+                </View>
+              ) : (
+                <View className="flex-row items-center bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">
+                  <Icon name="flag-outline" size={10} color="#B45309" />
+                  <Text className="text-[9px] text-amber-700 font-bold ml-0.5">Unclaimed</Text>
+                </View>
+              )}
             </View>
           </View>
 
@@ -530,7 +504,6 @@ export default function UserHomeScreen({ navigation }) {
             </View>
             <View className="space-y-1.5">
               <RatingBadge source="google" rating={googleRatingValue} reviews={googleCount} />
-              <RatingBadge source="tripadvisor" rating={tripAdvisorRatingValue} reviews={tripAdvisorCount} />
             </View>
           </View>
         </View>
@@ -981,58 +954,6 @@ export default function UserHomeScreen({ navigation }) {
             </View>
           </TouchableOpacity>
         </TouchableOpacity>
-      </Modal>
-
-      {/* Business Visibility Info Modal */}
-      <Modal
-        visible={visibilityModal.visible}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setVisibilityModal({ ...visibilityModal, visible: false })}
-      >
-        <View className="flex-1 justify-center items-center bg-black/50 px-5">
-          <View className="bg-white rounded-2xl p-6 w-full max-w-md">
-            <View className="items-center mb-4">
-              <View className="bg-blue-50 rounded-full p-4 mb-3">
-                <Icon
-                  name={visibilityModal.hasOwner ? "business-outline" : "shield-checkmark-outline"}
-                  size={32}
-                  color={visibilityModal.hasOwner ? COLORS.secondary : "#3B82F6"}
-                />
-              </View>
-              <Text className="text-lg font-bold text-gray-900 text-center mb-2">
-                {visibilityModal.businessName}
-              </Text>
-              <View className={`px-3 py-1.5 rounded-full ${visibilityModal.hasOwner ? 'bg-green-50' : 'bg-blue-50'}`}>
-                <Text className={`text-sm font-semibold ${visibilityModal.hasOwner ? 'text-green-700' : 'text-blue-700'}`}>
-                  {visibilityModal.hasOwner ? 'Public Business' : 'Private Business'}
-                </Text>
-              </View>
-            </View>
-
-            <View className="bg-gray-50 rounded-xl p-4 mb-5">
-              <Text className="text-gray-700 text-center text-sm leading-5">
-                {visibilityModal.hasOwner
-                  ? "This business was created and is managed by a business owner. It's publicly available to all users."
-                  : "This business was created by an admin. It's available for browsing but may not have an active owner account."}
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              onPress={() => setVisibilityModal({ ...visibilityModal, visible: false })}
-              activeOpacity={0.8}
-            >
-              <LinearGradient
-                colors={[COLORS.secondary, COLORS.secondaryDark]}
-                className="py-3.5 rounded-xl items-center justify-center"
-              >
-                <Text className="text-white font-bold text-base">
-                  Got it
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        </View>
       </Modal>
     </View>
   );

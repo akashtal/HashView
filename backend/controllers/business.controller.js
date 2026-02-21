@@ -1525,3 +1525,300 @@ exports.bulkUploadBusinesses = async (req, res, next) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────
+//  BUSINESS CLAIM SYSTEM
+// ─────────────────────────────────────────────────────────────
+const User = require('../models/User.model');
+const { sendEmail } = require('../utils/emailService');
+
+// In-memory OTP store (for demo; use Redis/DB in production)
+const claimOtpStore = new Map();
+
+// @desc    Submit a claim request for an unclaimed business
+// @route   POST /api/business/:id/claim
+// @access  Private (any logged-in user)
+exports.claimBusiness = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { businessEmail, role, agreedToTerms } = req.body;
+
+    if (!businessEmail || !role || !agreedToTerms) {
+      return res.status(400).json({ success: false, message: 'Business email, role, and agreement to terms are required.' });
+    }
+
+    const business = await Business.findById(id);
+    if (!business) return res.status(404).json({ success: false, message: 'Business not found.' });
+
+    // Already has an owner
+    if (business.owner) {
+      return res.status(400).json({ success: false, message: 'This business already has a registered owner.' });
+    }
+
+    // Already has a pending claim
+    if (business.claimRequest && business.claimRequest.status === 'pending') {
+      return res.status(400).json({ success: false, message: 'A claim request for this business is already pending review.' });
+    }
+
+    // Save claim request
+    business.claimRequest = {
+      status: 'pending',
+      requestedBy: req.user.id,
+      requestedAt: new Date(),
+      businessEmail,
+      role,
+      agreedToTerms: true,
+    };
+    await business.save();
+
+    // Notify admin via email (non-blocking)
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER;
+    if (adminEmail) {
+      sendEmail({
+        to: adminEmail,
+        subject: `New Business Claim Request — ${business.name}`,
+        html: `<p>A new claim has been submitted for <strong>${business.name}</strong>.</p>
+               <p><strong>Claimant:</strong> ${req.user.name} (${req.user.email})</p>
+               <p><strong>Claimed Role:</strong> ${role}</p>
+               <p><strong>Business Email:</strong> ${businessEmail}</p>
+               <p>Please review this claim in the admin dashboard.</p>`
+      }).catch(() => { });
+    }
+
+    // Notify claimant (non-blocking)
+    sendEmail({
+      to: req.user.email,
+      subject: 'Your Business Claim Request Is Under Review — HashView',
+      html: `<p>Hi ${req.user.name},</p>
+             <p>Thank you for submitting a claim for <strong>${business.name}</strong>. Our team will review your request shortly.</p>
+             <p>The next step is to <strong>verify your identity</strong>. Please upload your photo ID and selfie, or verify by phone, in the app.</p>
+             <p>Best regards,<br/><strong>The HashView Team</strong></p>`
+    }).catch(() => { });
+
+    res.status(200).json({ success: true, message: 'Claim submitted successfully. Please complete identity verification.', claimRequest: business.claimRequest });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Upload photo ID + selfie for claim verification (Step 2 — Document option)
+// @route   POST /api/business/:id/claim/documents
+// @access  Private (claimant)
+exports.uploadClaimDocuments = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const business = await Business.findById(id);
+    if (!business) return res.status(404).json({ success: false, message: 'Business not found.' });
+
+    if (!business.claimRequest || business.claimRequest.status !== 'pending') {
+      return res.status(400).json({ success: false, message: 'No pending claim found for this business.' });
+    }
+
+    if (String(business.claimRequest.requestedBy) !== String(req.user.id)) {
+      return res.status(403).json({ success: false, message: 'You are not the claimant for this business.' });
+    }
+
+    const updates = {};
+
+    // Upload ownerIdProof to Cloudinary
+    if (req.files?.ownerIdProof?.[0]) {
+      const idProofFile = req.files.ownerIdProof[0];
+      const uploadedId = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: 'hashview/claim-documents', resource_type: 'auto' },
+          (error, result) => error ? reject(error) : resolve(result)
+        );
+        uploadStream.end(idProofFile.buffer);
+      });
+      updates['documents.ownerIdProof'] = { url: uploadedId.secure_url, publicId: uploadedId.public_id, status: 'pending', verified: false };
+    }
+
+    // Upload selfie to Cloudinary
+    if (req.files?.selfie?.[0]) {
+      const selfieFile = req.files.selfie[0];
+      const uploadedSelfie = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: 'hashview/claim-selfies', resource_type: 'image' },
+          (error, result) => error ? reject(error) : resolve(result)
+        );
+        uploadStream.end(selfieFile.buffer);
+      });
+      updates['documents.selfie'] = { url: uploadedSelfie.secure_url, publicId: uploadedSelfie.public_id, status: 'pending', verified: false };
+    }
+
+    updates['claimRequest.verificationMethod'] = 'document';
+    await Business.findByIdAndUpdate(id, { $set: updates });
+
+    res.status(200).json({ success: true, message: 'Documents uploaded successfully. Your claim is under review.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Send OTP to user's registered phone for claim phone verification
+// @route   POST /api/business/:id/claim/send-phone-otp
+// @access  Private (claimant)
+exports.sendClaimPhoneOtp = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const business = await Business.findById(id);
+    if (!business) return res.status(404).json({ success: false, message: 'Business not found.' });
+
+    if (!business.claimRequest || business.claimRequest.status !== 'pending') {
+      return res.status(400).json({ success: false, message: 'No pending claim found for this business.' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user.phone) {
+      return res.status(400).json({ success: false, message: 'No phone number registered to your account. Please add a phone number first.' });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    // Store in memory (userId + businessId as key)
+    claimOtpStore.set(`${req.user.id}_${id}`, { otp, expiry });
+
+    // Send OTP via email (since SMS needs a provider like Twilio)
+    await sendEmail({
+      to: user.email,
+      subject: 'Your Business Claim Phone Verification Code — HashView',
+      html: `<p>Hi ${user.name},</p>
+             <p>Your phone verification code for claiming <strong>${business.name}</strong> is:</p>
+             <h1 style="letter-spacing:12px;color:#FF8C00;">${otp}</h1>
+             <p>This code is valid for <strong>10 minutes</strong>.</p>
+             <p>If you did not request this, please ignore this email.</p>`
+    });
+
+    res.status(200).json({ success: true, message: `OTP sent to your registered email (${user.email.replace(/(.{2}).*(@.*)/, '$1***$2')}). Check your inbox.`, phone: user.phone.replace(/\d(?=\d{4})/g, '*') });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Verify OTP for phone-based claim verification
+// @route   POST /api/business/:id/claim/verify-phone-otp
+// @access  Private (claimant)
+exports.verifyClaimPhoneOtp = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { otp } = req.body;
+
+    if (!otp) return res.status(400).json({ success: false, message: 'OTP is required.' });
+
+    const business = await Business.findById(id);
+    if (!business) return res.status(404).json({ success: false, message: 'Business not found.' });
+
+    const stored = claimOtpStore.get(`${req.user.id}_${id}`);
+    if (!stored) return res.status(400).json({ success: false, message: 'No OTP found. Please request a new one.' });
+    if (Date.now() > stored.expiry) {
+      claimOtpStore.delete(`${req.user.id}_${id}`);
+      return res.status(400).json({ success: false, message: 'OTP has expired. Please request a new one.' });
+    }
+    if (stored.otp !== otp.toString()) {
+      return res.status(400).json({ success: false, message: 'Invalid OTP. Please try again.' });
+    }
+
+    // OTP valid — mark phone as verified and set verification method
+    business.claimRequest.verificationMethod = 'phone';
+    business.claimRequest.phoneVerified = true;
+    await business.save();
+    claimOtpStore.delete(`${req.user.id}_${id}`);
+
+    res.status(200).json({ success: true, message: 'Phone verified successfully. Your claim is under review.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all pending business claim requests (Admin)
+// @route   GET /api/business/admin/claims
+// @access  Private (Admin)
+exports.getBusinessClaims = async (req, res, next) => {
+  try {
+    const { status = 'pending', page = 1, limit = 20 } = req.query;
+    const skip = (page - 1) * limit;
+
+    const filter = { 'claimRequest.status': status };
+    const claims = await Business.find(filter)
+      .populate('claimRequest.requestedBy', 'name email phone')
+      .select('name category address logo claimRequest documents.ownerIdProof documents.selfie')
+      .sort({ 'claimRequest.requestedAt': -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Business.countDocuments(filter);
+
+    res.status(200).json({ success: true, total, page: parseInt(page), data: claims });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Approve or reject a business claim (Admin)
+// @route   PUT /api/business/:id/claim/review
+// @access  Private (Admin)
+exports.reviewBusinessClaim = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { decision, rejectionReason } = req.body; // decision: 'approved' | 'rejected'
+
+    if (!['approved', 'rejected'].includes(decision)) {
+      return res.status(400).json({ success: false, message: "Decision must be 'approved' or 'rejected'." });
+    }
+
+    const business = await Business.findById(id).populate('claimRequest.requestedBy', 'name email role');
+    if (!business) return res.status(404).json({ success: false, message: 'Business not found.' });
+    if (!business.claimRequest || business.claimRequest.status !== 'pending') {
+      return res.status(400).json({ success: false, message: 'No pending claim found for this business.' });
+    }
+
+    const claimant = business.claimRequest.requestedBy;
+
+    business.claimRequest.status = decision;
+    business.claimRequest.reviewedBy = req.user.id;
+    business.claimRequest.reviewedAt = new Date();
+
+    if (decision === 'approved') {
+      // Assign ownership
+      business.owner = claimant._id;
+      business.email = business.email || business.claimRequest.businessEmail;
+      if (business.claimRequest.rejectionReason) business.claimRequest.rejectionReason = undefined;
+
+      // Upgrade user role to 'business' and add to their businesses array
+      await User.findByIdAndUpdate(claimant._id, {
+        $set: { role: 'business' },
+        $addToSet: { businesses: business._id }
+      });
+
+      // Notify claimant: approved
+      sendEmail({
+        to: claimant.email,
+        subject: `🎉 Your Business Claim Has Been Approved — ${business.name}`,
+        html: `<p>Hi ${claimant.name},</p>
+               <p>Congratulations! Your claim for <strong>${business.name}</strong> has been <strong style="color:green;">approved</strong>.</p>
+               <p>You can now manage your business profile in the HashView app.</p>
+               <p>Best regards,<br/><strong>The HashView Team</strong></p>`
+      }).catch(() => { });
+    } else {
+      business.claimRequest.rejectionReason = rejectionReason || 'Your claim could not be verified.';
+
+      // Notify claimant: rejected
+      sendEmail({
+        to: claimant.email,
+        subject: `Business Claim Update — ${business.name}`,
+        html: `<p>Hi ${claimant.name},</p>
+               <p>Unfortunately, your claim for <strong>${business.name}</strong> has been <strong style="color:red;">rejected</strong>.</p>
+               <p><strong>Reason:</strong> ${business.claimRequest.rejectionReason}</p>
+               <p>If you believe this is a mistake, please contact our support team.</p>
+               <p>Best regards,<br/><strong>The HashView Team</strong></p>`
+      }).catch(() => { });
+    }
+
+    await business.save();
+
+    res.status(200).json({ success: true, message: `Claim ${decision} successfully.`, business: { _id: business._id, name: business.name, claimRequest: business.claimRequest } });
+  } catch (error) {
+    next(error);
+  }
+};

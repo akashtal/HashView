@@ -78,6 +78,11 @@ export const adminApi = {
   // TripAdvisor - Updated to accept object with rating, reviewCount, profileUrl
   updateTripAdvisorRating: (businessId, data) =>
     api.put(`/business/${businessId}/tripadvisor-rating`, data),
+
+  // Business Claims
+  getBusinessClaims: (params) => api.get('/business/admin/claims', { params }),
+  reviewBusinessClaim: (businessId, decision, rejectionReason) =>
+    api.put(`/business/${businessId}/claim/review`, { decision, rejectionReason }),
 };
 
 export default adminApi;

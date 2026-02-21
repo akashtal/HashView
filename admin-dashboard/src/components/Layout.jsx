@@ -10,7 +10,8 @@ import {
   Menu,
   X,
   Grid,
-  Tag
+  Tag,
+  FileCheck
 } from 'lucide-react';
 
 const Layout = ({ children, onLogout }) => {
@@ -24,6 +25,7 @@ const Layout = ({ children, onLogout }) => {
     { name: 'Businesses', href: '/businesses', icon: Building2 },
     { name: 'Coupons', href: '/coupons', icon: Tag },
     { name: 'Reviews', href: '/reviews', icon: Star },
+    { name: 'Business Claims', href: '/business-claims', icon: FileCheck },
     { name: 'Notifications', href: '/notifications', icon: Bell },
   ];
 
@@ -35,9 +37,8 @@ const Layout = ({ children, onLogout }) => {
     <div className="min-h-screen bg-gray-100">
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
@@ -59,11 +60,10 @@ const Layout = ({ children, onLogout }) => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                    isActive(item.href)
+                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${isActive(item.href)
                       ? 'bg-primary-100 text-primary-700'
                       : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                    }`}
                 >
                   <Icon size={20} className="mr-3" />
                   {item.name}
@@ -87,9 +87,8 @@ const Layout = ({ children, onLogout }) => {
 
       {/* Main Content */}
       <div
-        className={`transition-all duration-200 ${
-          sidebarOpen ? 'lg:pl-64' : ''
-        }`}
+        className={`transition-all duration-200 ${sidebarOpen ? 'lg:pl-64' : ''
+          }`}
       >
         {/* Top Bar */}
         <div className="sticky top-0 z-40 flex items-center h-16 px-6 bg-white border-b border-gray-200">

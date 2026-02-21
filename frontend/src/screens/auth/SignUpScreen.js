@@ -44,6 +44,7 @@ export default function SignUpScreen({ navigation, route }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const phoneInputRef = useRef(null);
   const [rawPhoneValue, setRawPhoneValue] = useState('');
 
@@ -131,6 +132,11 @@ export default function SignUpScreen({ navigation, route }) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    // Terms agreement
+    if (!agreedToTerms) {
+      newErrors.terms = 'You must agree to the Terms & Conditions to create an account';
     }
 
     setErrors(newErrors);
@@ -563,6 +569,44 @@ export default function SignUpScreen({ navigation, route }) {
               </View>
               {errors.confirmPassword && (
                 <Text className="text-red-500 text-xs mt-1">{errors.confirmPassword}</Text>
+              )}
+            </View>
+
+            {/* Terms & Conditions Checkbox */}
+            <View style={{ marginBottom: 16 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setAgreedToTerms(!agreedToTerms);
+                  if (errors.terms) setErrors({ ...errors, terms: null });
+                }}
+                activeOpacity={0.7}
+                style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}
+              >
+                <View style={{
+                  width: 22, height: 22, borderRadius: 6, borderWidth: 2,
+                  borderColor: errors.terms ? '#EF4444' : (agreedToTerms ? COLORS.secondary : COLORS.gray300),
+                  backgroundColor: agreedToTerms ? COLORS.secondary : '#fff',
+                  alignItems: 'center', justifyContent: 'center', marginTop: 1, flexShrink: 0,
+                }}>
+                  {agreedToTerms && <Icon name="checkmark" size={14} color="#fff" />}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 13, color: '#374151', lineHeight: 19 }}>
+                    I agree to the{' '}
+                    <Text
+                      onPress={() => navigation.navigate('TermsAndConditions')}
+                      style={{ color: COLORS.secondary, fontWeight: '700', textDecorationLine: 'underline' }}
+                    >
+                      Terms & Conditions
+                    </Text>
+                    {' '}of HashView
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              {errors.terms && (
+                <Text style={{ color: '#EF4444', fontSize: 12, marginTop: 4, marginLeft: 32 }}>
+                  {errors.terms}
+                </Text>
               )}
             </View>
 

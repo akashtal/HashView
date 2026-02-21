@@ -9,6 +9,7 @@ import ResetPasswordScreen from '../screens/auth/ResetPasswordScreen';
 import LoginWithPhoneScreen from '../screens/auth/LoginWithPhoneScreen';
 import ConfirmEmailScreen from '../screens/auth/ConfirmEmailScreen';
 import VerifyOTPScreen from '../screens/auth/VerifyOTPScreen';
+import TermsAndConditionsScreen from '../screens/auth/TermsAndConditionsScreen';
 
 import BusinessDetailScreen from '../screens/user/BusinessDetailScreen';
 
@@ -32,6 +33,7 @@ export default function AuthNavigator() {
       <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
       <Stack.Screen name="LoginWithPhone" component={LoginWithPhoneScreen} />
       <Stack.Screen name="BusinessDetail" component={BusinessDetailScreen} />
+      <Stack.Screen name="TermsAndConditions" component={TermsAndConditionsScreen} />
     </Stack.Navigator>
   );
 }
