@@ -42,12 +42,26 @@
       "ios": {
         "simulator": false,
         "buildConfiguration": "Release",
-        "distribution": "store"
+        "distribution": "store",
+        "image": "latest"
       },
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://hashview.44.249.50.162.nip.io/api",
         "EXPO_PUBLIC_SOCKET_URL": "https://hashview.44.249.50.162.nip.io",
         "EXPO_PUBLIC_API_TIMEOUT": "30000"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "hashview01@gmail.com",
+        "ascAppId": "6756681321",
+        "appleTeamId": "TJ77UDBJ4N"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-play-key.json",
+        "track": "internal"
       }
     }
   }
