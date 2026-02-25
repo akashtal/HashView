@@ -10,15 +10,10 @@ export const API_CONFIG = {
   SOCKET_URL: process.env.EXPO_PUBLIC_SOCKET_URL || 'https://hashview.44.249.50.162.nip.io',
   // SECONDARY_BASE_URL: 'https://hashview-backend.onrender.com/api',
   // SECONDARY_SOCKET_URL: 'https://hashview-backend.onrender.com',
-
   TIMEOUT: parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT || '60000', 10),
-
   // API Endpoints
   ENDPOINTS: {
     // Auth
-
-
-
     REGISTER: '/auth/register',
     LOGIN: '/auth/login',
     SEND_OTP: '/auth/send-otp',
@@ -92,6 +87,5 @@ export const API_CONFIG = {
     GET_ALL_BUSINESS_REVIEWS: '/external-reviews/:id/all-reviews',
   }
 };
-
 export default API_CONFIG;
 

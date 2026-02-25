@@ -14,8 +14,8 @@
         "simulator": false
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "http://10.34.16.239:5001/api",
-        "EXPO_PUBLIC_SOCKET_URL": "http://10.34.16.239:5001",
+        "EXPO_PUBLIC_API_BASE_URL": "https://hashview.44.249.50.162.nip.io/api",
+        "EXPO_PUBLIC_SOCKET_URL": "https://hashview.44.249.50.162.nip.io",
         "EXPO_PUBLIC_API_TIMEOUT": "30000"
       }
     },

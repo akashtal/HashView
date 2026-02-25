@@ -25,7 +25,12 @@ const reviewSchema = new mongoose.Schema({
   },
   emotion: {
     type: String,
-    enum: ['loved', 'happy', 'okay', 'disappointed', 'frustrated', 'amazing', null],
+    enum: [
+      'loved', 'happy', 'okay', 'disappointed', 'frustrated', 'amazing',
+      'blessed', 'sad', 'lovely', 'thankful', 'excited', 'in_love',
+      'crazy', 'grateful', 'blissful', 'fantastic', 'silly', 'festive',
+      'wonderful', 'cool', 'amused', 'relaxed', 'positive', 'chill', null
+    ],
     default: null
   },
   images: [{
