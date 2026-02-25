@@ -1,0 +1,36 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hashview-backend
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./backend:/app
+      - /app/node_modules # Prevents local node_modules from overriding container's
+    command: npm start
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hashview-frontend
+    ports:
+      - "8081:8081"
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+    environment:
+      - NODE_ENV=development
+      # Use the --tunnel flag to make the React Native app accessible to your physical device across networks
+      # Or you can set REACT_NATIVE_PACKAGER_HOSTNAME to your machine's local IP
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npx expo start --tunnel
+    # tty and stdin_open keep the Expo prompt interactive
+    tty: true
+    stdin_open: true

@@ -43,6 +43,24 @@ export default function AdvancedLocationPicker({
   const [isDragging, setIsDragging] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(false);
 
+  // When the picker becomes visible, snap to UK if no location was previously chosen
+  useEffect(() => {
+    if (!visible) return;
+    const startLat = initialLocation?.latitude;
+    const startLng = initialLocation?.longitude;
+    const ukRegion = {
+      latitude: startLat ?? UK_DEFAULT_COORDS.latitude,
+      longitude: startLng ?? UK_DEFAULT_COORDS.longitude,
+      latitudeDelta: startLat ? 0.005 : UK_DEFAULT_COORDS.latitudeDelta,
+      longitudeDelta: startLng ? 0.005 : UK_DEFAULT_COORDS.longitudeDelta,
+    };
+    setRegion(ukRegion);
+    // Give the MapView 400ms to mount before animating
+    setTimeout(() => {
+      mapRef.current?.animateToRegion(ukRegion, 500);
+    }, 400);
+  }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Helper to extract address components from Google API response
   const extractGoogleAddressComponents = (components) => {
     const result = {
@@ -201,8 +219,10 @@ export default function AdvancedLocationPicker({
           <MapView
             ref={mapRef}
             style={styles.map}
-            provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
-            initialRegion={region}
+            // provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+            // NOTE: PROVIDER_GOOGLE only works in a custom dev build (expo-dev-client), NOT in Expo Go.
+            // Temporarily removed for Expo Go testing. Re-enable for production builds.
+            region={region}
             onRegionChange={onRegionChange}
             onRegionChangeComplete={onRegionChangeComplete}
             showsUserLocation={true}
@@ -226,6 +246,7 @@ export default function AdvancedLocationPicker({
               <View style={{ flex: 1 }}>
                 <GooglePlacesAutocomplete
                   placeholder='Search for a place'
+                  keyboardShouldPersistTaps='handled'
                   onPress={(data, details = null) => {
                     if (details) {
                       const { lat, lng } = details.geometry.location;

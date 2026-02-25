@@ -137,7 +137,7 @@ export const arePropsEqual = (prevProps, nextProps) => {
  */
 export const optimizeImageUri = (uri, width = 400, quality = 80) => {
   if (!uri) return null;
-  
+
   // If Cloudinary URL, add transformation parameters
   if (uri.includes('cloudinary.com')) {
     const parts = uri.split('/upload/');
@@ -145,7 +145,14 @@ export const optimizeImageUri = (uri, width = 400, quality = 80) => {
       return `${parts[0]}/upload/w_${width},q_${quality},f_auto/${parts[1]}`;
     }
   }
-  
+
+  // Handle local backend uploads via API
+  if (uri.startsWith('/uploads/')) {
+    // Determine base URL dynamically or use env variable
+    const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://api.hashview.co.uk';
+    return `${API_URL}${uri}`;
+  }
+
   return uri;
 };
 

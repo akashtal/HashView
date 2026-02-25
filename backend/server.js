@@ -147,7 +147,7 @@ const createDefaultAdmin = async () => {
       await User.create({
         name: 'System Admin',
         email: adminEmail,
-        phone: '+44 9989675789',
+        phone: '+449989675789',
         passwordHash: adminPassword,
         role: 'admin',
         status: 'active',

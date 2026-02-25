@@ -145,7 +145,6 @@ export default function BusinessRegistrationScreen({ navigation }) {
         return;
       }
 
-      // Step 1: Get place predictions using Places Autocomplete API
       // Using location bias to UK instead of strict country filtering for better results
       // UK center coordinates: 54.7023545, -3.2765753
       const autocompleteResponse = await fetch(
@@ -263,9 +262,6 @@ export default function BusinessRegistrationScreen({ navigation }) {
   const geocodeManualAddress = async (addressPayload) => {
     if (!GOOGLE_API_KEY) return;
 
-    const { buildingNumber, street, city, county, postcode } = addressPayload;
-    if (!street || !city || !postcode) return;
-
     const query = [buildingNumber, street, city, county, postcode, 'United Kingdom']
       .filter(Boolean)
       .join(', ');
@@ -371,11 +367,20 @@ export default function BusinessRegistrationScreen({ navigation }) {
       }
 
       console.log('📍 Getting current location...');
-      let currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-        timeInterval: 10000,
-        distanceInterval: 0
-      });
+      // --- TESTING OVERRIDE: COMMENTED OUT REAL GPS FETCH ---
+      // let currentLocation = await Location.getCurrentPositionAsync({
+      //   accuracy: Location.Accuracy.Balanced,
+      //   timeInterval: 10000,
+      //   distanceInterval: 0
+      // });
+
+      // HARDCODED TO LONDON FOR UK TESTING FROM INDIA
+      let currentLocation = {
+        coords: {
+          latitude: 51.5072,
+          longitude: -0.1276
+        }
+      };
 
       console.log('✅ Location obtained:', currentLocation.coords.latitude, currentLocation.coords.longitude);
 
@@ -935,7 +940,11 @@ export default function BusinessRegistrationScreen({ navigation }) {
         </View>
       </LinearGradient>
 
-      <ScrollView className="flex-1 px-6 py-6" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1 px-6 py-6"
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
 
         {/* Location Status */}
         <View className="mb-4 bg-blue-50 rounded-xl p-4">
@@ -1814,7 +1823,8 @@ export default function BusinessRegistrationScreen({ navigation }) {
             longitude: selectedLocation.longitude,
             address: selectedLocation.address,
             loading: false,
-            error: null
+            error: null,
+            pickerSelected: true // flag so the picker re-opens on this spot next time
           });
 
           if (selectedLocation.addressComponents) {
@@ -1836,7 +1846,13 @@ export default function BusinessRegistrationScreen({ navigation }) {
           setAddressSearchQuery(selectedLocation.address);
           console.log('✅ Location selected:', selectedLocation);
         }}
-        initialLocation={location}
+        initialLocation={
+          // Always open the map picker centered on the UK.
+          // Only use the previously-picked location if the user has already chosen one via the picker.
+          (location.latitude && location.pickerSelected)
+            ? location
+            : { latitude: 51.5072, longitude: -0.1276 } // London, UK
+        }
         googleApiKey={GOOGLE_API_KEY}
       />
     </View>

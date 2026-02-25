@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, FlatList, RefreshControl, ActivityIndicator, Alert, StatusBar, Image, TextInput, Modal, Keyboard, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, FlatList, RefreshControl, ActivityIndicator, Alert, StatusBar, TextInput, Modal, Keyboard, Platform } from 'react-native';
+import { Image } from 'expo-image';
 import ToastService from '../../utils/ToastService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
@@ -52,6 +53,127 @@ const RatingBadge = ({ source, rating, reviews }) => {
     </View>
   );
 };
+
+// BUSINESS CARD RENDER - Memoized to prevent heavy re-renders in FlatList
+const BusinessCard = React.memo(({ item, onPress }) => {
+  const parseRating = (rating) => {
+    const parsed = parseFloat(rating);
+    return !isNaN(parsed) && parsed > 0 ? parsed : null;
+  };
+
+  const googleRatingValue = parseRating(item.externalProfiles?.googleBusiness?.rating);
+  const googleCount = parseInt(item.externalProfiles?.googleBusiness?.reviewCount) || 0;
+
+  const hashviewRating = parseRating(item.rating?.average) || 0;
+  const hashviewCount = item.rating?.count || 0;
+  const coverImageUri = item.coverImage?.url || item.images?.[0]?.url || item.logo?.url || null;
+  const categoryLabel = item.category || 'Business';
+  const locationText = [item.address?.area, item.address?.city].filter(Boolean).join(', ') || item.address?.street || 'Location not specified';
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.85}
+      className="mb-4"
+    >
+      <View className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
+        {/* Cover Image */}
+        <View className="relative h-36 w-full overflow-hidden">
+          {coverImageUri ? (
+            <Image
+              source={{ uri: optimizeImageUri(coverImageUri, 800, 500) }}
+              style={{ width: '100%', height: '100%' }}
+              contentFit="cover"
+              transition={200}
+              cachePolicy="memory-disk"
+            />
+          ) : (
+            <LinearGradient
+              colors={[COLORS.primary, COLORS.primaryDark]}
+              style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Icon name="business" size={48} color="#FFF" />
+            </LinearGradient>
+          )}
+
+          <LinearGradient
+            colors={['rgba(0,0,0,0.45)', 'transparent']}
+            className="absolute inset-0"
+          />
+
+          {/* Rating Badge */}
+          <View className="absolute top-2 right-2">
+            <View className="bg-[#5e399e] flex-row items-center px-2.5 py-1 rounded-full shadow border border-[#FDE68A]">
+              <Icon name="star" size={13} color="#F4B400" />
+              <Text className="text-[#F4B400] font-semibold text-xs ml-1">
+                {hashviewRating ? hashviewRating.toFixed(1) : 'New'}
+              </Text>
+            </View>
+          </View>
+
+          {/* Distance badge */}
+          {item.distance !== undefined && item.distance > 0 && (
+            <View className="absolute top-2 left-2 bg-white rounded-full px-2 py-0.5 flex-row items-center shadow border border-gray-100">
+              <Icon name="navigate" size={11} color={COLORS.secondary} />
+              <Text className="text-gray-800 font-semibold text-[10px] ml-1">
+                {item.distance < 1
+                  ? `${(item.distance * 1000).toFixed(0)}m away`
+                  : `${item.distance.toFixed(1)}km away`}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Header */}
+        <View className="px-4 pt-4 pb-3">
+          <View className="flex-row items-center justify-between mb-1.5">
+            <View className="flex-row items-center flex-1 pr-2">
+              <Text className="text-[15px] font-semibold text-[#5e399e]" numberOfLines={1}>
+                {item.name}
+              </Text>
+            </View>
+            <Text className="text-[14px] text-[#5e399e]" style={{ opacity: 0.8 }} numberOfLines={1}>
+              {locationText}
+            </Text>
+          </View>
+          <View className="flex-row items-center gap-1.5">
+            <View className="bg-[#FFF1E6] border border-[#FCD9BD] rounded-full px-2 py-0.5">
+              <Text className="text-[14px] font-semibold text-[#e6ba4c]" numberOfLines={2}>{categoryLabel}</Text>
+            </View>
+            {/* Claim Status Badge */}
+            {item.owner || item.claimRequest?.status === 'approved' ? (
+              <View className="flex-row items-center bg-green-50 border border-green-200 rounded-full px-1.5 py-0.5">
+                <Icon name="shield-checkmark" size={10} color="#16A34A" />
+                <Text className="text-[9px] text-green-700 font-bold ml-0.5">Verified</Text>
+              </View>
+            ) : (
+              <View className="flex-row items-center bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">
+                <Icon name="flag-outline" size={10} color="#B45309" />
+                <Text className="text-[9px] text-amber-700 font-bold ml-0.5">Unclaimed</Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* Content */}
+        <View className="px-4 pb-4">
+          <View className="flex-row items-center justify-between mb-2.5">
+            <Text className="text-xs font-semibold text-gray-900">Overall Rating</Text>
+            <Text className="text-xs text-gray-500">{hashviewCount} reviews</Text>
+          </View>
+          <View className="space-y-1.5">
+            <RatingBadge source="google" rating={googleRatingValue} reviews={googleCount} />
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+}, (prevProps, nextProps) => {
+  // Custom comparison to prevent unnecessary re-renders when FlatList items mount/unmount
+  return prevProps.item._id === nextProps.item._id &&
+    prevProps.item.distance === nextProps.item.distance &&
+    prevProps.item.rating?.average === nextProps.item.rating?.average;
+});
 
 export default function UserHomeScreen({ navigation }) {
   const dispatch = useDispatch();
@@ -382,132 +504,11 @@ export default function UserHomeScreen({ navigation }) {
 
   // BUSINESS CARD RENDER - Tailwind CSS Styling
   const renderBusiness = useCallback(({ item }) => {
-    const parseRating = (rating) => {
-      const parsed = parseFloat(rating);
-      return !isNaN(parsed) && parsed > 0 ? parsed : null;
-    };
-
-    // FIX: Use externalProfiles (from backend) instead of externalRatings
-    const googleRatingValue = parseRating(item.externalProfiles?.googleBusiness?.rating);
-    const googleCount = parseInt(item.externalProfiles?.googleBusiness?.reviewCount) || 0;
-    const tripAdvisorRatingValue = parseRating(item.externalProfiles?.tripAdvisor?.rating);
-    const tripAdvisorCount = parseInt(item.externalProfiles?.tripAdvisor?.reviewCount) || 0;
-
-    // Debug logging for first item
-    if (item._id && !renderBusiness.logged) {
-      console.log('🏢 Business Card Data:', {
-        name: item.name,
-        hashviewRating: item.rating?.average,
-        externalProfiles: item.externalProfiles,
-        googleRating: googleRatingValue,
-        googleCount,
-        tripAdvisorRating: tripAdvisorRatingValue,
-        tripAdvisorCount
-      });
-      renderBusiness.logged = true;
-    }
-
-    const hashviewRating = parseRating(item.rating?.average) || 0;
-    const hashviewCount = item.rating?.count || 0;
-    const coverImageUri = item.coverImage?.url || item.images?.[0]?.url || item.logo?.url || null;
-    const categoryLabel = item.category || 'Business';
-    const locationText = [item.address?.area, item.address?.city].filter(Boolean).join(', ') || item.address?.street || 'Location not specified';
-
     return (
-      <TouchableOpacity
+      <BusinessCard
+        item={item}
         onPress={() => navigation.navigate('BusinessDetail', { businessId: item._id })}
-        activeOpacity={0.85}
-        className="mb-4"
-      >
-        <View className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
-          {/* Cover Image */}
-          <View className="relative h-36 w-full overflow-hidden">
-            {coverImageUri ? (
-              <Image
-                source={{ uri: optimizeImageUri(coverImageUri, 800, 500) }}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-            ) : (
-              <LinearGradient
-                colors={[COLORS.primary, COLORS.primaryDark]}
-                className="w-full h-full items-center justify-center"
-              >
-                <Icon name="business" size={48} color="#FFF" />
-              </LinearGradient>
-            )}
-
-            <LinearGradient
-              colors={['rgba(0,0,0,0.45)', 'transparent']}
-              className="absolute inset-0"
-            />
-
-            {/* Rating Badge */}
-            <View className="absolute top-2 right-2">
-              <View className="bg-[#5e399e] flex-row items-center px-2.5 py-1 rounded-full shadow border border-[#FDE68A]">
-                <Icon name="star" size={13} color="#F4B400" />
-                <Text className="text-[#F4B400] font-semibold text-xs ml-1">
-                  {hashviewRating ? hashviewRating.toFixed(1) : 'New'}
-                </Text>
-              </View>
-            </View>
-
-            {/* Distance badge */}
-            {item.distance !== undefined && item.distance > 0 && (
-              <View className="absolute top-2 left-2 bg-white rounded-full px-2 py-0.5 flex-row items-center shadow border border-gray-100">
-                <Icon name="navigate" size={11} color={COLORS.secondary} />
-                <Text className="text-gray-800 font-semibold text-[10px] ml-1">
-                  {item.distance < 1
-                    ? `${(item.distance * 1000).toFixed(0)}m away`
-                    : `${item.distance.toFixed(1)}km away`}
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {/* Header */}
-          <View className="px-4 pt-4 pb-3">
-            <View className="flex-row items-center justify-between mb-1.5">
-              <View className="flex-row items-center flex-1 pr-2">
-                <Text className="text-[15px] font-semibold text-[#5e399e]" numberOfLines={1}>
-                  {item.name}
-                </Text>
-              </View>
-              <Text className="text-[14px] text-[#5e399e]" style={{ opacity: 0.8 }} numberOfLines={1}>
-                {locationText}
-              </Text>
-            </View>
-            <View className="flex-row items-center gap-1.5">
-              <View className="bg-[#FFF1E6] border border-[#FCD9BD] rounded-full px-2 py-0.5">
-                <Text className="text-[14px] font-semibold text-[#e6ba4c]" numberOfLines={2}>{categoryLabel}</Text>
-              </View>
-              {/* Claim Status Badge */}
-              {item.owner || item.claimRequest?.status === 'approved' ? (
-                <View className="flex-row items-center bg-green-50 border border-green-200 rounded-full px-1.5 py-0.5">
-                  <Icon name="shield-checkmark" size={10} color="#16A34A" />
-                  <Text className="text-[9px] text-green-700 font-bold ml-0.5">Verified</Text>
-                </View>
-              ) : (
-                <View className="flex-row items-center bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">
-                  <Icon name="flag-outline" size={10} color="#B45309" />
-                  <Text className="text-[9px] text-amber-700 font-bold ml-0.5">Unclaimed</Text>
-                </View>
-              )}
-            </View>
-          </View>
-
-          {/* Content */}
-          <View className="px-4 pb-4">
-            <View className="flex-row items-center justify-between mb-2.5">
-              <Text className="text-xs font-semibold text-gray-900">Overall Rating</Text>
-              <Text className="text-xs text-gray-500">{hashviewCount} reviews</Text>
-            </View>
-            <View className="space-y-1.5">
-              <RatingBadge source="google" rating={googleRatingValue} reviews={googleCount} />
-            </View>
-          </View>
-        </View>
-      </TouchableOpacity>
+      />
     );
   }, [navigation]);
 

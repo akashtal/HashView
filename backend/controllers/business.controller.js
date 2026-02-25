@@ -549,7 +549,25 @@ exports.getNearbyBusinesses = async (req, res, next) => {
       },
       { $skip: skip },
       { $limit: limit },
-      { $project: { documents: 0 } } // Exclude heavy documents field
+      {
+        $project: {
+          documents: 0,
+          externalReviews: 0,
+          claimRequest: 0,
+          openingHours: 0
+        }
+      },
+      {
+        $addFields: {
+          images: {
+            $cond: {
+              if: { $isArray: "$images" },
+              then: { $slice: ["$images", 1] },
+              else: "$images"
+            }
+          }
+        }
+      }
     ]);
 
     // Use $geoWithin for counting (avoids $near sort issues)
@@ -687,7 +705,7 @@ exports.getAllActiveBusinesses = async (req, res, next) => {
     console.log('   📊 MongoDB query:', JSON.stringify(query, null, 2));
 
     const businesses = await Business.find(query)
-      .select('-documents')
+      .select('-documents -externalReviews -claimRequest -openingHours')
       .skip(skip)
       .limit(queryLimit)
       .sort({ 'rating.average': -1 }); // Sort by highest rated first
@@ -779,7 +797,7 @@ exports.searchBusinesses = async (req, res, next) => {
 
     // Fetch businesses
     let businesses = await Business.find(searchQuery)
-      .select('-documents')
+      .select('-documents -externalReviews -claimRequest -openingHours')
       .limit(parseInt(limit) || 50); // Default 50, or use limit param for autocomplete
 
     // Calculate distance if user location provided

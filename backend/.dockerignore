@@ -1,0 +1,10 @@
+node_modules
+npm-debug.log
+.env
+.git
+.idea
+.vscode
+logs
+uploads
+*.keystore
+*.zip
