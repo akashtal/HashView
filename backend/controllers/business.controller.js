@@ -251,6 +251,21 @@ exports.registerBusiness = async (req, res, next) => {
       }));
     }
 
+    // ----------------------------------------------------
+    // DUPLICATE CHECK: Prevent exact same name at exact same location
+    // ----------------------------------------------------
+    const duplicateBusiness = await Business.findOne({
+      name: { $regex: new RegExp(`^${name.trim()}$`, 'i') }, // Case-insensitive exact match
+      'location.coordinates': [parseFloat(longitude), parseFloat(latitude)]
+    });
+
+    if (duplicateBusiness) {
+      return res.status(400).json({
+        success: false,
+        message: 'A business with this exact name is already registered at this location.'
+      });
+    }
+
     // Create business
     console.log('Creating business with data:', JSON.stringify(businessData, null, 2));
     const business = await Business.create(businessData);
@@ -547,6 +562,7 @@ exports.getNearbyBusinesses = async (req, res, next) => {
           key: "location"
         }
       },
+      { $sort: { "dist.calculated": 1, _id: 1 } },
       { $skip: skip },
       { $limit: limit },
       {
@@ -631,8 +647,10 @@ exports.getNearbyBusinesses = async (req, res, next) => {
       success: true,
       count: businessesWithDistance.length,
       total,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
+      pagination: {
+        page: page,
+        pages: Math.ceil(total / limit)
+      },
       businesses: businessesWithDistance,
       filters: {
         radius: maxDistance,
@@ -721,8 +739,10 @@ exports.getAllActiveBusinesses = async (req, res, next) => {
       success: true,
       count: businesses.length,
       total,
-      totalPages: Math.ceil(total / queryLimit),
-      currentPage: page,
+      pagination: {
+        page: page,
+        pages: Math.ceil(total / queryLimit)
+      },
       businesses,
       filters: {
         ratingSource: ratingSource || null,
@@ -1513,7 +1533,17 @@ exports.bulkUploadBusinesses = async (req, res, next) => {
           radius: parseInt(row.Radius) || 50,
         };
 
-        // 4. Create Business
+        // 4. DUPLICATE CHECK: Prevent exact same name at exact same location
+        const duplicateBusiness = await Business.findOne({
+          name: { $regex: new RegExp(`^${businessData.name.trim()}$`, 'i') }, // Case-insensitive exact match
+          'location.coordinates': [parseFloat(longitude), parseFloat(latitude)]
+        });
+
+        if (duplicateBusiness) {
+          throw new Error('A business with this exact name is already registered at this location.');
+        }
+
+        // 5. Create Business
         const newBusiness = await Business.create(businessData);
 
         results.success++;

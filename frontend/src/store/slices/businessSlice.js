@@ -114,6 +114,10 @@ const businessSlice = createSlice({
     clearSelectedBusiness: (state) => {
       state.selectedBusiness = null;
     },
+    clearBusinesses: (state) => {
+      state.businesses = [];
+      state.nearbyBusinesses = [];
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -213,6 +217,6 @@ const businessSlice = createSlice({
   },
 });
 
-export const { clearError, clearSelectedBusiness } = businessSlice.actions;
+export const { clearError, clearSelectedBusiness, clearBusinesses } = businessSlice.actions;
 export default businessSlice.reducer;
 

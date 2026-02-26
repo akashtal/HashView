@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,6 +22,7 @@ export default function QRScannerScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [loading, setLoading] = useState(false);
+  const isFocused = useIsFocused(); // Track if screen is actively being viewed
 
   useEffect(() => {
     // Request camera permission on mount
@@ -167,55 +168,57 @@ export default function QRScannerScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <CameraView
-        style={styles.camera}
-        facing="back"
-        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-        barcodeScannerSettings={{
-          barcodeTypes: ['qr'],
-        }}
-      >
-        <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.7)']}
-          style={styles.overlay}
+      {isFocused && (
+        <CameraView
+          style={styles.camera}
+          facing="back"
+          onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+          barcodeScannerSettings={{
+            barcodeTypes: ['qr'],
+          }}
         >
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => navigation.goBack()}
-            >
-              <Icon name="close" size={28} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Scan QR Code</Text>
-            <View style={styles.placeholder} />
-          </View>
-
-          <View style={styles.scanArea}>
-            <View style={styles.scanFrame}>
-              <View style={[styles.corner, styles.topLeft]} />
-              <View style={[styles.corner, styles.topRight]} />
-              <View style={[styles.corner, styles.bottomLeft]} />
-              <View style={[styles.corner, styles.bottomRight]} />
+          <LinearGradient
+            colors={['transparent', 'rgba(0,0,0,0.7)']}
+            style={styles.overlay}
+          >
+            <View style={styles.header}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => navigation.goBack()}
+              >
+                <Icon name="close" size={28} color="#fff" />
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>Scan QR Code</Text>
+              <View style={styles.placeholder} />
             </View>
-            <Text style={styles.scanInstruction}>
-              Position the QR code within the frame
-            </Text>
-          </View>
 
-          {loading && (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#fff" />
-              <Text style={styles.loadingText}>Processing QR code...</Text>
+            <View style={styles.scanArea}>
+              <View style={styles.scanFrame}>
+                <View style={[styles.corner, styles.topLeft]} />
+                <View style={[styles.corner, styles.topRight]} />
+                <View style={[styles.corner, styles.bottomLeft]} />
+                <View style={[styles.corner, styles.bottomRight]} />
+              </View>
+              <Text style={styles.scanInstruction}>
+                Position the QR code within the frame
+              </Text>
             </View>
-          )}
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              Scan a business QR code to view details and leave a review
-            </Text>
-          </View>
-        </LinearGradient>
-      </CameraView>
+            {loading && (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#fff" />
+                <Text style={styles.loadingText}>Processing QR code...</Text>
+              </View>
+            )}
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>
+                Scan a business QR code to view details and leave a review
+              </Text>
+            </View>
+          </LinearGradient>
+        </CameraView>
+      )}
     </View>
   );
 }

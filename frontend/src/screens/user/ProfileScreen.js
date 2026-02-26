@@ -193,11 +193,6 @@ export default function ProfileScreen({ navigation }) {
       ];
     }
 
-    // Admin menu items
-    if (user?.role === 'admin') {
-      return commonItems;
-    }
-
     // Default fallback
     return commonItems;
   };

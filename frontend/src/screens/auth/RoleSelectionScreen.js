@@ -140,12 +140,6 @@ export default function RoleSelectionScreen({ navigation }) {
           </View>
         </TouchableOpacity>
 
-        {/* Admin Login Hint */}
-        <View className="mt-8">
-          <Text className="text-white/60 text-sm text-center">
-            Admin? Login as Customer with admin credentials
-          </Text>
-        </View>
       </View>
     </LinearGradient>
   );

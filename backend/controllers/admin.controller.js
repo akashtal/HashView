@@ -361,6 +361,21 @@ exports.createBusiness = async (req, res, next) => {
       businessData.images = req.body.images;
     }
 
+    // ----------------------------------------------------
+    // DUPLICATE CHECK: Prevent exact same name at exact same location
+    // ----------------------------------------------------
+    const duplicateBusiness = await Business.findOne({
+      name: { $regex: new RegExp(`^${name.trim()}$`, 'i') }, // Case-insensitive exact match
+      'location.coordinates': [parseFloat(longitude), parseFloat(latitude)]
+    });
+
+    if (duplicateBusiness) {
+      return res.status(400).json({
+        success: false,
+        message: 'A business with this exact name is already registered at this location.'
+      });
+    }
+
     const business = await Business.create(businessData);
 
     console.log(`✅ Admin created business: ${business.name} (${owner ? 'with owner' : 'without owner'})`);

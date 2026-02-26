@@ -45,7 +45,9 @@ const reviewSlice = createSlice({
     loading: false,
     error: null,
     successMessage: null,
-    createdCoupon: null, // Store the earned coupon
+    createdCoupon: null,     // coupon earned after review
+    isNearbyCoupon: false,   // true when coupon is from a nearby business
+    couponBusinessName: null // name of the business that issued the coupon
   },
   reducers: {
     clearError: (state) => {
@@ -56,6 +58,8 @@ const reviewSlice = createSlice({
     },
     clearCreatedCoupon: (state) => {
       state.createdCoupon = null;
+      state.isNearbyCoupon = false;
+      state.couponBusinessName = null;
     },
   },
   extraReducers: (builder) => {
@@ -71,6 +75,8 @@ const reviewSlice = createSlice({
         // Store the coupon if one was awarded
         if (action.payload.coupon) {
           state.createdCoupon = action.payload.coupon;
+          state.isNearbyCoupon = action.payload.isNearbyCoupon || false;
+          state.couponBusinessName = action.payload.couponBusinessName || null;
         }
       })
       .addCase(createReview.rejected, (state, action) => {

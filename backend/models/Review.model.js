@@ -26,10 +26,14 @@ const reviewSchema = new mongoose.Schema({
   emotion: {
     type: String,
     enum: [
-      'loved', 'happy', 'okay', 'disappointed', 'frustrated', 'amazing',
-      'blessed', 'sad', 'lovely', 'thankful', 'excited', 'in_love',
-      'crazy', 'grateful', 'blissful', 'fantastic', 'silly', 'festive',
-      'wonderful', 'cool', 'amused', 'relaxed', 'positive', 'chill', null
+      /* New Trimmed List */
+      'happy', 'sad', 'lovely', 'grateful', 'cool', 'positive',
+      '😊', '😢', '🥰', '😅', '😎',
+      /* Legacy Backwards Compatibility */
+      'loved', 'okay', 'disappointed', 'frustrated', 'amazing',
+      'blessed', 'thankful', 'excited', 'in_love', 'crazy',
+      'blissful', 'fantastic', 'silly', 'festive', 'wonderful',
+      'amused', 'relaxed', 'chill', null
     ],
     default: null
   },

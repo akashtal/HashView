@@ -44,15 +44,6 @@ import CouponManagementScreen from '../screens/business/CouponManagementScreen';
 import ManageCouponsNew from '../screens/business/ManageCouponsNew';
 import CouponQRScannerScreen from '../screens/business/CouponQRScannerScreen';
 
-// Admin Screens - Full Management
-import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
-import CategoryManagementScreen from '../screens/admin/CategoryManagementScreen';
-import BusinessManagementScreen from '../screens/admin/BusinessManagementScreen';
-import UserManagementScreen from '../screens/admin/UserManagementScreen';
-import ReviewManagementScreen from '../screens/admin/ReviewManagementScreen';
-import AdminCouponManagementScreen from '../screens/admin/AdminCouponManagementScreen';
-import TripAdvisorManagementScreen from '../screens/admin/TripAdvisorManagementScreen';
-import NotificationManagementScreen from '../screens/admin/NotificationManagementScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -153,48 +144,6 @@ function BusinessStack() {
   );
 }
 
-// No separate admin stack needed - admins just see analytics + profile
-
-// Admin Stack with navigation screens
-function AdminDashboardStack() {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen name="DashboardHome" component={AdminDashboardScreen} />
-      <Stack.Screen name="CategoryManagement" component={CategoryManagementScreen} />
-      <Stack.Screen name="BusinessManagement" component={BusinessManagementScreen} />
-      <Stack.Screen name="UserManagement" component={UserManagementScreen} />
-      <Stack.Screen name="AdminCouponManagement" component={AdminCouponManagementScreen} />
-      <Stack.Screen name="ReviewManagement" component={ReviewManagementScreen} />
-      <Stack.Screen name="TripAdvisorManagement" component={TripAdvisorManagementScreen} />
-      <Stack.Screen name="NotificationManagement" component={NotificationManagementScreen} />
-      <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
-    </Stack.Navigator>
-  );
-}
-
-function AdminProfileStack() {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,  // Hide navigator header, screens have their own
-      }}
-    >
-      <Stack.Screen name="ProfileHome" component={ProfileScreen} />
-      <Stack.Screen name="Settings" component={SettingsScreen} />
-      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-      <Stack.Screen name="Notifications" component={NotificationsScreen} />
-      <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
-      <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} />
-      <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
-      <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
-    </Stack.Navigator>
-  );
-}
-
 // Business Profile Stack with navigation screens
 function BusinessProfileStack() {
   return (
@@ -218,36 +167,6 @@ function BusinessProfileStack() {
 
 export default function MainNavigator() {
   const { user } = useSelector((state) => state.auth);
-
-  if (user?.role === 'admin') {
-    // Admin has full management capabilities
-    return (
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          tabBarIcon: ({ focused, color, size }) => {
-            let iconName;
-            if (route.name === 'Dashboard') iconName = focused ? 'grid' : 'grid-outline';
-            else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
-            return <Icon name={iconName} size={size} color={color} />;
-          },
-          tabBarActiveTintColor: COLORS.primary,
-          tabBarInactiveTintColor: 'gray',
-          headerShown: false,
-        })}
-      >
-        <Tab.Screen
-          name="Dashboard"
-          component={AdminDashboardStack}
-          options={{ title: 'Admin Panel' }}
-        />
-        <Tab.Screen
-          name="Profile"
-          component={AdminProfileStack}
-          options={{ title: 'Profile' }}
-        />
-      </Tab.Navigator>
-    );
-  }
 
   if (user?.role === 'business') {
     return (

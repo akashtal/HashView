@@ -94,10 +94,6 @@ export default function LoginScreen({ navigation, route }) {
       const result = await dispatch(login(loginData)).unwrap();
 
       console.log('Login successful', { userId: result.user._id, role: result.user.role });
-
-      if (result.user.role === 'admin') {
-        ToastService.showSuccess('Welcome Admin!', 'Redirecting to admin dashboard...');
-      }
     } catch (error) {
       const safeEmail = loginData.email ? loginData.email.trim().toLowerCase() : '';
       console.log('Login failed', { email: safeEmail, role, error: String(error) });

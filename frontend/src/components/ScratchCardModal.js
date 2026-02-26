@@ -8,62 +8,90 @@ import {
     PanResponder,
     Animated,
     TouchableOpacity,
-    Vibration
+    Vibration,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import COLORS from '../config/colors';
 
-const { width } = Dimensions.get('window');
-const CARD_WIDTH = width * 0.85;
-const CARD_HEIGHT = CARD_WIDTH * 1.2; // Adjust aspect ratio
+const { width, height } = Dimensions.get('window');
 
-// Grid configuration for scratch effect
-const ROWS = 10;
-const COLS = 10;
+// HashView brand colors (extracted from logo)
+const BRAND = {
+    purple: '#2D0057',
+    deepPurple: '#1A0033',
+    orange: '#FF8C00',
+    orangeLight: '#FFA940',
+    magenta: '#BB44CC',
+    white: '#FFFFFF',
+    cardBg: '#F9F0FF',
+};
+
+const CARD_WIDTH = width * 0.88;
+const CARD_HEIGHT = CARD_WIDTH * 1.15;
+
+// Smaller grid = smoother performance
+const ROWS = 5;
+const COLS = 5;
 const TOTAL_CELLS = ROWS * COLS;
 const CELL_WIDTH = CARD_WIDTH / COLS;
 const CELL_HEIGHT = CARD_HEIGHT / ROWS;
-const REVEAL_THRESHOLD = 0.45; // 45% scratched reveals all
+const REVEAL_THRESHOLD = 0.38; // 38% scratched reveals the rest
 
-const ScratchCardModal = ({ visible, onClose, coupon }) => {
+// Grid cell scratch radius (scratch surrounding cells too for a brush feel)
+const BRUSH_RADIUS = 1;
+
+const ScratchCardModal = ({ visible, onClose, coupon, isNearbyCoupon, couponBusinessName }) => {
     const [revealed, setRevealed] = useState(false);
     const [scratchedCount, setScratchedCount] = useState(0);
+    const [scratchProgress, setScratchProgress] = useState(0); // 0-1
 
-    // Create animated values for each cell opacity
     const cellOpacities = useRef(
         Array(TOTAL_CELLS).fill(0).map(() => new Animated.Value(1))
     ).current;
 
-    // Track which cells are already scratched to avoid double counting
     const scratchedCells = useRef(new Set()).current;
 
-    // Animation for the final reveal (card pop/shake)
-    const cardScale = useRef(new Animated.Value(0.8)).current;
+    const cardScale = useRef(new Animated.Value(0.85)).current;
     const cardOpacity = useRef(new Animated.Value(0)).current;
+    const shineAnim = useRef(new Animated.Value(-CARD_WIDTH)).current;
+    const revealScale = useRef(new Animated.Value(0.7)).current;
+    const confettiAnim = useRef(new Animated.Value(0)).current;
+
+    // Card Y-offset ref so we can calculate real touch position
+    const cardYOffset = useRef(0);
+    const cardXOffset = useRef((width - CARD_WIDTH) / 2);
 
     useEffect(() => {
         if (visible) {
-            // Reset state when modal opens
             resetCard();
+            // Entrance animation
             Animated.parallel([
                 Animated.spring(cardScale, {
                     toValue: 1,
-                    friction: 8,
-                    useNativeDriver: true
+                    friction: 7,
+                    tension: 60,
+                    useNativeDriver: true,
                 }),
                 Animated.timing(cardOpacity, {
                     toValue: 1,
-                    duration: 300,
-                    useNativeDriver: true
-                })
-            ]).start();
+                    duration: 280,
+                    useNativeDriver: true,
+                }),
+            ]).start(() => {
+                // Shine sweep animation on entry
+                Animated.timing(shineAnim, {
+                    toValue: CARD_WIDTH * 2,
+                    duration: 800,
+                    useNativeDriver: true,
+                }).start();
+            });
         }
     }, [visible]);
 
     useEffect(() => {
-        // Check if threshold reached
-        if (!revealed && scratchedCount / TOTAL_CELLS > REVEAL_THRESHOLD) {
+        const progress = scratchedCount / TOTAL_CELLS;
+        setScratchProgress(progress);
+        if (!revealed && progress > REVEAL_THRESHOLD) {
             revealAll();
         }
     }, [scratchedCount]);
@@ -71,68 +99,99 @@ const ScratchCardModal = ({ visible, onClose, coupon }) => {
     const resetCard = () => {
         setRevealed(false);
         setScratchedCount(0);
+        setScratchProgress(0);
         scratchedCells.clear();
-        cellOpacities.forEach(anim => anim.setValue(1));
+        cellOpacities.forEach(a => a.setValue(1));
+        cardScale.setValue(0.85);
+        cardOpacity.setValue(0);
+        shineAnim.setValue(-CARD_WIDTH);
+        revealScale.setValue(0.7);
+        confettiAnim.setValue(0);
     };
 
     const revealAll = () => {
         setRevealed(true);
-        Vibration.vibrate(50); // Haptic feedback
+        Vibration.vibrate([0, 30, 80, 50]);
 
-        // Fade out remaining cells
-        Animated.stagger(10,
+        // Fade out all remaining cells quickly
+        Animated.stagger(8,
             cellOpacities.map(anim =>
                 Animated.timing(anim, {
                     toValue: 0,
-                    duration: 300,
-                    useNativeDriver: true
+                    duration: 200,
+                    useNativeDriver: true,
                 })
             )
         ).start();
+
+        // Animate the reward reveal
+        Animated.sequence([
+            Animated.delay(250),
+            Animated.spring(revealScale, {
+                toValue: 1,
+                friction: 5,
+                tension: 80,
+                useNativeDriver: true,
+            }),
+            Animated.timing(confettiAnim, {
+                toValue: 1,
+                duration: 400,
+                useNativeDriver: true,
+            }),
+        ]).start();
     };
 
-    // PanResponder to handle scratching
     const panResponder = useRef(
         PanResponder.create({
             onStartShouldSetPanResponder: () => true,
             onMoveShouldSetPanResponder: () => true,
-            onPanResponderGrant: () => { },
-            onPanResponderMove: (evt, gestureState) => {
-                if (revealed) return;
-
-                // Calculate touch position relative to the grid
-                // Note: Simple approximation. For better precision, we'd need onLayout to get exact card coordinates.
-                // Assuming Card is centered.
-                const touchX = gestureState.moveX - (width - CARD_WIDTH) / 2;
-                const touchY = gestureState.moveY - (Dimensions.get('window').height - CARD_HEIGHT) / 2;
-
-                handleScratch(touchX, touchY);
+            onPanResponderGrant: (evt) => {
+                if (!revealed) handleScratchPoint(evt.nativeEvent.pageX, evt.nativeEvent.pageY);
+            },
+            onPanResponderMove: (evt) => {
+                if (!revealed) handleScratchPoint(evt.nativeEvent.pageX, evt.nativeEvent.pageY);
             },
         })
     ).current;
 
-    const handleScratch = (x, y) => {
-        // Map coordinates to grid index
-        const col = Math.floor(x / CELL_WIDTH);
-        const row = Math.floor(y / CELL_HEIGHT);
+    const handleScratchPoint = (pageX, pageY) => {
+        const localX = pageX - cardXOffset.current;
+        const localY = pageY - cardYOffset.current;
 
-        if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
-            const index = row * COLS + col;
+        const centerCol = Math.floor(localX / CELL_WIDTH);
+        const centerRow = Math.floor(localY / CELL_HEIGHT);
 
-            if (!scratchedCells.has(index)) {
-                scratchedCells.add(index);
-                setScratchedCount(prev => prev + 1);
-
-                Animated.timing(cellOpacities[index], {
-                    toValue: 0,
-                    duration: 150, // Fast fade for instant feel
-                    useNativeDriver: true
-                }).start();
+        // Scratch a brush area around the touch point
+        for (let dr = -BRUSH_RADIUS; dr <= BRUSH_RADIUS; dr++) {
+            for (let dc = -BRUSH_RADIUS; dc <= BRUSH_RADIUS; dc++) {
+                const col = centerCol + dc;
+                const row = centerRow + dr;
+                if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
+                    const index = row * COLS + col;
+                    if (!scratchedCells.has(index)) {
+                        scratchedCells.add(index);
+                        setScratchedCount(prev => prev + 1);
+                        Animated.timing(cellOpacities[index], {
+                            toValue: 0,
+                            duration: 100,
+                            useNativeDriver: true,
+                        }).start();
+                    }
+                }
             }
         }
     };
 
-    if (!visible || !coupon) return null;
+    const getRewardText = () => {
+        if (!coupon) return 'SORRY!';
+        if (coupon.rewardType === 'percentage') return `${coupon.title || `${coupon.rewardValue}% OFF`}`;
+        if (coupon.rewardType === 'fixed') return `${coupon.title || `₹${coupon.rewardValue} OFF`}`;
+        if (coupon.rewardType === 'free_item' || coupon.rewardType === 'free_drink') return `${coupon.title || `FREE: ${coupon.itemName || 'ITEM'}`}`;
+        if (coupon.rewardType === 'buy1get1') return `${coupon.title || 'BUY 1 GET 1'}`;
+        return coupon.title || 'FREE GIFT';
+    };
+
+    if (!visible) return null;
 
     return (
         <Modal
@@ -140,99 +199,226 @@ const ScratchCardModal = ({ visible, onClose, coupon }) => {
             visible={visible}
             animationType="fade"
             onRequestClose={onClose}
+            statusBarTranslucent
         >
-            <View style={styles.overlay}>
+            {/* Blurred dark overlay with radial purple glow */}
+            <LinearGradient
+                colors={['rgba(29,0,51,0.92)', 'rgba(10,0,30,0.96)']}
+                style={styles.overlay}
+            >
                 <Animated.View
                     style={[
                         styles.container,
                         { opacity: cardOpacity, transform: [{ scale: cardScale }] }
                     ]}
                 >
-                    {/* Header */}
-                    <Text style={styles.title}>You've earned a reward!</Text>
-                    <Text style={styles.subtitle}>Scratch below to reveal</Text>
+                    {/* ── Header ── */}
+                    <View style={styles.headerBadge}>
+                        <Text style={styles.headerEmoji}>🎉</Text>
+                        <Text style={styles.headerLabel}>YOU EARNED A REWARD</Text>
+                        <Text style={styles.headerEmoji}>🎉</Text>
+                    </View>
+                    <Text style={styles.subtitle}>Scratch the card to reveal your prize</Text>
 
-                    {/* Card Container */}
-                    <View style={styles.cardWrapper}>
-
-                        {/* 1. Underlying Reward Content (Back Layer) */}
+                    {/* ── Card ── */}
+                    <View
+                        style={styles.cardWrapper}
+                        onLayout={e => {
+                            cardYOffset.current = e.nativeEvent.layout.y
+                                + (e.nativeEvent.layout.height - CARD_HEIGHT) / 2;
+                        }}
+                    >
+                        {/* Back Layer – Revealed Reward */}
                         <LinearGradient
-                            colors={[COLORS.white, '#f0f9ff']}
+                            colors={[BRAND.cardBg, '#EDD5FF', BRAND.cardBg]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
                             style={styles.rewardLayer}
                         >
-                            <View style={styles.rewardContent}>
-                                <View style={styles.iconContainer}>
-                                    <Ionicons name="gift-outline" size={48} color={COLORS.primary} />
-                                </View>
+                            {/* Decorative arcs (brand-style) */}
+                            <View style={styles.decorTopLeft} />
+                            <View style={styles.decorBottomRight} />
 
-                                <Text style={styles.rewardValue}>
-                                    {coupon.rewardType === 'percentage' ? `${coupon.rewardValue}% OFF` :
-                                        coupon.rewardType === 'fixed' ? `₹${coupon.rewardValue} OFF` :
-                                            'FREE GIFT'}
-                                </Text>
+                            <Animated.View
+                                style={[
+                                    styles.rewardContent,
+                                    { transform: [{ scale: revealed ? revealScale : 1 }] }
+                                ]}
+                            >
+                                {/* Icon ring */}
+                                <LinearGradient
+                                    colors={coupon ? [BRAND.orange, BRAND.magenta] : ['#9CA3AF', '#6B7280']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.iconRing}
+                                >
+                                    <View style={styles.iconInner}>
+                                        <Ionicons name={coupon ? "gift" : "sad-outline"} size={36} color={coupon ? BRAND.orange : "#6B7280"} />
+                                    </View>
+                                </LinearGradient>
 
-                                <Text style={styles.rewardDesc}>
-                                    {coupon.description || 'On your next visit'}
-                                </Text>
+                                {/* Reward value – big, bold */}
+                                <Text style={styles.rewardValue}>{getRewardText()}</Text>
 
-                                <View style={styles.codeContainer}>
-                                    <Text style={styles.codeLabel}>CODE:</Text>
-                                    <Text style={styles.codeText}>{coupon.code}</Text>
-                                </View>
+                                {coupon ? (
+                                    <>
+                                        {/* Show which business this coupon is from */}
+                                        {isNearbyCoupon && couponBusinessName ? (
+                                            <View style={styles.nearbyBadge}>
+                                                <Ionicons name="storefront-outline" size={13} color={BRAND.orange} />
+                                                <Text style={styles.nearbyBadgeText}>Reward from {couponBusinessName}</Text>
+                                            </View>
+                                        ) : (
+                                            <View style={styles.nearbyBadge}>
+                                                <Ionicons name="storefront-outline" size={13} color={BRAND.orange} />
+                                                <Text style={styles.nearbyBadgeText}>
+                                                    {coupon?.business?.name || couponBusinessName || ''}
+                                                </Text>
+                                            </View>
+                                        )}
 
-                                <Text style={styles.expiryText}>
-                                    Valid for 2 hours
-                                </Text>
-                            </View>
+                                        <Text style={styles.rewardDesc}>
+                                            {coupon.description || 'On your next visit!'}
+                                        </Text>
+
+                                        {/* Coupon code box */}
+                                        <View style={styles.codeBox}>
+                                            <Text style={styles.codeLabel}>COUPON CODE</Text>
+                                            <Text style={styles.codeText}>{coupon.code}</Text>
+                                        </View>
+
+                                        {/* Coupon Additional Details */}
+                                        <View style={styles.detailsBox}>
+                                            <View style={styles.validityRow}>
+                                                <Ionicons name="time-outline" size={12} color={BRAND.orange} />
+                                                <Text style={styles.expiryText}>
+                                                    {coupon.validUntil ? `  Valid until: ${new Date(coupon.validUntil).toLocaleDateString()}` : '  Valid for 2 hours'}
+                                                </Text>
+                                            </View>
+
+                                            {coupon.minPurchaseAmount > 0 && (
+                                                <View style={styles.detailRow}>
+                                                    <Ionicons name="cart-outline" size={12} color={BRAND.orange} />
+                                                    <Text style={styles.detailText}>  Min. Purchase: ₹{coupon.minPurchaseAmount}</Text>
+                                                </View>
+                                            )}
+                                            {coupon.maxDiscountAmount > 0 && coupon.rewardType === 'percentage' && (
+                                                <View style={styles.detailRow}>
+                                                    <Ionicons name="pricetag-outline" size={12} color={BRAND.orange} />
+                                                    <Text style={styles.detailText}>  Max Discount: ₹{coupon.maxDiscountAmount}</Text>
+                                                </View>
+                                            )}
+                                            {coupon.terms && (
+                                                <View style={styles.detailRow}>
+                                                    <Ionicons name="document-text-outline" size={12} color={BRAND.orange} />
+                                                    <Text style={styles.detailText} numberOfLines={2}>  {coupon.terms}</Text>
+                                                </View>
+                                            )}
+                                        </View>
+                                    </>
+                                ) : (
+                                    <View style={{ alignItems: 'center', marginTop: 15, paddingHorizontal: 20 }}>
+                                        <Text style={[styles.rewardDesc, { fontSize: 16, fontWeight: 'bold', color: BRAND.purple }]}>
+                                            No nearby rewards available right now.
+                                        </Text>
+                                        <Text style={[styles.rewardDesc, { fontSize: 14, marginTop: 5 }]}>
+                                            Better luck next time!
+                                        </Text>
+                                    </View>
+                                )}
+                            </Animated.View>
                         </LinearGradient>
 
-                        {/* 2. Scratch Overlay (Front Layer) */}
+                        {/* Front Layer – Scratch surface */}
                         <View
-                            style={[styles.scratchLayer, revealed && styles.pointerEventsNone]}
+                            style={[styles.scratchLayer, revealed && { pointerEvents: 'none' }]}
                             {...panResponder.panHandlers}
                         >
-                            {/* Grid of mask cells */}
-                            <View style={styles.gridContainer}>
+                            {/* Grid mask cells */}
+                            <View style={styles.grid}>
                                 {cellOpacities.map((opacity, index) => (
                                     <Animated.View
                                         key={index}
-                                        style={[
-                                            styles.cell,
-                                            { opacity, width: CELL_WIDTH, height: CELL_HEIGHT }
-                                        ]}
+                                        style={{ opacity, width: CELL_WIDTH, height: CELL_HEIGHT }}
                                     >
-                                        {/* Render gradient only on initial cells to form the cover */}
                                         <LinearGradient
-                                            colors={[COLORS.primary, COLORS.secondary]}
+                                            colors={
+                                                index % 3 === 0
+                                                    ? [BRAND.purple, BRAND.magenta]
+                                                    : index % 3 === 1
+                                                        ? [BRAND.deepPurple, BRAND.purple]
+                                                        : [BRAND.magenta, BRAND.orange]
+                                            }
                                             start={{ x: 0, y: 0 }}
                                             end={{ x: 1, y: 1 }}
                                             style={StyleSheet.absoluteFill}
                                         />
+                                        {/* Subtle sparkle pattern */}
+                                        {index % 6 === 0 && (
+                                            <Text style={styles.sparkle}>✦</Text>
+                                        )}
                                     </Animated.View>
                                 ))}
                             </View>
 
-                            {/* Text/Logo on top of the scratch layer */}
-                            <View style={styles.scratchContent} pointerEvents="none">
-                                <Ionicons name="trophy" size={50} color="rgba(255,255,255,0.9)" />
-                                <Text style={styles.scratchText}>Scratch Here!</Text>
-                            </View>
-                        </View>
+                            {/* "Scratch Here" hint – visible before user starts */}
+                            {!revealed && scratchProgress < 0.05 && (
+                                <View style={styles.scratchHint} pointerEvents="none">
+                                    <View style={styles.scratchHintInner}>
+                                        <Text style={styles.fingerEmoji}>👆</Text>
+                                        <Text style={styles.scratchText}>Scratch Here!</Text>
+                                        <View style={styles.scratchArrows}>
+                                            <Text style={styles.arrowText}>← Swipe →</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                            )}
 
+                            {/* Progress dots along the bottom while scratching */}
+                            {!revealed && scratchProgress >= 0.05 && (
+                                <View style={styles.progressRow} pointerEvents="none">
+                                    {Array(5).fill(0).map((_, i) => (
+                                        <View
+                                            key={i}
+                                            style={[
+                                                styles.progressDot,
+                                                { backgroundColor: scratchProgress > (i + 1) / 5 ? BRAND.orange : 'rgba(255,255,255,0.4)' }
+                                            ]}
+                                        />
+                                    ))}
+                                </View>
+                            )}
+
+                            {/* Shine sweep on entry */}
+                            <Animated.View
+                                style={[styles.shine, { transform: [{ translateX: shineAnim }] }]}
+                                pointerEvents="none"
+                            />
+                        </View>
                     </View>
 
-                    {/* Close Button */}
+                    {/* ── CTA Button ── */}
                     <TouchableOpacity
-                        style={styles.closeButton}
                         onPress={onClose}
+                        activeOpacity={0.85}
+                        style={styles.ctaWrapper}
                     >
-                        <Text style={styles.closeButtonText}>
-                            {revealed ? 'Claim Reward' : 'Close'}
-                        </Text>
+                        <LinearGradient
+                            colors={revealed ? [BRAND.orange, '#FF6B00'] : ['rgba(255,255,255,0.18)', 'rgba(255,255,255,0.10)']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.ctaButton}
+                        >
+                            <Text style={[styles.ctaText, !revealed && { color: 'rgba(255,255,255,0.8)' }]}>
+                                {revealed ? (coupon ? '🎁  Claim Reward' : 'Got it') : 'Close'}
+                            </Text>
+                        </LinearGradient>
                     </TouchableOpacity>
 
+                    {/* Small brand note */}
+                    <Text style={styles.brandNote}>HashView • Rewards</Text>
                 </Animated.View>
-            </View>
+            </LinearGradient>
         </Modal>
     );
 };
@@ -240,151 +426,305 @@ const ScratchCardModal = ({ visible, onClose, coupon }) => {
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.7)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     container: {
         width: width * 0.95,
         alignItems: 'center',
-        backgroundColor: 'transparent', // Card handles its own bg
     },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#fff',
-        marginBottom: 8,
-        textShadowColor: 'rgba(0,0,0,0.3)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 3,
+
+    // Header
+    headerBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255,140,0,0.18)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,140,0,0.45)',
+        borderRadius: 50,
+        paddingHorizontal: 18,
+        paddingVertical: 6,
+        marginBottom: 10,
+    },
+    headerEmoji: { fontSize: 16 },
+    headerLabel: {
+        fontSize: 13,
+        fontWeight: '800',
+        color: BRAND.orangeLight,
+        letterSpacing: 1.5,
+        marginHorizontal: 8,
     },
     subtitle: {
-        fontSize: 16,
-        color: 'rgba(255,255,255,0.9)',
-        marginBottom: 20,
+        fontSize: 13,
+        color: 'rgba(255,255,255,0.65)',
+        marginBottom: 18,
+        letterSpacing: 0.3,
     },
+
+    // Card wrapper
     cardWrapper: {
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
-        borderRadius: 16,
+        borderRadius: 24,
         overflow: 'hidden',
-        position: 'relative',
-        elevation: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        backgroundColor: '#fff',
+        elevation: 20,
+        shadowColor: BRAND.magenta,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.5,
+        shadowRadius: 16,
+        // Purple glowing border
+        borderWidth: 2,
+        borderColor: 'rgba(187,68,204,0.7)',
     },
-    // Back Layer (Reward)
+
+    // Back reward layer
     rewardLayer: {
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 20,
+        padding: 24,
+    },
+    decorTopLeft: {
+        position: 'absolute',
+        top: -30,
+        left: -30,
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: 'rgba(187,68,204,0.15)',
+    },
+    decorBottomRight: {
+        position: 'absolute',
+        bottom: -40,
+        right: -40,
+        width: 130,
+        height: 130,
+        borderRadius: 65,
+        backgroundColor: 'rgba(255,140,0,0.1)',
     },
     rewardContent: {
         alignItems: 'center',
         width: '100%',
     },
-    iconContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: '#e6f7ff',
+    iconRing: {
+        width: 76,
+        height: 76,
+        borderRadius: 38,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 15,
+        marginBottom: 14,
+    },
+    iconInner: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: '#FFF8F0',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     rewardValue: {
-        fontSize: 36,
+        fontSize: 42,
         fontWeight: '900',
-        color: COLORS.primary,
-        marginBottom: 8,
-        textAlign: 'center',
+        color: BRAND.purple,
+        marginBottom: 6,
+        letterSpacing: -1,
+        textShadowColor: 'rgba(187,68,204,0.3)',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 6,
     },
     rewardDesc: {
-        fontSize: 16,
-        color: '#666',
+        fontSize: 13,
+        color: '#555',
         textAlign: 'center',
-        marginBottom: 20,
+        marginBottom: 18,
+        lineHeight: 18,
+        paddingHorizontal: 10,
     },
-    codeContainer: {
-        backgroundColor: '#f5f5f5',
+    codeBox: {
+        backgroundColor: BRAND.purple,
         paddingVertical: 10,
-        paddingHorizontal: 25,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderStyle: 'dashed',
+        paddingHorizontal: 22,
+        borderRadius: 14,
         alignItems: 'center',
-        marginBottom: 15,
+        marginBottom: 12,
         width: '100%',
+        shadowColor: BRAND.purple,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 8,
+        elevation: 6,
     },
     codeLabel: {
-        fontSize: 12,
-        color: '#888',
+        fontSize: 9,
+        color: 'rgba(255,255,255,0.6)',
+        letterSpacing: 2,
         marginBottom: 2,
-        fontWeight: '600',
+        fontWeight: '700',
     },
     codeText: {
         fontSize: 22,
         fontWeight: 'bold',
-        color: '#333',
-        letterSpacing: 2,
+        color: BRAND.orangeLight,
+        letterSpacing: 3,
+    },
+    validityRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     expiryText: {
-        fontSize: 12,
-        color: '#999',
+        fontSize: 11,
+        color: '#888',
         fontStyle: 'italic',
     },
+    nearbyBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255,140,0,0.12)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,140,0,0.35)',
+        borderRadius: 20,
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        marginBottom: 10,
+        maxWidth: '100%',
+    },
+    nearbyBadgeText: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: BRAND.orange,
+        marginLeft: 5,
+        flexShrink: 1,
+    },
 
-    // Front Layer (Scratch)
+    // Front scratch layer
     scratchLayer: {
         ...StyleSheet.absoluteFillObject,
         backgroundColor: 'transparent',
     },
-    pointerEventsNone: {
-        pointerEvents: 'none',
-    },
-    gridContainer: {
+    grid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+        width: CARD_WIDTH,
+        height: CARD_HEIGHT,
     },
-    cell: {
-        // Determine gradient via child
-        overflow: 'hidden',
-        backgroundColor: COLORS.primary, // Fallback
-        borderColor: 'transparent', // Ensure no borders
+    sparkle: {
+        position: 'absolute',
+        top: '35%',
+        left: '35%',
+        fontSize: 10,
+        color: 'rgba(255,255,255,0.35)',
     },
-    scratchContent: {
+
+    // Scratch hint overlay
+    scratchHint: {
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 10,
+    },
+    scratchHintInner: {
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.35)',
+        paddingHorizontal: 28,
+        paddingVertical: 20,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.2)',
+    },
+    fingerEmoji: {
+        fontSize: 36,
+        marginBottom: 6,
     },
     scratchText: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#fff',
-        marginTop: 10,
-        textShadowColor: 'rgba(0,0,0,0.3)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 2,
+        fontSize: 22,
+        fontWeight: '800',
+        color: '#FFFFFF',
+        letterSpacing: 0.5,
+        textShadowColor: 'rgba(0,0,0,0.6)',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 6,
+    },
+    scratchArrows: {
+        marginTop: 6,
+    },
+    arrowText: {
+        fontSize: 13,
+        color: 'rgba(255,255,255,0.7)',
+        letterSpacing: 1,
     },
 
-    // Buttons
-    closeButton: {
-        marginTop: 30,
-        paddingVertical: 12,
-        paddingHorizontal: 40,
-        backgroundColor: '#fff',
-        borderRadius: 25,
+    // Progress
+    progressRow: {
+        position: 'absolute',
+        bottom: 12,
+        left: 0,
+        right: 0,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 6,
     },
-    closeButtonText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: COLORS.primary,
+    progressDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+    },
+
+    // Shine effect
+    shine: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        width: 60,
+        backgroundColor: 'rgba(255,255,255,0.12)',
+        transform: [{ skewX: '-20deg' }],
+    },
+
+    // CTA Button
+    ctaWrapper: {
+        marginTop: 22,
+        width: CARD_WIDTH,
+        borderRadius: 50,
+        overflow: 'hidden',
+    },
+    ctaButton: {
+        paddingVertical: 15,
+        alignItems: 'center',
+        borderRadius: 50,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.2)',
+    },
+    ctaText: {
+        fontSize: 17,
+        fontWeight: '800',
+        color: '#fff',
+        letterSpacing: 0.5,
+    },
+
+    brandNote: {
+        marginTop: 14,
+        fontSize: 11,
+        color: 'rgba(255,255,255,0.3)',
+        letterSpacing: 2,
+        fontWeight: '600',
+    },
+    detailsBox: {
+        marginTop: 10,
+        backgroundColor: 'rgba(255,140,0,0.05)',
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 12,
+        width: '100%',
+        alignItems: 'flex-start',
+    },
+    detailRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 4,
+    },
+    detailText: {
+        fontSize: 11,
+        color: '#666',
+        flexShrink: 1,
     }
 });
 

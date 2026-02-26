@@ -18,6 +18,11 @@ export default function SearchScreen({ navigation }) {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [hasLocation, setHasLocation] = useState(false);
 
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   // Initialize screen - same pattern as UserHomeScreen
   useEffect(() => {
     initializeScreen();
@@ -25,9 +30,9 @@ export default function SearchScreen({ navigation }) {
 
   const initializeScreen = async () => {
     fetchCategories();
-    await checkLocation();
-    // Initial fetch after location check (will use location if available)
-    fetchFilteredBusinesses();
+    const loc = await checkLocation();
+    // Initial fetch after location check resolves, using the resolved location
+    fetchFilteredBusinesses(1, loc);
   };
 
   const checkLocation = async () => {
@@ -38,17 +43,21 @@ export default function SearchScreen({ navigation }) {
           accuracy: Location.Accuracy.Balanced,
           timeout: 10000,
         });
-        setCurrentLocation({
+        const locCoords = {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude
-        });
+        };
+        setCurrentLocation(locCoords);
         setHasLocation(true);
+        return locCoords;
       } else {
         setHasLocation(false);
+        return null;
       }
     } catch (error) {
       console.error('Error checking location permission or getting location:', error);
       setHasLocation(false);
+      return null;
     }
   };
 
@@ -85,69 +94,98 @@ export default function SearchScreen({ navigation }) {
 
   // Backend handles all search and filtering logic - frontend just passes parameters
   // Call API directly and store in local state (independent from home screen)
-  const fetchFilteredBusinesses = useCallback(async () => {
+  const fetchFilteredBusinesses = useCallback(async (pageNumber = 1, overrideLocation = null) => {
     try {
-      setSearchLoading(true);
-      const params = {};
+      if (pageNumber === 1) {
+        setSearchLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+
+      const params = {
+        page: pageNumber,
+        limit: 10
+      };
 
       // Pass search query to backend (backend handles case-insensitive search)
       if (searchQuery && searchQuery.trim() !== '') {
         params.search = searchQuery.trim();
-        console.log('🔍 Searching for:', params.search);
+        console.log(`🔍 Searching for: ${params.search} (Page: ${pageNumber})`);
       }
 
       // Pass category to backend (backend handles case-insensitive matching)
       if (selectedCategory && typeof selectedCategory === 'string' && selectedCategory.trim() !== '') {
         params.category = selectedCategory.trim();
-        console.log('🏷️ Filtering by category:', params.category);
+        console.log(`🏷️ Filtering by category: ${params.category} (Page: ${pageNumber})`);
       }
 
       console.log('📡 API params:', params);
 
       // Call API directly (not through Redux) to keep search screen independent
       let response;
-      if (currentLocation) {
-        params.latitude = currentLocation.latitude;
-        params.longitude = currentLocation.longitude;
+      const targetLocation = overrideLocation || currentLocation;
+
+      if (targetLocation && targetLocation.latitude) {
+        params.latitude = targetLocation.latitude;
+        params.longitude = targetLocation.longitude;
+        params.radius = 20000000; // 20,000 km default radius so global test properties show up
         response = await ApiService.getNearbyBusinesses(params);
       } else {
         response = await ApiService.getAllActiveBusinesses(params);
       }
 
       // API client interceptor already unwraps response.data, so response is already the data object
-      // Store results in local state (doesn't affect home screen)
       if (response && response.businesses && Array.isArray(response.businesses)) {
-        console.log('✅ Search results received:', response.businesses.length, 'businesses');
-        setSearchResults(response.businesses);
+        console.log(`✅ Search results received: ${response.businesses.length} businesses (Page ${response.pagination?.page || pageNumber}/${response.pagination?.pages || 1})`);
+
+        if (pageNumber === 1) {
+          setSearchResults(response.businesses);
+        } else {
+          setSearchResults(prev => [...prev, ...response.businesses]);
+        }
+
+        // Update pagination data
+        setPage(response.pagination?.page || pageNumber);
+        setTotalPages(response.pagination?.pages || 1);
       } else {
         console.log('⚠️ No businesses in response. Response structure:', response);
-        setSearchResults([]);
+        if (pageNumber === 1) {
+          setSearchResults([]);
+        }
       }
     } catch (error) {
       console.error('❌ Error fetching businesses:', error);
-      setSearchResults([]);
+      if (pageNumber === 1) setSearchResults([]);
     } finally {
       setSearchLoading(false);
+      setLoadingMore(false);
     }
   }, [searchQuery, selectedCategory, currentLocation]);
 
-  // Debounced search for text input (only for typing, not for initial load)
-  const debouncedSearch = useMemo(() => debounce(fetchFilteredBusinesses, 500), [fetchFilteredBusinesses]);
+  // Handle load more
+  const handleLoadMore = useCallback(() => {
+    if (!searchLoading && !loadingMore && page < totalPages) {
+      console.log(`🔄 Loading more results... (Page ${page + 1})`);
+      fetchFilteredBusinesses(page + 1);
+    }
+  }, [searchLoading, loadingMore, page, totalPages, fetchFilteredBusinesses]);
 
-  // Trigger search when category changes (immediate, not debounced)
+  // Debounced search for text input (only for typing, not for initial load)
+  const debouncedSearch = useMemo(() => debounce(() => fetchFilteredBusinesses(1), 500), [fetchFilteredBusinesses]);
+
+  // Trigger search when category changes
+  const initialCategoryMount = React.useRef(true);
+
   useEffect(() => {
-    fetchFilteredBusinesses();
+    if (initialCategoryMount.current) {
+      initialCategoryMount.current = false;
+      return;
+    }
+
+    // Trigger reset to page 1 whenever category changes
+    fetchFilteredBusinesses(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory]);
-
-  // Re-fetch when location becomes available (to get nearby results)
-  useEffect(() => {
-    // Only re-fetch if location was just set (skip initial null state)
-    if (currentLocation) {
-      fetchFilteredBusinesses();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentLocation]);
 
   // Memoize renderBusiness for performance
   const renderBusiness = useCallback(({ item }) => (
@@ -267,7 +305,7 @@ export default function SearchScreen({ navigation }) {
               // Trigger search on every character change (debounced) or immediately when cleared
               if (text.length === 0) {
                 console.log('🔄 Search cleared, fetching all businesses');
-                fetchFilteredBusinesses(); // Immediate search when cleared
+                fetchFilteredBusinesses(1); // Immediate search when cleared
               } else {
                 console.log('⌨️ User typing, triggering debounced search for:', text);
                 debouncedSearch(); // Debounced search as user types
@@ -279,7 +317,7 @@ export default function SearchScreen({ navigation }) {
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => {
               setSearchQuery('');
-              fetchFilteredBusinesses();
+              fetchFilteredBusinesses(1);
             }}>
               <Icon name="close-circle" size={22} color="#9CA3AF" />
             </TouchableOpacity>
@@ -353,13 +391,23 @@ export default function SearchScreen({ navigation }) {
                     </View>
                   </TouchableOpacity>
                 ))}
-                {searchResults.length > 10 && (
-                  <View className="px-4 py-3 border-t border-gray-100">
-                    <Text className="text-xs text-gray-500 text-center">
-                      Showing 10 of {searchResults.length} results
-                    </Text>
-                  </View>
-                )}
+                <View className="px-4 py-3 border-t border-gray-100 items-center">
+                  {loadingMore ? (
+                    <View className="flex-row items-center">
+                      <ActivityIndicator size="small" color={COLORS.secondary} className="mr-2" />
+                      <Text className="text-xs text-gray-500">Loading more...</Text>
+                    </View>
+                  ) : page < totalPages ? (
+                    <TouchableOpacity onPress={handleLoadMore}>
+                      <Text className="text-xs text-secondary font-bold" style={{ color: COLORS.secondary }}>
+                        Load more results
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <Text className="text-xs text-gray-500">End of results</Text>
+                  )}
+                </View>
+
               </ScrollView>
             ) : (
               <View className="py-6 px-4 items-center">
@@ -397,14 +445,14 @@ export default function SearchScreen({ navigation }) {
             horizontal
             showsHorizontalScrollIndicator={false}
             className="mb-4"
-            contentContainerStyle={{ paddingRight: 24, paddingBottom: 2, paddingTop: 2 }}
+            contentContainerStyle={{ paddingRight: 24, paddingBottom: 8, paddingTop: 4 }}
           >
             {categories.map((category) => {
               const categoryColor = category.color || COLORS.secondary;
-              const isAllCategory = category.slug === 'all' || category._id === 'all';
+              const isAllCategory = category.name === 'All' || category._id === 'all';
               const filterValue = isAllCategory
                 ? null
-                : (category.slug || category.value || category.name || '').trim();
+                : (category.name || category.value || category.slug || '').trim();
 
               const isSelected = isAllCategory
                 ? (!selectedCategory || selectedCategory === null)
@@ -453,10 +501,9 @@ export default function SearchScreen({ navigation }) {
                   </View>
                   {/* Category Label */}
                   <Text
-                    className={`text-[11px] font-medium text-center ${isSelected ? 'text-[#5e399e]' : 'text-gray-700'
+                    className={`text-[11px] font-medium text-center pb-1 ${isSelected ? 'text-[#5e399e]' : 'text-gray-700'
                       }`}
                     numberOfLines={1}
-                    style={{ lineHeight: 14 }}
                   >
                     {category.name}
                   </Text>
@@ -498,6 +545,21 @@ export default function SearchScreen({ navigation }) {
                   windowSize={5}
                   initialNumToRender={10}
                   updateCellsBatchingPeriod={50}
+                  onEndReached={handleLoadMore}
+                  onEndReachedThreshold={0.5}
+                  ListFooterComponent={() =>
+                    loadingMore ? (
+                      <View className="py-4 items-center">
+                        <ActivityIndicator size="small" color={COLORS.secondary} />
+                      </View>
+                    ) : (
+                      page >= totalPages && searchResults.length > 0 && (
+                        <View className="py-4 items-center">
+                          <Text className="text-gray-400 text-xs">End of results</Text>
+                        </View>
+                      )
+                    )
+                  }
                   getItemLayout={(data, index) => ({
                     length: 120,
                     offset: 120 * index + (index * 12), // height + margin

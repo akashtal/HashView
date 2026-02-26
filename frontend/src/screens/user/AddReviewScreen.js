@@ -19,7 +19,7 @@ import ScratchCardModal from '../../components/ScratchCardModal';
 export default function AddReviewScreen({ navigation, route }) {
   const dispatch = useDispatch();
   const { business } = route.params;
-  const { loading, successMessage, error, createdCoupon } = useSelector((state) => state.review);
+  const { loading, successMessage, error, createdCoupon, isNearbyCoupon, couponBusinessName } = useSelector((state) => state.review);
 
   // Modal State
   const [showScratchCard, setShowScratchCard] = useState(false);
@@ -91,28 +91,25 @@ export default function AddReviewScreen({ navigation, route }) {
   // ==================== SUCCESS/ERROR HANDLING ====================
   useEffect(() => {
     if (successMessage) {
-      if (createdCoupon) {
-        // If we have a coupon, show the scratch card!
-        setShowScratchCard(true);
-      } else {
-        // Standard success message (e.g. limit reached)
-        ToastService.showSuccess('Success!', successMessage);
+      // Show generic toast success
+      ToastService.showSuccess('Success!', successMessage);
 
-        setTimeout(() => {
-          dispatch(clearSuccessMessage());
-          navigation.goBack();
-        }, 1500);
-      }
+      // Always show scratch card, even if there's no coupon
+      setShowScratchCard(true);
     }
-  }, [successMessage, createdCoupon]);
+  }, [successMessage]);
 
   const handleCloseScratchCard = () => {
     setShowScratchCard(false);
+    const hasCoupon = !!createdCoupon;
     dispatch(clearCreatedCoupon());
     dispatch(clearSuccessMessage());
 
-    // Navigate to coupons page to see the new reward
-    navigation.replace('Coupons', { newCouponId: createdCoupon?._id });
+    if (hasCoupon) {
+      navigation.replace('Coupons', { newCouponId: createdCoupon?._id });
+    } else {
+      navigation.goBack();
+    }
   };
 
   useEffect(() => {
@@ -120,6 +117,7 @@ export default function AddReviewScreen({ navigation, route }) {
       ToastService.showError('Error', error);
     }
   }, [error]);
+
 
   // 🔄 CRITICAL: Reset location when business changes (prevents cache bug!)
   useEffect(() => {
@@ -507,22 +505,22 @@ export default function AddReviewScreen({ navigation, route }) {
   const start30SecondTimer = () => {
     console.log('⏱️ Starting 30-second verification timer...');
 
+    let timeRemaining = VERIFICATION_TIME;
+    setVerificationTimer(timeRemaining);
+
     timerInterval.current = setInterval(() => {
-      setVerificationTimer(prev => {
-        const newTime = prev - 1;
+      timeRemaining -= 1;
+      setVerificationTimer(timeRemaining);
 
-        if (newTime <= 0) {
-          clearInterval(timerInterval.current);
-          setVerificationComplete(true);
-          console.log('✅ 30-second verification complete!');
-          ToastService.showSuccess(
-            'Verification Complete! ✅',
-            'You\'ve stayed within the business location for 30 seconds. You can now submit your review!'
-          );
-        }
-
-        return newTime;
-      });
+      if (timeRemaining <= 0) {
+        clearInterval(timerInterval.current);
+        setVerificationComplete(true);
+        console.log('✅ 30-second verification complete!');
+        ToastService.showSuccess(
+          'Verification Complete! ✅',
+          'You\'ve stayed within the business location for 30 seconds. You can now submit your review!'
+        );
+      }
     }, 1000);
   };
 
@@ -1205,25 +1203,11 @@ export default function AddReviewScreen({ navigation, route }) {
           <View className="flex-row justify-center items-center flex-wrap px-2">
             {[
               { emoji: '😊', label: 'happy', value: 'happy' },
-              { emoji: '😇', label: 'blessed', value: 'blessed' },
-              { emoji: '😍', label: 'loved', value: 'loved' },
               { emoji: '😢', label: 'sad', value: 'sad' },
               { emoji: '🥰', label: 'lovely', value: 'lovely' },
-              { emoji: '😃', label: 'thankful', value: 'thankful' },
-              { emoji: '⭐😁', label: 'excited', value: 'excited' },
-              { emoji: '😘', label: 'in love', value: 'in_love' },
-              { emoji: '😂', label: 'crazy', value: 'crazy' },
               { emoji: '😅', label: 'grateful', value: 'grateful' },
-              { emoji: '😊', label: 'blissful', value: 'blissful' },
-              { emoji: '😂', label: 'fantastic', value: 'fantastic' },
-              { emoji: '😛', label: 'silly', value: 'silly' },
-              { emoji: '🎉', label: 'festive', value: 'festive' },
-              { emoji: '😊', label: 'wonderful', value: 'wonderful' },
               { emoji: '😎', label: 'cool', value: 'cool' },
-              { emoji: '😊', label: 'amused', value: 'amused' },
-              { emoji: '😌', label: 'relaxed', value: 'relaxed' },
               { emoji: '😊', label: 'positive', value: 'positive' },
-              { emoji: '😌', label: 'chill', value: 'chill' },
             ].map((emotion) => (
               <TouchableOpacity
                 key={emotion.value}
@@ -1420,6 +1404,8 @@ export default function AddReviewScreen({ navigation, route }) {
       <ScratchCardModal
         visible={showScratchCard}
         coupon={createdCoupon}
+        isNearbyCoupon={isNearbyCoupon}
+        couponBusinessName={couponBusinessName}
         onClose={handleCloseScratchCard}
       />
     </ScrollView>

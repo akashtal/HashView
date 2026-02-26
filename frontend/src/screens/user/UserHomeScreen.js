@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import { getAllActiveBusinesses, getNearbyBusinesses, searchBusinesses } from '../../store/slices/businessSlice';
+import { getAllActiveBusinesses, getNearbyBusinesses, searchBusinesses, clearBusinesses } from '../../store/slices/businessSlice';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
 import { FLATLIST_OPTIMIZATIONS, optimizeImageUri } from '../../utils/performanceHelpers';
@@ -72,7 +72,7 @@ const BusinessCard = React.memo(({ item, onPress }) => {
 
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={() => onPress(item._id)}
       activeOpacity={0.85}
       className="mb-4"
     >
@@ -347,6 +347,9 @@ export default function UserHomeScreen({ navigation }) {
         params.distance = distanceFilter;
       }
 
+      // Clear existing UI lists before fetching new matching ones
+      dispatch(clearBusinesses());
+
       // Backend decides which endpoint to use based on location
       if (currentLocation) {
         params.latitude = currentLocation.latitude;
@@ -416,31 +419,17 @@ export default function UserHomeScreen({ navigation }) {
     // Reset all filters on refresh to show "All Businesses"
     setSelectedCategory(null);
     setRatingFilter({ source: null, stars: null });
-    setDistanceFilter(null); // Assuming this state setter exists
+    setDistanceFilter(null);
 
-    // We need to fetch with "empty" filters immediately implies Global Scope
-    if (currentLocation) {
-      await dispatch(getNearbyBusinesses({
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
-        radius: 20000000 // Force Global
-      }));
-    } else {
-      await dispatch(getAllActiveBusinesses());
-    }
-
-    setRefreshing(false);
-  }, [currentLocation, dispatch]);
+    // fetchFilteredBusinesses is triggered by useEffect on state change
+    setTimeout(() => {
+      setRefreshing(false); // Stop refresh icon slightly after
+    }, 1000);
+  }, []);
 
   useEffect(() => {
     fetchFilteredBusinesses();
-  }, [
-    ratingFilter.source,
-    ratingFilter.stars,
-    distanceFilter,
-    selectedCategory,
-    fetchFilteredBusinesses,
-  ]);
+  }, [ratingFilter.source, ratingFilter.stars, distanceFilter, selectedCategory]);
 
   /* --- SEARCH FUNCTIONALITY TEMPORARILY DISABLED ---
   const handleSearch = useCallback(async (query) => {
@@ -495,22 +484,21 @@ export default function UserHomeScreen({ navigation }) {
 
   const applyFilters = useCallback(() => {
     setShowFilterModal(false);
-    fetchFilteredBusinesses();
-  }, [fetchFilteredBusinesses]);
+    // fetchFilteredBusinesses is already triggered by the useEffect observing filter states
+  }, []);
 
   // Backend handles all filtering - just use what backend returns
-  const displayBusinesses = hasLocation && nearbyBusinesses.length > 0 ? nearbyBusinesses : businesses;
-  const isShowingNearby = hasLocation && nearbyBusinesses.length > 0;
+  const displayBusinesses = hasLocation ? nearbyBusinesses : businesses;
+  const isShowingNearby = hasLocation;
 
   // BUSINESS CARD RENDER - Tailwind CSS Styling
-  const renderBusiness = useCallback(({ item }) => {
-    return (
-      <BusinessCard
-        item={item}
-        onPress={() => navigation.navigate('BusinessDetail', { businessId: item._id })}
-      />
-    );
+  const handleBusinessPress = useCallback((businessId) => {
+    navigation.navigate('BusinessDetail', { businessId });
   }, [navigation]);
+
+  const renderBusiness = useCallback(({ item }) => (
+    <BusinessCard item={item} onPress={handleBusinessPress} />
+  ), [handleBusinessPress]);
 
   const keyExtractor = useCallback((item) => item._id, []);
 
@@ -639,10 +627,10 @@ export default function UserHomeScreen({ navigation }) {
           >
             {categories.map((category) => {
               const categoryColor = category.color || COLORS.secondary;
-              const isAllCategory = category.slug === 'all' || category._id === 'all';
+              const isAllCategory = category.name === 'All' || category._id === 'all';
               const filterValue = isAllCategory
                 ? null
-                : (category.slug || category.value || category.name || '').trim();
+                : (category.name || category.value || category.slug || '').trim();
 
               const isSelected = isAllCategory
                 ? (!selectedCategory || selectedCategory === null)
@@ -739,12 +727,12 @@ export default function UserHomeScreen({ navigation }) {
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
             showsVerticalScrollIndicator={false}
-            removeClippedSubviews={Platform.OS === 'android'} // Only enable on Android if issues persist
-            initialNumToRender={6}
-            maxToRenderPerBatch={5}
-            windowSize={5}
+            removeClippedSubviews={false} // Disable to fix scrolling issues with dynamic heights
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}
+            windowSize={11}
             onEndReached={handleLoadMore}
-            onEndReachedThreshold={0.5}
+            onEndReachedThreshold={0.3}
             ListFooterComponent={renderFooter}
             contentContainerStyle={{ paddingBottom: 20 }}
           />
