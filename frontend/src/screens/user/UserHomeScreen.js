@@ -10,6 +10,7 @@ import { getAllActiveBusinesses, getNearbyBusinesses, searchBusinesses, clearBus
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
 import { FLATLIST_OPTIMIZATIONS, optimizeImageUri } from '../../utils/performanceHelpers';
+import { FlashList } from '@shopify/flash-list';
 
 const RatingBadge = ({ source, rating, reviews }) => {
   const colors = {
@@ -218,7 +219,10 @@ export default function UserHomeScreen({ navigation }) {
   }, [user]);
 
   const initializeScreen = async () => {
-    dispatch(getAllActiveBusinesses());
+    // Only fetch globally initially if we don't already have results cached in Redux
+    if (businesses.length === 0 && nearbyBusinesses.length === 0) {
+      dispatch(getAllActiveBusinesses());
+    }
     await checkLocationPermission();
   };
 
@@ -264,7 +268,12 @@ export default function UserHomeScreen({ navigation }) {
       const { status } = await Location.getForegroundPermissionsAsync();
       setLocationPermission(status);
       if (status === 'granted') {
-        await getCurrentLocation();
+        // Only trigger the deep location fetch on mount if cache is empty OR we need a fresh location
+        if (nearbyBusinesses.length === 0) {
+          await getCurrentLocation();
+        } else {
+          setHasLocation(true); // Trust the cached state
+        }
       }
     } catch (error) {
       console.error('Error checking location permission:', error);
@@ -427,8 +436,15 @@ export default function UserHomeScreen({ navigation }) {
     }, 1000);
   }, []);
 
+  const isFirstFilterMount = React.useRef(true);
   useEffect(() => {
+    if (isFirstFilterMount.current) {
+      isFirstFilterMount.current = false;
+      // If we already have businesses in Redux from a previous mount, skip the initial fetch override
+      if (businesses.length > 0 || nearbyBusinesses.length > 0) return;
+    }
     fetchFilteredBusinesses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ratingFilter.source, ratingFilter.stars, distanceFilter, selectedCategory]);
 
   /* --- SEARCH FUNCTIONALITY TEMPORARILY DISABLED ---
@@ -619,77 +635,66 @@ export default function UserHomeScreen({ navigation }) {
             <ActivityIndicator size="small" color={COLORS.secondary} />
           </View>
         ) : (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="mb-2"
-            contentContainerStyle={{ paddingBottom: 0, paddingRight: 12 }}
-          >
-            {categories.map((category) => {
-              const categoryColor = category.color || COLORS.secondary;
-              const isAllCategory = category.name === 'All' || category._id === 'all';
-              const filterValue = isAllCategory
-                ? null
-                : (category.name || category.value || category.slug || '').trim();
+          <View style={{ height: 100 }}>
+            <FlashList
+              data={categories}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              estimatedItemSize={77}
+              keyExtractor={(item) => item._id}
+              contentContainerStyle={{ paddingHorizontal: 4 }}
+              renderItem={({ item: category }) => {
+                const isSelected = selectedCategory === category.name;
+                const categoryColor = category.color || COLORS.secondary;
 
-              const isSelected = isAllCategory
-                ? (!selectedCategory || selectedCategory === null)
-                : (selectedCategory === filterValue && filterValue !== '');
-
-              return (
-                <TouchableOpacity
-                  key={category._id}
-                  onPress={() => {
-                    if (isAllCategory) {
-                      setSelectedCategory(null);
-                    } else if (filterValue) {
-                      setSelectedCategory(filterValue);
-                    }
-                  }}
-                  activeOpacity={0.8}
-                  className="mr-3 items-center"
-                  style={{ width: 65 }}
-                >
-                  {/* Circular Icon Container */}
-                  <View
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 28,
-                      backgroundColor: isSelected
-                        ? '#5e399e'
-                        : '#FFFFFF',
-                      borderWidth: isSelected ? 0 : 1.5,
-                      borderColor: '#E5E7EB',
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: isSelected ? 0.15 : 0.08,
-                      shadowRadius: 4,
-                      elevation: isSelected ? 4 : 2,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginBottom: 6,
-                    }}
+                return (
+                  <TouchableOpacity
+                    onPress={() => setSelectedCategory(isSelected ? null : category.name)}
+                    activeOpacity={0.8}
+                    className="mr-3 items-center"
+                    style={{ width: 65 }}
                   >
-                    <Icon
-                      name={category.icon || 'apps'}
-                      size={26}
-                      color={isSelected ? '#FFFFFF' : categoryColor}
-                    />
-                  </View>
-                  {/* Category Label */}
-                  <Text
-                    className={`text-[11px] font-medium text-center ${isSelected ? 'text-[#5e399e]' : 'text-gray-700'
-                      }`}
-                    numberOfLines={1}
-                    style={{ lineHeight: 14 }}
-                  >
-                    {category.name}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
+                    {/* Circular Icon Container */}
+                    <View
+                      style={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 28,
+                        backgroundColor: isSelected
+                          ? '#5e399e'
+                          : '#FFFFFF',
+                        borderWidth: isSelected ? 0 : 1.5,
+                        borderColor: '#E5E7EB',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: isSelected ? 0.15 : 0.08,
+                        shadowRadius: 4,
+                        elevation: isSelected ? 4 : 2,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: 6,
+                      }}
+                    >
+                      <Icon
+                        name={category.icon || 'apps'}
+                        size={26}
+                        color={isSelected ? '#FFFFFF' : categoryColor}
+                      />
+                    </View>
+                    {/* Category Label */}
+                    <Text
+                      className={`text-[11px] font-medium text-center pb-1 ${isSelected ? 'text-[#5e399e]' : 'text-gray-700'
+                        }`}
+                      numberOfLines={1}
+                      style={{ lineHeight: 14 }}
+                    >
+                      {category.name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
         )}
       </View>
 
@@ -719,18 +724,15 @@ export default function UserHomeScreen({ navigation }) {
             </TouchableOpacity>
           </View>
         ) : (
-          <FlatList
+          <FlashList
             data={displayBusinesses}
             renderItem={renderBusiness}
             keyExtractor={keyExtractor}
+            estimatedItemSize={300}
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
             showsVerticalScrollIndicator={false}
-            removeClippedSubviews={false} // Disable to fix scrolling issues with dynamic heights
-            initialNumToRender={10}
-            maxToRenderPerBatch={10}
-            windowSize={11}
             onEndReached={handleLoadMore}
             onEndReachedThreshold={0.3}
             ListFooterComponent={renderFooter}

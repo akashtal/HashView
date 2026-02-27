@@ -127,7 +127,11 @@ const businessSlice = createSlice({
       })
       .addCase(getAllActiveBusinesses.fulfilled, (state, action) => {
         state.loading = false;
-        const { businesses, currentPage, totalPages, total } = action.payload;
+        const { businesses, pagination, total } = action.payload;
+
+        // Handle gracefully if the backend still sends deprecated fields during rollout
+        const currentPage = pagination?.page || action.payload.currentPage || 1;
+        const totalPages = pagination?.pages || action.payload.totalPages || 1;
 
         if (currentPage === 1) {
           state.businesses = businesses;
@@ -140,8 +144,8 @@ const businessSlice = createSlice({
         }
 
         state.pagination = {
-          currentPage: currentPage || 1,
-          totalPages: totalPages || 1,
+          currentPage: currentPage,
+          totalPages: totalPages,
           totalCount: total || 0,
           hasMore: currentPage < totalPages
         };
@@ -156,7 +160,10 @@ const businessSlice = createSlice({
       })
       .addCase(getNearbyBusinesses.fulfilled, (state, action) => {
         state.loading = false;
-        const { businesses, currentPage, totalPages, total } = action.payload;
+        const { businesses, pagination, total } = action.payload;
+
+        const currentPage = pagination?.page || action.payload.currentPage || 1;
+        const totalPages = pagination?.pages || action.payload.totalPages || 1;
 
         if (currentPage === 1) {
           state.nearbyBusinesses = businesses;
@@ -168,8 +175,8 @@ const businessSlice = createSlice({
         }
 
         state.nearbyPagination = {
-          currentPage: currentPage || 1,
-          totalPages: totalPages || 1,
+          currentPage: currentPage,
+          totalPages: totalPages,
           totalCount: total || 0,
           hasMore: currentPage < totalPages
         };

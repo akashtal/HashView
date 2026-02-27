@@ -94,7 +94,7 @@ export default function SearchScreen({ navigation }) {
 
   // Backend handles all search and filtering logic - frontend just passes parameters
   // Call API directly and store in local state (independent from home screen)
-  const fetchFilteredBusinesses = useCallback(async (pageNumber = 1, overrideLocation = null) => {
+  const fetchFilteredBusinesses = useCallback(async (pageNumber = 1, overrideLocation = null, queryOverride = null) => {
     try {
       if (pageNumber === 1) {
         setSearchLoading(true);
@@ -107,9 +107,11 @@ export default function SearchScreen({ navigation }) {
         limit: 10
       };
 
+      const actualQuery = queryOverride !== null ? queryOverride : searchQuery;
+
       // Pass search query to backend (backend handles case-insensitive search)
-      if (searchQuery && searchQuery.trim() !== '') {
-        params.search = searchQuery.trim();
+      if (actualQuery && actualQuery.trim() !== '') {
+        params.search = actualQuery.trim();
         console.log(`🔍 Searching for: ${params.search} (Page: ${pageNumber})`);
       }
 
@@ -141,7 +143,12 @@ export default function SearchScreen({ navigation }) {
         if (pageNumber === 1) {
           setSearchResults(response.businesses);
         } else {
-          setSearchResults(prev => [...prev, ...response.businesses]);
+          setSearchResults(prev => {
+            const newBusinesses = response.businesses.filter(
+              newBiz => !prev.some(existingBiz => existingBiz._id === newBiz._id)
+            );
+            return [...prev, ...newBusinesses];
+          });
         }
 
         // Update pagination data
@@ -171,7 +178,7 @@ export default function SearchScreen({ navigation }) {
   }, [searchLoading, loadingMore, page, totalPages, fetchFilteredBusinesses]);
 
   // Debounced search for text input (only for typing, not for initial load)
-  const debouncedSearch = useMemo(() => debounce(() => fetchFilteredBusinesses(1), 500), [fetchFilteredBusinesses]);
+  const debouncedSearch = useMemo(() => debounce((text) => fetchFilteredBusinesses(1, null, text), 500), [fetchFilteredBusinesses]);
 
   // Trigger search when category changes
   const initialCategoryMount = React.useRef(true);
@@ -305,10 +312,10 @@ export default function SearchScreen({ navigation }) {
               // Trigger search on every character change (debounced) or immediately when cleared
               if (text.length === 0) {
                 console.log('🔄 Search cleared, fetching all businesses');
-                fetchFilteredBusinesses(1); // Immediate search when cleared
+                fetchFilteredBusinesses(1, null, ''); // Immediate search when cleared
               } else {
                 console.log('⌨️ User typing, triggering debounced search for:', text);
-                debouncedSearch(); // Debounced search as user types
+                debouncedSearch(text); // Debounced search as user types
               }
             }}
             returnKeyType="search"
