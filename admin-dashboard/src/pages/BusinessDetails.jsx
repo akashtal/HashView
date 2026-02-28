@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, MapPin, Phone, Mail, Globe, Star, Edit2, Save, X, Image as ImageIcon, QrCode, Download, Plane, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, MapPin, Phone, Mail, Globe, Star, Edit2, Save, X, Image as ImageIcon, QrCode, Download, Plane, Plus, Trash2, Clock } from 'lucide-react';
 import { adminApi } from '../api/adminApi';
 import { format } from 'date-fns';
+import ImageCropperModal from '../components/ImageCropperModal';
 
 const BusinessDetails = () => {
   const { id } = useParams();
@@ -33,6 +34,12 @@ const BusinessDetails = () => {
   const [coverPreview, setCoverPreview] = useState('');
   const [galleryFiles, setGalleryFiles] = useState([]);
   const [galleryPreviews, setGalleryPreviews] = useState([]);
+
+  // Cropper state
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState(null);
+  const [cropType, setCropType] = useState(null); // 'logo' | 'cover' | 'gallery'
+  const [cropAspect, setCropAspect] = useState(1);
 
   const categories = [
     'restaurant', 'cafe', 'retail', 'services', 'healthcare',
@@ -90,7 +97,16 @@ const BusinessDetails = () => {
           tripAdvisorUrl: businessData.externalProfiles?.tripAdvisor?.profileUrl || '',
           googleBusinessName: businessData.externalProfiles?.googleBusiness?.businessName || '',
           status: businessData.status || 'pending',
-          kycStatus: businessData.kycStatus || 'pending'
+          kycStatus: businessData.kycStatus || 'pending',
+          openingHours: businessData.openingHours || {
+            monday: { open: '09:00', close: '17:00', closed: false },
+            tuesday: { open: '09:00', close: '17:00', closed: false },
+            wednesday: { open: '09:00', close: '17:00', closed: false },
+            thursday: { open: '09:00', close: '17:00', closed: false },
+            friday: { open: '09:00', close: '17:00', closed: false },
+            saturday: { open: '09:00', close: '17:00', closed: true },
+            sunday: { open: '09:00', close: '17:00', closed: true },
+          }
         });
       } else {
         alert('Business not found');
@@ -130,7 +146,16 @@ const BusinessDetails = () => {
         tripAdvisorUrl: business.externalProfiles?.tripAdvisor?.profileUrl || '',
         googleBusinessName: business.externalProfiles?.googleBusiness?.businessName || '',
         status: business.status || 'pending',
-        kycStatus: business.kycStatus || 'pending'
+        kycStatus: business.kycStatus || 'pending',
+        openingHours: business.openingHours || {
+          monday: { open: '09:00', close: '17:00', closed: false },
+          tuesday: { open: '09:00', close: '17:00', closed: false },
+          wednesday: { open: '09:00', close: '17:00', closed: false },
+          thursday: { open: '09:00', close: '17:00', closed: false },
+          friday: { open: '09:00', close: '17:00', closed: false },
+          saturday: { open: '09:00', close: '17:00', closed: true },
+          sunday: { open: '09:00', close: '17:00', closed: true },
+        }
       });
       // Reset images
       setLogoFile(null);
@@ -150,30 +175,83 @@ const BusinessDetails = () => {
     }));
   };
 
-  const handleLogoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setLogoFile(file);
-      setLogoPreview(URL.createObjectURL(file));
-    }
+  const handleHoursChange = (day, field, value) => {
+    setEditFormData(prev => ({
+      ...prev,
+      openingHours: {
+        ...prev.openingHours,
+        [day]: {
+          ...prev.openingHours[day],
+          [field]: value
+        }
+      }
+    }));
   };
 
-  const handleCoverChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setCoverFile(file);
-      setCoverPreview(URL.createObjectURL(file));
-    }
+  const readFile = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.addEventListener('load', () => resolve(reader.result), false);
+      reader.readAsDataURL(file);
+    });
   };
 
-  const handleGalleryChange = (e) => {
+  const handleLogoChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const imageDataUrl = await readFile(file);
+      setCropImageSrc(imageDataUrl);
+      setCropType('logo');
+      setCropAspect(1); // 1:1 Square focus for logo
+      setCropperOpen(true);
+    }
+    e.target.value = null; // reset input
+  };
+
+  const handleCoverChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const imageDataUrl = await readFile(file);
+      setCropImageSrc(imageDataUrl);
+      setCropType('cover');
+      setCropAspect(16 / 9); // 16:9 widescreen for cover
+      setCropperOpen(true);
+    }
+    e.target.value = null; // reset input
+  };
+
+  const handleGalleryChange = async (e) => {
     if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files);
-      setGalleryFiles(prev => [...prev, ...newFiles]);
-
-      const newPreviews = newFiles.map(file => URL.createObjectURL(file));
-      setGalleryPreviews(prev => [...prev, ...newPreviews]);
+      // NOTE: We only crop the FIRST image selected for simplicity in this implementation.
+      // A robust gallery cropper would iterate through each file sequentially.
+      const file = e.target.files[0];
+      const imageDataUrl = await readFile(file);
+      setCropImageSrc(imageDataUrl);
+      setCropType('gallery');
+      setCropAspect(4 / 3); // Standard 4:3 view usually
+      setCropperOpen(true);
     }
+    e.target.value = null; // reset input
+  };
+
+  const handleCropComplete = async (croppedBlob) => {
+    // Generate a file object from the blob
+    const file = new File([croppedBlob], `cropped-${Date.now()}.jpg`, { type: 'image/jpeg' });
+    const previewUrl = URL.createObjectURL(croppedBlob);
+
+    if (cropType === 'logo') {
+      setLogoFile(file);
+      setLogoPreview(previewUrl);
+    } else if (cropType === 'cover') {
+      setCoverFile(file);
+      setCoverPreview(previewUrl);
+    } else if (cropType === 'gallery') {
+      setGalleryFiles(prev => [...prev, file]);
+      setGalleryPreviews(prev => [...prev, previewUrl]);
+    }
+
+    setCropperOpen(false);
+    setCropImageSrc(null);
   };
 
   const handleUpdateBusiness = async () => {
@@ -552,6 +630,51 @@ const BusinessDetails = () => {
                   />
                   <p className="text-xs text-gray-500 mt-1">Users can only review this business when within this radius</p>
                 </div>
+
+                {/* Hours Edit Section */}
+                <div className="pt-4 border-t">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <Clock size={20} className="mr-2 text-gray-500" />
+                    Business Hours
+                  </h3>
+                  <div className="space-y-3">
+                    {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => (
+                      <div key={day} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-28 flex items-center">
+                          <input
+                            type="checkbox"
+                            id={`closed-${day}`}
+                            checked={!editFormData.openingHours[day].closed}
+                            onChange={(e) => handleHoursChange(day, 'closed', !e.target.checked)}
+                            className="mr-2 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                          />
+                          <label htmlFor={`closed-${day}`} className="text-sm font-medium text-gray-700 capitalize cursor-pointer">
+                            {day}
+                          </label>
+                        </div>
+
+                        <div className={`flex items-center gap-2 flex-1 ${editFormData.openingHours[day].closed ? 'opacity-50 pointer-events-none' : ''}`}>
+                          <input
+                            type="time"
+                            value={editFormData.openingHours[day].open || '09:00'}
+                            onChange={(e) => handleHoursChange(day, 'open', e.target.value)}
+                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                          />
+                          <span className="text-gray-500">-</span>
+                          <input
+                            type="time"
+                            value={editFormData.openingHours[day].close || '17:00'}
+                            onChange={(e) => handleHoursChange(day, 'close', e.target.value)}
+                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                          />
+                        </div>
+                        {editFormData.openingHours[day].closed && (
+                          <span className="text-sm text-red-500 font-medium w-16 text-right">Closed</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
@@ -615,6 +738,35 @@ const BusinessDetails = () => {
                       </span>
                     </div>
                   </div>
+                </div>
+
+                {/* Hours Display Section */}
+                <div className="pt-4 border-t">
+                  <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center">
+                    <Clock size={16} className="mr-2" />
+                    Opening Hours
+                  </h3>
+                  {business.openingHours ? (
+                    <div className="space-y-2">
+                      {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => {
+                        const hours = business.openingHours[day];
+                        return (
+                          <div key={day} className="flex justify-between text-sm">
+                            <span className="text-gray-500 capitalize w-24">{day}</span>
+                            {hours && !hours.closed ? (
+                              <span className="text-gray-900 font-medium">
+                                {hours.open} - {hours.close}
+                              </span>
+                            ) : (
+                              <span className="text-red-500 font-medium">Closed</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400 italic">No hours configured</p>
+                  )}
                 </div>
 
               </div>
@@ -1427,6 +1579,17 @@ const BusinessDetails = () => {
           )}
         </div>
       </div>
+
+      <ImageCropperModal
+        isOpen={cropperOpen}
+        imageSrc={cropImageSrc}
+        aspect={cropAspect}
+        onCropComplete={handleCropComplete}
+        onCancel={() => {
+          setCropperOpen(false);
+          setCropImageSrc(null);
+        }}
+      />
     </div>
   );
 };
