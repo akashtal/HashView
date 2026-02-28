@@ -318,9 +318,6 @@ const ScratchCardModal = ({ visible, onClose, coupon, isNearbyCoupon, couponBusi
                                     </>
                                 ) : (
                                     <View style={{ alignItems: 'center', marginTop: 15, paddingHorizontal: 20 }}>
-                                        <Text style={[styles.rewardDesc, { fontSize: 16, fontWeight: 'bold', color: BRAND.purple }]}>
-                                            No nearby rewards available right now.
-                                        </Text>
                                         <Text style={[styles.rewardDesc, { fontSize: 14, marginTop: 5 }]}>
                                             Better luck next time!
                                         </Text>

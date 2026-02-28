@@ -569,7 +569,6 @@ exports.getNearbyBusinesses = async (req, res, next) => {
         $project: {
           documents: 0,
           externalReviews: 0,
-          claimRequest: 0,
           openingHours: 0
         }
       },
@@ -723,7 +722,7 @@ exports.getAllActiveBusinesses = async (req, res, next) => {
     console.log('   📊 MongoDB query:', JSON.stringify(query, null, 2));
 
     const businesses = await Business.find(query)
-      .select('-documents -externalReviews -claimRequest -openingHours')
+      .select('-documents -externalReviews -openingHours')
       .skip(skip)
       .limit(queryLimit)
       .sort({ 'rating.average': -1 }); // Sort by highest rated first
@@ -817,7 +816,7 @@ exports.searchBusinesses = async (req, res, next) => {
 
     // Fetch businesses
     let businesses = await Business.find(searchQuery)
-      .select('-documents -externalReviews -claimRequest -openingHours')
+      .select('-documents -externalReviews -openingHours')
       .limit(parseInt(limit) || 50); // Default 50, or use limit param for autocomplete
 
     // Calculate distance if user location provided
@@ -869,7 +868,6 @@ exports.searchBusinesses = async (req, res, next) => {
 exports.getBusiness = async (req, res, next) => {
   try {
     const business = await Business.findById(req.params.id)
-      .populate('owner', 'name email')
       .select('-documents');
 
     if (!business) {
