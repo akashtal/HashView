@@ -26,16 +26,27 @@ const reviewSchema = new mongoose.Schema({
   emotion: {
     type: String,
     enum: [
-      /* New Trimmed List */
+      /* New UI Values */
+      'Delighted', 'Relaxed', 'Valued', 'Excited', 'Disappointed',
+      /* Legacy UI Values */
       'happy', 'sad', 'lovely', 'grateful', 'cool', 'positive',
-      '😊', '😢', '🥰', '😅', '😎',
-      /* Legacy Backwards Compatibility */
+      '🤩', '🧘', '🥰', '🎉', '☹️',
+      /* Older Backwards Compatibility */
       'loved', 'okay', 'disappointed', 'frustrated', 'amazing',
       'blessed', 'thankful', 'excited', 'in_love', 'crazy',
       'blissful', 'fantastic', 'silly', 'festive', 'wonderful',
       'amused', 'relaxed', 'chill', null
     ],
     default: null
+  },
+  // 🏨 Booking.com-style category ratings (all optional, scale 1-10)
+  categoryRatings: {
+    staff: { type: Number, min: 1, max: 10, default: null },
+    facilities: { type: Number, min: 1, max: 10, default: null },
+    cleanliness: { type: Number, min: 1, max: 10, default: null },
+    comfort: { type: Number, min: 1, max: 10, default: null },
+    valueForMoney: { type: Number, min: 1, max: 10, default: null },
+    location: { type: Number, min: 1, max: 10, default: null },
   },
   images: [{
     url: String,

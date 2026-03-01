@@ -29,6 +29,7 @@ import COLORS from '../../config/colors';
 import { parseBackendErrors, showErrorMessage } from '../../utils/errorHandler';
 import ValidatedTextInput from '../../components/common/ValidatedTextInput';
 import ToastService from '../../utils/ToastService';
+import CustomImageCropper from '../../components/CustomImageCropper';
 
 const GOOGLE_API_KEY =
   process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ||
@@ -78,6 +79,13 @@ export default function BusinessRegistrationScreen({ navigation }) {
     logo: false,
     coverImage: false,
     gallery: false
+  });
+
+  // State for Custom Image Cropper
+  const [cropModal, setCropModal] = useState({
+    visible: false,
+    imageUri: null,
+    type: null // 'logo' or 'coverImage'
   });
 
   const [location, setLocation] = useState({
@@ -517,8 +525,8 @@ export default function BusinessRegistrationScreen({ navigation }) {
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
-        quality: 0.8,
+        allowsEditing: false, // We'll crop manually now
+        quality: 1, // Get highest quality before crop
         allowsMultipleSelection: type === 'gallery'
       });
 
@@ -527,13 +535,23 @@ export default function BusinessRegistrationScreen({ navigation }) {
           // For gallery, add multiple images
           setImages({ ...images, gallery: [...images.gallery, ...result.assets] });
         } else {
-          // For logo and cover, single image
-          setImages({ ...images, [type]: result.assets[0] });
+          // Open custom crop modal for single images
+          setCropModal({
+            visible: true,
+            imageUri: result.assets[0].uri,
+            type: type
+          });
         }
       }
     } catch (error) {
       ToastService.showError('Error', 'Failed to pick image');
     }
+  };
+
+  const handleCropComplete = (croppedImage) => {
+    const { type } = cropModal;
+    setImages({ ...images, [type]: croppedImage });
+    setCropModal({ visible: false, imageUri: null, type: null });
   };
 
   const removeGalleryImage = (index) => {
@@ -1854,6 +1872,14 @@ export default function BusinessRegistrationScreen({ navigation }) {
             : { latitude: 51.5072, longitude: -0.1276 } // London, UK
         }
         googleApiKey={GOOGLE_API_KEY}
+      />
+
+      <CustomImageCropper
+        visible={cropModal.visible}
+        imageUri={cropModal.imageUri}
+        aspectRatio={cropModal.type === 'logo' ? 1 : 16 / 9}
+        onCancel={() => setCropModal({ visible: false, imageUri: null, type: null })}
+        onCropComplete={handleCropComplete}
       />
     </View>
   );

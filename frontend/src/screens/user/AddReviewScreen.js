@@ -29,6 +29,14 @@ export default function AddReviewScreen({ navigation, route }) {
     rating: 0,
     comment: '',
     emotion: null, // Add emotion field
+    categoryRatings: {
+      staff: 0,
+      facilities: 0,
+      cleanliness: 0,
+      comfort: 0,
+      valueForMoney: 0,
+      location: 0,
+    }
   });
 
   // Media state
@@ -996,6 +1004,15 @@ export default function AddReviewScreen({ navigation, route }) {
         rating: formData.rating,
         comment: formData.comment,
         emotion: formData.emotion, // Add emotion field
+        // 🏨 Booking.com-style category ratings
+        categoryRatings: {
+          staff: formData.categoryRatings.staff || null,
+          facilities: formData.categoryRatings.facilities || null,
+          cleanliness: formData.categoryRatings.cleanliness || null,
+          comfort: formData.categoryRatings.comfort || null,
+          valueForMoney: formData.categoryRatings.valueForMoney || null,
+          location: formData.categoryRatings.location || null,
+        },
         latitude: finalLocation.coords.latitude,
         longitude: finalLocation.coords.longitude,
         images: uploadedMedia.photos, // Cloudinary URLs
@@ -1197,17 +1214,75 @@ export default function AddReviewScreen({ navigation, route }) {
           </Text>
         )}
 
+        {/* 🏨 Booking.com-style Category Ratings */}
+        <View className="mb-6">
+          <Text className="text-xl font-bold text-gray-900 mb-1">Rate by Category</Text>
+          <Text className="text-sm text-gray-500 mb-4">Optional — help others with detailed scores</Text>
+          {[
+            { key: 'staff', label: 'Staff', icon: 'people' },
+            { key: 'facilities', label: 'Facilities', icon: 'business' },
+            { key: 'cleanliness', label: 'Cleanliness', icon: 'sparkles' },
+            { key: 'comfort', label: 'Comfort', icon: 'bed' },
+            { key: 'valueForMoney', label: 'Value for Money', icon: 'cash' },
+            { key: 'location', label: 'Location', icon: 'location' },
+          ].map(({ key, label, icon }) => {
+            const val = formData.categoryRatings[key];
+            return (
+              <View key={key} className="mb-4">
+                <View className="flex-row items-center justify-between mb-2">
+                  <View className="flex-row items-center">
+                    <Icon name={icon} size={18} color={COLORS.primary} />
+                    <Text className="text-gray-800 font-semibold ml-2">{label}</Text>
+                  </View>
+                  {val > 0 ? (
+                    <View className="px-3 py-1 rounded-full" style={{ backgroundColor: val >= 8 ? '#D1FAE5' : val >= 6 ? '#FEF3C7' : '#FEE2E2' }}>
+                      <Text className="font-bold text-sm" style={{ color: val >= 8 ? '#065F46' : val >= 6 ? '#92400E' : '#991B1B' }}>
+                        {val.toFixed(1)}
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text className="text-gray-400 text-xs">Not rated</Text>
+                  )}
+                </View>
+                {/* Dot Selector Row */}
+                <View className="flex-row items-center" style={{ gap: 4 }}>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
+                    <TouchableOpacity
+                      key={score}
+                      onPress={() => setFormData({
+                        ...formData,
+                        categoryRatings: { ...formData.categoryRatings, [key]: score }
+                      })}
+                      style={{
+                        flex: 1,
+                        height: 28,
+                        borderRadius: 4,
+                        backgroundColor: val >= score
+                          ? (val >= 8 ? '#10B981' : val >= 6 ? '#F59E0B' : '#EF4444')
+                          : '#E5E7EB',
+                      }}
+                    />
+                  ))}
+                </View>
+                <View className="flex-row justify-between mt-1">
+                  <Text className="text-xs text-gray-400">Poor</Text>
+                  <Text className="text-xs text-gray-400">Excellent</Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+
         {/* Emotion Selector - Facebook Style */}
         <View className="mb-6">
           <Text className="text-lg font-bold text-gray-900 mb-3">How are you feeling?</Text>
           <View className="flex-row justify-center items-center flex-wrap px-2">
             {[
-              { emoji: '😊', label: 'happy', value: 'happy' },
-              { emoji: '😢', label: 'sad', value: 'sad' },
-              { emoji: '🥰', label: 'lovely', value: 'lovely' },
-              { emoji: '😅', label: 'grateful', value: 'grateful' },
-              { emoji: '😎', label: 'cool', value: 'cool' },
-              { emoji: '😊', label: 'positive', value: 'positive' },
+              { emoji: '🤩', label: 'Delighted', value: 'Delighted' },
+              { emoji: '🧘', label: 'Relaxed', value: 'Relaxed' },
+              { emoji: '🥰', label: 'Valued', value: 'Valued' },
+              { emoji: '🎉', label: 'Excited', value: 'Excited' },
+              { emoji: '☹️', label: 'Disappointed', value: 'Disappointed' },
             ].map((emotion) => (
               <TouchableOpacity
                 key={emotion.value}

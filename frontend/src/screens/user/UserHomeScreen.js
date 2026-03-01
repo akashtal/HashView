@@ -69,7 +69,7 @@ const BusinessCard = React.memo(({ item, onPress }) => {
   const hashviewCount = item.rating?.count || 0;
   const coverImageUri = item.coverImage?.url || item.images?.[0]?.url || item.logo?.url || null;
   const categoryLabel = item.category || 'Business';
-  const locationText = [item.address?.area, item.address?.city].filter(Boolean).join(', ') || item.address?.street || 'Location not specified';
+  const locationText = item.address?.fullAddress || [item.address?.area, item.address?.city].filter(Boolean).join(', ') || item.address?.city || item.address?.street || 'Location not specified';
 
   return (
     <TouchableOpacity
@@ -127,15 +127,16 @@ const BusinessCard = React.memo(({ item, onPress }) => {
 
         {/* Header */}
         <View className="px-4 pt-4 pb-3">
-          <View className="flex-row items-center justify-between mb-1.5">
-            <View className="flex-row items-center flex-1 pr-2">
-              <Text className="text-[15px] font-semibold text-[#5e399e]" numberOfLines={1}>
-                {item.name}
+          <View className="mb-1.5">
+            <Text className="text-[16px] font-bold text-[#5e399e] mb-1" numberOfLines={1}>
+              {item.name}
+            </Text>
+            <View className="flex-row items-center">
+              <Icon name="location-outline" size={12} color="#5e399e" style={{ opacity: 0.7 }} />
+              <Text className="text-[13px] text-[#5e399e] ml-1 flex-1" style={{ opacity: 0.8 }} numberOfLines={1}>
+                {locationText}
               </Text>
             </View>
-            <Text className="text-[14px] text-[#5e399e]" style={{ opacity: 0.8 }} numberOfLines={1}>
-              {locationText}
-            </Text>
           </View>
           <View className="flex-row items-center gap-1.5">
             <View className="bg-[#FFF1E6] border border-[#FCD9BD] rounded-full px-2 py-0.5">
@@ -305,7 +306,7 @@ export default function UserHomeScreen({ navigation }) {
         radius: 20000000 // 20,000km (Global) - Show all businesses sorted by distance
       }));
     } catch (error) {
-      console.error('❌ Error getting current location:', error);
+      console.log('⚠️ Could not get current location (services may be disabled):', error.message);
       setHasLocation(false);
 
       // Load businesses without location if it failed

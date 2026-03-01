@@ -265,7 +265,7 @@ export default function SearchScreen({ navigation }) {
             <View className="flex-row items-center">
               <Icon name="location-outline" size={12} color="#6B7280" />
               <Text className="text-xs text-gray-500 ml-1 flex-1" numberOfLines={1}>
-                {item.address?.fullAddress || 'Location not specified'}
+                {item.address?.fullAddress || [item.address?.area, item.address?.city].filter(Boolean).join(', ') || item.address?.city || item.address?.street || 'Location not specified'}
               </Text>
             </View>
           </View>
@@ -385,7 +385,7 @@ export default function SearchScreen({ navigation }) {
                         <View className="flex-row items-center mt-1">
                           <Icon name="location-outline" size={12} color="#6B7280" />
                           <Text className="text-xs text-gray-500 ml-1 flex-1" numberOfLines={1}>
-                            {business.address?.fullAddress || business.address?.city || 'Location not specified'}
+                            {business.address?.fullAddress || [business.address?.area, business.address?.city].filter(Boolean).join(', ') || business.address?.city || business.address?.street || 'Location not specified'}
                           </Text>
                         </View>
                         {business.category && (

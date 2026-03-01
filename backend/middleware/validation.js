@@ -95,10 +95,16 @@ const schemas = {
     rating: Joi.number().min(1).max(5).required(),
     comment: Joi.string().min(10).max(500).required(),
     emotion: Joi.string().valid(
-      'happy', 'blessed', 'loved', 'sad', 'lovely', 'thankful',
-      'excited', 'in_love', 'crazy', 'grateful', 'blissful',
-      'fantastic', 'silly', 'festive', 'wonderful', 'cool',
-      'amused', 'relaxed', 'positive', 'chill'
+      /* New UI Values */
+      'Delighted', 'Relaxed', 'Valued', 'Excited', 'Disappointed',
+      /* Legacy UI Values */
+      'happy', 'sad', 'lovely', 'grateful', 'cool', 'positive',
+      '😊', '😢', '🥰', '😅', '😎',
+      /* Older Backwards Compatibility */
+      'loved', 'okay', 'disappointed', 'frustrated', 'amazing',
+      'blessed', 'thankful', 'excited', 'in_love', 'crazy',
+      'blissful', 'fantastic', 'silly', 'festive', 'wonderful',
+      'amused', 'relaxed', 'chill'
     ).allow('', null).optional(),
     latitude: Joi.number().min(-90).max(90).required(),
     longitude: Joi.number().min(-180).max(180).required(),
@@ -112,7 +118,16 @@ const schemas = {
     locationHistoryCount: Joi.number().optional(),
     suspiciousActivities: Joi.array().optional(),
     deviceFingerprint: Joi.object().optional(),
-    devicePlatform: Joi.string().optional()
+    devicePlatform: Joi.string().optional(),
+    // 🏨 Booking.com-style category ratings (all optional, 1-10)
+    categoryRatings: Joi.object({
+      staff: Joi.number().min(1).max(10).allow(null).optional(),
+      facilities: Joi.number().min(1).max(10).allow(null).optional(),
+      cleanliness: Joi.number().min(1).max(10).allow(null).optional(),
+      comfort: Joi.number().min(1).max(10).allow(null).optional(),
+      valueForMoney: Joi.number().min(1).max(10).allow(null).optional(),
+      location: Joi.number().min(1).max(10).allow(null).optional(),
+    }).allow(null).optional()
   }),
 
   // Business validation

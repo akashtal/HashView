@@ -111,11 +111,16 @@ exports.clearSuspiciousActivities = async (req, res, next) => {
 // @access  Private
 exports.createReview = async (req, res, next) => {
   try {
+    console.log('\n\n=== 🚨 INCOMING REVIEW PAYLOAD ===');
+    console.log(JSON.stringify(req.body, null, 2));
+    console.log('===================================\n\n');
+
     const {
       business: businessId,
       rating,
       comment,
       emotion, // Add emotion field
+      categoryRatings, // Add category ratings
       latitude,
       longitude,
       images,
@@ -303,6 +308,7 @@ exports.createReview = async (req, res, next) => {
       rating,
       comment,
       emotion: emotion || null, // Add emotion field
+      categoryRatings: categoryRatings || null, // Add category ratings
       geolocation: {
         type: 'Point',
         coordinates: [longitude, latitude]
@@ -345,23 +351,46 @@ exports.createReview = async (req, res, next) => {
     await business.save();
 
     // ── SMART COUPON REWARD LOGIC ──────────────────────────────────────────
-    // 1. Look for the reviewed business's own active coupon template
-    let couponTemplate = await Coupon.findOne({
+    // 1. Fetch ALL active, non-expired coupon templates for the reviewed business
+    const now = new Date();
+    const allTemplates = await Coupon.find({
       business: businessId,
       type: 'business',
-      isActive: true
+      isActive: true,
+      $or: [{ validUntil: null }, { validUntil: { $gt: now } }]
     });
+
+    // Filter out templates whose redemptionLimit has been fully reached (store scan limit)
+    // usageCount = how many times a coupon was issued after reviews
+    // redemptionCount = how many users actually scanned/redeemed at the store
+    // We gate by redemptionLimit (physical store redemptions), NOT usageCount (issued count)
+    const validTemplates = allTemplates.filter(t => {
+      if (t.redemptionLimit !== null && t.redemptionLimit !== undefined) {
+        return t.redemptionCount < t.redemptionLimit;
+      }
+      if (t.usageLimit !== null && t.usageLimit !== undefined) {
+        return t.usageCount < t.usageLimit;
+      }
+      return true; // no limit set
+    });
+
+    // Pick a random template from the valid ones (so different coupons are offered)
+    let couponTemplate = null;
+    if (validTemplates.length > 0) {
+      couponTemplate = validTemplates[Math.floor(Math.random() * validTemplates.length)];
+      logger.info(`Picked template "${couponTemplate.title || couponTemplate.code}" (${couponTemplate._id}) from ${validTemplates.length} valid template(s) for business ${businessId}`);
+    }
 
     // Track which business the coupon will belong to (own or nearby)
     let couponBusinessId = businessId;
     let couponBusinessName = business.name;
     let isNearbyCoupon = false;
 
-    // 2. If this business has no template, find a nearby business (within 5 km) that does
+    // 2. If this business has no valid template, find a nearby business (within 5 km) that does
     if (!couponTemplate) {
-      logger.info(`No coupon template for business ${businessId}. Searching nearby businesses...`);
+      logger.info(`No valid coupon template for business ${businessId} (${allTemplates.length} template(s) exist but all exhausted/expired). Searching nearby businesses...`);
 
-      const nearbyBusinessWithTemplate = await Business.aggregate([
+      const nearbyBusinesses = await Business.aggregate([
         {
           $geoNear: {
             near: { type: 'Point', coordinates: [businessLon, businessLat] },
@@ -371,17 +400,29 @@ exports.createReview = async (req, res, next) => {
             query: { _id: { $ne: business._id }, status: 'active' }
           }
         },
-        { $limit: 20 } // Check up to 20 nearby businesses
+        { $limit: 20 }
       ]);
 
-      for (const nb of nearbyBusinessWithTemplate) {
-        const nbTemplate = await Coupon.findOne({
+      for (const nb of nearbyBusinesses) {
+        const nbTemplates = await Coupon.find({
           business: nb._id,
           type: 'business',
-          isActive: true
+          isActive: true,
+          $or: [{ validUntil: null }, { validUntil: { $gt: now } }]
         });
-        if (nbTemplate) {
-          couponTemplate = nbTemplate;
+
+        const nbValid = nbTemplates.filter(t => {
+          if (t.redemptionLimit !== null && t.redemptionLimit !== undefined) {
+            return t.redemptionCount < t.redemptionLimit;
+          }
+          if (t.usageLimit !== null && t.usageLimit !== undefined) {
+            return t.usageCount < t.usageLimit;
+          }
+          return true;
+        });
+
+        if (nbValid.length > 0) {
+          couponTemplate = nbValid[Math.floor(Math.random() * nbValid.length)];
           couponBusinessId = nb._id;
           couponBusinessName = nb.name;
           isNearbyCoupon = true;
@@ -391,11 +432,10 @@ exports.createReview = async (req, res, next) => {
       }
     }
 
-    // 3. If still no template found anywhere → no coupon, just success
+    // 3. If still no template found → no coupon, just return the review
     if (!couponTemplate) {
-      logger.info(`No coupon template found (own or nearby) for review on business ${businessId}. Skipping coupon.`);
+      logger.info(`No coupon template available (own or nearby) for review on business ${businessId}. Skipping coupon.`);
 
-      // Notify business owner about the review
       try {
         const User = require('../models/User.model');
         const user = await User.findById(req.user.id).select('name');
@@ -418,41 +458,7 @@ exports.createReview = async (req, res, next) => {
         success: true,
         message: 'Review posted successfully',
         review
-        // coupon intentionally omitted — no template configured
       });
-    }
-
-    // 4. Check if redemption limit has been reached on the template
-    if (couponTemplate.redemptionLimit !== null) {
-      const redeemedCount = await Coupon.countDocuments({
-        business: couponBusinessId,
-        type: 'review_reward',
-        status: 'redeemed'
-      });
-
-      if (redeemedCount >= couponTemplate.redemptionLimit) {
-        logger.info(`Redemption limit reached for business ${couponBusinessId}. Limit: ${couponTemplate.redemptionLimit}, Redeemed: ${redeemedCount}`);
-
-        // Notify business owner, then return without coupon
-        try {
-          const User = require('../models/User.model');
-          const user = await User.findById(req.user.id).select('name');
-          await sendPushNotification(
-            business.owner,
-            '⭐ New Review!',
-            `${user.name} left a ${rating}-star review for ${business.name}`,
-            { type: 'review', screen: 'BusinessDashboard', reviewId: review._id.toString(), businessId: businessId.toString() }
-          );
-        } catch (notifError) {
-          console.error('❌ Failed to send review notification:', notifError);
-        }
-
-        return res.status(201).json({
-          success: true,
-          message: 'Review posted successfully. Coupon redemption limit reached.',
-          review
-        });
-      }
     }
 
     // 5. Issue the coupon using exact template values (generating a unique code to avoid collision)

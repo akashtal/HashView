@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StatusBar, Image, Dimensions, Linking, Share, Modal } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { Video, ResizeMode } from 'expo-av';
 import ToastService from '../../utils/ToastService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,11 +27,13 @@ export default function BusinessDetailScreen({ navigation, route }) {
   const [loadingUpdates, setLoadingUpdates] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [videoViewerVisible, setVideoViewerVisible] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   useEffect(() => {
     if (fromQR && business) {
       setQrBusiness(business);
-      dispatch(getBusinessReviews({ businessId: business._id, params: { limit: 5 } }));
       fetchBusinessUpdates(business._id);
 
       // Check if business is in user favorites
@@ -38,7 +42,6 @@ export default function BusinessDetailScreen({ navigation, route }) {
       }
     } else if (businessId) {
       dispatch(getBusiness(businessId));
-      dispatch(getBusinessReviews({ businessId, params: { limit: 5 } }));
       fetchBusinessUpdates(businessId);
 
       // Check if business is in user favorites
@@ -47,6 +50,16 @@ export default function BusinessDetailScreen({ navigation, route }) {
       }
     }
   }, [businessId, business, fromQR, user]);
+
+  // Refetch reviews whenever the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      const idToFetch = (fromQR && business) ? business._id : businessId;
+      if (idToFetch) {
+        dispatch(getBusinessReviews({ businessId: idToFetch, params: { limit: 100 } }));
+      }
+    }, [businessId, business, fromQR, dispatch])
+  );
 
   const fetchBusinessUpdates = async (busId) => {
     try {
@@ -66,6 +79,31 @@ export default function BusinessDetailScreen({ navigation, route }) {
   };
 
   const displayBusiness = fromQR ? qrBusiness : selectedBusiness;
+
+  // 🏨 Compute aggregated category averages from all reviews (like Booking.com)
+  const computeCategoryAverages = (reviewList) => {
+    const CATEGORIES = ['staff', 'facilities', 'cleanliness', 'comfort', 'valueForMoney', 'location'];
+    const sums = {};
+    const counts = {};
+    CATEGORIES.forEach((k) => { sums[k] = 0; counts[k] = 0; });
+
+    (reviewList || []).forEach((r) => {
+      if (r.categoryRatings) {
+        CATEGORIES.forEach((k) => {
+          if (r.categoryRatings[k]) {
+            sums[k] += r.categoryRatings[k];
+            counts[k] += 1;
+          }
+        });
+      }
+    });
+
+    const averages = {};
+    CATEGORIES.forEach((k) => {
+      averages[k] = counts[k] > 0 ? (sums[k] / counts[k]) : null;
+    });
+    return averages;
+  };
 
   const handleAddReview = () => {
     navigation.navigate('AddReview', { business: displayBusiness });
@@ -114,6 +152,16 @@ export default function BusinessDetailScreen({ navigation, route }) {
   const handleCloseImageViewer = () => {
     setImageViewerVisible(false);
     setSelectedImage(null);
+  };
+
+  const handleVideoPress = (videoUrl) => {
+    setSelectedVideo(videoUrl);
+    setVideoViewerVisible(true);
+  };
+
+  const handleCloseVideoViewer = () => {
+    setVideoViewerVisible(false);
+    setSelectedVideo(null);
   };
 
   const handleOpenTripAdvisor = () => {
@@ -519,123 +567,179 @@ export default function BusinessDetailScreen({ navigation, route }) {
 
         {/* Tab Content */}
         <View className="px-5 py-5 pb-24">
-          {/* Reviews Tab */}
+          {/* Reviews Tab — Exact Booking.com layout */}
           {activeTab === 'reviews' && (
             <View>
-              <View className="flex-row justify-between items-center mb-4">
-                <Text className="text-lg font-bold text-gray-900">
-                  Reviews ({displayBusiness.rating?.count || 0})
-                </Text>
-              </View>
-
               {reviews.length === 0 ? (
-                <View className="items-center py-10">
+                <View className="items-center py-16">
                   <Icon name="chatbubbles-outline" size={64} color="#D1D5DB" />
-                  <Text className="text-gray-400 mt-4 text-[15px]">No reviews yet</Text>
-                  <Text className="text-gray-300 text-[13px] mt-1">Be the first to review!</Text>
+                  <Text className="text-gray-400 mt-4 text-base font-medium">No reviews yet</Text>
+                  <Text className="text-gray-300 text-sm mt-1">Be the first to share your experience!</Text>
                 </View>
               ) : (
-                reviews.map((review) => (
-                  <View key={review._id} className="bg-white rounded-2xl p-4 mb-3.5 shadow-sm border border-gray-100">
-                    <View className="flex-row justify-between items-start mb-3.5">
-                      <View className="flex-row items-center flex-1">
-                        <LinearGradient
-                          colors={[COLORS.primary + '30', COLORS.primary + '15']}
-                          className="w-12 h-12 rounded-full items-center justify-center mr-3.5 border-2"
-                          style={{ borderColor: COLORS.primary + '10' }}
-                        >
-                          <Text className="text-xl font-bold" style={{ color: COLORS.primary }}>
-                            {review.user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                          </Text>
-                        </LinearGradient>
-                        <View className="flex-1">
-                          <Text className="text-base font-bold text-gray-900 mb-1">
-                            {review.user?.name || 'Anonymous User'}
-                          </Text>
-                          <View className="flex-row items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Icon
-                                key={i}
-                                name={i < review.rating ? "star" : "star-outline"}
-                                size={16}
-                                color={i < review.rating ? '#FFA500' : '#D1D5DB'}
-                                style={{ marginRight: 2 }}
-                              />
-                            ))}
-                            <Text className="text-[13px] font-bold text-amber-500 ml-1.5">
-                              {review.rating}.0
+                <View>
+
+                  {/* ── Overall Score Row ── */}
+                  <View className="flex-row items-center mb-5">
+                    <View className="w-[52px] h-[52px] rounded-xl items-center justify-center mr-3" style={{ backgroundColor: COLORS.primary }}>
+                      <Text className="text-white text-xl font-black">
+                        {displayBusiness.rating?.average
+                          ? (displayBusiness.rating.average * 2).toFixed(1)
+                          : (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length * 2).toFixed(1)}
+                      </Text>
+                    </View>
+                    <View>
+                      <Text className="text-base font-black text-gray-900">
+                        {(() => {
+                          const avg = displayBusiness.rating?.average || (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length);
+                          if (avg >= 4.5) return 'Exceptional';
+                          if (avg >= 4) return 'Very good';
+                          if (avg >= 3.5) return 'Good';
+                          return 'Reviews';
+                        })()}
+                      </Text>
+                      <Text className="text-sm text-gray-500">{displayBusiness.rating?.count || reviews.length} reviews</Text>
+                    </View>
+                  </View>
+
+                  {/* ── Categories: 1-column list (Booking.com mobile style) ── */}
+                  {(() => {
+                    const avgs = computeCategoryAverages(reviews);
+                    const CATS = [
+                      { key: 'location', label: 'Location' },
+                      { key: 'cleanliness', label: 'Cleanliness' },
+                      { key: 'valueForMoney', label: 'Value for money' },
+                      { key: 'facilities', label: 'Facilities' },
+                      { key: 'comfort', label: 'Comfort' },
+                      { key: 'staff', label: 'Staff' },
+                    ];
+                    const available = CATS.filter(c => avgs[c.key] !== null);
+                    if (available.length === 0) return null;
+                    return (
+                      <View className="mb-6">
+                        {available.map(({ key, label }) => {
+                          const val = avgs[key];
+                          return (
+                            <View key={key} className="mb-4">
+                              <View className="flex-row justify-between items-center mb-1.5">
+                                <Text className="text-sm text-gray-800 font-semibold">{label}</Text>
+                                <Text className="text-sm font-bold text-gray-900">{val.toFixed(1)}</Text>
+                              </View>
+                              <View style={{ height: 8, backgroundColor: '#E0E0E0', borderRadius: 4, overflow: 'hidden' }}>
+                                <View style={{ width: `${(val / 10) * 100}%`, height: '100%', backgroundColor: '#003580', borderRadius: 4 }} />
+                              </View>
+                            </View>
+                          );
+                        })}
+                        <View className="h-px bg-gray-200 mt-2 mb-2" />
+                      </View>
+                    );
+                  })()}
+
+                  {/* ── "Guest reviews" heading ── */}
+                  <View className="flex-row items-center justify-between mb-5">
+                    <Text className="text-base font-black text-gray-900">Guest reviews</Text>
+                    <Text className="text-xs text-gray-400">{reviews.length} total</Text>
+                  </View>
+
+                  {/* ── All Review Cards — full detail, always visible ── */}
+                  {reviews.map((review) => {
+                    const CATEGORY_KEYS = [
+                      { key: 'staff', label: 'Staff' },
+                      { key: 'facilities', label: 'Facilities' },
+                      { key: 'cleanliness', label: 'Cleanliness' },
+                      { key: 'comfort', label: 'Comfort' },
+                      { key: 'valueForMoney', label: 'Value' },
+                      { key: 'location', label: 'Location' },
+                    ];
+                    const initial = review.user?.name?.charAt(0)?.toUpperCase() || 'U';
+                    const avatarColors = ['#6C47FF', '#F59E0B', '#10B981', '#EF4444', '#3B82F6', '#EC4899'];
+                    const avatarColor = avatarColors[initial.charCodeAt(0) % avatarColors.length];
+                    return (
+                      <View key={review._id} className="mb-5 pb-5" style={{ borderBottomWidth: 1, borderBottomColor: '#F3F4F6' }}>
+
+                        {/* Reviewer row */}
+                        <View className="flex-row items-center mb-3">
+                          <View className="w-12 h-12 rounded-full items-center justify-center mr-3" style={{ backgroundColor: avatarColor }}>
+                            <Text className="text-white text-lg font-bold">{initial}</Text>
+                          </View>
+                          <View className="flex-1">
+                            <Text className="text-sm font-bold text-gray-900">{review.user?.name || 'Anonymous'}</Text>
+                            <Text className="text-xs text-gray-500 mt-0.5">
+                              Reviewed: {new Date(review.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                             </Text>
                           </View>
+                          <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: COLORS.primary }}>
+                            <Text className="text-white text-sm font-black">{(review.rating * 2).toFixed(0)}</Text>
+                          </View>
                         </View>
-                      </View>
-                      <View className="bg-gray-50 px-2.5 py-1 rounded-lg">
-                        <Text className="text-[11px] text-gray-600 font-semibold">
-                          {new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </Text>
-                      </View>
-                    </View>
 
-                    {/* Review Text */}
-                    <Text className="text-[15px] text-gray-600 leading-5 mb-3">
-                      {review.comment}
-                    </Text>
+                        {/* Stars + Emotion */}
+                        <View className="flex-row items-center mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <Icon key={i} name={i < review.rating ? 'star' : 'star-outline'} size={14} color={i < review.rating ? '#FFA500' : '#D5D5D5'} style={{ marginRight: 1 }} />
+                          ))}
+                          {review.emotion && <Text className="text-xs text-gray-400 ml-2">· {review.emotion}</Text>}
+                        </View>
 
-                    {/* Review Photos */}
-                    {review.images && review.images.length > 0 && (
-                      <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        className="mb-2"
-                        contentContainerStyle={{ gap: 8 }}
-                      >
-                        {review.images.map((image, idx) => (
-                          <TouchableOpacity key={idx} activeOpacity={0.8}>
-                            <Image
-                              source={{ uri: image.url }}
-                              className="w-24 h-24 rounded-xl bg-gray-100"
-                              resizeMode="cover"
-                            />
-                          </TouchableOpacity>
-                        ))}
-                      </ScrollView>
-                    )}
+                        {/* Full review text */}
+                        <Text className="text-sm text-gray-800 leading-5 mb-3">{review.comment}</Text>
 
-                    {/* Review Videos */}
-                    {review.videos && review.videos.length > 0 && (
-                      <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{ gap: 8 }}
-                      >
-                        {review.videos.map((video, idx) => (
-                          <TouchableOpacity
-                            key={idx}
-                            activeOpacity={0.8}
-                            className="w-24 h-24 rounded-xl bg-gray-800 items-center justify-center overflow-hidden"
-                          >
-                            {video.thumbnail && (
-                              <Image
-                                source={{ uri: video.thumbnail }}
-                                className="w-full h-full absolute"
-                                resizeMode="cover"
-                              />
-                            )}
-                            <View className="bg-black/60 w-10 h-10 rounded-full items-center justify-center">
-                              <Icon name="play" size={24} color="#FFF" />
+                        {/* Category rating pills */}
+                        {review.categoryRatings && (() => {
+                          const rated = CATEGORY_KEYS.filter(c => review.categoryRatings[c.key]);
+                          if (rated.length === 0) return null;
+                          return (
+                            <View className="flex-row flex-wrap mb-3" style={{ gap: 6 }}>
+                              {rated.map(({ key, label }) => {
+                                const val = review.categoryRatings[key];
+                                const color = val >= 8 ? '#10B981' : val >= 6 ? '#F59E0B' : '#EF4444';
+                                return (
+                                  <View key={key} className="px-2.5 py-1 rounded-full" style={{ backgroundColor: color + '18' }}>
+                                    <Text className="text-[11px] font-semibold" style={{ color }}>{label} {val.toFixed(1)}</Text>
+                                  </View>
+                                );
+                              })}
                             </View>
-                            {video.duration && (
-                              <View className="absolute bottom-1.5 right-1.5 bg-black/80 px-1.5 py-0.5 rounded">
-                                <Text className="text-white text-[10px] font-semibold">
-                                  {Math.floor(video.duration / 60)}:{(video.duration % 60).toString().padStart(2, '0')}
-                                </Text>
-                              </View>
-                            )}
-                          </TouchableOpacity>
-                        ))}
-                      </ScrollView>
-                    )}
-                  </View>
-                ))
+                          );
+                        })()}
+
+                        {/* Photos */}
+                        {review.images && review.images.length > 0 && (
+                          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }} className="mb-2">
+                            {review.images.map((img, idx) => (
+                              <TouchableOpacity key={idx} activeOpacity={0.85}>
+                                <Image source={{ uri: img.url }} style={{ width: 100, height: 100, borderRadius: 10 }} resizeMode="cover" />
+                              </TouchableOpacity>
+                            ))}
+                          </ScrollView>
+                        )}
+
+                        {/* Videos */}
+                        {review.videos && review.videos.length > 0 && (
+                          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                            {review.videos.map((video, idx) => (
+                              <TouchableOpacity key={idx} activeOpacity={0.85} style={{ width: 100, height: 100, borderRadius: 10, backgroundColor: '#1a1a1a', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }} onPress={() => handleVideoPress(video.url)}>
+                                {video.thumbnail && <Image source={{ uri: video.thumbnail }} style={{ width: 100, height: 100, position: 'absolute' }} resizeMode="cover" />}
+                                <View style={{ backgroundColor: 'rgba(0,0,0,0.55)', width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' }}>
+                                  <Icon name="play" size={18} color="#FFF" />
+                                </View>
+                                {video.duration && (
+                                  <View style={{ position: 'absolute', bottom: 5, right: 5, backgroundColor: 'rgba(0,0,0,0.8)', borderRadius: 3, paddingHorizontal: 5, paddingVertical: 2 }}>
+                                    <Text style={{ color: '#FFF', fontSize: 9, fontWeight: '600' }}>
+                                      {Math.floor(video.duration / 60)}:{(video.duration % 60).toString().padStart(2, '0')}
+                                    </Text>
+                                  </View>
+                                )}
+                              </TouchableOpacity>
+                            ))}
+                          </ScrollView>
+                        )}
+                      </View>
+                    );
+                  })}
+
+                </View>
               )}
             </View>
           )}
@@ -819,33 +923,35 @@ export default function BusinessDetailScreen({ navigation, route }) {
             </View>
           )}
         </View>
-      </ScrollView>
+      </ScrollView >
 
       {/* Fixed Bottom Button - Hide for Guest */}
-      {(!user?.isGuest && user?.role !== 'guest') && (
-        <View className="bg-white px-5 pt-4 pb-5 border-t border-gray-100 shadow-2xl">
-          <TouchableOpacity
-            onPress={handleAddReview}
-            activeOpacity={0.85}
-            className="shadow-xl"
-          >
-            <LinearGradient
-              colors={[COLORS.secondary, COLORS.secondaryDark]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              className="rounded-2xl py-4 items-center flex-row justify-center border border-white/20"
+      {
+        (!user?.isGuest && user?.role !== 'guest') && (
+          <View className="bg-white px-5 pt-4 pb-5 border-t border-gray-100 shadow-2xl">
+            <TouchableOpacity
+              onPress={handleAddReview}
+              activeOpacity={0.85}
+              className="shadow-xl"
             >
-              <View className="bg-white/20 w-9 h-9 rounded-full items-center justify-center mr-3">
-                <Icon name="star" size={20} color="#FFF" />
-              </View>
-              <Text className="text-white text-[17px] font-bold tracking-wide">
-                Write a Review
-              </Text>
-              <Icon name="arrow-forward" size={20} color="#FFF" style={{ marginLeft: 8, opacity: 0.8 }} />
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      )}
+              <LinearGradient
+                colors={[COLORS.secondary, COLORS.secondaryDark]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                className="rounded-2xl py-4 items-center flex-row justify-center border border-white/20"
+              >
+                <View className="bg-white/20 w-9 h-9 rounded-full items-center justify-center mr-3">
+                  <Icon name="star" size={20} color="#FFF" />
+                </View>
+                <Text className="text-white text-[17px] font-bold tracking-wide">
+                  Write a Review
+                </Text>
+                <Icon name="arrow-forward" size={20} color="#FFF" style={{ marginLeft: 8, opacity: 0.8 }} />
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        )
+      }
 
       {/* Image Viewer Modal */}
       <Modal
@@ -884,6 +990,39 @@ export default function BusinessDetailScreen({ navigation, route }) {
           </View>
         </View>
       </Modal>
-    </View>
+
+      {/* Video Viewer Modal */}
+      <Modal
+        visible={videoViewerVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleCloseVideoViewer}
+      >
+        <View className="flex-1 bg-black">
+          {/* Close Button */}
+          <TouchableOpacity
+            onPress={handleCloseVideoViewer}
+            className="absolute top-12 right-5 z-50 bg-white/20 w-12 h-12 rounded-full items-center justify-center"
+            activeOpacity={0.8}
+          >
+            <Icon name="close" size={28} color="#FFF" />
+          </TouchableOpacity>
+
+          {/* Video Player */}
+          <View className="flex-1 items-center justify-center">
+            {selectedVideo && (
+              <Video
+                source={{ uri: selectedVideo }}
+                style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.5 }}
+                useNativeControls
+                resizeMode={ResizeMode.CONTAIN}
+                shouldPlay
+                isLooping
+              />
+            )}
+          </View>
+        </View>
+      </Modal>
+    </View >
   );
 }

@@ -29,3 +29,5 @@ hashview-upload-certificate.pem
 upload-cert.pem
 upload-certificate.pem.expo/
 .expo/
+
+.env.local

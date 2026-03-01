@@ -17,18 +17,4 @@ Your App ID: 2656b51b-bf6d-446d-8258-42f7cbacb2ab
 local.properties
 sdk.dir=/Users/akash/Library/Android/sdk
 
-
-
-
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-  <dict>
-    <key>aps-environment</key>
-    <string>development</string>
-    <key>com.apple.developer.applesignin</key>
-    <array>
-      <string>Default</string>
-    </array>
-  </dict>
-</plist>
+febvur-xusjY8-moszar

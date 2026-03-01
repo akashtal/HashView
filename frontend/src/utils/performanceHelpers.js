@@ -146,12 +146,8 @@ export const optimizeImageUri = (uri, width = 400, quality = 80) => {
     }
   }
 
-  // Handle local backend uploads via API
-  if (uri.startsWith('/uploads/')) {
-    // Determine base URL dynamically or use env variable
-    const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://api.hashview.co.uk';
-    return `${API_URL}${uri}`;
-  }
+  // Since all images are guaranteed to be on Cloudinary, we just return the URI
+  // if it wasn't already caught by the Cloudinary block above (e.g. for external placeholders).
 
   return uri;
 };

@@ -7,29 +7,39 @@ import Toast from 'react-native-toast-message';
 import store from './src/store';
 import AppNavigator from './src/navigation/AppNavigator';
 import AnimatedSplashScreen from './src/components/AnimatedSplashScreen';
-import { initializeSentry } from './src/config/sentry.config';
-import * as Font from 'expo-font';
-import { Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome, Feather } from '@expo/vector-icons';
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN || 'https://8fc528bac0775906eb4f09200b90fe2d@o4510752747028480.ingest.de.sentry.io/4510752828293200',
+
+  // Adds more context data to events (IP address, cookies, user, etc.)
+  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  sendDefaultPii: true,
+
+  // Enable Logs
+  enableLogs: true,
+
+  // Configure Session Replay
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1,
+  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // spotlight: __DEV__,
+});
 
 LogBox.ignoreLogs([
   'Warning: CountryModal: Support for defaultProps will be removed from function components',
 ]);
 
-export default function App() {
+export default Sentry.wrap(function App() {
   const [isSplashComplete, setIsSplashComplete] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
     console.log('🚀 App mounted - Starting initialization');
 
-    // Initialize Sentry
-    try {
-      console.log('🔧 Initializing Sentry...');
-      initializeSentry();
-      console.log('✅ Sentry initialized (or skipped safely)');
-    } catch (e) {
-      console.log('⚠️ Sentry initialization warning:', e);
-    }
+    // Load fonts
 
     // Initialize Notifications
     try {
@@ -95,5 +105,4 @@ export default function App() {
       </Provider>
     </GestureHandlerRootView>
   );
-}
-
+});
