@@ -1,7 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApiService from '../../services/api.service';
 import NotificationService from '../../services/notification.service';
+
+// ─── Helper to extract subscription safely from API response ─────────────────
+const extractSubscription = (user) => ({
+  isPro: user?.isPro || false,
+  subscription: user?.subscription || { status: 'inactive', plan: null, currentPeriodEnd: null },
+});
 
 // Async thunks
 export const login = createAsyncThunk(
@@ -138,6 +145,22 @@ export const loadUser = createAsyncThunk(
   }
 );
 
+// ─── Check subscription status (called on app foreground) ────────────────────
+export const checkSubscriptionStatus = createAsyncThunk(
+  'auth/checkSubscriptionStatus',
+  async (_, { rejectWithValue, getState }) => {
+    try {
+      const { auth } = getState();
+      // Only run for business owners
+      if (auth.user?.role !== 'business') return null;
+      const response = await ApiService.getSubscriptionStatus();
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
@@ -146,6 +169,14 @@ const authSlice = createSlice({
     isAuthenticated: false,
     loading: false,
     error: null,
+    // ─── Subscription state ───────────────────────────────────────────
+    isPro: false,
+    subscription: {
+      status: 'inactive',
+      plan: null,
+      currentPeriodEnd: null,
+      cancelAtPeriodEnd: false,
+    },
   },
   reducers: {
     clearError: (state) => {
@@ -154,6 +185,11 @@ const authSlice = createSlice({
     updateUser: (state, action) => {
       state.user = { ...state.user, ...action.payload };
     },
+    // Directly update subscription state (e.g. after returning from browser payment)
+    setSubscription: (state, action) => {
+      state.isPro = action.payload.isPro ?? state.isPro;
+      state.subscription = action.payload.subscription ?? state.subscription;
+    },
     // OAuth login success (Google/Apple)
     loginSuccess: (state, action) => {
       state.loading = false;
@@ -161,7 +197,12 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.error = null;
-
+      // Set subscription if business owner
+      if (action.payload.user?.role === 'business') {
+        const sub = extractSubscription(action.payload.user);
+        state.isPro = sub.isPro;
+        state.subscription = sub.subscription;
+      }
       // Store in AsyncStorage
       AsyncStorage.setItem('token', action.payload.token);
       AsyncStorage.setItem('user', JSON.stringify(action.payload.user));
@@ -179,6 +220,12 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
+        // Populate subscription for business owners
+        if (action.payload.user?.role === 'business') {
+          const sub = extractSubscription(action.payload.user);
+          state.isPro = sub.isPro;
+          state.subscription = sub.subscription;
+        }
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
@@ -201,6 +248,11 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
+        if (action.payload.user?.role === 'business') {
+          const sub = extractSubscription(action.payload.user);
+          state.isPro = sub.isPro;
+          state.subscription = sub.subscription;
+        }
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
@@ -236,16 +288,47 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
+        if (action.payload.user?.role === 'business') {
+          const sub = extractSubscription(action.payload.user);
+          state.isPro = sub.isPro;
+          state.subscription = sub.subscription;
+        }
       })
       .addCase(loadUser.rejected, (state) => {
         state.loading = false;
         state.isAuthenticated = false;
         state.user = null;
         state.token = null;
+      })
+      // Check subscription status (foreground refresh)
+      .addCase(checkSubscriptionStatus.fulfilled, (state, action) => {
+        if (action.payload) {
+          state.isPro = action.payload.isPro ?? state.isPro;
+          state.subscription = action.payload.subscription ?? state.subscription;
+        }
       });
+
   },
 });
 
-export const { clearError, updateUser, loginSuccess } = authSlice.actions;
+// Fix 6: Export setSubscription so ProGate and other components can use it directly
+export const { clearError, updateUser, loginSuccess, setSubscription } = authSlice.actions;
+
+// ─── Fix 8: App Foreground Subscription Refresh ───────────────────────────────
+// Call this once after the Redux store is created (in App.js or store/index.js).
+// Whenever the app comes back to foreground, we refresh the subscription status
+// for business owners so the Pro gate is always accurate.
+export const initForegroundSubscriptionSync = (store) => {
+  let appState = AppState.currentState;
+  AppState.addEventListener('change', (nextState) => {
+    if (appState !== 'active' && nextState === 'active') {
+      const { auth } = store.getState();
+      if (auth.isAuthenticated && auth.user?.role === 'business') {
+        store.dispatch(checkSubscriptionStatus());
+      }
+    }
+    appState = nextState;
+  });
+};
 export default authSlice.reducer;
 

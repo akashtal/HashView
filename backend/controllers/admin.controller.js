@@ -798,7 +798,13 @@ exports.getAllReviews = async (req, res, next) => {
     const { status } = req.query;
 
     const query = {};
-    if (status) query.status = status;
+    if (status) {
+      if (status.includes(',')) {
+        query.status = { $in: status.split(',') };
+      } else {
+        query.status = status;
+      }
+    }
 
     const reviews = await Review.find(query)
       .populate('user', 'name email')

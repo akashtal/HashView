@@ -25,6 +25,8 @@ const oauthRoutes = require('./routes/oauth.routes');
 const chatRoutes = require('./routes/chat.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const externalReviewsRoutes = require('./routes/externalReviews.routes');
+const subscriptionRoutes = require('./routes/subscription.routes');
+const { handleWebhook } = require('./controllers/subscription.controller');
 
 
 // Import middleware
@@ -66,7 +68,17 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
   credentials: !!process.env.FRONTEND_URL // Only allow credentials if specific origin is set
 }));
+// ─── Stripe Webhook — MUST be before express.json() ───────────────────────
+// Stripe signature verification requires the raw request body (a Buffer).
+// If express.json() parses this first, the signature check will always fail.
+app.post(
+  '/api/subscription/webhook',
+  express.raw({ type: 'application/json' }),
+  handleWebhook
+);
+
 app.use(express.json({ limit: '10mb' }));
+
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 
@@ -107,6 +119,8 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/external-reviews', externalReviewsRoutes);
 app.use('/api/verification', require('./routes/verification.routes'));
 app.use('/api/support', supportRoutes);
+app.use('/api/subscription', subscriptionRoutes);
+
 
 // Socket.IO for real-time chat
 const chatSocket = require('./sockets/chat.socket');

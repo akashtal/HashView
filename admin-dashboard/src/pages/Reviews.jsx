@@ -18,7 +18,13 @@ const Reviews = () => {
     setLoading(true);
     try {
       const params = { page, limit: 20 };
-      if (statusFilter) params.status = statusFilter;
+
+      // Map 'active' UI filter to include both 'active' and 'approved' backend statuses
+      if (statusFilter === 'active') {
+        params.status = 'active,approved';
+      } else if (statusFilter) {
+        params.status = statusFilter;
+      }
 
       const response = await adminApi.getAllReviews(params);
       setReviews(response.data.reviews);
@@ -73,9 +79,10 @@ const Reviews = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
           >
             <option value="">All Reviews</option>
-            <option value="active">Active</option>
+            <option value="active">Active / Approved</option>
+            <option value="pending">Pending</option>
             <option value="flagged">Flagged</option>
-            <option value="removed">Removed</option>
+            <option value="removed">Removed / Rejected</option>
           </select>
         </div>
       </div>
@@ -98,13 +105,12 @@ const Reviews = () => {
                   <div className="flex items-center mb-2">
                     <div className="flex items-center">{renderStars(review.rating)}</div>
                     <span
-                      className={`ml-3 px-2 py-1 text-xs font-medium rounded-full ${
-                        review.status === 'active'
-                          ? 'bg-green-100 text-green-800'
-                          : review.status === 'flagged'
+                      className={`ml-3 px-2 py-1 text-xs font-medium rounded-full ${(review.status === 'active' || review.status === 'approved')
+                        ? 'bg-green-100 text-green-800'
+                        : review.status === 'flagged'
                           ? 'bg-yellow-100 text-yellow-800'
                           : 'bg-red-100 text-red-800'
-                      }`}
+                        }`}
                     >
                       {review.status}
                     </span>
@@ -140,7 +146,7 @@ const Reviews = () => {
                 </div>
 
                 <div className="ml-6 flex flex-col gap-2">
-                  {review.status !== 'active' && (
+                  {(review.status !== 'active' && review.status !== 'approved') && (
                     <button
                       onClick={() => handleStatusUpdate(review._id, 'active')}
                       className="flex items-center px-3 py-2 text-sm bg-green-100 hover:bg-green-200 text-green-700 font-medium rounded-lg transition"

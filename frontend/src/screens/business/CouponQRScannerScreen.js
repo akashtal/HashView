@@ -16,6 +16,7 @@ import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
 import ToastService from '../../utils/ToastService';
+import ProGate from '../../components/ProGate';
 
 export default function CouponQRScannerScreen({ navigation, route }) {
   const { businessId } = route.params || {};
@@ -125,107 +126,109 @@ export default function CouponQRScannerScreen({ navigation, route }) {
   }
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
-      {isFocused && (
-        <CameraView
-          style={styles.camera}
-          facing="back"
-          onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-          barcodeScannerSettings={{
-            barcodeTypes: ['qr'],
-          }}
-        >
-          <LinearGradient
-            colors={['transparent', 'rgba(0,0,0,0.7)']}
-            style={styles.overlay}
+    <ProGate feature="QR Coupon Scanner">
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" />
+        {isFocused && (
+          <CameraView
+            style={styles.camera}
+            facing="back"
+            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+            barcodeScannerSettings={{
+              barcodeTypes: ['qr'],
+            }}
           >
-            <View style={styles.header}>
+            <LinearGradient
+              colors={['transparent', 'rgba(0,0,0,0.7)']}
+              style={styles.overlay}
+            >
+              <View style={styles.header}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => navigation.goBack()}
+                >
+                  <Icon name="close" size={28} color="#fff" />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Scan Coupon QR</Text>
+                <View style={styles.placeholder} />
+              </View>
+
+              <View style={styles.scanArea}>
+                <View style={styles.scanFrame}>
+                  <View style={[styles.corner, styles.topLeft]} />
+                  <View style={[styles.corner, styles.topRight]} />
+                  <View style={[styles.corner, styles.bottomLeft]} />
+                  <View style={[styles.corner, styles.bottomRight]} />
+                </View>
+                <Text style={styles.scanInstruction}>
+                  Position the coupon QR code within the frame
+                </Text>
+              </View>
+
+              {loading && (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color="#fff" />
+                  <Text style={styles.loadingText}>Processing coupon...</Text>
+                </View>
+              )}
+
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>
+                  Scan a customer's coupon QR code to redeem it
+                </Text>
+              </View>
+            </LinearGradient>
+          </CameraView>
+        )}
+
+        {/* Success Modal */}
+        <Modal
+          visible={successModalVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={handleScanAgain}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <View style={styles.successIconContainer}>
+                <Icon name="checkmark-circle" size={80} color="#10B981" />
+              </View>
+              <Text style={styles.modalTitle}>Coupon Redeemed!</Text>
+              {redeemedCoupon && (
+                <>
+                  <Text style={styles.modalSubtitle}>
+                    Coupon Code: {redeemedCoupon.code}
+                  </Text>
+                  {redeemedCoupon.user && (
+                    <View style={styles.userInfo}>
+                      <Icon name="person" size={20} color={COLORS.secondary} />
+                      <Text style={styles.userName}>
+                        {redeemedCoupon.user.name}
+                      </Text>
+                    </View>
+                  )}
+                  <Text style={styles.modalMessage}>
+                    This coupon has been successfully redeemed.
+                  </Text>
+                </>
+              )}
               <TouchableOpacity
-                style={styles.closeButton}
+                style={styles.modalButton}
+                onPress={handleScanAgain}
+              >
+                <Text style={styles.modalButtonText}>Scan Another</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalButtonSecondary}
                 onPress={() => navigation.goBack()}
               >
-                <Icon name="close" size={28} color="#fff" />
+                <Text style={styles.modalButtonTextSecondary}>Done</Text>
               </TouchableOpacity>
-              <Text style={styles.headerTitle}>Scan Coupon QR</Text>
-              <View style={styles.placeholder} />
             </View>
-
-            <View style={styles.scanArea}>
-              <View style={styles.scanFrame}>
-                <View style={[styles.corner, styles.topLeft]} />
-                <View style={[styles.corner, styles.topRight]} />
-                <View style={[styles.corner, styles.bottomLeft]} />
-                <View style={[styles.corner, styles.bottomRight]} />
-              </View>
-              <Text style={styles.scanInstruction}>
-                Position the coupon QR code within the frame
-              </Text>
-            </View>
-
-            {loading && (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#fff" />
-                <Text style={styles.loadingText}>Processing coupon...</Text>
-              </View>
-            )}
-
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>
-                Scan a customer's coupon QR code to redeem it
-              </Text>
-            </View>
-          </LinearGradient>
-        </CameraView>
-      )}
-
-      {/* Success Modal */}
-      <Modal
-        visible={successModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={handleScanAgain}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.successIconContainer}>
-              <Icon name="checkmark-circle" size={80} color="#10B981" />
-            </View>
-            <Text style={styles.modalTitle}>Coupon Redeemed!</Text>
-            {redeemedCoupon && (
-              <>
-                <Text style={styles.modalSubtitle}>
-                  Coupon Code: {redeemedCoupon.code}
-                </Text>
-                {redeemedCoupon.user && (
-                  <View style={styles.userInfo}>
-                    <Icon name="person" size={20} color={COLORS.secondary} />
-                    <Text style={styles.userName}>
-                      {redeemedCoupon.user.name}
-                    </Text>
-                  </View>
-                )}
-                <Text style={styles.modalMessage}>
-                  This coupon has been successfully redeemed.
-                </Text>
-              </>
-            )}
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={handleScanAgain}
-            >
-              <Text style={styles.modalButtonText}>Scan Another</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.modalButtonSecondary}
-              onPress={() => navigation.goBack()}
-            >
-              <Text style={styles.modalButtonTextSecondary}>Done</Text>
-            </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </ProGate>
   );
 }
 

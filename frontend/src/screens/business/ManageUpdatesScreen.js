@@ -20,6 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import COLORS from '../../config/colors';
 import { API_CONFIG } from '../../config/api.config';
 import ToastService from '../../utils/ToastService';
+import ProGate from '../../components/ProGate';
 
 export default function ManageUpdatesScreen({ navigation, route }) {
   const { businessId } = route.params || {};
@@ -253,383 +254,385 @@ export default function ManageUpdatesScreen({ navigation, route }) {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+    <ProGate feature="Business Updates & Offers">
+      <View className="flex-1 bg-gray-50">
+        <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
-      {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center flex-1">
-            <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
-              <Icon name="arrow-back" size={24} color="#FFF" />
-            </TouchableOpacity>
-            <Text className="text-white text-xl font-bold">Manage Updates & Offers</Text>
-          </View>
-        </View>
-      </LinearGradient>
-
-      {loading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={COLORS.primary} />
-        </View>
-      ) : (
-        <ScrollView className="flex-1 px-6 py-6">
-          {updates.length === 0 ? (
-            <View className="items-center py-20">
-              <Icon name="megaphone-outline" size={80} color="#D1D5DB" />
-              <Text className="text-gray-500 text-lg mt-4">No updates yet</Text>
-              <Text className="text-gray-400 text-sm mt-2 text-center">
-                Create your first update or offer
-              </Text>
-            </View>
-          ) : (
-            updates.map((update) => (
-              <View key={update._id} className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-                {update.image?.url && (
-                  <Image
-                    source={{ uri: update.image.url }}
-                    className="w-full h-40 rounded-lg mb-3"
-                    resizeMode="cover"
-                  />
-                )}
-
-                <View className="flex-row items-center justify-between mb-2">
-                  <View style={{
-                    backgroundColor: update.type === 'offer' ? COLORS.secondary + '20' : COLORS.primary + '20',
-                    paddingHorizontal: 10,
-                    paddingVertical: 4,
-                    borderRadius: 12
-                  }}>
-                    <Text style={{
-                      color: update.type === 'offer' ? COLORS.secondary : COLORS.primary,
-                      fontSize: 11,
-                      fontWeight: 'bold',
-                      textTransform: 'uppercase'
-                    }}>
-                      {update.type}
-                    </Text>
-                  </View>
-
-                  <View className="flex-row items-center">
-                    <TouchableOpacity
-                      onPress={() => handleToggleActive(update)}
-                      className="mr-3"
-                    >
-                      <Icon
-                        name={update.isActive ? "eye" : "eye-off"}
-                        size={22}
-                        color={update.isActive ? COLORS.primary : '#9CA3AF'}
-                      />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      onPress={() => handleOpenModal(update)}
-                      className="mr-3"
-                    >
-                      <Icon name="pencil" size={22} color={COLORS.primary} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={() => handleDelete(update)}>
-                      <Icon name="trash" size={22} color="#EF4444" />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                <Text className="text-lg font-bold text-gray-900 mb-2">{update.title}</Text>
-                <Text className="text-sm text-gray-600 mb-3">{update.description}</Text>
-
-                {update.type === 'offer' && update.discountValue > 0 && (
-                  <View style={{
-                    backgroundColor: COLORS.secondary + '10',
-                    padding: 10,
-                    borderRadius: 8,
-                    flexDirection: 'row',
-                    alignItems: 'center'
-                  }}>
-                    <Icon name="pricetag" size={16} color={COLORS.secondary} />
-                    <Text style={{
-                      fontSize: 13,
-                      fontWeight: 'bold',
-                      color: COLORS.secondary,
-                      marginLeft: 6
-                    }}>
-                      {update.discountType === 'percentage' ? `${update.discountValue}% OFF` : `₹${update.discountValue} OFF`}
-                    </Text>
-                    {update.validUntil && (
-                      <Text className="text-xs text-gray-600 ml-auto">
-                        Valid till {new Date(update.validUntil).toLocaleDateString()}
-                      </Text>
-                    )}
-                  </View>
-                )}
-
-                <View className="flex-row items-center mt-3">
-                  <Icon name="time" size={14} color="#9CA3AF" />
-                  <Text className="text-xs text-gray-500 ml-1">
-                    Created: {new Date(update.createdAt).toLocaleDateString()}
-                  </Text>
-                  <View style={{
-                    marginLeft: 'auto',
-                    flexDirection: 'row',
-                    alignItems: 'center'
-                  }}>
-                    <View style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: 4,
-                      backgroundColor: update.isActive ? '#10B981' : '#EF4444',
-                      marginRight: 6
-                    }} />
-                    <Text className="text-xs font-semibold" style={{
-                      color: update.isActive ? '#10B981' : '#EF4444'
-                    }}>
-                      {update.isActive ? 'Active' : 'Inactive'}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            ))
-          )}
-        </ScrollView>
-      )}
-
-      {/* Floating Add Button */}
-      <TouchableOpacity
-        onPress={() => handleOpenModal()}
-        style={{
-          position: 'absolute',
-          bottom: 20,
-          right: 20,
-          width: 60,
-          height: 60,
-          borderRadius: 30,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 8
-        }}
-      >
+        {/* Header */}
         <LinearGradient
-          colors={[COLORS.secondary, COLORS.secondaryDark]}
-          style={{
-            width: '100%',
-            height: '100%',
-            borderRadius: 30,
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
+          colors={[COLORS.primary, COLORS.primaryDark]}
+          className="pt-12 pb-6 px-6"
         >
-          <Icon name="add" size={32} color="#FFF" />
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center flex-1">
+              <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
+                <Icon name="arrow-back" size={24} color="#FFF" />
+              </TouchableOpacity>
+              <Text className="text-white text-xl font-bold">Manage Updates & Offers</Text>
+            </View>
+          </View>
         </LinearGradient>
-      </TouchableOpacity>
 
-      {/* Create/Edit Modal */}
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View className="flex-1 bg-white">
-          <LinearGradient
-            colors={[COLORS.primary, COLORS.primaryDark]}
-            className="pt-12 pb-6 px-6"
-          >
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center flex-1">
-                <TouchableOpacity onPress={() => setModalVisible(false)} className="mr-4">
-                  <Icon name="close" size={24} color="#FFF" />
-                </TouchableOpacity>
-                <Text className="text-white text-xl font-bold">
-                  {editingUpdate ? 'Edit Update' : 'Create Update'}
+        {loading ? (
+          <View className="flex-1 items-center justify-center">
+            <ActivityIndicator size="large" color={COLORS.primary} />
+          </View>
+        ) : (
+          <ScrollView className="flex-1 px-6 py-6">
+            {updates.length === 0 ? (
+              <View className="items-center py-20">
+                <Icon name="megaphone-outline" size={80} color="#D1D5DB" />
+                <Text className="text-gray-500 text-lg mt-4">No updates yet</Text>
+                <Text className="text-gray-400 text-sm mt-2 text-center">
+                  Create your first update or offer
                 </Text>
               </View>
-            </View>
-          </LinearGradient>
+            ) : (
+              updates.map((update) => (
+                <View key={update._id} className="bg-white rounded-xl p-4 mb-4 shadow-sm">
+                  {update.image?.url && (
+                    <Image
+                      source={{ uri: update.image.url }}
+                      className="w-full h-40 rounded-lg mb-3"
+                      resizeMode="cover"
+                    />
+                  )}
 
-          <ScrollView className="flex-1 px-6 py-6">
-            {/* Type Selection */}
-            <View className="mb-6">
-              <Text className="text-gray-900 font-semibold mb-3">Type</Text>
-              <View className="flex-row items-center gap-2 flex-wrap">
-                {['offer', 'update', 'announcement'].map((type) => (
-                  <TouchableOpacity
-                    key={type}
-                    onPress={() => setFormData({ ...formData, type })}
-                    className={`px-4 py-3 rounded-xl border ${formData.type === type
-                      ? 'bg-purple-600 border-purple-600'
-                      : 'bg-white border-gray-200'
-                      }`}
-                  >
-                    <Text className={`font-semibold capitalize ${formData.type === type ? 'text-white' : 'text-gray-600'
-                      }`}>
-                      {type}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
+                  <View className="flex-row items-center justify-between mb-2">
+                    <View style={{
+                      backgroundColor: update.type === 'offer' ? COLORS.secondary + '20' : COLORS.primary + '20',
+                      paddingHorizontal: 10,
+                      paddingVertical: 4,
+                      borderRadius: 12
+                    }}>
+                      <Text style={{
+                        color: update.type === 'offer' ? COLORS.secondary : COLORS.primary,
+                        fontSize: 11,
+                        fontWeight: 'bold',
+                        textTransform: 'uppercase'
+                      }}>
+                        {update.type}
+                      </Text>
+                    </View>
 
-            {/* Title */}
-            <View className="mb-4">
-              <Text className="text-gray-900 font-semibold mb-2">Title *</Text>
-              <TextInput
-                className="bg-gray-100 rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
-                placeholder="e.g., 50% Off This Weekend!"
-                placeholderTextColor="#9CA3AF"
-                value={formData.title}
-                onChangeText={(value) => setFormData({ ...formData, title: value })}
-                maxLength={100}
-              />
-            </View>
-
-            {/* Description */}
-            <View className="mb-4">
-              <Text className="text-gray-900 font-semibold mb-2">Description *</Text>
-              <TextInput
-                className="bg-gray-100 rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
-                placeholder="Describe your offer or update..."
-                placeholderTextColor="#9CA3AF"
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
-                value={formData.description}
-                onChangeText={(value) => setFormData({ ...formData, description: value })}
-                maxLength={500}
-              />
-            </View>
-
-            {/* Offer-specific fields */}
-            {formData.type === 'offer' && (
-              <>
-                <View className="mb-6">
-                  <Text className="text-gray-900 font-semibold mb-3">Discount Type</Text>
-                  <View className="flex-row items-center gap-2">
-                    {[
-                      { label: 'Percentage (%)', value: 'percentage' },
-                      { label: 'Fixed Amount (₹)', value: 'fixed' }
-                    ].map((option) => (
+                    <View className="flex-row items-center">
                       <TouchableOpacity
-                        key={option.value}
-                        onPress={() => setFormData({ ...formData, discountType: option.value })}
-                        className={`flex-1 px-4 py-3 rounded-xl border items-center ${formData.discountType === option.value
-                          ? 'bg-purple-600 border-purple-600'
-                          : 'bg-white border-gray-200'
-                          }`}
+                        onPress={() => handleToggleActive(update)}
+                        className="mr-3"
                       >
-                        <Text className={`font-bold ${formData.discountType === option.value ? 'text-white' : 'text-gray-600'
-                          }`}>
-                          {option.label}
-                        </Text>
+                        <Icon
+                          name={update.isActive ? "eye" : "eye-off"}
+                          size={22}
+                          color={update.isActive ? COLORS.primary : '#9CA3AF'}
+                        />
                       </TouchableOpacity>
-                    ))}
+
+                      <TouchableOpacity
+                        onPress={() => handleOpenModal(update)}
+                        className="mr-3"
+                      >
+                        <Icon name="pencil" size={22} color={COLORS.primary} />
+                      </TouchableOpacity>
+
+                      <TouchableOpacity onPress={() => handleDelete(update)}>
+                        <Icon name="trash" size={22} color="#EF4444" />
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                </View>
 
-                <View className="mb-4">
-                  <Text className="text-gray-900 font-semibold mb-2">Discount Value</Text>
-                  <TextInput
-                    className="bg-gray-100 rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
-                    placeholder={formData.discountType === 'percentage' ? "e.g., 50" : "e.g., 100"}
-                    placeholderTextColor="#9CA3AF"
-                    keyboardType="numeric"
-                    value={formData.discountValue}
-                    onChangeText={(value) => setFormData({ ...formData, discountValue: value })}
-                  />
-                </View>
+                  <Text className="text-lg font-bold text-gray-900 mb-2">{update.title}</Text>
+                  <Text className="text-sm text-gray-600 mb-3">{update.description}</Text>
 
-                <View className="mb-6">
-                  <Text className="text-gray-900 font-semibold mb-2">Valid Until</Text>
-                  <TouchableOpacity
-                    onPress={() => setShowDatePicker(true)}
-                    className="bg-white rounded-xl px-4 py-3 border border-gray-200 flex-row justify-between items-center"
-                  >
-                    <Text className="text-gray-900 font-medium">
-                      {formData.validUntil.toLocaleDateString(undefined, {
-                        weekday: 'short',
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </Text>
-                    <Icon name="calendar-outline" size={20} color="#6B7280" />
-                  </TouchableOpacity>
-
-                  {showDatePicker && (
-                    <View className="mt-2 bg-white rounded-xl border border-gray-100 p-2">
-                      <DateTimePicker
-                        value={formData.validUntil}
-                        mode="date"
-                        display={Platform.OS === 'ios' ? 'inline' : 'default'}
-                        onChange={(event, selectedDate) => {
-                          const currentDate = selectedDate || formData.validUntil;
-                          setShowDatePicker(Platform.OS === 'ios'); // Keep open for iOS inline, close for Android default
-                          setFormData({ ...formData, validUntil: currentDate });
-                        }}
-                        minimumDate={new Date()}
-                        style={Platform.OS === 'ios' ? { height: 320 } : {}}
-                      />
-                      {Platform.OS === 'ios' && (
-                        <TouchableOpacity
-                          onPress={() => setShowDatePicker(false)}
-                          className="bg-purple-600 py-3 rounded-lg mt-2 items-center"
-                        >
-                          <Text className="text-white font-bold">Done</Text>
-                        </TouchableOpacity>
+                  {update.type === 'offer' && update.discountValue > 0 && (
+                    <View style={{
+                      backgroundColor: COLORS.secondary + '10',
+                      padding: 10,
+                      borderRadius: 8,
+                      flexDirection: 'row',
+                      alignItems: 'center'
+                    }}>
+                      <Icon name="pricetag" size={16} color={COLORS.secondary} />
+                      <Text style={{
+                        fontSize: 13,
+                        fontWeight: 'bold',
+                        color: COLORS.secondary,
+                        marginLeft: 6
+                      }}>
+                        {update.discountType === 'percentage' ? `${update.discountValue}% OFF` : `₹${update.discountValue} OFF`}
+                      </Text>
+                      {update.validUntil && (
+                        <Text className="text-xs text-gray-600 ml-auto">
+                          Valid till {new Date(update.validUntil).toLocaleDateString()}
+                        </Text>
                       )}
                     </View>
                   )}
+
+                  <View className="flex-row items-center mt-3">
+                    <Icon name="time" size={14} color="#9CA3AF" />
+                    <Text className="text-xs text-gray-500 ml-1">
+                      Created: {new Date(update.createdAt).toLocaleDateString()}
+                    </Text>
+                    <View style={{
+                      marginLeft: 'auto',
+                      flexDirection: 'row',
+                      alignItems: 'center'
+                    }}>
+                      <View style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: 4,
+                        backgroundColor: update.isActive ? '#10B981' : '#EF4444',
+                        marginRight: 6
+                      }} />
+                      <Text className="text-xs font-semibold" style={{
+                        color: update.isActive ? '#10B981' : '#EF4444'
+                      }}>
+                        {update.isActive ? 'Active' : 'Inactive'}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
-              </>
+              ))
             )}
-
-            {/* Image */}
-            <View className="mb-6">
-              <Text className="text-gray-900 font-semibold mb-2">Image (Optional)</Text>
-              <TouchableOpacity
-                onPress={pickImage}
-                className="bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 py-8 items-center justify-center"
-              >
-                {formData.image ? (
-                  <Image
-                    source={{ uri: formData.image.uri || formData.image.url }}
-                    className="w-full h-40 rounded-lg"
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <>
-                    <Icon name="image-outline" size={48} color="#D1D5DB" />
-                    <Text className="text-gray-500 mt-2">Select Image</Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            </View>
-
-            {/* Save Button */}
-            <TouchableOpacity
-              onPress={handleSave}
-              disabled={submitting}
-              className="mb-8"
-            >
-              <LinearGradient
-                colors={[COLORS.secondary, COLORS.secondaryDark]}
-                className="rounded-xl py-4 items-center"
-              >
-                {submitting ? (
-                  <ActivityIndicator color="#FFF" size="small" />
-                ) : (
-                  <Text className="text-white font-bold text-lg">
-                    {editingUpdate ? 'Update' : 'Create'}
-                  </Text>
-                )}
-              </LinearGradient>
-            </TouchableOpacity>
           </ScrollView>
-        </View>
-      </Modal>
-    </View>
+        )}
+
+        {/* Floating Add Button */}
+        <TouchableOpacity
+          onPress={() => handleOpenModal()}
+          style={{
+            position: 'absolute',
+            bottom: 20,
+            right: 20,
+            width: 60,
+            height: 60,
+            borderRadius: 30,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 8
+          }}
+        >
+          <LinearGradient
+            colors={[COLORS.secondary, COLORS.secondaryDark]}
+            style={{
+              width: '100%',
+              height: '100%',
+              borderRadius: 30,
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Icon name="add" size={32} color="#FFF" />
+          </LinearGradient>
+        </TouchableOpacity>
+
+        {/* Create/Edit Modal */}
+        <Modal
+          visible={modalVisible}
+          animationType="slide"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View className="flex-1 bg-white">
+            <LinearGradient
+              colors={[COLORS.primary, COLORS.primaryDark]}
+              className="pt-12 pb-6 px-6"
+            >
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center flex-1">
+                  <TouchableOpacity onPress={() => setModalVisible(false)} className="mr-4">
+                    <Icon name="close" size={24} color="#FFF" />
+                  </TouchableOpacity>
+                  <Text className="text-white text-xl font-bold">
+                    {editingUpdate ? 'Edit Update' : 'Create Update'}
+                  </Text>
+                </View>
+              </View>
+            </LinearGradient>
+
+            <ScrollView className="flex-1 px-6 py-6">
+              {/* Type Selection */}
+              <View className="mb-6">
+                <Text className="text-gray-900 font-semibold mb-3">Type</Text>
+                <View className="flex-row items-center gap-2 flex-wrap">
+                  {['offer', 'update', 'announcement'].map((type) => (
+                    <TouchableOpacity
+                      key={type}
+                      onPress={() => setFormData({ ...formData, type })}
+                      className={`px-4 py-3 rounded-xl border ${formData.type === type
+                        ? 'bg-purple-600 border-purple-600'
+                        : 'bg-white border-gray-200'
+                        }`}
+                    >
+                      <Text className={`font-semibold capitalize ${formData.type === type ? 'text-white' : 'text-gray-600'
+                        }`}>
+                        {type}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Title */}
+              <View className="mb-4">
+                <Text className="text-gray-900 font-semibold mb-2">Title *</Text>
+                <TextInput
+                  className="bg-gray-100 rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
+                  placeholder="e.g., 50% Off This Weekend!"
+                  placeholderTextColor="#9CA3AF"
+                  value={formData.title}
+                  onChangeText={(value) => setFormData({ ...formData, title: value })}
+                  maxLength={100}
+                />
+              </View>
+
+              {/* Description */}
+              <View className="mb-4">
+                <Text className="text-gray-900 font-semibold mb-2">Description *</Text>
+                <TextInput
+                  className="bg-gray-100 rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
+                  placeholder="Describe your offer or update..."
+                  placeholderTextColor="#9CA3AF"
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                  value={formData.description}
+                  onChangeText={(value) => setFormData({ ...formData, description: value })}
+                  maxLength={500}
+                />
+              </View>
+
+              {/* Offer-specific fields */}
+              {formData.type === 'offer' && (
+                <>
+                  <View className="mb-6">
+                    <Text className="text-gray-900 font-semibold mb-3">Discount Type</Text>
+                    <View className="flex-row items-center gap-2">
+                      {[
+                        { label: 'Percentage (%)', value: 'percentage' },
+                        { label: 'Fixed Amount (₹)', value: 'fixed' }
+                      ].map((option) => (
+                        <TouchableOpacity
+                          key={option.value}
+                          onPress={() => setFormData({ ...formData, discountType: option.value })}
+                          className={`flex-1 px-4 py-3 rounded-xl border items-center ${formData.discountType === option.value
+                            ? 'bg-purple-600 border-purple-600'
+                            : 'bg-white border-gray-200'
+                            }`}
+                        >
+                          <Text className={`font-bold ${formData.discountType === option.value ? 'text-white' : 'text-gray-600'
+                            }`}>
+                            {option.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  <View className="mb-4">
+                    <Text className="text-gray-900 font-semibold mb-2">Discount Value</Text>
+                    <TextInput
+                      className="bg-gray-100 rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
+                      placeholder={formData.discountType === 'percentage' ? "e.g., 50" : "e.g., 100"}
+                      placeholderTextColor="#9CA3AF"
+                      keyboardType="numeric"
+                      value={formData.discountValue}
+                      onChangeText={(value) => setFormData({ ...formData, discountValue: value })}
+                    />
+                  </View>
+
+                  <View className="mb-6">
+                    <Text className="text-gray-900 font-semibold mb-2">Valid Until</Text>
+                    <TouchableOpacity
+                      onPress={() => setShowDatePicker(true)}
+                      className="bg-white rounded-xl px-4 py-3 border border-gray-200 flex-row justify-between items-center"
+                    >
+                      <Text className="text-gray-900 font-medium">
+                        {formData.validUntil.toLocaleDateString(undefined, {
+                          weekday: 'short',
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </Text>
+                      <Icon name="calendar-outline" size={20} color="#6B7280" />
+                    </TouchableOpacity>
+
+                    {showDatePicker && (
+                      <View className="mt-2 bg-white rounded-xl border border-gray-100 p-2">
+                        <DateTimePicker
+                          value={formData.validUntil}
+                          mode="date"
+                          display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                          onChange={(event, selectedDate) => {
+                            const currentDate = selectedDate || formData.validUntil;
+                            setShowDatePicker(Platform.OS === 'ios'); // Keep open for iOS inline, close for Android default
+                            setFormData({ ...formData, validUntil: currentDate });
+                          }}
+                          minimumDate={new Date()}
+                          style={Platform.OS === 'ios' ? { height: 320 } : {}}
+                        />
+                        {Platform.OS === 'ios' && (
+                          <TouchableOpacity
+                            onPress={() => setShowDatePicker(false)}
+                            className="bg-purple-600 py-3 rounded-lg mt-2 items-center"
+                          >
+                            <Text className="text-white font-bold">Done</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    )}
+                  </View>
+                </>
+              )}
+
+              {/* Image */}
+              <View className="mb-6">
+                <Text className="text-gray-900 font-semibold mb-2">Image (Optional)</Text>
+                <TouchableOpacity
+                  onPress={pickImage}
+                  className="bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 py-8 items-center justify-center"
+                >
+                  {formData.image ? (
+                    <Image
+                      source={{ uri: formData.image.uri || formData.image.url }}
+                      className="w-full h-40 rounded-lg"
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <>
+                      <Icon name="image-outline" size={48} color="#D1D5DB" />
+                      <Text className="text-gray-500 mt-2">Select Image</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+
+              {/* Save Button */}
+              <TouchableOpacity
+                onPress={handleSave}
+                disabled={submitting}
+                className="mb-8"
+              >
+                <LinearGradient
+                  colors={[COLORS.secondary, COLORS.secondaryDark]}
+                  className="rounded-xl py-4 items-center"
+                >
+                  {submitting ? (
+                    <ActivityIndicator color="#FFF" size="small" />
+                  ) : (
+                    <Text className="text-white font-bold text-lg">
+                      {editingUpdate ? 'Update' : 'Create'}
+                    </Text>
+                  )}
+                </LinearGradient>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </Modal>
+      </View>
+    </ProGate>
   );
 }

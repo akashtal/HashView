@@ -473,7 +473,19 @@ exports.login = async (req, res, next) => {
         profileImage: user.profileImage,
         emailVerified: user.emailVerified,
         phoneVerified: user.phoneVerified,
-        ...(user.role === 'business' && { businesses })
+        ...(user.role === 'business' && { businesses }),
+        // Include subscription status for business owners so the frontend
+        // correctly sets isPro on login — without this, ProGate always shows the paywall
+        ...(user.role === 'business' && {
+          isPro: user.isPro,
+          subscription: {
+            status: user.subscription?.status || 'inactive',
+            plan: user.subscription?.plan || null,
+            currentPeriodEnd: user.subscription?.currentPeriodEnd || null,
+            cancelAtPeriodEnd: user.subscription?.cancelAtPeriodEnd || false,
+            trialEnd: user.subscription?.trialEnd || null,
+          }
+        })
       }
     });
   } catch (error) {
@@ -720,10 +732,19 @@ exports.getMe = async (req, res, next) => {
         phoneVerified: user.phoneVerified,
         status: user.status,
         createdAt: user.createdAt,
-        // Include business-specific fields if it's a business owner
         ...(user.role === 'business' && { businesses }),
-        // Include customer-specific fields if it's a customer
-        ...(user.role === 'customer' && { location: user.location })
+        ...(user.role === 'customer' && { location: user.location }),
+        // Include subscription status for business owners
+        ...(user.role === 'business' && {
+          isPro: user.isPro,
+          subscription: {
+            status: user.subscription?.status || 'inactive',
+            plan: user.subscription?.plan || null,
+            currentPeriodEnd: user.subscription?.currentPeriodEnd || null,
+            cancelAtPeriodEnd: user.subscription?.cancelAtPeriodEnd || false,
+            trialEnd: user.subscription?.trialEnd || null,
+          }
+        })
       }
     });
   } catch (error) {

@@ -347,6 +347,17 @@ const ApiService = {
 
   reviewBusinessClaim: (businessId, decision, rejectionReason) =>
     apiClient.put(`/business/${businessId}/claim/review`, { decision, rejectionReason }),
+
+  // ─── Subscription APIs ─────────────────────────────────────────────────────
+  // Get current subscription status (isPro, plan, currentPeriodEnd, cancelAtPeriodEnd)
+  getSubscriptionStatus: () => apiClient.get('/subscription/status'),
+
+  // Generate a Stripe Checkout URL — planType: 'monthly' | '6month' | 'yearly'
+  createSubscriptionCheckout: (planType = 'monthly') =>
+    apiClient.post('/subscription/create-checkout-session', { planType }),
+
+  // Generate a Stripe Customer Portal URL for managing/cancelling subscription in browser
+  createSubscriptionPortal: () => apiClient.post('/subscription/create-portal-session'),
 };
 
 export default ApiService;

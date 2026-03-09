@@ -113,6 +113,51 @@ const businessOwnerSchema = new mongoose.Schema({
       default: true
     }
   },
+
+  // ─── Stripe Subscription ───────────────────────────────────────────────────
+  subscription: {
+    status: {
+      type: String,
+      enum: ['inactive', 'active', 'trialing', 'past_due', 'canceled', 'unpaid'],
+      default: 'inactive'
+    },
+    plan: {
+      type: String,
+      default: null          // e.g. 'pro_monthly'
+    },
+    stripeCustomerId: {
+      type: String,
+      default: null,
+      select: false          // never returned in queries unless explicitly requested
+    },
+    stripeSubscriptionId: {
+      type: String,
+      default: null,
+      select: false
+    },
+    stripePriceId: {
+      type: String,
+      default: null,
+      select: false
+    },
+    currentPeriodStart: {
+      type: Date,
+      default: null
+    },
+    currentPeriodEnd: {
+      type: Date,
+      default: null
+    },
+    cancelAtPeriodEnd: {
+      type: Boolean,
+      default: false
+    },
+    trialEnd: {
+      type: Date,
+      default: null
+    }
+  },
+
   createdAt: {
     type: Date,
     default: Date.now
@@ -122,7 +167,21 @@ const businessOwnerSchema = new mongoose.Schema({
     default: Date.now
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// ── isPro virtual ───────────────────────────────────────────────────────────
+// An owner is "Pro" if their subscription is active or trialing AND not expired
+businessOwnerSchema.virtual('isPro').get(function () {
+  const s = this.subscription;
+  if (!s) return false;
+  const activeStatuses = ['active', 'trialing'];
+  if (!activeStatuses.includes(s.status)) return false;
+  // Double-check period end hasn't lapsed (safety net for missed webhooks)
+  if (s.currentPeriodEnd && new Date(s.currentPeriodEnd) < new Date()) return false;
+  return true;
 });
 
 // Hash password before saving
@@ -145,7 +204,7 @@ businessOwnerSchema.methods.comparePassword = async function (candidatePassword)
   return await bcrypt.compare(candidatePassword, this.passwordHash);
 };
 
-// Method to get public profile
+// Method to get public profile (includes subscription status but NOT Stripe IDs)
 businessOwnerSchema.methods.getPublicProfile = function () {
   return {
     id: this._id,
@@ -159,6 +218,14 @@ businessOwnerSchema.methods.getPublicProfile = function () {
     phoneVerified: this.phoneVerified,
     address: this.address,
     businesses: this.businesses,
+    isPro: this.isPro,
+    subscription: {
+      status: this.subscription?.status || 'inactive',
+      plan: this.subscription?.plan || null,
+      currentPeriodEnd: this.subscription?.currentPeriodEnd || null,
+      cancelAtPeriodEnd: this.subscription?.cancelAtPeriodEnd || false,
+      trialEnd: this.subscription?.trialEnd || null,
+    },
     createdAt: this.createdAt
   };
 };

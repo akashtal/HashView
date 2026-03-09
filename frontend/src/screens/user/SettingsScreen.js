@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,16 +7,48 @@ import {
   Switch,
   Alert,
   StatusBar,
-  Linking
+  Linking,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
-
+import { useSelector, useDispatch } from 'react-redux';
+import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ToastService from '../../utils/ToastService';
 import COLORS from '../../config/colors';
+import ApiService from '../../services/api.service';
+import { checkSubscriptionStatus } from '../../store/slices/authSlice';
 
 export default function SettingsScreen({ navigation }) {
+  const dispatch = useDispatch();
+  const { user, isPro, subscription } = useSelector((s) => s.auth);
+  const isBusinessOwner = user?.role === 'business';
+  const [subLoading, setSubLoading] = useState(false);
+
+  const handleManageSubscription = useCallback(async () => {
+    setSubLoading(true);
+    try {
+      // isPro=true → open Customer Portal (manage/cancel/view invoices)
+      // isPro=false → open Checkout to start a new subscription
+      const data = isPro
+        ? await ApiService.createSubscriptionPortal()
+        : await ApiService.createSubscriptionCheckout();
+      if (!data?.url) throw new Error('Could not generate subscription URL');
+      await Linking.openURL(data.url);
+      Toast.show({ type: 'info', text1: 'Checking your subscription…', visibilityTime: 3000 });
+      setTimeout(async () => {
+        const result = await dispatch(checkSubscriptionStatus());
+        if (result?.payload?.isPro) {
+          Toast.show({ type: 'success', text1: '🎉 Pro Unlocked!', text2: 'All premium features are now active.', visibilityTime: 4000 });
+        }
+      }, 3500);
+    } catch (err) {
+      Alert.alert('Subscription', err.message || 'Unable to open subscription page.');
+    } finally {
+      setSubLoading(false);
+    }
+  }, [dispatch, isPro]);
   // Settings State
   const [settings, setSettings] = useState({
     pushNotifications: true,
@@ -155,6 +187,47 @@ export default function SettingsScreen({ navigation }) {
 
       <ScrollView className="flex-1">
         <View className="px-6 py-4">
+          {/* ── Subscription Section (business owners only) ─────────────── */}
+          {isBusinessOwner && (
+            <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 20, marginBottom: 16, shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 4 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                <Icon name="star" size={20} color="#7C3AED" />
+                <Text style={{ fontSize: 16, fontWeight: '700', color: '#1F2937', marginLeft: 8, flex: 1 }}>HashView Pro</Text>
+                <View style={{ backgroundColor: isPro ? '#D1FAE5' : '#FEE2E2', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 }}>
+                  <Text style={{ fontSize: 11, fontWeight: '700', color: isPro ? '#065F46' : '#991B1B' }}>
+                    {isPro ? '● ACTIVE' : '● INACTIVE'}
+                  </Text>
+                </View>
+              </View>
+              {isPro && subscription?.currentPeriodEnd && (
+                <Text style={{ fontSize: 12, color: '#6B7280', marginBottom: 12 }}>
+                  Plan: {subscription.plan || 'Pro'} · Renews {new Date(subscription.currentPeriodEnd).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  {subscription.cancelAtPeriodEnd ? ' (Cancels at end of period)' : ''}
+                </Text>
+              )}
+              <TouchableOpacity
+                onPress={handleManageSubscription}
+                disabled={subLoading}
+                activeOpacity={0.85}
+                style={{ borderRadius: 12, overflow: 'hidden' }}
+              >
+                <LinearGradient
+                  colors={['#7C3AED', '#4F46E5']}
+                  style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 13, borderRadius: 12 }}
+                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                >
+                  {subLoading
+                    ? <ActivityIndicator color="#fff" size="small" />
+                    : <>
+                      <Icon name="open-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+                      <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Manage Subscription</Text>
+                    </>
+                  }
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* Notifications Settings */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
             <Text className="text-lg font-bold text-gray-900 mb-4">

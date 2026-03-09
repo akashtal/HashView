@@ -22,7 +22,7 @@ exports.generateBusinessQRCode = async (businessId, businessName) => {
     // 1. If app installed: Open app via deep link (hashview://business/{id})
     // 2. If app NOT installed: Redirect to App Store (iOS) or Play Store (Android)
 
-    const webURL = process.env.WEB_APP_URL || 'https://hashview.app';
+    const webURL = process.env.WEB_APP_URL || 'https://hashview-backend.onrender.com';
     const qrCodeURL = `${webURL}/business/${businessId}`;
 
     console.log(`📱 Generating QR code with smart URL: ${qrCodeURL}`);
@@ -146,7 +146,7 @@ exports.generateBusinessQRCode = async (businessId, businessName) => {
     console.error('Error generating styled QR code:', error);
     // Fallback to simple QR code if styling fails
     try {
-      const webURL = process.env.WEB_APP_URL || 'https://hashview.app';
+      const webURL = process.env.WEB_APP_URL || 'https://hashview-backend.onrender.com';
       const qrCodeURL = `${webURL}/business/${businessId}`;
 
       const qrCodeString = await QRCode.toDataURL(qrCodeURL, {
