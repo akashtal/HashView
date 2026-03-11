@@ -508,7 +508,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="note">Secure payment by Stripe · Cancel anytime<br>Manage your plan anytime from the app</div>
 </div>
 <script>
-const API='${apiBase}',TOKEN='${token}';
+const TOKEN='${token}';
 async function pick(plan){
   const btn=document.getElementById('btn-'+plan);
   if(btn.disabled)return;
@@ -516,7 +516,7 @@ async function pick(plan){
   btn.innerHTML='<span class="spin"></span>Loading…';
   document.getElementById('err').style.display='none';
   try{
-    const r=await fetch(API+'/api/subscription/create-checkout-session',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({planType:plan})});
+    const r=await fetch('/api/subscription/create-checkout-session',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({planType:plan})});
     const d=await r.json();
     if(d.url)window.location.href=d.url;
     else throw new Error(d.message||'Could not start checkout');
@@ -524,7 +524,8 @@ async function pick(plan){
     document.querySelectorAll('.btn').forEach(b=>b.disabled=false);
     btn.textContent='Choose Plan';
     const el=document.getElementById('err');
-    el.textContent=e.message;el.style.display='block';
+    el.textContent=e.message||'Failed to connect to server. Please try again.';
+    el.style.display='block';
   }
 }
 </script></body></html>`;
