@@ -1,6 +1,8 @@
 const Stripe = require('stripe');
 const BusinessOwner = require('../models/BusinessOwner.model');
 const logger = require('../utils/logger');
+const { verifyToken } = require('../utils/jwt');
+
 
 // ─── Fix 1: Stripe singleton — created once at startup, not per-request ───────
 // Avoids TLS handshake overhead on every API call and prevents misconfiguration
@@ -143,8 +145,29 @@ exports.createCheckoutSession = async (req, res, next) => {
             });
         }
 
-        // ── Fix 3: Idempotency key prevents duplicate customers on retries ───
+        // ── Get or create Stripe Customer ─────────────────────────────────────
         let customerId = owner.subscription?.stripeCustomerId;
+
+        // If a customer ID exists, verify it's valid in the current Stripe mode.
+        // When switching from test → live, the old cus_test_... ID won't exist.
+        if (customerId) {
+            try {
+                await stripe.customers.retrieve(customerId);
+            } catch (stripeErr) {
+                if (stripeErr.code === 'resource_missing') {
+                    // Stale test-mode customer ID — clear it and create a fresh one below
+                    logger.warn(`[Subscription] Stale customer ID ${customerId} detected (mode switch?). Clearing and creating new customer.`);
+                    customerId = null;
+                    owner.subscription.stripeCustomerId = null;
+                    owner.subscription.stripeSubscriptionId = null;
+                    owner.subscription.status = 'inactive';
+                    await owner.save();
+                } else {
+                    throw stripeErr; // Re-throw unexpected errors
+                }
+            }
+        }
+
         if (!customerId) {
             const customer = await stripe.customers.create(
                 {
@@ -152,7 +175,7 @@ exports.createCheckoutSession = async (req, res, next) => {
                     name: owner.name,
                     metadata: { ownerId: owner._id.toString() },
                 },
-                { idempotencyKey: `customer-create-${owner._id.toString()}` }
+                { idempotencyKey: `customer-create-live-${owner._id.toString()}` }
             );
             customerId = customer.id;
             owner.subscription.stripeCustomerId = customerId;
@@ -208,15 +231,27 @@ exports.createPortalSession = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'Business owner not found' });
         }
 
-        // No customer ID → they've never paid → redirect to Checkout instead
+        // No customer ID — route them to Checkout instead
         if (!owner.subscription?.stripeCustomerId) {
             logger.info(`[Subscription] No customer ID. Falling back to Checkout for owner ${owner._id}`);
             return exports.createCheckoutSession(req, res, next);
         }
 
-        const returnUrl = process.env.APP_DEEP_LINK_BASE
-            ? `${process.env.APP_DEEP_LINK_BASE}://subscription-portal-return`
-            : `${process.env.BACKEND_URL || 'https://hashview.app'}/subscription/return`;
+        // Verify the customer ID exists in current Stripe mode (guard against test→live switch)
+        try {
+            await stripe.customers.retrieve(owner.subscription.stripeCustomerId);
+        } catch (stripeErr) {
+            if (stripeErr.code === 'resource_missing') {
+                logger.warn(`[Subscription] Stale customer ID on portal. Clearing and falling back to Checkout.`);
+                owner.subscription.stripeCustomerId = null;
+                owner.subscription.stripeSubscriptionId = null;
+                owner.subscription.status = 'inactive';
+                await owner.save();
+                // Fall through to Checkout so user can subscribe fresh in live mode
+                return exports.createCheckoutSession(req, res, next);
+            }
+            throw stripeErr;
+        }
 
         const portalSession = await stripe.billingPortal.sessions.create({
             customer: owner.subscription.stripeCustomerId,
@@ -388,3 +423,113 @@ exports.handleWebhook = async (req, res) => {
 
     res.status(200).json({ received: true });
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/subscription/pricing?token=<jwt>  (NO auth middleware — public URL)
+// Serves a self-contained HTML pricing page in the browser.
+// User picks a plan → JS POST to checkout → redirect to Stripe Checkout.
+// Fully browser-based. App Store & Play Store compliant.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.getPricingPage = async (req, res) => {
+    const { token } = req.query;
+
+    if (!token) {
+        return res.status(400).send(`<html><body style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:#1e1b4b;color:#fff"><h2>Missing authentication token. Please re-open from the app.</h2></body></html>`);
+    }
+
+    try {
+        verifyToken(token); // just validate — we don't need the payload for the page itself
+    } catch {
+        return res.status(401).send(`<html><body style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:#1e1b4b;color:#fff"><h2>Session expired. Please re-open from the app.</h2></body></html>`);
+    }
+
+    const apiBase = process.env.BACKEND_URL || `${req.protocol}://${req.get('host')}`;
+
+    const plans = [
+        { id: 'monthly', label: 'Monthly', badge: '', interval: '/ month', priceId: process.env.STRIPE_PRICE_ID_MONTHLY || process.env.STRIPE_PRICE_ID },
+        { id: '6month', label: '6 Months', badge: 'Save More', interval: '/ 6 months', priceId: process.env.STRIPE_PRICE_ID_6MONTH },
+        { id: 'yearly', label: 'Yearly', badge: 'Best Value', interval: '/ year', priceId: process.env.STRIPE_PRICE_ID_YEARLY, featured: true },
+    ].filter(p => p.priceId);
+
+    const stripe = getStripe();
+    const plansWithPrices = await Promise.all(plans.map(async (plan) => {
+        try {
+            const price = await stripe.prices.retrieve(plan.priceId);
+            const amount = (price.unit_amount / 100).toLocaleString('en-GB', {
+                style: 'currency', currency: price.currency.toUpperCase(),
+            });
+            return { ...plan, amount };
+        } catch {
+            return { ...plan, amount: 'See price' };
+        }
+    }));
+
+    const cards = plansWithPrices.map(p => `
+        <div class="card${p.featured ? ' featured' : ''}" onclick="pick('${p.id}')">
+            ${p.badge ? `<div class="badge">${p.badge}</div>` : '<div class="badge-empty"></div>'}
+            <div class="plan-name">${p.label}</div>
+            <div class="plan-price">${p.amount}</div>
+            <div class="plan-int">${p.interval}</div>
+            <button class="btn${p.featured ? ' btn-feat' : ''}" id="btn-${p.id}">Choose Plan</button>
+        </div>`).join('');
+
+    const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HashView Pro — Choose Your Plan</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#1e1b4b,#4c1d95);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px}
+.wrap{width:100%;max-width:480px}
+.hdr{text-align:center;margin-bottom:28px}
+.logo{font-size:26px;font-weight:800;color:#fff}.logo span{color:#a78bfa}
+.sub{color:#c4b5fd;margin-top:6px;font-size:14px}
+.cards{display:flex;flex-direction:column;gap:14px}
+.card{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);border-radius:20px;padding:22px 20px;cursor:pointer;text-align:center;transition:transform .18s,background .18s}
+.card:hover{background:rgba(255,255,255,.14);transform:translateY(-2px)}
+.card.featured{background:rgba(124,58,237,.35);border-color:#7c3aed;box-shadow:0 8px 28px rgba(124,58,237,.4)}
+.badge{display:inline-block;background:linear-gradient(90deg,#7c3aed,#4f46e5);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.badge-empty{height:24px;margin-bottom:10px}
+.plan-name{font-size:17px;font-weight:700;color:#fff;margin-bottom:4px}
+.plan-price{font-size:30px;font-weight:800;color:#fff;margin-bottom:2px}
+.plan-int{font-size:12px;color:#a78bfa;margin-bottom:18px}
+.btn{width:100%;padding:12px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.15);color:#fff;transition:background .15s}
+.btn:hover{background:rgba(255,255,255,.25)}
+.btn.btn-feat{background:linear-gradient(90deg,#7c3aed,#4f46e5);box-shadow:0 4px 14px rgba(124,58,237,.5)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.note{text-align:center;color:#7c6fad;font-size:12px;margin-top:20px;line-height:1.6}
+#err{color:#f87171;text-align:center;margin-top:12px;font-size:13px;display:none}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:s .7s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes s{to{transform:rotate(360deg)}}
+</style></head><body>
+<div class="wrap">
+  <div class="hdr"><div class="logo">Hash<span>View</span> Pro</div><div class="sub">Unlock all premium features for your business</div></div>
+  <div class="cards">${cards}</div>
+  <div id="err"></div>
+  <div class="note">Secure payment by Stripe · Cancel anytime<br>Manage your plan anytime from the app</div>
+</div>
+<script>
+const API='${apiBase}',TOKEN='${token}';
+async function pick(plan){
+  const btn=document.getElementById('btn-'+plan);
+  if(btn.disabled)return;
+  document.querySelectorAll('.btn').forEach(b=>b.disabled=true);
+  btn.innerHTML='<span class="spin"></span>Loading…';
+  document.getElementById('err').style.display='none';
+  try{
+    const r=await fetch(API+'/api/subscription/create-checkout-session',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},body:JSON.stringify({planType:plan})});
+    const d=await r.json();
+    if(d.url)window.location.href=d.url;
+    else throw new Error(d.message||'Could not start checkout');
+  }catch(e){
+    document.querySelectorAll('.btn').forEach(b=>b.disabled=false);
+    btn.textContent='Choose Plan';
+    const el=document.getElementById('err');
+    el.textContent=e.message;el.style.display='block';
+  }
+}
+</script></body></html>`;
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+};
+

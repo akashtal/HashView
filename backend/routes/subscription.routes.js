@@ -7,12 +7,17 @@ const {
     createCheckoutSession,
     createPortalSession,
     handleWebhook,
+    getPricingPage,
 } = require('../controllers/subscription.controller');
 
+
 // ─── Stripe Webhook ────────────────────────────────────────────────────────────
-// Raw body parsing is applied in server.js BEFORE express.json().
-// No auth here — Stripe's HMAC signature IS the authentication.
 router.post('/webhook', handleWebhook);
+
+// ─── Public: Pricing page (token passed as query param, no auth middleware) ───
+// Opens in browser via Linking.openURL — shows plan cards, then → Stripe Checkout
+router.get('/pricing', getPricingPage);
+
 
 // ─── Fix 2: Rate limiters ─────────────────────────────────────────────────────
 // Prevents abuse (hammering checkout/portal to inflate Stripe API costs or

@@ -32,15 +32,19 @@ const ProGate = ({ children, feature = 'This feature' }) => {
     const handleManageSubscription = useCallback(async () => {
         setLoading(true);
         try {
-            // isPro=true → Customer Portal (manage/cancel/view invoices)
-            // isPro=false → Checkout to start a new subscription
-            const data = isPro
-                ? await ApiService.createSubscriptionPortal()
-                : await ApiService.createSubscriptionCheckout();
+            let url;
+            if (isPro) {
+                // Existing subscriber → Customer Portal (cancel, change plan, view invoices)
+                const data = await ApiService.createSubscriptionPortal();
+                if (!data?.url) throw new Error('Could not generate portal URL');
+                url = data.url;
+            } else {
+                // New user → open hosted pricing page in browser (shows all 3 plans)
+                // Never inside the app — App Store & Play Store compliant
+                url = await ApiService.getPricingPageUrl();
+            }
 
-            if (!data?.url) throw new Error('Could not generate subscription page URL');
-
-            await Linking.openURL(data.url);
+            await Linking.openURL(url);
 
             Toast.show({
                 type: 'info',

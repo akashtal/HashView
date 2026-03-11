@@ -3,19 +3,21 @@ import { View, Text, ScrollView, TouchableOpacity, Image, StatusBar, Alert, Acti
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
-import { logout } from '../../store/slices/authSlice';
+import { logout, checkSubscriptionStatus } from '../../store/slices/authSlice';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
 import ToastService from '../../utils/ToastService';
 
 export default function BusinessProfileScreen({ navigation }) {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  const { user, isPro } = useSelector((state) => state.auth);
   const [myBusinesses, setMyBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchMyBusinesses();
+    // Always refresh subscription status when this screen opens
+    dispatch(checkSubscriptionStatus());
   }, []);
 
   const fetchMyBusinesses = async () => {
@@ -152,11 +154,23 @@ export default function BusinessProfileScreen({ navigation }) {
             <Text className="text-xl font-bold text-gray-900">{user?.name}</Text>
             <Text className="text-sm text-gray-500 mb-2">{user?.email}</Text>
 
-            <View className="rounded-full px-4 py-2 mt-2" style={{ backgroundColor: '#FFF9F0' }}>
-              <Text className="text-sm font-semibold capitalize" style={{ color: COLORS.secondary }}>
-                Business Owner
-              </Text>
-            </View>
+            {isPro ? (
+              /* ── Pro subscriber ── */
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                <View style={{ backgroundColor: '#7C3AED', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5, flexDirection: 'row', alignItems: 'center' }}>
+                  <Icon name="star" size={12} color="#fff" style={{ marginRight: 4 }} />
+                  <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12 }}>PRO</Text>
+                </View>
+                <View style={{ backgroundColor: '#FFF9F0', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, marginLeft: 8 }}>
+                  <Text style={{ fontSize: 14, fontWeight: '600', color: COLORS.secondary }}>Business Owner</Text>
+                </View>
+              </View>
+            ) : (
+              /* ── Free plan ── */
+              <View style={{ backgroundColor: '#FFF9F0', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, marginTop: 8 }}>
+                <Text style={{ fontSize: 14, fontWeight: '600', color: COLORS.secondary }}>Business Owner</Text>
+              </View>
+            )}
           </View>
         </View>
       </LinearGradient>
@@ -194,7 +208,7 @@ export default function BusinessProfileScreen({ navigation }) {
 
       <View className="px-6 pb-6">
         <Text className="text-center text-gray-400 text-xs">
-          HashView Business v1.0.0
+          HashView Business v1.1.8
         </Text>
       </View>
     </ScrollView>

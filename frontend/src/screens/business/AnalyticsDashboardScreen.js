@@ -12,7 +12,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
-import ProGate from '../../components/ProGate';
 
 const { width } = Dimensions.get('window');
 
@@ -206,96 +205,94 @@ export default function AnalyticsDashboardScreen({ navigation, route }) {
         </View>
       </LinearGradient>
 
-      {/* Pro-gated content */}
-      <ProGate feature="Analytics Dashboard">
-        {loading ? (
-          <View className="flex-1 justify-center items-center">
-            <ActivityIndicator size="large" color={COLORS.secondary} />
-          </View>
-        ) : (
-          <ScrollView className="flex-1 px-6 py-6">
-            {/* Key Metrics */}
-            <View className="flex-row mb-4">
-              <View className="flex-1 mr-2">
-                <View className="bg-white rounded-2xl p-5 shadow-sm">
-                  <Icon name="star" size={24} color={COLORS.secondary} />
-                  <Text className="text-3xl font-bold text-gray-900 mt-3">
-                    {analytics.averageRating.toFixed(1)}
-                  </Text>
-                  <Text className="text-xs text-gray-500 mt-1">Avg Rating</Text>
-                </View>
-              </View>
-              <View className="flex-1 ml-2">
-                <View className="bg-white rounded-2xl p-5 shadow-sm">
-                  <Icon name="chatbubbles" size={24} color={COLORS.primary} />
-                  <Text className="text-3xl font-bold text-gray-900 mt-3">
-                    {analytics.totalReviews}
-                  </Text>
-                  <Text className="text-xs text-gray-500 mt-1">Reviews</Text>
-                </View>
+      {/* Analytics content */}
+      {loading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color={COLORS.secondary} />
+        </View>
+      ) : (
+        <ScrollView className="flex-1 px-6 py-6">
+          {/* Key Metrics */}
+          <View className="flex-row mb-4">
+            <View className="flex-1 mr-2">
+              <View className="bg-white rounded-2xl p-5 shadow-sm">
+                <Icon name="star" size={24} color={COLORS.secondary} />
+                <Text className="text-3xl font-bold text-gray-900 mt-3">
+                  {analytics.averageRating.toFixed(1)}
+                </Text>
+                <Text className="text-xs text-gray-500 mt-1">Avg Rating</Text>
               </View>
             </View>
+            <View className="flex-1 ml-2">
+              <View className="bg-white rounded-2xl p-5 shadow-sm">
+                <Icon name="chatbubbles" size={24} color={COLORS.primary} />
+                <Text className="text-3xl font-bold text-gray-900 mt-3">
+                  {analytics.totalReviews}
+                </Text>
+                <Text className="text-xs text-gray-500 mt-1">Reviews</Text>
+              </View>
+            </View>
+          </View>
 
-            {/* Rating Distribution */}
-            <RatingDistribution />
+          {/* Rating Distribution */}
+          <RatingDistribution />
 
-            {/* Engagement Metrics */}
-            <EngagementMetrics />
+          {/* Engagement Metrics */}
+          <EngagementMetrics />
 
-            {/* Recent Activity */}
-            <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-              <Text className="text-lg font-bold text-gray-900 mb-4">Recent Reviews</Text>
-              {analytics.recentReviews && analytics.recentReviews.length > 0 ? (
-                analytics.recentReviews.map((review) => (
-                  <View key={review._id} className="mb-3 pb-3 border-b border-gray-100">
-                    <View className="flex-row items-center mb-2">
-                      <View className="flex-row">
-                        {[...Array(5)].map((_, i) => (
-                          <Icon
-                            key={i}
-                            name="star"
-                            size={12}
-                            color={i < review.rating ? COLORS.secondary : '#E5E7EB'}
-                          />
-                        ))}
-                      </View>
-                      <Text className="text-xs text-gray-500 ml-2">
-                        {new Date(review.createdAt).toLocaleDateString()}
-                      </Text>
+          {/* Recent Activity */}
+          <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
+            <Text className="text-lg font-bold text-gray-900 mb-4">Recent Reviews</Text>
+            {analytics.recentReviews && analytics.recentReviews.length > 0 ? (
+              analytics.recentReviews.map((review) => (
+                <View key={review._id} className="mb-3 pb-3 border-b border-gray-100">
+                  <View className="flex-row items-center mb-2">
+                    <View className="flex-row">
+                      {[...Array(5)].map((_, i) => (
+                        <Icon
+                          key={i}
+                          name="star"
+                          size={12}
+                          color={i < review.rating ? COLORS.secondary : '#E5E7EB'}
+                        />
+                      ))}
                     </View>
-                    <Text className="text-sm text-gray-700" numberOfLines={2}>
-                      {review.comment}
+                    <Text className="text-xs text-gray-500 ml-2">
+                      {new Date(review.createdAt).toLocaleDateString()}
                     </Text>
                   </View>
-                ))
-              ) : (
-                <Text className="text-sm text-gray-500 text-center py-4">
-                  No recent reviews
-                </Text>
-              )}
-            </View>
+                  <Text className="text-sm text-gray-700" numberOfLines={2}>
+                    {review.comment}
+                  </Text>
+                </View>
+              ))
+            ) : (
+              <Text className="text-sm text-gray-500 text-center py-4">
+                No recent reviews
+              </Text>
+            )}
+          </View>
 
-            {/* Insights */}
-            <View className="rounded-2xl p-5 mb-6" style={{ backgroundColor: '#FFF9F0' }}>
-              <View className="flex-row items-center mb-3">
-                <Icon name="bulb" size={24} color={COLORS.secondary} />
-                <Text className="text-lg font-bold ml-2" style={{ color: COLORS.secondary }}>
-                  Insights
-                </Text>
-              </View>
-              <Text className="text-sm text-gray-700 mb-2">
-                • Your average rating is {analytics.averageRating >= 4 ? 'excellent' : 'good'}!
-              </Text>
-              <Text className="text-sm text-gray-700 mb-2">
-                • You've received {analytics.totalReviews} reviews total
-              </Text>
-              <Text className="text-sm text-gray-700">
-                • {analytics.redeemedCoupons} out of {analytics.totalCoupons} coupons have been redeemed
+          {/* Insights */}
+          <View className="rounded-2xl p-5 mb-6" style={{ backgroundColor: '#FFF9F0' }}>
+            <View className="flex-row items-center mb-3">
+              <Icon name="bulb" size={24} color={COLORS.secondary} />
+              <Text className="text-lg font-bold ml-2" style={{ color: COLORS.secondary }}>
+                Insights
               </Text>
             </View>
-          </ScrollView>
-        )}
-      </ProGate>
+            <Text className="text-sm text-gray-700 mb-2">
+              • Your average rating is {analytics.averageRating >= 4 ? 'excellent' : 'good'}!
+            </Text>
+            <Text className="text-sm text-gray-700 mb-2">
+              • You've received {analytics.totalReviews} reviews total
+            </Text>
+            <Text className="text-sm text-gray-700">
+              • {analytics.redeemedCoupons} out of {analytics.totalCoupons} coupons have been redeemed
+            </Text>
+          </View>
+        </ScrollView>
+      )}
     </View>
   );
 }

@@ -358,6 +358,17 @@ const ApiService = {
 
   // Generate a Stripe Customer Portal URL for managing/cancelling subscription in browser
   createSubscriptionPortal: () => apiClient.post('/subscription/create-portal-session'),
+
+  // Returns the browser URL for the hosted plan-selection page.
+  // Open with Linking.openURL() — never shown inside the app.
+  getPricingPageUrl: async () => {
+    const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+    const token = await AsyncStorage.getItem('token');
+    if (!token) throw new Error('Not authenticated');
+    const base = (apiClient.defaults.baseURL || '').replace(/\/api\/?$/, '');
+    return `${base}/api/subscription/pricing?token=${encodeURIComponent(token)}`;
+  },
 };
+
 
 export default ApiService;
