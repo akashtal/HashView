@@ -2,7 +2,7 @@ const Business = require('../models/Business.model');
 const axios = require('axios');
 
 // Helper function to sync Google ratings (can be called from anywhere)
-const syncGoogleRatingsForBusiness = async (businessId, ratingsOnly = true) => {
+const syncGoogleRatingsForBusiness = async (businessId, ratingsOnly = true, forceRefresh = false) => {
   try {
     // Check if Google Places API key is configured
     if (!process.env.GOOGLE_PLACES_API_KEY) {
@@ -15,6 +15,29 @@ const syncGoogleRatingsForBusiness = async (businessId, ratingsOnly = true) => {
       console.error(`❌ Business not found: ${businessId}`);
       return { success: false, error: 'Business not found' };
     }
+
+    // ─── SMART CACHE GUARD ────────────────────────────────────────────────────
+    // Skip if synced within the last 23 hours (prevents double-billing when
+    // the daily cron and a manual sync overlap, or the cron runs twice).
+    if (!forceRefresh) {
+      const lastSynced = business.externalProfiles?.googleBusiness?.lastSynced;
+      if (lastSynced) {
+        const hoursSinceSync = (Date.now() - new Date(lastSynced).getTime()) / (1000 * 60 * 60);
+        if (hoursSinceSync < 23) {
+          console.log(`⏭️  Skipping Google sync for ${business.name} — synced ${hoursSinceSync.toFixed(1)}h ago (cache valid for 23h)`);
+          return {
+            success: true,
+            cached: true,
+            data: {
+              rating: business.externalProfiles.googleBusiness.rating,
+              reviewCount: business.externalProfiles.googleBusiness.reviewCount,
+              lastSynced: lastSynced
+            }
+          };
+        }
+      }
+    }
+    // ─── END CACHE GUARD ──────────────────────────────────────────────────────
 
     const googleBusinessName = business.externalProfiles?.googleBusiness?.businessName;
     let googlePlaceId = business.externalProfiles?.googleBusiness?.placeId;
@@ -72,10 +95,20 @@ const syncGoogleRatingsForBusiness = async (businessId, ratingsOnly = true) => {
     // Google Places API - Get Place Details (including reviews)
     try {
       const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json`;
+
+      // COST OPTIMIZATION: Only request the 'reviews' field when explicitly needed.
+      // The 'reviews' field triggers the Enterprise SKU ($0.040/call).
+      // Without it, we use the Basic SKU ($0.017/call) — a 57% saving per call.
+      // Since ratingsOnly=true is the default (set in syncJobs cron and dashboard button),
+      // we almost never need reviews in practice.
+      const fieldsToFetch = ratingsOnly
+        ? 'name,rating,user_ratings_total'              // Basic SKU — cheaper!
+        : 'name,rating,user_ratings_total,reviews';     // Enterprise SKU — only when reviews needed
+
       const detailsResponse = await axios.get(detailsUrl, {
         params: {
           place_id: placeId,
-          fields: 'name,rating,user_ratings_total,reviews',
+          fields: fieldsToFetch,
           key: process.env.GOOGLE_PLACES_API_KEY
         }
       });
@@ -177,7 +210,9 @@ exports.syncGoogleReviews = async (req, res, next) => {
     }
 
     const ratingsOnly = (process.env.EXTERNAL_RATINGS_ONLY === 'true') || (req.query.ratingsOnly === 'true');
-    const result = await syncGoogleRatingsForBusiness(req.params.id, ratingsOnly);
+    // Allow business owners to force a sync even within the 23-hour cache window (pass ?force=true)
+    const forceRefresh = req.query.force === 'true';
+    const result = await syncGoogleRatingsForBusiness(req.params.id, ratingsOnly, forceRefresh);
 
     if (!result.success) {
       if (result.error === 'Business not found') {

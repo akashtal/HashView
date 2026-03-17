@@ -280,21 +280,15 @@ exports.registerBusiness = async (req, res, next) => {
       coverUrl: business.coverImage?.url?.substring(0, 50) || 'N/A'
     });
 
-    // Auto-sync Google ratings in background (if Google Business name is provided)
+    // Google Business name is stored in DB.
+    // The daily cron at 2 AM will sync ratings automatically.
+    // We deliberately do NOT sync immediately on registration:
+    //   1. The business owner may have entered an incorrect Google Business name.
+    //   2. Immediate sync wastes 1-2 API calls ($0.022-$0.057) before the name is verified.
+    //   3. The business is 'pending' anyway and won't appear in user listings until approved.
     if (googleBusinessName && googleBusinessName.trim()) {
-      console.log(`🔄 Auto-syncing Google ratings for business: ${business._id}`);
-      // Call sync in background without blocking the response
-      syncGoogleRatingsForBusiness(business._id.toString(), true)
-        .then(result => {
-          if (result.success) {
-            console.log(`✅ Auto-sync completed for business: ${business._id} - Rating: ${result.data.rating}, Count: ${result.data.reviewCount}`);
-          } else {
-            console.log(`⚠️  Auto-sync failed for business: ${business._id} - ${result.error}`);
-          }
-        })
-        .catch(err => {
-          console.error(`❌ Auto-sync error for business: ${business._id}`, err.message);
-        });
+      console.log(`📝 Google Business name saved for: ${business._id}. Will sync on next daily cron at 2 AM.`);
+      // Auto-sync removed — daily cron (syncJobs.js) handles initial and ongoing sync.
     }
 
     res.status(201).json({

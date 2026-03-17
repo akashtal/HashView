@@ -5,60 +5,105 @@ const { syncGoogleRatingsForBusiness } = require('../controllers/externalReviews
 const logger = require('./logger');
 
 /**
+ * Determine how many hours between syncs for a given business.
+ *
+ * Tiers:
+ *   🆕 New      (< 30 days old)            → every 24 h  (daily)
+ *   🔥 Active   (30 days–1 year + reviews) → every 168 h (weekly)
+ *   💤 Inactive (> 1 year OR no reviews)   → every 720 h (monthly)
+ */
+const getSyncIntervalHours = (business) => {
+  const ageDays = (Date.now() - new Date(business.createdAt || 0).getTime()) / (1000 * 60 * 60 * 24);
+  const hasReviews = (business.rating?.count || 0) > 0;
+
+  if (ageDays < 30) return 24;                    // New — sync daily
+  if (ageDays <= 365 && hasReviews) return 168;   // Active — sync weekly
+  return 720;                                      // Inactive / old — sync monthly
+};
+
+/**
  * Automatic Google Ratings Sync Job
- * Runs daily at 2:00 AM to sync Google ratings for all businesses
- * Only syncs businesses that have a Google Business name configured
+ * Runs daily at 2:00 AM — but uses tiered intervals so each business is
+ * only called at the frequency it actually needs.
+ *
+ * Tier summary:
+ *   New  (< 30 days)          → daily   (24 h)
+ *   Active (< 1 yr + reviews) → weekly  (168 h)
+ *   Inactive / old            → monthly (720 h)
  */
 const syncAllGoogleRatings = async () => {
   try {
-    logger.info('🔄 Starting automatic Google ratings sync job...');
-    
-    // Find all businesses with Google Business name configured
+    logger.info('🔄 Starting automatic Google ratings sync job (tiered)...');
+
+    // Fetch businesses with createdAt + rating so we can apply tier logic
     const businesses = await Business.find({
       'externalProfiles.googleBusiness.businessName': { $exists: true, $ne: '' },
-      status: { $in: ['active', 'pending'] } // Only sync active or pending businesses
-    }).select('_id name externalProfiles');
+      status: { $in: ['active', 'pending'] }
+    }).select('_id name createdAt rating externalProfiles');
 
     if (!businesses || businesses.length === 0) {
       logger.info('ℹ️  No businesses found with Google Business name configured');
       return;
     }
 
-    logger.info(`📊 Found ${businesses.length} businesses to sync`);
+    logger.info(`📊 Found ${businesses.length} total businesses — applying tier filter...`);
 
+    let dueCount = 0;
+    let skippedCount = 0;
     let successCount = 0;
     let failCount = 0;
 
-    // Sync ratings for each business (with delay to avoid rate limiting)
     for (let i = 0; i < businesses.length; i++) {
       const business = businesses[i];
-      
+      const intervalHours = getSyncIntervalHours(business);
+      const lastSynced = business.externalProfiles?.googleBusiness?.lastSynced;
+
+      // Check if this business is due for a sync based on its tier interval
+      if (lastSynced) {
+        const hoursSinceSync = (Date.now() - new Date(lastSynced).getTime()) / (1000 * 60 * 60);
+        if (hoursSinceSync < intervalHours) {
+          skippedCount++;
+          const tierLabel = intervalHours === 24 ? 'daily' : intervalHours === 168 ? 'weekly' : 'monthly';
+          logger.info(`⏭️  [${tierLabel}] Skipping ${business.name} — synced ${hoursSinceSync.toFixed(0)}h ago (next in ${(intervalHours - hoursSinceSync).toFixed(0)}h)`);
+          continue;
+        }
+      }
+
+      // Business is due — sync it
+      dueCount++;
       try {
-        // Add delay between requests to avoid Google API rate limits
-        if (i > 0) {
-          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+        // 1-second stagger between actual API calls to avoid rate limits
+        if (dueCount > 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
-        const result = await syncGoogleRatingsForBusiness(business._id.toString(), true);
-        
+        // forceRefresh=true bypasses the 23h cache guard inside syncGoogleRatingsForBusiness
+        // (tier logic above already did the time check — no need to double-gate)
+        const result = await syncGoogleRatingsForBusiness(business._id.toString(), true, true);
+
         if (result.success) {
           successCount++;
-          logger.info(`✅ Synced ratings for business: ${business.name} (${business._id})`);
+          logger.info(`✅ Synced: ${business.name} (${business._id})`);
         } else {
           failCount++;
-          logger.warn(`⚠️  Failed to sync ratings for business: ${business.name} (${business._id}) - ${result.error}`);
+          logger.warn(`⚠️  Failed: ${business.name} — ${result.error}`);
         }
       } catch (error) {
         failCount++;
-        logger.error(`❌ Error syncing ratings for business: ${business.name} (${business._id})`, error);
+        logger.error(`❌ Error syncing: ${business.name} (${business._id})`, error);
       }
     }
 
-    logger.info(`✅ Google ratings sync job completed. Success: ${successCount}, Failed: ${failCount}`);
+    logger.info(
+      `✅ Sync job complete — Due: ${dueCount} | Skipped: ${skippedCount} | ` +
+      `Success: ${successCount} | Failed: ${failCount} | ` +
+      `API calls saved today: ${skippedCount}`
+    );
   } catch (error) {
     logger.error('❌ Error in automatic Google ratings sync job:', error);
   }
 };
+
 
 /**
  * Auto-expire coupons that have passed their 2-hour validity period

@@ -20,6 +20,9 @@ import { Ionicons as Icon } from '@expo/vector-icons';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import COLORS from '../config/colors';
 
+// Helper: generate a unique session token string for Autocomplete billing grouping
+const generateSessionToken = () => 'st_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
 const { width, height } = Dimensions.get('window');
 const UK_DEFAULT_COORDS = { latitude: 54.5, longitude: -3.3, latitudeDelta: 0.2, longitudeDelta: 0.2 };
 
@@ -109,6 +112,10 @@ export default function AdvancedLocationPicker({
     };
   };
 
+  // Autocomplete session token — groups all keystrokes into a single billable session.
+  // Reset after user selects a result so next search starts a new session.
+  const sessionTokenRef = useRef(generateSessionToken());
+
   // Debounce helper
   const debounce = (func, delay) => {
     let timeoutId;
@@ -121,22 +128,11 @@ export default function AdvancedLocationPicker({
   };
 
   // Reverse Geocode (Get address from coordinates)
+  // COST OPTIMIZATION: Uses free Expo Location as PRIMARY geocoder.
+  // Google Geocoding API ($0.005/call) is only used as a last-resort fallback.
   const reverseGeocode = async (latitude, longitude) => {
     try {
-      if (googleApiKey) {
-        const response = await fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${googleApiKey}`
-        );
-        const data = await response.json();
-        if (data.status === 'OK' && data.results.length > 0) {
-          const result = data.results[0];
-          setAddress(result.formatted_address);
-          setAddressComponents(extractGoogleAddressComponents(result.address_components));
-          return;
-        }
-      }
-
-      // Fallback to Expo Location
+      // PRIMARY: Use FREE Expo Location reverse geocoding (device-side, no network cost)
       const addressResults = await Location.reverseGeocodeAsync({ latitude, longitude });
       const addr = addressResults[0];
       if (addr) {
@@ -149,15 +145,34 @@ export default function AdvancedLocationPicker({
         ].filter(Boolean).join(', ');
         setAddress(fullAddress);
         setAddressComponents(extractExpoAddressComponents(addr));
-      } else {
-        setAddress(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
-        setAddressComponents(null);
+        return; // Done — no API call needed
       }
-    } catch (error) {
-      console.log('Reverse geocoding error:', error);
-      setAddress(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
-      setAddressComponents(null);
+    } catch (expoError) {
+      // Expo geocoder failed — fall through to Google fallback
+      console.log('Expo reverse geocoding unavailable, trying Google fallback:', expoError?.message);
     }
+
+    // FALLBACK ONLY: Use Google Geocoding API if Expo failed and key is available
+    if (googleApiKey) {
+      try {
+        const response = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${googleApiKey}`
+        );
+        const data = await response.json();
+        if (data.status === 'OK' && data.results.length > 0) {
+          const result = data.results[0];
+          setAddress(result.formatted_address);
+          setAddressComponents(extractGoogleAddressComponents(result.address_components));
+          return;
+        }
+      } catch (googleError) {
+        console.log('Google reverse geocoding also failed:', googleError?.message);
+      }
+    }
+
+    // Last resort: show raw coordinates
+    setAddress(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+    setAddressComponents(null);
   };
 
   const debouncedReverseGeocode = useCallback(debounce(reverseGeocode, 800), []);
@@ -248,6 +263,8 @@ export default function AdvancedLocationPicker({
                   placeholder='Search for a place'
                   keyboardShouldPersistTaps='handled'
                   onPress={(data, details = null) => {
+                    // Reset session token after selection — next search is a NEW billable session
+                    sessionTokenRef.current = generateSessionToken();
                     if (details) {
                       const { lat, lng } = details.geometry.location;
                       const newRegion = {
@@ -270,8 +287,13 @@ export default function AdvancedLocationPicker({
                     key: googleApiKey,
                     language: 'en',
                     components: 'country:gb', // Limit to UK
+                    sessiontoken: sessionTokenRef.current, // Groups keystrokes into one billable session
                   }}
                   fetchDetails={true}
+                  // Field mask: only fetch what we actually use — reduces PlaceDetails SKU cost
+                  GooglePlacesDetailsQuery={{
+                    fields: 'geometry,formatted_address,address_components',
+                  }}
                   styles={{
                     textInputContainer: {
                       backgroundColor: 'transparent',
@@ -298,7 +320,8 @@ export default function AdvancedLocationPicker({
                     },
                   }}
                   enablePoweredByContainer={false}
-                  debounce={400}
+                  debounce={600}     // Increased from 400ms → 600ms: fewer API calls while typing
+                  minLength={3}      // Require 3+ chars before firing: avoids calls on short inputs
                 />
               </View>
             </View>
