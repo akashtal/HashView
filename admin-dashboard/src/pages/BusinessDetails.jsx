@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, MapPin, Phone, Mail, Globe, Star, Edit2, Save, X, Image as ImageIcon, QrCode, Download, Plane, Plus, Trash2, Clock } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, MapPin, Phone, Mail, Globe, Star, Edit2, Save, X, Image as ImageIcon, QrCode, Download, Plane, Plus, Trash2, Clock, Bell } from 'lucide-react';
 import { adminApi } from '../api/adminApi';
 import { format } from 'date-fns';
 import ImageCropperModal from '../components/ImageCropperModal';
@@ -21,6 +21,15 @@ const BusinessDetails = () => {
   const [qrGenerating, setQrGenerating] = useState(false);
   const [tripAdvisorEditing, setTripAdvisorEditing] = useState(false);
   const [tripAdvisorLoading, setTripAdvisorLoading] = useState(false);
+
+  // Push notification limit (per-owner, admin-controlled)
+  const [notifLimit, setNotifLimit]           = useState(100);
+  const [notifLimitInput, setNotifLimitInput] = useState('100');
+  const [notifStats, setNotifStats]           = useState({ totalSent: 0, totalUsersReached: 0 });
+  const [notifIsPro, setNotifIsPro]           = useState(false);
+  const [notifEditing, setNotifEditing]       = useState(false);
+  const [notifLoading, setNotifLoading]       = useState(false);
+  const [notifOwnerFound, setNotifOwnerFound] = useState(false);
   const [tripAdvisorData, setTripAdvisorData] = useState({
     rating: '',
     reviewCount: '',
@@ -49,6 +58,49 @@ const BusinessDetails = () => {
   useEffect(() => {
     fetchBusinessDetails();
   }, [id]);
+
+  useEffect(() => {
+    if (!business?.owner?._id) return;
+    fetchOwnerNotifSettings(business.owner._id);
+  }, [business?.owner?._id]);
+
+  const fetchOwnerNotifSettings = async (ownerId) => {
+    try {
+      // Use a large limit to avoid pagination cutting off the owner we need
+      const res = await adminApi.getBusinessOwners({ limit: 1000 });
+      const ownerIdStr = ownerId?.toString();
+      const owner = res.data?.owners?.find(o => o._id?.toString() === ownerIdStr);
+      if (owner) {
+        setNotifOwnerFound(true);
+        setNotifIsPro(owner.subscriptionStatus === 'active' || owner.subscriptionStatus === 'trialing');
+        setNotifLimit(owner.pushNotifications?.maxReach ?? 100);
+        setNotifLimitInput(String(owner.pushNotifications?.maxReach ?? 100));
+        setNotifStats({
+          totalSent: owner.pushNotifications?.totalSent ?? 0,
+          totalUsersReached: owner.pushNotifications?.totalUsersReached ?? 0,
+        });
+      }
+    } catch (e) { console.error('fetchOwnerNotifSettings error', e); }
+  };
+
+  const handleSaveNotifLimit = async () => {
+    const val = parseInt(notifLimitInput);
+    if (isNaN(val) || val < 1 || val > 100000) {
+      alert('Please enter a valid number between 1 and 100,000');
+      return;
+    }
+    setNotifLoading(true);
+    try {
+      await adminApi.setOwnerNotificationLimit(business.owner._id, val);
+      setNotifLimit(val);
+      setNotifEditing(false);
+      alert(`Notification limit set to ${val} users per post`);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update limit');
+    } finally {
+      setNotifLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (business) {
@@ -1109,6 +1161,93 @@ const BusinessDetails = () => {
               </div>
             )}
           </div>
+
+          {/* Push Notification Limit Card — always visible */}
+          <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl shadow-md border-2 border-orange-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center">
+                  <div className="bg-orange-500 rounded-lg p-2 mr-3">
+                    <Bell className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">Push Notification Limit</h2>
+                    <p className="text-sm text-gray-600 mt-0.5">Max users per Offer / Update post (Pro owners)</p>
+                  </div>
+                </div>
+                {!notifEditing && (
+                  <button
+                    onClick={() => { setNotifEditing(true); setNotifLimitInput(String(notifLimit)); }}
+                    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition shadow-sm flex items-center"
+                  >
+                    <Edit2 size={16} className="mr-2" />
+                    Change Limit
+                  </button>
+                )}
+              </div>
+
+              {notifEditing ? (
+                <div className="bg-white rounded-lg p-4 border border-orange-200">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Max users per post <span className="text-xs text-gray-400">(1 – 100,000)</span>
+                  </label>
+                  <div className="flex items-center gap-3 mb-4">
+                    <input
+                      type="number"
+                      min="1"
+                      max="100000"
+                      value={notifLimitInput}
+                      onChange={(e) => setNotifLimitInput(e.target.value)}
+                      className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-lg font-semibold"
+                      placeholder="e.g. 500"
+                    />
+                    <span className="text-base font-medium text-gray-500">users</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSaveNotifLimit}
+                      disabled={notifLoading}
+                      className="flex-1 px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition disabled:opacity-50 flex items-center justify-center"
+                    >
+                      <Save size={18} className="mr-2" />
+                      {notifLoading ? 'Saving...' : 'Save Limit'}
+                    </button>
+                    <button
+                      onClick={() => setNotifEditing(false)}
+                      className="px-4 py-3 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white rounded-lg p-5 border border-orange-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-xs text-gray-500 mb-0.5">Current Limit</p>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-bold text-orange-500">{notifLimit}</span>
+                        <span className="text-base font-medium text-gray-600">users / post</span>
+                      </div>
+                    </div>
+                    {notifIsPro ? (
+                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">✓ Pro Active</span>
+                    ) : (
+                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">Not Pro</span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 pt-3 border-t border-orange-100">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-gray-900">{notifStats.totalSent.toLocaleString()}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Total Sent</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-gray-900">{notifStats.totalUsersReached.toLocaleString()}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Users Reached</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
           {/* QR Code Section - Show for all active businesses */}
           {business.status === 'active' && (

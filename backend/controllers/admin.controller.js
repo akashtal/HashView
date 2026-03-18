@@ -1497,3 +1497,94 @@ exports.deleteCoupon = async (req, res, next) => {
   }
 };
 
+// @desc    Get all business owners (with notification settings)
+// @route   GET /api/admin/business-owners
+// @access  Private (Admin)
+exports.getBusinessOwners = async (req, res, next) => {
+  try {
+    const page  = parseInt(req.query.page)  || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip  = (page - 1) * limit;
+    const { search } = req.query;
+
+    const query = {};
+    if (search) {
+      query.$or = [
+        { name:  { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const owners = await BusinessOwner.find(query)
+      .select('name email subscription.status pushNotifications createdAt')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await BusinessOwner.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+      owners: owners.map(o => ({
+        _id:   o._id,
+        name:  o.name,
+        email: o.email,
+        subscriptionStatus: o.subscription?.status || 'inactive',
+        pushNotifications: {
+          maxReach:   o.pushNotifications?.maxReach ?? 100,
+          totalSent:  o.pushNotifications?.totalSent ?? 0,
+          totalUsersReached: o.pushNotifications?.notifiedUserIds?.length ?? 0
+        }
+      }))
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Set notification reach limit for a business owner
+// @route   PUT /api/admin/business-owners/:ownerId/notification-limit
+// @access  Private (Admin)
+exports.setOwnerNotificationLimit = async (req, res, next) => {
+  try {
+    const { ownerId } = req.params;
+    const { maxReach } = req.body;
+
+    if (maxReach === undefined || isNaN(maxReach) || maxReach < 1 || maxReach > 100000) {
+      return res.status(400).json({
+        success: false,
+        message: 'maxReach must be a number between 1 and 100,000'
+      });
+    }
+
+    const owner = await BusinessOwner.findByIdAndUpdate(
+      ownerId,
+      { $set: { 'pushNotifications.maxReach': parseInt(maxReach) } },
+      { new: true }
+    ).select('name email pushNotifications');
+
+    if (!owner) {
+      return res.status(404).json({ success: false, message: 'Business owner not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Notification limit updated to ${maxReach} users per post`,
+      owner: {
+        _id:  owner._id,
+        name: owner.name,
+        email: owner.email,
+        pushNotifications: {
+          maxReach:  owner.pushNotifications.maxReach,
+          totalSent: owner.pushNotifications.totalSent,
+          totalUsersReached: owner.pushNotifications.notifiedUserIds?.length ?? 0
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};

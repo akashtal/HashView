@@ -41,7 +41,7 @@ export default function CouponsScreen() {
           <View className="bg-green-100 rounded-full w-16 h-16 items-center justify-center">
             <Text className="text-xl font-bold text-green-700">
               {item.rewardType === 'percentage' ? `${item.rewardValue}%` :
-                item.rewardType === 'fixed' ? `₹${item.rewardValue}` : 'FREE'}
+                item.rewardType === 'fixed' ? `£${item.rewardValue}` : 'FREE'}
             </Text>
           </View>
         </View>
@@ -178,16 +178,16 @@ export default function CouponsScreen() {
                       {selectedCoupon.rewardType === 'percentage'
                         ? `${selectedCoupon.rewardValue}% OFF`
                         : selectedCoupon.rewardType === 'fixed'
-                          ? `₹${selectedCoupon.rewardValue} OFF`
+                          ? `£${selectedCoupon.rewardValue} OFF`
                           : selectedCoupon.rewardType === 'free_item' || selectedCoupon.rewardType === 'free_drink'
                             ? `Free ${selectedCoupon.itemName || 'Item'}`
                             : `${selectedCoupon.rewardValue}% OFF`}
                     </Text>
                     {selectedCoupon.minPurchaseAmount > 0 && (
-                      <Text className="text-xs text-green-800 mt-1">Min. Purchase: ₹{selectedCoupon.minPurchaseAmount}</Text>
+                      <Text className="text-xs text-green-800 mt-1">Min. Purchase: £{selectedCoupon.minPurchaseAmount}</Text>
                     )}
                     {selectedCoupon.maxDiscountAmount > 0 && selectedCoupon.rewardType === 'percentage' && (
-                      <Text className="text-xs text-green-800">Max Discount: ₹{selectedCoupon.maxDiscountAmount}</Text>
+                      <Text className="text-xs text-green-800">Max Discount: £{selectedCoupon.maxDiscountAmount}</Text>
                     )}
                   </View>
                 </View>

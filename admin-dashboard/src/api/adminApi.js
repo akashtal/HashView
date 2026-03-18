@@ -83,6 +83,11 @@ export const adminApi = {
   getBusinessClaims: (params) => api.get('/business/admin/claims', { params }),
   reviewBusinessClaim: (businessId, decision, rejectionReason) =>
     api.put(`/business/${businessId}/claim/review`, { decision, rejectionReason }),
+
+  // Business Owner Notification Limits (admin control)
+  getBusinessOwners: (params) => api.get('/admin/business-owners', { params }),
+  setOwnerNotificationLimit: (ownerId, maxReach) =>
+    api.put(`/admin/business-owners/${ownerId}/notification-limit`, { maxReach }),
 };
 
 export default adminApi;

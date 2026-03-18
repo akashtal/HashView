@@ -412,9 +412,62 @@ exports.handleWebhook = async (req, res) => {
                 break;
             }
 
+            // ── Charge refunded — cancel subscription immediately ─────────────
+            // When a charge is refunded via Stripe Dashboard or API, Stripe fires
+            // 'charge.refunded'. It does NOT cancel the subscription automatically,
+            // so we must do it here.
+            case 'charge.refunded': {
+                const charge = event.data.object;
+
+                // Only act on full or close-to-full refunds
+                const isFullRefund = charge.amount_refunded >= charge.amount;
+                if (!isFullRefund) break;
+
+                const customerId = charge.customer;
+                if (!customerId) break;
+
+                // Find the owner by customer ID
+                const owner = await BusinessOwner
+                    .findOne({ 'subscription.stripeCustomerId': customerId })
+                    .select('+subscription.stripeCustomerId +subscription.stripeSubscriptionId');
+
+                if (!owner) {
+                    logger.warn(`[Subscription] charge.refunded — no owner found for customer ${customerId}`);
+                    break;
+                }
+
+                const subId = owner.subscription?.stripeSubscriptionId;
+
+                // Cancel the subscription in Stripe immediately
+                if (subId) {
+                    try {
+                        const stripeInstance = getStripe();
+                        await stripeInstance.subscriptions.cancel(subId);
+                        logger.info(`[Subscription] Cancelled subscription ${subId} due to full refund`);
+                    } catch (cancelErr) {
+                        // Sub may already be cancelled — log and continue to clean up DB
+                        logger.warn(`[Subscription] Could not cancel sub ${subId}: ${cancelErr.message}`);
+                    }
+                }
+
+                // Mark owner as inactive in DB regardless
+                await BusinessOwner.findByIdAndUpdate(owner._id, {
+                    $set: {
+                        'subscription.status': 'inactive',
+                        'subscription.plan': null,
+                        'subscription.stripeSubscriptionId': null,
+                        'subscription.currentPeriodEnd': null,
+                        'subscription.cancelAtPeriodEnd': false,
+                    },
+                });
+                logger.info(`[Subscription] Owner ${owner._id} marked inactive after full refund`);
+                break;
+            }
+
             default:
                 // Unhandled event types are fine
                 break;
+
         }
     } catch (processingError) {
         logger.error(`[Subscription] Error processing ${event.type}: ${processingError.message}`);

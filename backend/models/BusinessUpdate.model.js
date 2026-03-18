@@ -54,6 +54,15 @@ const businessUpdateSchema = new mongoose.Schema({
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'BusinessOwner'
+  },
+  // Users who received a push notification for THIS specific update
+  notifiedUsers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  notificationSentAt: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true

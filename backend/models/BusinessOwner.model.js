@@ -158,6 +158,27 @@ const businessOwnerSchema = new mongoose.Schema({
     }
   },
 
+  // ─── Push Notification Settings (set by Admin) ────────────────────────────
+  pushNotifications: {
+    // Admin-controlled: max unique users this owner can notify per post
+    maxReach: {
+      type: Number,
+      default: 100,
+      min: 1
+    },
+    // Cumulative set of user IDs already notified (across all posts).
+    // New posts target users NOT in this list first, promoting fresh reach.
+    notifiedUserIds: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    // Total push notifications sent lifetime
+    totalSent: {
+      type: Number,
+      default: 0
+    }
+  },
+
   createdAt: {
     type: Date,
     default: Date.now

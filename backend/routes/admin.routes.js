@@ -22,7 +22,9 @@ const {
   generateBusinessQRCode,
   getAllCoupons,
   toggleCouponStatus,
-  deleteCoupon
+  deleteCoupon,
+  getBusinessOwners,
+  setOwnerNotificationLimit
 } = require('../controllers/admin.controller');
 const { protect, authorize } = require('../middleware/auth.middleware');
 
@@ -55,6 +57,10 @@ router.get('/suspended', getAllSuspendedAccounts);
 router.get('/coupons', getAllCoupons);
 router.put('/coupons/:id/status', toggleCouponStatus);
 router.delete('/coupons/:id', deleteCoupon);
+
+// Business Owner notification limit (Admin control)
+router.get('/business-owners', getBusinessOwners);
+router.put('/business-owners/:ownerId/notification-limit', setOwnerNotificationLimit);
 
 module.exports = router;
 

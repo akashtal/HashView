@@ -92,12 +92,23 @@ exports.sendPushNotification = async (userId, title, message, data = {}) => {
   }
 };
 
-// Send notification to multiple users
+// Send notification to multiple users — returns { sent, failed, sentIds }
 exports.sendBulkNotifications = async (userIds, title, message, data = {}) => {
   const results = await Promise.allSettled(
-    userIds.map(userId => this.sendPushNotification(userId, title, message, data))
+    userIds.map(userId => exports.sendPushNotification(userId, title, message, data))
   );
-  return results;
+
+  const sentIds = [];
+  let failed = 0;
+  results.forEach((result, idx) => {
+    if (result.status === 'fulfilled' && result.value?.success) {
+      sentIds.push(userIds[idx]);
+    } else {
+      failed++;
+    }
+  });
+
+  return { sent: sentIds.length, failed, sentIds };
 };
 
 // Check notification receipts

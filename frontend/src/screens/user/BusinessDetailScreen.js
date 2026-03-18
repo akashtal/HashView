@@ -826,7 +826,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
                             </View>
                             <View>
                               <Text className="text-base font-bold" style={{ color: COLORS.secondary }}>
-                                {update.discountType === 'percentage' ? `${update.discountValue}% OFF` : `₹${update.discountValue} OFF`}
+                                {update.discountType === 'percentage' ? `${update.discountValue}% OFF` : `£${update.discountValue} OFF`}
                               </Text>
                               <Text className="text-[11px] text-gray-400 mt-0.5">
                                 Special Discount

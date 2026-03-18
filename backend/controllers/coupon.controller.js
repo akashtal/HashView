@@ -262,7 +262,7 @@ exports.redeemCoupon = async (req, res, next) => {
       const discountText = coupon.rewardType === 'percentage'
         ? `${coupon.rewardValue}% OFF`
         : coupon.rewardType === 'fixed'
-          ? `₹${coupon.rewardValue} OFF`
+          ? `£${coupon.rewardValue} OFF`
           : coupon.rewardType;
 
       await sendPushNotification(

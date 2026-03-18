@@ -358,7 +358,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
                         color: COLORS.secondary,
                         marginLeft: 6
                       }}>
-                        {update.discountType === 'percentage' ? `${update.discountValue}% OFF` : `₹${update.discountValue} OFF`}
+                        {update.discountType === 'percentage' ? `${update.discountValue}% OFF` : `£${update.discountValue} OFF`}
                       </Text>
                       {update.validUntil && (
                         <Text className="text-xs text-gray-600 ml-auto">
@@ -512,7 +512,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
                     <View className="flex-row items-center gap-2">
                       {[
                         { label: 'Percentage (%)', value: 'percentage' },
-                        { label: 'Fixed Amount (₹)', value: 'fixed' }
+                        { label: 'Fixed Amount (£)', value: 'fixed' }
                       ].map((option) => (
                         <TouchableOpacity
                           key={option.value}

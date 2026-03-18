@@ -58,7 +58,7 @@ export default function ManageCouponsScreen({ navigation, route }) {
         businessId,
         rewardType: formData.discountType,
         rewardValue: parseFloat(formData.discountValue),
-        description: formData.description || `${formData.discountValue}${formData.discountType === 'percentage' ? '%' : '₹'} off on your next visit`,
+        description: formData.description || `${formData.discountValue}${formData.discountType === 'percentage' ? '%' : '£'} off on your next visit`,
         minPurchaseAmount: parseFloat(formData.minCartValue) || 0,
         maxDiscountAmount: parseFloat(formData.maxDiscount) || null
       });
@@ -95,7 +95,7 @@ export default function ManageCouponsScreen({ navigation, route }) {
       case 'percentage':
         return `${coupon.rewardValue}%`;
       case 'fixed':
-        return `₹${coupon.rewardValue}`;
+        return `£${coupon.rewardValue}`;
       case 'buy1get1':
         return 'B1G1';
       case 'free_drink':
@@ -152,7 +152,7 @@ export default function ManageCouponsScreen({ navigation, route }) {
               <View className="flex-row items-center">
                 <Icon name="cart-outline" size={14} color="#6B7280" />
                 <Text className="text-xs text-gray-500 ml-1">
-                  Min. ₹{coupon.minPurchaseAmount}
+                  Min. £{coupon.minPurchaseAmount}
                 </Text>
               </View>
             )}
@@ -299,7 +299,7 @@ export default function ManageCouponsScreen({ navigation, route }) {
               {/* Discount Value */}
               <View className="mb-4">
                 <Text className="text-gray-900 font-semibold mb-2">
-                  Discount Value * {formData.discountType === 'percentage' ? '(%)' : '(₹)'}
+                  Discount Value * {formData.discountType === 'percentage' ? '(%)' : '(£)'}
                 </Text>
                 <TextInput
                   className="bg-gray-50 rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
@@ -313,7 +313,7 @@ export default function ManageCouponsScreen({ navigation, route }) {
 
               {/* Min Cart Value */}
               <View className="mb-4">
-                <Text className="text-gray-900 font-semibold mb-2">Min Cart Value (₹)</Text>
+                <Text className="text-gray-900 font-semibold mb-2">Min Cart Value (£)</Text>
                 <TextInput
                   className="bg-gray-50 rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
                   placeholder="e.g., 200"
@@ -327,7 +327,7 @@ export default function ManageCouponsScreen({ navigation, route }) {
               {/* Max Discount */}
               {formData.discountType === 'percentage' && (
                 <View className="mb-4">
-                  <Text className="text-gray-900 font-semibold mb-2">Max Discount (₹)</Text>
+                  <Text className="text-gray-900 font-semibold mb-2">Max Discount (£)</Text>
                   <TextInput
                     className="bg-gray-50 rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
                     placeholder="e.g., 500"

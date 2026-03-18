@@ -257,7 +257,7 @@ const ScratchCardModal = ({ visible, onClose, coupon, isNearbyCoupon, couponBusi
     const getRewardText = () => {
         if (!coupon) return 'SORRY!';
         if (coupon.rewardType === 'percentage') return coupon.title || `${coupon.rewardValue}% OFF`;
-        if (coupon.rewardType === 'fixed') return coupon.title || `₹${coupon.rewardValue} OFF`;
+        if (coupon.rewardType === 'fixed') return coupon.title || `£${coupon.rewardValue} OFF`;
         if (coupon.rewardType === 'free_item' || coupon.rewardType === 'free_drink')
             return coupon.title || `FREE: ${coupon.itemName || 'ITEM'}`;
         if (coupon.rewardType === 'buy1get1') return coupon.title || 'BUY 1 GET 1';
@@ -343,7 +343,7 @@ const ScratchCardModal = ({ visible, onClose, coupon, isNearbyCoupon, couponBusi
                                             {coupon.minPurchaseAmount > 0 && (
                                                 <View style={styles.detailRow}>
                                                     <Ionicons name="cart-outline" size={12} color={BRAND.orange} />
-                                                    <Text style={styles.detailText}>  Min. Purchase: ₹{coupon.minPurchaseAmount}</Text>
+                                                    <Text style={styles.detailText}>  Min. Purchase: £{coupon.minPurchaseAmount}</Text>
                                                 </View>
                                             )}
                                         </View>

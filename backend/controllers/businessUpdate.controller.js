@@ -1,7 +1,9 @@
-const BusinessUpdate = require('../models/BusinessUpdate.model');
-const Business = require('../models/Business.model');
-const User = require('../models/User.model');
+const BusinessUpdate  = require('../models/BusinessUpdate.model');
+const Business        = require('../models/Business.model');
+const BusinessOwner   = require('../models/BusinessOwner.model');
+const User            = require('../models/User.model');
 const { sendBulkNotifications } = require('../utils/notification');
+const logger          = require('../utils/logger');
 
 // @desc    Get all updates/offers for a business
 // @route   GET /api/business/:businessId/updates
@@ -70,49 +72,81 @@ exports.createBusinessUpdate = async (req, res, next) => {
       createdBy: req.user.id
     });
 
-    // Send push notification for announcements and offers
-    if (type === 'announcement' || type === 'offer') {
-      try {
-        // Create notification title and message
-        let notificationTitle = `📢 ${business.name}`;
-        let notificationMessage = title;
+    // ── Push notification dispatch ──────────────────────────────────────────
+    // Only Pro subscribers may send push notifications
+    const owner = await BusinessOwner
+      .findOne({ businesses: businessId })
+      .select('subscription pushNotifications isPro');
 
+    if (owner && owner.isPro) {
+      try {
+        const maxReach = owner.pushNotifications?.maxReach ?? 100;
+        const alreadyReachedIds = owner.pushNotifications?.notifiedUserIds?.map(id => id.toString()) || [];
+
+        // Build notification text
+        let notificationTitle = `📢 ${business.name}`;
+        let notificationBody  = title;
         if (type === 'offer' && discountValue > 0) {
-          const discountText = discountType === 'percentage'
-            ? `${discountValue}% OFF`
-            : `₹${discountValue} OFF`;
-          notificationMessage = `${discountText} - ${title}`;
+          const disc = discountType === 'percentage' ? `${discountValue}% OFF` : `£${discountValue} OFF`;
+          notificationTitle = `🎁 ${business.name} — New Offer!`;
+          notificationBody  = `${disc} · ${title}`;
         }
 
-        // Send to users who have favorited this business
-        // Find users who have favorited this business
-        console.log(`📊 Searching for users who favorited business ${businessId}...`);
-        const users = await User.find({ favoritePlaces: businessId }).select('_id');
-        console.log(`📊 Found ${users.length} users to notify`);
+        // Query ALL users with a push token — prioritise those never reached by this owner
+        const User = require('../models/User.model');
+        const allUsers = await User.find({ pushToken: { $exists: true, $ne: null } }).select('_id pushToken');
 
-        if (users.length > 0) {
-          const userIds = users.map(user => user._id);
+        // Split: fresh users (never notified by this owner) first, then already-notified
+        const freshUsers = allUsers.filter(u => !alreadyReachedIds.includes(u._id.toString()));
+        const poolUsers  = freshUsers.length >= maxReach
+          ? freshUsers.slice(0, maxReach)
+          : [
+              ...freshUsers,
+              ...allUsers
+                .filter(u => alreadyReachedIds.includes(u._id.toString()))
+                .slice(0, maxReach - freshUsers.length)
+            ];
 
-          await sendBulkNotifications(
+        if (poolUsers.length > 0) {
+          const userIds = poolUsers.map(u => u._id);
+          const { sentIds } = await sendBulkNotifications(
             userIds,
             notificationTitle,
-            notificationMessage,
+            notificationBody,
             {
               type: 'business_update',
               businessId: businessId.toString(),
               updateId: update._id.toString(),
-              screen: 'BusinessDetail' // For frontend navigation
+              screen: 'BusinessDetail'
             }
           );
-          console.log(`✅ Push notification sent for business ${type}: ${business.name} to ${users.length} users`);
+
+          // Track per-update and per-owner, then persist
+          if (sentIds.length > 0) {
+            update.notifiedUsers  = sentIds;
+            update.notificationSentAt = new Date();
+            await update.save();
+
+            // Append new recipients to owner's cumulative list (avoid duplicates)
+            const newIds = sentIds.filter(id => !alreadyReachedIds.includes(id.toString()));
+            await BusinessOwner.findByIdAndUpdate(owner._id, {
+              $push: { 'pushNotifications.notifiedUserIds': { $each: newIds } },
+              $inc:  { 'pushNotifications.totalSent': sentIds.length }
+            });
+
+            logger.info(`[Updates] Push sent for "${title}" by ${business.name} → ${sentIds.length} users`);
+          }
         } else {
-          console.log(`⚠️ No users found to notify for business ${businessId}`);
+          logger.info(`[Updates] No eligible users to notify for "${title}" (${business.name})`);
         }
-      } catch (error) {
-        console.error('❌ Failed to send push notification for business update:', error);
-        // Don't fail the request if notification fails
+      } catch (notifErr) {
+        // Notification failure must never block the create response
+        logger.error('[Updates] Push notification error:', notifErr.message);
       }
+    } else if (owner && !owner.isPro) {
+      logger.info(`[Updates] Skipping push — owner is not Pro (businessId: ${businessId})`);
     }
+    // ── End push dispatch ───────────────────────────────────────────────────
 
     res.status(201).json({
       success: true,
