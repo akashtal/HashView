@@ -10,7 +10,7 @@ const businessSchema = new mongoose.Schema({
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'BusinessOwner'
     // Optional - admin can create businesses without owner
   },
   ownerName: {

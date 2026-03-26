@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StatusBar, Image, Dimensions, Linking, Share, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StatusBar, Image, Dimensions, Linking, Share, Modal, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Video, ResizeMode } from 'expo-av';
 import ToastService from '../../utils/ToastService';
@@ -411,6 +411,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
 
             // ⚠️ Unclaimed — show Claim button only for fully authenticated, non-guest users
             if (user && !user.isGuest) {
+              const isBusiness = user.role === 'business';
               return (
                 <TouchableOpacity
                   onPress={() => navigation.navigate('ClaimBusiness', { business: displayBusiness })}
@@ -420,7 +421,9 @@ export default function BusinessDetailScreen({ navigation, route }) {
                   <Icon name="flag-outline" size={16} color="#B45309" />
                   <View className="flex-1 ml-2">
                     <Text className="text-amber-800 text-xs font-bold">Unclaimed Business</Text>
-                    <Text className="text-amber-600 text-[10px]">Is this your business? Claim it now →</Text>
+                    <Text className="text-amber-600 text-[10px]">
+                      {isBusiness ? "Is this your business? Claim it now →" : "Claim your business listing →"}
+                    </Text>
                   </View>
                   <Icon name="chevron-forward" size={14} color="#B45309" />
                 </TouchableOpacity>

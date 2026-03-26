@@ -223,7 +223,14 @@ const Businesses = () => {
                           )}
                         </div>
                         <div className="ml-4">
-                          <div className="font-medium text-gray-900">{business.name}</div>
+                          <div className="flex items-center gap-2">
+                            <div className="font-medium text-gray-900">{business.name}</div>
+                            {business.claimRequest?.status === 'pending' && (
+                              <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded uppercase tracking-wider animate-pulse border border-amber-200">
+                                Pending Claim
+                              </span>
+                            )}
+                          </div>
                           <div className="text-sm text-gray-500">{business.email}</div>
                         </div>
                       </div>

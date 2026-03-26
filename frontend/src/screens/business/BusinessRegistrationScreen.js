@@ -153,10 +153,8 @@ export default function BusinessRegistrationScreen({ navigation }) {
         return;
       }
 
-      // Using location bias to UK instead of strict country filtering for better results
-      // UK center coordinates: 54.7023545, -3.2765753
       const autocompleteResponse = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&components=country:gb&types=establishment|geocode&key=${GOOGLE_API_KEY}`
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&types=establishment|geocode&key=${GOOGLE_API_KEY}`
       );
 
       if (!autocompleteResponse.ok) {
@@ -175,44 +173,20 @@ export default function BusinessRegistrationScreen({ navigation }) {
         return;
       }
 
+      // Cost Optimization: Only return predictions here.
+      // Detailed info (lat/lng, components) will be fetched only when a user SELECTS a suggestion.
+      const simplifiedSuggestions = autocompleteData.predictions.slice(0, 5).map(prediction => ({
+        id: prediction.place_id,
+        description: prediction.description,
+        placeId: prediction.place_id
+      }));
 
-      // Step 2: Get detailed information (lat/lng) for each prediction
-      const detailedSuggestions = await Promise.all(
-        autocompleteData.predictions.slice(0, 5).map(async (prediction) => {
-          try {
-            const placeDetailsResponse = await fetch(
-              `https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&fields=formatted_address,geometry,address_component&key=${GOOGLE_API_KEY}`
-            );
+      setAddressSuggestions(simplifiedSuggestions);
+      setShowAddressSuggestions(simplifiedSuggestions.length > 0);
 
-            const placeDetailsData = await placeDetailsResponse.json();
 
-            if (placeDetailsData.status === 'OK' && placeDetailsData.result) {
-              return {
-                id: prediction.place_id,
-                address: placeDetailsData.result.formatted_address || prediction.description,
-                latitude: placeDetailsData.result.geometry.location.lat,
-                longitude: placeDetailsData.result.geometry.location.lng,
-                placeId: prediction.place_id,
-                types: prediction.types || [],
-                components: placeDetailsData.result.address_components || []
-              };
-            }
-            return null;
-          } catch (error) {
-            console.error('Error fetching place details:', error);
-            return null;
-          }
-        })
-      );
-
-      // Filter out null results
-      const validSuggestions = detailedSuggestions.filter(s => s !== null);
-
-      setAddressSuggestions(validSuggestions);
-      setShowAddressSuggestions(validSuggestions.length > 0);
-
-      if (validSuggestions.length > 0) {
-        console.log(`✅ Found ${validSuggestions.length} accurate address suggestions`);
+      if (simplifiedSuggestions.length > 0) {
+        console.log(`✅ Found ${simplifiedSuggestions.length} address suggestions`);
       }
     } catch (error) {
       console.error('Error searching address:', error);
@@ -270,7 +244,14 @@ export default function BusinessRegistrationScreen({ navigation }) {
   const geocodeManualAddress = async (addressPayload) => {
     if (!GOOGLE_API_KEY) return;
 
-    const query = [buildingNumber, street, city, county, postcode, 'United Kingdom']
+    const query = [
+      addressPayload.buildingNumber,
+      addressPayload.street,
+      addressPayload.city,
+      addressPayload.county,
+      addressPayload.postcode,
+      addressPayload.country || 'United Kingdom'
+    ]
       .filter(Boolean)
       .join(', ');
 
@@ -278,7 +259,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
           query
-        )}&components=country:GB&key=${GOOGLE_API_KEY}`
+        )}&key=${GOOGLE_API_KEY}`
       );
       const data = await response.json();
       if (data.status === 'OK' && data.results?.length) {
@@ -318,35 +299,65 @@ export default function BusinessRegistrationScreen({ navigation }) {
   };
 
   // Function to select address from suggestions
-  const selectAddressSuggestion = (suggestion) => {
-    let updatedForm = { ...formData, address: suggestion.address };
-    if (suggestion.components) {
-      const parsed = parseAddressComponents(suggestion.components);
-      updatedForm = {
-        ...updatedForm,
-        buildingNumber: parsed.buildingNumber || updatedForm.buildingNumber,
-        street: parsed.street || updatedForm.street,
-        city: parsed.city || updatedForm.city,
-        county: parsed.county || updatedForm.county,
-        postcode: parsed.postcode || updatedForm.postcode,
-        country: parsed.country || updatedForm.country,
-      };
+  const selectAddressSuggestion = async (suggestion) => {
+    try {
+      setSearchingAddress(true);
+
+      // Fetch detailed information (lat/lng & components) ONLY for the selected prediction
+      const placeDetailsResponse = await fetch(
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${suggestion.placeId}&fields=formatted_address,geometry,address_component&key=${GOOGLE_API_KEY}`
+      );
+
+      const placeDetailsData = await placeDetailsResponse.json();
+
+      if (placeDetailsData.status !== 'OK' || !placeDetailsData.result) {
+        throw new Error(`Place details failed: ${placeDetailsData.status}`);
+      }
+
+      const result = placeDetailsData.result;
+      const formattedAddress = result.formatted_address || suggestion.description;
+      const latitude = result.geometry.location.lat;
+      const longitude = result.geometry.location.lng;
+      const components = result.address_components || [];
+
+      let updatedForm = { ...formData, address: formattedAddress };
+      if (components.length > 0) {
+        const parsed = parseAddressComponents(components);
+        updatedForm = {
+          ...updatedForm,
+          buildingNumber: parsed.buildingNumber || updatedForm.buildingNumber,
+          street: parsed.street || updatedForm.street,
+          city: parsed.city || updatedForm.city,
+          county: parsed.county || updatedForm.county,
+          postcode: parsed.postcode || updatedForm.postcode,
+          country: parsed.country || updatedForm.country,
+        };
+      }
+
+      setFormData(updatedForm);
+      updateFullAddress(updatedForm);
+      setAddressSearchQuery(formattedAddress);
+
+      setLocation({
+        latitude: latitude,
+        longitude: longitude,
+        address: formattedAddress,
+        loading: false,
+        error: null
+      });
+
+      setManualAddressDirty(false);
+      setShowAddressSuggestions(false);
+      setAddressSuggestions([]); // Clear suggestions after selection
+
+      console.log('✅ Address selected & details fetched:', formattedAddress);
+      console.log('📍 Location:', latitude.toFixed(6), longitude.toFixed(6));
+    } catch (error) {
+      console.error('Error selecting address suggestion:', error);
+      Alert.alert('Error', 'Failed to fetch address details. Please try again.');
+    } finally {
+      setSearchingAddress(false);
     }
-    setFormData(updatedForm);
-    updateFullAddress(updatedForm);
-    setAddressSearchQuery(suggestion.address);
-    setLocation({
-      latitude: suggestion.latitude,
-      longitude: suggestion.longitude,
-      address: suggestion.address,
-      loading: false,
-      error: null
-    });
-    setManualAddressDirty(false);
-    setShowAddressSuggestions(false);
-    setAddressSuggestions([]); // Clear suggestions after selection
-    console.log('✅ Address selected from search:', suggestion.address);
-    console.log('📍 Location:', suggestion.latitude.toFixed(6), suggestion.longitude.toFixed(6));
   };
 
   // Function to get location
@@ -375,20 +386,11 @@ export default function BusinessRegistrationScreen({ navigation }) {
       }
 
       console.log('📍 Getting current location...');
-      // --- TESTING OVERRIDE: COMMENTED OUT REAL GPS FETCH ---
-      // let currentLocation = await Location.getCurrentPositionAsync({
-      //   accuracy: Location.Accuracy.Balanced,
-      //   timeInterval: 10000,
-      //   distanceInterval: 0
-      // });
-
-      // HARDCODED TO LONDON FOR UK TESTING FROM INDIA
-      let currentLocation = {
-        coords: {
-          latitude: 51.5072,
-          longitude: -0.1276
-        }
-      };
+      let currentLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+        timeInterval: 15000,
+        distanceInterval: 10
+      });
 
       console.log('✅ Location obtained:', currentLocation.coords.latitude, currentLocation.coords.longitude);
 
@@ -1145,7 +1147,9 @@ export default function BusinessRegistrationScreen({ navigation }) {
                     onPress={() => selectAddressSuggestion(suggestion)}
                   >
                     <Icon name="location-outline" size={18} color={COLORS.primary} style={{ marginTop: 2 }} />
-                    <Text className="flex-1 ml-2 text-gray-800">{suggestion.address}</Text>
+                    <Text className="flex-1 ml-2 text-black" style={{ color: '#000000', fontWeight: '500' }}>
+                      {suggestion.description}
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>

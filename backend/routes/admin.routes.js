@@ -24,7 +24,8 @@ const {
   toggleCouponStatus,
   deleteCoupon,
   getBusinessOwners,
-  setOwnerNotificationLimit
+  setOwnerNotificationLimit,
+  promoteUserToBusiness
 } = require('../controllers/admin.controller');
 const { protect, authorize } = require('../middleware/auth.middleware');
 
@@ -40,6 +41,7 @@ router.put('/businesses/:id', updateBusiness);
 router.put('/businesses/:id/radius', updateBusinessRadius);
 router.put('/businesses/:id/kyc', updateBusinessKYC);
 router.post('/businesses/:id/generate-qr', generateBusinessQRCode);
+router.post('/users/:id/promote-to-business', promoteUserToBusiness);
 router.put('/users/:id/status', updateUserStatus);
 router.get('/reviews', getAllReviews);
 router.put('/reviews/:id/status', updateReviewStatus);

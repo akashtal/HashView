@@ -177,7 +177,8 @@ exports.getAllBusinesses = async (req, res, next) => {
 exports.getBusinessById = async (req, res, next) => {
   try {
     const business = await Business.findById(req.params.id)
-      .populate('owner', 'name email phone');
+      .populate('owner', 'name email phone')
+      .populate('claimRequest.requestedBy', 'name email phone');
 
     if (!business) {
       return res.status(404).json({
@@ -1582,6 +1583,68 @@ exports.setOwnerNotificationLimit = async (req, res, next) => {
           totalSent: owner.pushNotifications.totalSent,
           totalUsersReached: owner.pushNotifications.notifiedUserIds?.length ?? 0
         }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Promote a standard User to a BusinessOwner
+// @route   POST /api/admin/users/:id/promote-to-business
+// @access  Private (Admin)
+exports.promoteUserToBusiness = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).select('+passwordHash');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Check if BusinessOwner already exists with this email
+    let businessOwner = await BusinessOwner.findOne({ email: user.email.toLowerCase() });
+
+    if (businessOwner) {
+      // If they already have a business account, just ensure it's active
+      if (businessOwner.status !== 'active') {
+        businessOwner.status = 'active';
+        await businessOwner.save();
+      }
+      return res.status(200).json({
+        success: true,
+        message: 'User already has a business account. Account ensured active.',
+        businessOwner: {
+          _id: businessOwner._id,
+          name: businessOwner.name,
+          email: businessOwner.email
+        }
+      });
+    }
+
+    // Create new BusinessOwner using User's credentials
+    businessOwner = await BusinessOwner.create({
+      name: user.name,
+      email: user.email.toLowerCase(),
+      phone: user.phone,
+      passwordHash: user.passwordHash, // Copy hash directly (it's already hashed)
+      address: user.address,
+      profileImage: user.profileImage,
+      emailVerified: user.emailVerified,
+      phoneVerified: user.phoneVerified,
+      status: 'active',
+      role: 'business'
+    });
+
+    // Also update the original user's role to 'business' for consistency in User collection
+    user.role = 'business';
+    await user.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'User successfully promoted to Business Account',
+      businessOwner: {
+        _id: businessOwner._id,
+        name: businessOwner.name,
+        email: businessOwner.email
       }
     });
   } catch (error) {

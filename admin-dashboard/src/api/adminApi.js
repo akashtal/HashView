@@ -88,6 +88,7 @@ export const adminApi = {
   getBusinessOwners: (params) => api.get('/admin/business-owners', { params }),
   setOwnerNotificationLimit: (ownerId, maxReach) =>
     api.put(`/admin/business-owners/${ownerId}/notification-limit`, { maxReach }),
+  promoteUserToBusiness: (userId) => api.post(`/admin/users/${userId}/promote-to-business`),
 };
 
 export default adminApi;

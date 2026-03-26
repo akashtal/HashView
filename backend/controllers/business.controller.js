@@ -1820,15 +1820,39 @@ exports.reviewBusinessClaim = async (req, res, next) => {
     business.claimRequest.reviewedAt = new Date();
 
     if (decision === 'approved') {
-      // Assign ownership
-      business.owner = claimant._id;
+      // MANDATORY: Claimant must have a business account before approval
+      if (claimant.role !== 'business') {
+        return res.status(400).json({
+          success: false,
+          message: 'This user does not have a business account. You must promote them to a Business Account before granting ownership.'
+        });
+      }
+
+      // Check for corresponding BusinessOwner record
+      const businessOwner = await BusinessOwner.findOne({ email: claimant.email.toLowerCase() });
+      if (!businessOwner) {
+        return res.status(400).json({
+          success: false,
+          message: 'No BusinessOwner record found for this user. Please promote them to a Business Account first.'
+        });
+      }
+
+      // Assign ownership (Owner field in Business should refer to the BusinessOwner ID)
+      // Note: We might need to handle ref inconsistency if Business.model.js strictly uses ref: 'User'
+      business.owner = businessOwner._id;
       business.email = business.email || business.claimRequest.businessEmail;
+      
+      // Clear rejection reason if any
       if (business.claimRequest.rejectionReason) business.claimRequest.rejectionReason = undefined;
 
-      // Upgrade user role to 'business' and add to their businesses array
-      await User.findByIdAndUpdate(claimant._id, {
-        $set: { role: 'business' },
+      // Ensure business is added to the BusinessOwner's array
+      await BusinessOwner.findByIdAndUpdate(businessOwner._id, {
         $addToSet: { businesses: business._id }
+      });
+
+      // Keep User role updated for consistency, although BusinessOwner is the primary account
+      await User.findByIdAndUpdate(claimant._id, {
+        $set: { role: 'business' }
       });
 
       // Notify claimant: approved

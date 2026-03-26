@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, MapPin, Phone, Mail, Globe, Star, Edit2, Save, X, Image as ImageIcon, QrCode, Download, Plane, Plus, Trash2, Clock, Bell } from 'lucide-react';
+import {
+  ArrowLeft, CheckCircle, XCircle, MapPin, Phone, Mail, Globe, Star, Edit2, Save, X,
+  Image as ImageIcon, QrCode, Download, Plane, Plus, Trash2, Clock, Bell,
+  FileText, Eye, AlertTriangle, User, ChevronDown
+} from 'lucide-react';
 import { adminApi } from '../api/adminApi';
 import { format } from 'date-fns';
 import ImageCropperModal from '../components/ImageCropperModal';
@@ -35,6 +39,11 @@ const BusinessDetails = () => {
     reviewCount: '',
     profileUrl: ''
   });
+
+  // Claim management state
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [claimActionLoading, setClaimActionLoading] = useState(false);
 
   // Images state
   const [logoFile, setLogoFile] = useState(null);
@@ -485,6 +494,61 @@ const BusinessDetails = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleApproveClaim = async () => {
+    if (!window.confirm('Are you sure you want to approve this claim? This will assign ownership to the claimant.')) return;
+    
+    // Safety check: ensure claimant is a business account
+    if (business.claimRequest?.requestedBy?.role !== 'business') {
+      alert('This user is currently a Customer. You must promote them to a Business Account before approving the claim.');
+      return;
+    }
+
+    setClaimActionLoading(true);
+    try {
+      await adminApi.reviewBusinessClaim(id, 'approved');
+      alert('Claim approved successfully! The user is now the owner of this business.');
+      fetchBusinessDetails();
+    } catch (error) {
+      alert(error.response?.data?.message || 'Failed to approve claim');
+    } finally {
+      setClaimActionLoading(false);
+    }
+  };
+
+  const handlePromoteToBusiness = async (userId) => {
+    if (!window.confirm('Are you sure you want to promote this user to a Business Account? This will create a separate BusinessOwner record for them.')) return;
+    setClaimActionLoading(true);
+    try {
+      await adminApi.promoteUserToBusiness(userId);
+      alert('User promoted to Business Account successfully!');
+      fetchBusinessDetails();
+    } catch (error) {
+      console.error('Error promoting user:', error);
+      alert(error.response?.data?.message || 'Failed to promote user');
+    } finally {
+      setClaimActionLoading(false);
+    }
+  };
+
+  const handleRejectClaim = async () => {
+    if (!rejectionReason) {
+      alert('Please provide a reason for rejection');
+      return;
+    }
+    setClaimActionLoading(true);
+    try {
+      await adminApi.reviewBusinessClaim(id, 'rejected', rejectionReason);
+      alert('Claim rejected successfully.');
+      setRejectModalOpen(false);
+      setRejectionReason('');
+      fetchBusinessDetails();
+    } catch (error) {
+      alert(error.response?.data?.message || 'Failed to reject claim');
+    } finally {
+      setClaimActionLoading(false);
+    }
   };
 
   if (loading) {
@@ -1079,6 +1143,144 @@ const BusinessDetails = () => {
               </div>
             )}
           </div>
+
+          {/* Business Claim Management Section */}
+          {(!business.owner || (business.claimRequest && business.claimRequest.status === 'pending')) && (
+            <div className={`rounded-xl shadow-md border-2 p-6 transition-all ${
+              business.claimRequest?.status === 'pending'
+                ? 'bg-amber-50 border-amber-200 ring-2 ring-amber-100 ring-offset-2'
+                : 'bg-gray-50 border-gray-200'
+            }`}>
+              <div className="flex items-center gap-3 mb-5">
+                <div className={`p-2.5 rounded-xl ${
+                  business.claimRequest?.status === 'pending' ? 'bg-amber-500' : 'bg-gray-400'
+                }`}>
+                  <FileText className="text-white" size={22} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Claim Status</h2>
+                  <p className="text-sm text-gray-600 mt-0.5">
+                    {business.owner ? 'Business is claimed' : 'This business is unclaimed'}
+                  </p>
+                </div>
+              </div>
+
+              {business.claimRequest && business.claimRequest.status === 'pending' ? (
+                <div className="space-y-5">
+                  <div className="bg-white rounded-xl p-4 border border-amber-200 shadow-sm">
+                    <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                      <Clock size={12} /> Pending Claim Request
+                    </p>
+
+                    <div className="space-y-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <User size={14} className="text-gray-400" />
+                        <span className="text-sm font-semibold text-gray-800">{business.claimRequest.requestedBy?.name || 'Unknown User'}</span>
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <Mail size={14} className="text-gray-400" />
+                        <span className="text-sm text-gray-600 truncate">{business.claimRequest.requestedBy?.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                      <FileText size={14} className="text-gray-400" />
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-600 capitalize">Role: {business.claimRequest.requestedBy?.role || 'User'}</span>
+                        {business.claimRequest.requestedBy?.role === 'business' ? (
+                          <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold rounded">BUSINESS</span>
+                        ) : (
+                          <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded">CUSTOMER</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t border-gray-50 flex items-center justify-between text-[11px]">
+                      <span className="text-gray-400">Requested: {business.claimRequest.requestedAt ? format(new Date(business.claimRequest.requestedAt), 'dd MMM yyyy') : '—'}</span>
+                      {business.claimRequest.verificationMethod && (
+                        <span className={`px-2 py-0.5 rounded-full font-medium ${
+                          business.claimRequest.phoneVerified ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          {business.claimRequest.verificationMethod === 'phone' ? '📱 Phone OTP' : '🪪 Documents'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Role Warning & Promotion Button */}
+                {business.claimRequest.requestedBy?.role === 'customer' && (
+                  <div className="bg-red-50 border border-red-100 rounded-xl p-4 space-y-3">
+                    <div className="flex items-start gap-2 text-red-700">
+                      <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
+                      <p className="text-xs font-semibold leading-relaxed">
+                        This user is currently using a standard Customer account. 
+                        They must have a Business Account to become an owner.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handlePromoteToBusiness(business.claimRequest.requestedBy._id)}
+                      disabled={claimActionLoading}
+                      className="w-full bg-white border border-red-200 text-red-600 hover:bg-red-600 hover:text-white py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm"
+                    >
+                      <User size={14} /> Promote to Business Account
+                    </button>
+                  </div>
+                )}
+
+                {/* Documents Preview */}
+                {business.documents && (business.documents.ownerIdProof?.url || business.documents.selfie?.url) && (
+                  <div className="grid grid-cols-2 gap-3">
+                    {business.documents.ownerIdProof?.url && (
+                      <a href={business.documents.ownerIdProof.url} target="_blank" rel="noreferrer" className="group">
+                        <div className="aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 relative">
+                          <img src={business.documents.ownerIdProof.url} alt="ID Proof" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Eye className="text-white" size={20} />
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-center text-gray-500 mt-1 font-medium">ID Proof</p>
+                      </a>
+                    )}
+                    {business.documents.selfie?.url && (
+                      <a href={business.documents.selfie.url} target="_blank" rel="noreferrer" className="group">
+                        <div className="aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 relative">
+                          <img src={business.documents.selfie.url} alt="Selfie" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Eye className="text-white" size={20} />
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-center text-gray-500 mt-1 font-medium">Selfie</p>
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleApproveClaim}
+                      disabled={claimActionLoading || business.claimRequest.requestedBy?.role !== 'business'}
+                      className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                        business.claimRequest.requestedBy?.role === 'business'
+                          ? 'bg-green-600 hover:bg-green-700 text-white shadow-sm shadow-green-100'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      <CheckCircle size={16} /> Approve
+                    </button>
+                    <button
+                      onClick={() => setRejectModalOpen(true)}
+                      disabled={claimActionLoading}
+                      className="flex-1 bg-white border border-red-200 text-red-600 hover:bg-red-50 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2"
+                    >
+                      <XCircle size={16} /> Reject
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4 bg-white/50 rounded-xl border border-dashed border-gray-300">
+                  <p className="text-sm text-gray-500 px-4">No pending claims for this business listing yet.</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Review Radius Card - PROMINENT */}
           <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl shadow-md border-2 border-primary-200 p-6">
@@ -1718,6 +1920,55 @@ const BusinessDetails = () => {
           )}
         </div>
       </div>
+
+      {/* Rejection Modal for Claims */}
+      {rejectModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-red-100 p-2.5 rounded-full">
+                  <AlertTriangle className="text-red-600" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Reject Claim</h3>
+                  <p className="text-sm text-gray-500">Provide a reason for the claimant</p>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Rejection Reason</label>
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="e.g. Identity documents are blurry or invalid..."
+                  className="w-full h-32 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none resize-none text-sm"
+                />
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setRejectModalOpen(false)}
+                  className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleRejectClaim}
+                  disabled={claimActionLoading}
+                  className="flex-1 px-4 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-100 flex items-center justify-center gap-2"
+                >
+                  {claimActionLoading ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    'Confirm Reject'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ImageCropperModal
         isOpen={cropperOpen}
