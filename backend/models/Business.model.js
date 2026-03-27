@@ -236,7 +236,7 @@ const businessSchema = new mongoose.Schema({
   claimRequest: {
     status: {
       type: String,
-      enum: ['none', 'pending', 'approved', 'rejected'],
+      enum: ['none', 'incomplete', 'pending', 'approved', 'rejected'],
       default: 'none'
     },
     requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

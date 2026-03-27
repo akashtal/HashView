@@ -1594,14 +1594,20 @@ exports.claimBusiness = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'This business already has a registered owner.' });
     }
 
-    // Already has a pending claim
-    if (business.claimRequest && business.claimRequest.status === 'pending') {
-      return res.status(400).json({ success: false, message: 'A claim request for this business is already pending review.' });
+    // Check if there's already a claim request
+    if (business.claimRequest) {
+      if (business.claimRequest.status === 'pending') {
+        return res.status(400).json({ success: false, message: 'A claim request for this business is already pending review.' });
+      }
+      if (business.claimRequest.status === 'approved') {
+        return res.status(400).json({ success: false, message: 'This business already has an approved owner.' });
+      }
+      // If 'incomplete' or 'rejected', we allow updating/overwriting
     }
 
-    // Save claim request
+    // Save claim request — start as 'incomplete' until verified
     business.claimRequest = {
-      status: 'pending',
+      status: 'incomplete',
       requestedBy: req.user.id,
       requestedAt: new Date(),
       businessEmail,
@@ -1649,8 +1655,8 @@ exports.uploadClaimDocuments = async (req, res, next) => {
     const business = await Business.findById(id);
     if (!business) return res.status(404).json({ success: false, message: 'Business not found.' });
 
-    if (!business.claimRequest || business.claimRequest.status !== 'pending') {
-      return res.status(400).json({ success: false, message: 'No pending claim found for this business.' });
+    if (!business.claimRequest || !['incomplete', 'pending'].includes(business.claimRequest.status)) {
+      return res.status(400).json({ success: false, message: 'No active claim request found to verify.' });
     }
 
     if (String(business.claimRequest.requestedBy) !== String(req.user.id)) {
@@ -1686,9 +1692,10 @@ exports.uploadClaimDocuments = async (req, res, next) => {
     }
 
     updates['claimRequest.verificationMethod'] = 'document';
+    updates['claimRequest.status'] = 'pending';
     await Business.findByIdAndUpdate(id, { $set: updates });
 
-    res.status(200).json({ success: true, message: 'Documents uploaded successfully. Your claim is under review.' });
+    res.status(200).json({ success: true, message: 'Documents uploaded successfully. Your claim is now under review by our team.' });
   } catch (error) {
     next(error);
   }
@@ -1703,8 +1710,8 @@ exports.sendClaimPhoneOtp = async (req, res, next) => {
     const business = await Business.findById(id);
     if (!business) return res.status(404).json({ success: false, message: 'Business not found.' });
 
-    if (!business.claimRequest || business.claimRequest.status !== 'pending') {
-      return res.status(400).json({ success: false, message: 'No pending claim found for this business.' });
+    if (!business.claimRequest || !['incomplete', 'pending'].includes(business.claimRequest.status)) {
+      return res.status(400).json({ success: false, message: 'No active claim request found to verify.' });
     }
 
     const user = await User.findById(req.user.id);
@@ -1749,6 +1756,10 @@ exports.verifyClaimPhoneOtp = async (req, res, next) => {
     const business = await Business.findById(id);
     if (!business) return res.status(404).json({ success: false, message: 'Business not found.' });
 
+    if (!business.claimRequest || !['incomplete', 'pending'].includes(business.claimRequest.status)) {
+      return res.status(400).json({ success: false, message: 'No active claim request found to verify.' });
+    }
+
     const stored = claimOtpStore.get(`${req.user.id}_${id}`);
     if (!stored) return res.status(400).json({ success: false, message: 'No OTP found. Please request a new one.' });
     if (Date.now() > stored.expiry) {
@@ -1759,9 +1770,10 @@ exports.verifyClaimPhoneOtp = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid OTP. Please try again.' });
     }
 
-    // OTP valid — mark phone as verified and set verification method
+    // OTP valid — mark phone as verified, set verification method and move to pending status
     business.claimRequest.verificationMethod = 'phone';
     business.claimRequest.phoneVerified = true;
+    business.claimRequest.status = 'pending';
     await business.save();
     claimOtpStore.delete(`${req.user.id}_${id}`);
 

@@ -148,6 +148,11 @@ const BusinessCard = React.memo(({ item, onPress }) => {
                 <Icon name="shield-checkmark" size={10} color="#16A34A" />
                 <Text className="text-[9px] text-green-700 font-bold ml-0.5">Verified</Text>
               </View>
+            ) : item.claimRequest?.status === 'pending' ? (
+              <View className="flex-row items-center bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">
+                <Icon name="time-outline" size={10} color="#D97706" />
+                <Text className="text-[9px] text-amber-700 font-bold ml-0.5">Pending</Text>
+              </View>
             ) : (
               <View className="flex-row items-center bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">
                 <Icon name="flag-outline" size={10} color="#B45309" />
