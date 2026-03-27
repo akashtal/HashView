@@ -8,6 +8,14 @@ import store from './src/store';
 import AppNavigator from './src/navigation/AppNavigator';
 import AnimatedSplashScreen from './src/components/AnimatedSplashScreen';
 import * as Sentry from '@sentry/react-native';
+import * as Font from 'expo-font';
+import { 
+  Ionicons, 
+  MaterialIcons, 
+  MaterialCommunityIcons, 
+  FontAwesome, 
+  Feather 
+} from '@expo/vector-icons';
 
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN || 'https://8fc528bac0775906eb4f09200b90fe2d@o4510752747028480.ingest.de.sentry.io/4510752828293200',

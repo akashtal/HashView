@@ -3,7 +3,7 @@ export default {
     name: "HashView",
     slug: "hashview",
     scheme: "hashview",
-    version: "1.1.8",
+    version: "1.1.9",
     orientation: "portrait",
     icon: "./assets/HashViewlogo-01.png",
     userInterfaceStyle: "automatic",
@@ -34,7 +34,7 @@ export default {
           NSAllowsArbitraryLoads: true
         }
       },
-      buildNumber: "20",
+      buildNumber: "21",
       config: {
         googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY || "AIzaSyCgafT4Tw62CuxxN5DwbkqWIK9pVflKEXI"
       }
@@ -43,7 +43,7 @@ export default {
     android: {
       package: "com.hashview.apps",
       googleServicesFile: "./google-services.json",
-      versionCode: 28,
+      versionCode: 29,
       usesCleartextTraffic: true,
       adaptiveIcon: {
         foregroundImage: "./assets/HashViewlogo-01.png",
