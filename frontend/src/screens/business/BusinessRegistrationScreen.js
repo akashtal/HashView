@@ -526,7 +526,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: false, // We'll crop manually now
         quality: 1, // Get highest quality before crop
         allowsMultipleSelection: type === 'gallery'

@@ -200,6 +200,7 @@ const businessSlice = createSlice({
       .addCase(getBusiness.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.selectedBusiness = null; // Clear stale data immediately so detail screen never shows wrong business
       })
       .addCase(getBusiness.fulfilled, (state, action) => {
         state.loading = false;
@@ -208,6 +209,7 @@ const businessSlice = createSlice({
       .addCase(getBusiness.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        state.selectedBusiness = null; // Clear stale data on failure too
       })
       .addCase(registerBusiness.pending, (state) => {
         state.loading = true;

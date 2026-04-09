@@ -17,6 +17,7 @@ import * as ImagePicker from 'expo-image-picker';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
 import ToastService from '../../utils/ToastService';
+import CustomImageCropper from '../../components/CustomImageCropper';
 
 export default function EditBusinessInfoScreen({ navigation, route }) {
   const { businessId } = route.params;
@@ -28,6 +29,13 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
   // Modal states
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [timePickerModal, setTimePickerModal] = useState({ visible: false, day: null, field: null });
+
+  // State for Custom Image Cropper (same as Registration screen)
+  const [cropModal, setCropModal] = useState({
+    visible: false,
+    imageUri: null,
+    type: null // 'logo' or 'coverImage'
+  });
 
   const [formData, setFormData] = useState({
     name: '',
@@ -171,7 +179,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: false,
         quality: 0.8,
         allowsMultipleSelection: type === 'gallery'
@@ -182,15 +190,25 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
           // For gallery, add multiple images
           setImages({ ...images, gallery: [...images.gallery, ...result.assets] });
         } else {
-          // For logo and cover, replace single image
-          setImages({ ...images, [type]: result.assets[0] });
-          // Clear uploaded status when new image is selected
-          setUploadedImages({ ...uploadedImages, [type]: null });
+          // Open custom crop modal for logo and cover images (same as Registration screen)
+          setCropModal({
+            visible: true,
+            imageUri: result.assets[0].uri,
+            type: type
+          });
         }
       }
     } catch (error) {
       ToastService.showError('Error', 'Failed to pick image');
     }
+  };
+
+  const handleCropComplete = (croppedImage) => {
+    const { type } = cropModal;
+    setImages({ ...images, [type]: croppedImage });
+    // Clear uploaded status when new cropped image is set
+    setUploadedImages({ ...uploadedImages, [type]: null });
+    setCropModal({ visible: false, imageUri: null, type: null });
   };
 
   const removeGalleryImage = (index) => {
@@ -294,59 +312,66 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
       setSaving(true);
       setUploadingImages(true);
 
-      // Upload new images to Cloudinary if they've been changed
+      // Upload new images to Cloudinary IN PARALLEL (much faster than sequential)
       let logoData = uploadedImages.logo;
       let coverImageData = uploadedImages.coverImage;
       let galleryData = [...uploadedImages.gallery];
 
-      // Check if logo was changed (new image selected)
-      if (images.logo && images.logo.uri !== originalImages.logo?.uri && !images.logo.uri.startsWith('http')) {
-        try {
-          logoData = await uploadImageToCloudinary(images.logo.uri, 'logo');
-          setUploadedImages(prev => ({ ...prev, logo: logoData }));
-          console.log('✅ Logo uploaded:', logoData.url);
-        } catch (error) {
-          ToastService.showError('Upload Error', `Failed to upload logo: ${error.message}`);
-          setSaving(false);
-          setUploadingImages(false);
-          return;
-        }
+      const uploadPromises = [];
+
+      // Prepare logo upload
+      const needsLogoUpload = images.logo && images.logo.uri !== originalImages.logo?.uri && !images.logo.uri.startsWith('http');
+      if (needsLogoUpload) {
+        uploadPromises.push(
+          uploadImageToCloudinary(images.logo.uri, 'logo')
+            .then(data => { logoData = data; console.log('✅ Logo uploaded:', data.url); })
+            .catch(error => { throw new Error(`Logo upload failed: ${error.message}`); })
+        );
       }
 
-      // Check if cover image was changed
-      if (images.coverImage && images.coverImage.uri !== originalImages.coverImage?.uri && !images.coverImage.uri.startsWith('http')) {
-        try {
-          coverImageData = await uploadImageToCloudinary(images.coverImage.uri, 'coverImage');
-          setUploadedImages(prev => ({ ...prev, coverImage: coverImageData }));
-          console.log('✅ Cover image uploaded:', coverImageData.url);
-        } catch (error) {
-          ToastService.showError('Upload Error', `Failed to upload cover image: ${error.message}`);
-          setSaving(false);
-          setUploadingImages(false);
-          return;
-        }
+      // Prepare cover upload
+      const needsCoverUpload = images.coverImage && images.coverImage.uri !== originalImages.coverImage?.uri && !images.coverImage.uri.startsWith('http');
+      if (needsCoverUpload) {
+        uploadPromises.push(
+          uploadImageToCloudinary(images.coverImage.uri, 'coverImage')
+            .then(data => { coverImageData = data; console.log('✅ Cover uploaded:', data.url); })
+            .catch(error => { throw new Error(`Cover upload failed: ${error.message}`); })
+        );
       }
 
-      // Check for new gallery images (images not in original)
+      // Prepare gallery upload
       const newGalleryImages = images.gallery.filter(img =>
         !originalImages.gallery.some(orig => orig.uri === img.uri)
       );
-
       if (newGalleryImages.length > 0) {
+        uploadPromises.push(
+          uploadGalleryImages(newGalleryImages)
+            .then(uploadedNewGallery => {
+              galleryData = [
+                ...uploadedImages.gallery.filter(existing =>
+                  images.gallery.some(img => img.uri === existing.url || img.uri === existing.originalUri)
+                ),
+                ...uploadedNewGallery
+              ];
+              console.log(`✅ Gallery uploaded: ${uploadedNewGallery.length} new images`);
+            })
+            .catch(error => {
+              console.error('Gallery upload warning:', error);
+              ToastService.showWarning('Upload Warning', 'Some gallery images failed. Continuing...');
+            })
+        );
+      }
+
+      // Upload ALL images in parallel — much faster
+      if (uploadPromises.length > 0) {
         try {
-          const uploadedNewGallery = await uploadGalleryImages(newGalleryImages);
-          // Merge with existing gallery (keep original + new)
-          galleryData = [
-            ...uploadedImages.gallery.filter(existing =>
-              images.gallery.some(img => img.uri === existing.url || img.uri === existing.originalUri)
-            ),
-            ...uploadedNewGallery
-          ];
-          setUploadedImages(prev => ({ ...prev, gallery: galleryData }));
-          console.log(`✅ Gallery images uploaded: ${uploadedNewGallery.length} new images`);
+          await Promise.all(uploadPromises);
+          setUploadedImages({ logo: logoData, coverImage: coverImageData, gallery: galleryData });
         } catch (error) {
-          console.error('Failed to upload gallery images:', error);
-          ToastService.showWarning('Upload Warning', 'Some gallery images failed to upload. Continuing with update...');
+          ToastService.showError('Upload Error', error.message);
+          setSaving(false);
+          setUploadingImages(false);
+          return;
         }
       }
 
@@ -825,6 +850,15 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
           </View>
         </View>
       </Modal>
+
+      {/* Custom Image Cropper Modal (same as Registration screen) */}
+      <CustomImageCropper
+        visible={cropModal.visible}
+        imageUri={cropModal.imageUri}
+        aspectRatio={cropModal.type === 'logo' ? 1 : 16 / 9}
+        onCancel={() => setCropModal({ visible: false, imageUri: null, type: null })}
+        onCropComplete={handleCropComplete}
+      />
     </View>
   );
 }

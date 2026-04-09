@@ -177,14 +177,21 @@ const BusinessCard = React.memo(({ item, onPress }) => {
     </TouchableOpacity>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison - must include image fields to prevent stale images when FlatList recycles cells
-  const prevImage = prevProps.item.coverImage?.url || prevProps.item.images?.[0]?.url || prevProps.item.logo?.url;
-  const nextImage = nextProps.item.coverImage?.url || nextProps.item.images?.[0]?.url || nextProps.item.logo?.url;
-  return prevProps.item._id === nextProps.item._id &&
-    prevProps.item.distance === nextProps.item.distance &&
-    prevProps.item.rating?.average === nextProps.item.rating?.average &&
+  // Compare ALL fields that affect visual rendering to prevent stale card data on recycled cells
+  const p = prevProps.item;
+  const n = nextProps.item;
+  const prevImage = p.coverImage?.url || p.images?.[0]?.url || p.logo?.url;
+  const nextImage = n.coverImage?.url || n.images?.[0]?.url || n.logo?.url;
+  const prevAddr = p.address?.fullAddress || p.address?.area || p.address?.city;
+  const nextAddr = n.address?.fullAddress || n.address?.area || n.address?.city;
+  return p._id === n._id &&
+    p.distance === n.distance &&
+    p.rating?.average === n.rating?.average &&
     prevImage === nextImage &&
-    prevProps.item.name === nextProps.item.name;
+    p.name === n.name &&
+    prevAddr === nextAddr &&
+    p.category === n.category &&
+    p.owner === n.owner;
 });
 
 export default function UserHomeScreen({ navigation }) {

@@ -732,7 +732,7 @@ export default function AddReviewScreen({ navigation, route }) {
               }
 
               const result = await ImagePicker.launchCameraAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                mediaTypes: ['images'],
                 allowsEditing: true,
                 quality: 0.8,
               });
@@ -752,7 +752,7 @@ export default function AddReviewScreen({ navigation, route }) {
               }
 
               const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                mediaTypes: ['images'],
                 allowsMultipleSelection: true,
                 quality: 0.8,
                 selectionLimit: 5 - selectedPhotos.length, // Max 5 photos total
@@ -793,7 +793,7 @@ export default function AddReviewScreen({ navigation, route }) {
               }
 
               const result = await ImagePicker.launchCameraAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+                mediaTypes: ['videos'],
                 videoMaxDuration: 30, // Max 30 seconds
                 quality: 0.8,
               });
@@ -813,7 +813,7 @@ export default function AddReviewScreen({ navigation, route }) {
               }
 
               const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+                mediaTypes: ['videos'],
                 allowsMultipleSelection: true,
                 quality: 0.8,
                 videoMaxDuration: 30, // Max 30 seconds per video

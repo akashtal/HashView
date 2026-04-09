@@ -104,7 +104,7 @@ export default function ClaimBusinessScreen({ route, navigation }) {
     // ── Helpers ──────────────────────────────────────────────────────────────
     const pickImage = async (setter) => {
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: ['images'],
             quality: 0.8,
             allowsEditing: true,
         });

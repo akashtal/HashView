@@ -55,7 +55,7 @@ export default function BusinessKYCScreen({ navigation, route }) {
             }
 
             const options = {
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                mediaTypes: ['images'],
                 allowsEditing: true, // Allow cropping for documents
                 quality: 0.8,
             };
