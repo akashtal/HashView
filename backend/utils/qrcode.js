@@ -1,7 +1,31 @@
 const QRCode = require('qrcode');
-const { createCanvas, loadImage } = require('canvas');
+const { createCanvas, loadImage, registerFont } = require('canvas');
 const fs = require('fs');
 const path = require('path');
+
+// Register bundled font so text renders correctly on all servers (Mac + Linux/Docker)
+// This prevents the "boxes" bug where system Arial is missing on the production server
+const FONT_PATHS = [
+  path.join(__dirname, '../assets/Arial.ttf'),
+  path.join(process.cwd(), 'backend/assets/Arial.ttf'),
+  path.join(process.cwd(), 'assets/Arial.ttf'),
+];
+let fontRegistered = false;
+for (const fontPath of FONT_PATHS) {
+  if (fs.existsSync(fontPath)) {
+    try {
+      registerFont(fontPath, { family: 'HashViewArial' });
+      fontRegistered = true;
+      console.log(`✅ QR font registered from: ${fontPath}`);
+      break;
+    } catch (e) {
+      console.warn('⚠️ Could not register font:', e.message);
+    }
+  }
+}
+if (!fontRegistered) {
+  console.warn('⚠️ Bundled font not found — QR text may render as boxes on Linux servers. Add Arial.ttf to backend/assets/');
+}
 
 // HashView Brand Colors
 const BRAND_COLORS = {
@@ -125,17 +149,28 @@ exports.generateBusinessQRCode = async (businessId, businessName) => {
       ctx.stroke();
     }
 
-    // Step 9: Add business name at bottom (if space allows)
-    if (businessName && businessName.length < 30) {
+    // Step 9: Add business name at bottom - always show regardless of length
+    if (businessName) {
+      // Truncate very long names with ellipsis
+      const maxChars = 35;
+      const displayName = businessName.length > maxChars
+        ? businessName.substring(0, maxChars) + '...'
+        : businessName;
+
+      // Use smaller font for longer names so they fit on canvas
+      const fontSize = displayName.length > 25 ? 22 : 28;
+      // Use bundled font family (falls back to sans-serif if not registered)
+      const fontFamily = fontRegistered ? 'HashViewArial' : 'sans-serif';
+
       ctx.fillStyle = BRAND_COLORS.primary;
-      ctx.font = 'bold 28px Arial';
+      ctx.font = `bold ${fontSize}px ${fontFamily}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(businessName, canvasWidth / 2, padding + qrSize + 40);
+      ctx.fillText(displayName, canvasWidth / 2, padding + qrSize + 40);
 
       // Add "Scan for Details" text
       ctx.fillStyle = BRAND_COLORS.secondary;
-      ctx.font = '18px Arial';
+      ctx.font = `18px ${fontFamily}`;
       ctx.fillText('Scan for Business Details', canvasWidth / 2, padding + qrSize + 70);
     }
 
