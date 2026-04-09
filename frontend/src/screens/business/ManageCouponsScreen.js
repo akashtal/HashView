@@ -83,10 +83,8 @@ export default function ManageCouponsScreen({ navigation, route }) {
 
   const getCouponStatus = (coupon) => {
     const now = new Date();
-    const validUntil = new Date(coupon.validUntil);
-
     if (coupon.status === 'redeemed') return { text: 'Redeemed', color: 'bg-green-100 text-green-700' };
-    if (validUntil < now) return { text: 'Expired', color: 'bg-gray-100 text-gray-700' };
+    if (coupon.validUntil && new Date(coupon.validUntil) < now) return { text: 'Expired', color: 'bg-gray-100 text-gray-700' };
     return { text: 'Active', color: 'bg-blue-100 text-blue-700' };
   };
 
@@ -123,9 +121,11 @@ export default function ManageCouponsScreen({ navigation, route }) {
   const renderCoupon = (coupon) => {
     const status = getCouponStatus(coupon);
     const now = new Date();
-    const validUntil = new Date(coupon.validUntil);
-    const hoursLeft = Math.max(0, Math.floor((validUntil - now) / (1000 * 60 * 60)));
-    const minutesLeft = Math.max(0, Math.floor(((validUntil - now) % (1000 * 60 * 60)) / (1000 * 60)));
+    // Only calculate time left if coupon has an expiry date
+    const hasExpiry = !!coupon.validUntil;
+    const validUntil = hasExpiry ? new Date(coupon.validUntil) : null;
+    const hoursLeft = hasExpiry ? Math.max(0, Math.floor((validUntil - now) / (1000 * 60 * 60))) : null;
+    const minutesLeft = hasExpiry ? Math.max(0, Math.floor(((validUntil - now) % (1000 * 60 * 60)) / (1000 * 60))) : null;
 
     return (
       <View key={coupon._id} className="bg-white rounded-2xl p-5 mb-3 shadow-sm">
@@ -179,8 +179,8 @@ export default function ManageCouponsScreen({ navigation, route }) {
           <View className="flex-row items-center">
             <Icon name="time-outline" size={14} color={COLORS.secondary} />
             <Text className="text-xs text-gray-600 ml-1">
-              {status.text === 'Active'
-                ? `${hoursLeft}h ${minutesLeft}m left`
+                          {status.text === 'Active'
+                ? (hasExpiry ? `${hoursLeft}h ${minutesLeft}m left` : 'No expiry')
                 : status.text === 'Expired'
                   ? 'Expired'
                   : 'Redeemed'}
@@ -365,7 +365,7 @@ export default function ManageCouponsScreen({ navigation, route }) {
                 <Text className="text-xs text-gray-600">
                   • Create coupon template here{'\n'}
                   • Customers get this coupon when they review your business{'\n'}
-                  • Coupons are valid for 2 hours from time of issue{'\n'}
+                  • Coupons are valid until redeemed at the business{'\n'}
                   • Customers must be within your business radius to review (set by admin)
                 </Text>
               </View>

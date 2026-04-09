@@ -463,12 +463,10 @@ exports.createReview = async (req, res, next) => {
 
     // 5. Issue the coupon using exact template values (generating a unique code to avoid collision)
     const couponCode = generateCouponCode();
-    const couponExpiry = new Date();
-    if (couponTemplate.validUntil) {
-      couponExpiry.setTime(new Date(couponTemplate.validUntil).getTime());
-    } else {
-      couponExpiry.setHours(couponExpiry.getHours() + 2);
-    }
+    // Use template's validUntil if set, otherwise no expiry (null = unlimited)
+    const couponExpiry = couponTemplate.validUntil
+      ? new Date(couponTemplate.validUntil)
+      : null;
 
     const rewardType = couponTemplate.rewardType;
     const rewardValue = couponTemplate.rewardValue;
@@ -498,7 +496,7 @@ exports.createReview = async (req, res, next) => {
       rewardValue,
       description,
       validFrom: new Date(),
-      validUntil: couponExpiry,
+      validUntil: couponExpiry, // null means no expiry
       minPurchaseAmount,
       maxDiscountAmount,
       status: 'active',
@@ -530,12 +528,12 @@ exports.createReview = async (req, res, next) => {
 
     // Send push notification to user
     const couponMessage = rewardType === 'percentage'
-      ? `You've earned a ${rewardValue}% discount coupon from ${couponBusinessName}! Valid for 2 hours.`
+      ? `You've earned a ${rewardValue}% discount coupon from ${couponBusinessName}! Show it to the staff to redeem.`
       : rewardType === 'fixed'
-        ? `You've earned a £${rewardValue} discount coupon from ${couponBusinessName}! Valid for 2 hours.`
+        ? `You've earned a £${rewardValue} discount coupon from ${couponBusinessName}! Show it to the staff to redeem.`
         : rewardType === 'buy1get1'
-          ? `You've earned a Buy 1 Get 1 coupon from ${couponBusinessName}! Valid for 2 hours.`
-          : `You've earned a free item coupon from ${couponBusinessName}! Valid for 2 hours.`;
+          ? `You've earned a Buy 1 Get 1 coupon from ${couponBusinessName}! Show it to the staff to redeem.`
+          : `You've earned a free item coupon from ${couponBusinessName}! Show it to the staff to redeem.`;
 
     await sendPushNotification(
       req.user.id,

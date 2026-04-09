@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, ActivityIndicator, ScrollView, StatusBar, Image } from 'react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, ActivityIndicator, ScrollView, StatusBar } from 'react-native';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import * as Location from 'expo-location';
@@ -208,16 +209,18 @@ export default function SearchScreen({ navigation }) {
             <Image
               source={{ uri: optimizeImageUri(item.coverImage.url, 200, 80) }}
               style={{ width: '100%', height: '100%' }}
-              resizeMode="cover"
-              cache="force-cache"
+              contentFit="cover"
+              cachePolicy="disk"
+              recyclingKey={item._id}
             />
           ) : item.logo?.url ? (
             <View className="w-full h-full items-center justify-center">
               <Image
                 source={{ uri: optimizeImageUri(item.logo.url, 150, 85) }}
                 style={{ width: 70, height: 70, borderRadius: 8 }}
-                resizeMode="cover"
-                cache="force-cache"
+                contentFit="cover"
+                cachePolicy="disk"
+                recyclingKey={`logo-${item._id}`}
               />
             </View>
           ) : (

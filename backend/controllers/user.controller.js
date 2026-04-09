@@ -196,8 +196,7 @@ exports.getUserCoupons = async (req, res, next) => {
     const query = { user: req.user.id };
     if (status) query.status = status;
 
-    // CRITICAL FIX: Only return non-expired coupons
-    query.validUntil = { $gte: new Date() };
+    // Return all coupons (no expiry filtering - coupons are unlimited unless admin sets a specific date)
 
     const coupons = await Coupon.find(query)
       .populate('business', 'name logo address phone email category')

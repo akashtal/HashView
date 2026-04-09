@@ -1443,7 +1443,7 @@ export default function AddReviewScreen({ navigation, route }) {
             <Text className="text-sm font-bold text-green-700 ml-2">Earn a Coupon!</Text>
           </View>
           <Text className="text-xs text-green-600">
-            Complete verification and post your review to receive a special discount coupon valid for 2 hours!
+            Complete verification and post your review to receive a special discount coupon!
           </Text>
         </View>
 

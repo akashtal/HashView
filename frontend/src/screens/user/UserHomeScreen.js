@@ -86,7 +86,8 @@ const BusinessCard = React.memo(({ item, onPress }) => {
               style={{ width: '100%', height: '100%' }}
               contentFit="cover"
               transition={200}
-              cachePolicy="memory-disk"
+              cachePolicy="disk"
+              recyclingKey={item._id}
             />
           ) : (
             <LinearGradient
@@ -176,10 +177,14 @@ const BusinessCard = React.memo(({ item, onPress }) => {
     </TouchableOpacity>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison to prevent unnecessary re-renders when FlatList items mount/unmount
+  // Custom comparison - must include image fields to prevent stale images when FlatList recycles cells
+  const prevImage = prevProps.item.coverImage?.url || prevProps.item.images?.[0]?.url || prevProps.item.logo?.url;
+  const nextImage = nextProps.item.coverImage?.url || nextProps.item.images?.[0]?.url || nextProps.item.logo?.url;
   return prevProps.item._id === nextProps.item._id &&
     prevProps.item.distance === nextProps.item.distance &&
-    prevProps.item.rating?.average === nextProps.item.rating?.average;
+    prevProps.item.rating?.average === nextProps.item.rating?.average &&
+    prevImage === nextImage &&
+    prevProps.item.name === nextProps.item.name;
 });
 
 export default function UserHomeScreen({ navigation }) {

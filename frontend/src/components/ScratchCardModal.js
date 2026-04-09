@@ -337,7 +337,7 @@ const ScratchCardModal = ({ visible, onClose, coupon, isNearbyCoupon, couponBusi
                                                 <Text style={styles.expiryText}>
                                                     {coupon.validUntil
                                                         ? `  Valid until: ${new Date(coupon.validUntil).toLocaleDateString()}`
-                                                        : '  Valid for 2 hours'}
+                                                        : '  No expiry'}
                                                 </Text>
                                             </View>
                                             {coupon.minPurchaseAmount > 0 && (

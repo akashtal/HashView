@@ -38,12 +38,12 @@ export default function HelpSupportScreen({ navigation }) {
     {
       id: 3,
       question: 'How do I redeem my discount coupons?',
-      answer: 'Go to "My Coupons" from your profile, select the coupon you want to use, and show the QR code to the business staff. They\'ll scan it to verify and apply your discount. Note: Coupons are valid for 2 hours after earning them!'
+      answer: 'Go to "My Coupons" from your profile, select the coupon you want to use, and show the QR code to the business staff. They\'ll scan it to verify and apply your discount. Your coupon stays active until it is redeemed — no time limit!'
     },
     {
       id: 4,
       question: 'Why did my coupon expire?',
-      answer: 'Coupons are valid for 2 hours from the time you earn them. This encourages immediate visits and ensures coupons are used while the review experience is fresh. Make sure to redeem your coupons within this timeframe!'
+      answer: 'Coupons are valid until you redeem them at the business — there is no time limit. Simply show the QR code to staff and they will apply your discount whenever you visit.'
     },
     {
       id: 5,
