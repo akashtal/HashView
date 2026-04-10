@@ -4,9 +4,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApiService from '../../services/api.service';
 import NotificationService from '../../services/notification.service';
 
-// ─── Helper to extract subscription safely from API response ─────────────────
+// ─── Helper to extract subscription + freeTrial safely from API response ─────
 const extractSubscription = (user) => ({
   isPro: user?.isPro || false,
+  hasFreeTrial: user?.hasFreeTrial || false,
+  freeTrial: user?.freeTrial || { updatesUsed: 0, maxFreeUpdates: 25, remaining: 25 },
   subscription: user?.subscription || { status: 'inactive', plan: null, currentPeriodEnd: null },
 });
 
@@ -171,6 +173,8 @@ const authSlice = createSlice({
     error: null,
     // ─── Subscription state ───────────────────────────────────────────
     isPro: false,
+    hasFreeTrial: true,
+    freeTrial: { updatesUsed: 0, maxFreeUpdates: 25, remaining: 25 },
     subscription: {
       status: 'inactive',
       plan: null,
@@ -188,6 +192,8 @@ const authSlice = createSlice({
     // Directly update subscription state (e.g. after returning from browser payment)
     setSubscription: (state, action) => {
       state.isPro = action.payload.isPro ?? state.isPro;
+      state.hasFreeTrial = action.payload.hasFreeTrial ?? state.hasFreeTrial;
+      state.freeTrial = action.payload.freeTrial ?? state.freeTrial;
       state.subscription = action.payload.subscription ?? state.subscription;
     },
     // OAuth login success (Google/Apple)
@@ -197,10 +203,12 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.error = null;
-      // Set subscription if business owner
+      // Set subscription + free trial if business owner
       if (action.payload.user?.role === 'business') {
         const sub = extractSubscription(action.payload.user);
         state.isPro = sub.isPro;
+        state.hasFreeTrial = sub.hasFreeTrial;
+        state.freeTrial = sub.freeTrial;
         state.subscription = sub.subscription;
       }
       // Store in AsyncStorage
@@ -220,10 +228,12 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        // Populate subscription for business owners
+        // Populate subscription + free trial for business owners
         if (action.payload.user?.role === 'business') {
           const sub = extractSubscription(action.payload.user);
           state.isPro = sub.isPro;
+          state.hasFreeTrial = sub.hasFreeTrial;
+          state.freeTrial = sub.freeTrial;
           state.subscription = sub.subscription;
         }
       })
@@ -251,6 +261,8 @@ const authSlice = createSlice({
         if (action.payload.user?.role === 'business') {
           const sub = extractSubscription(action.payload.user);
           state.isPro = sub.isPro;
+          state.hasFreeTrial = sub.hasFreeTrial;
+          state.freeTrial = sub.freeTrial;
           state.subscription = sub.subscription;
         }
       })
@@ -291,6 +303,8 @@ const authSlice = createSlice({
         if (action.payload.user?.role === 'business') {
           const sub = extractSubscription(action.payload.user);
           state.isPro = sub.isPro;
+          state.hasFreeTrial = sub.hasFreeTrial;
+          state.freeTrial = sub.freeTrial;
           state.subscription = sub.subscription;
         }
       })
@@ -304,6 +318,8 @@ const authSlice = createSlice({
       .addCase(checkSubscriptionStatus.fulfilled, (state, action) => {
         if (action.payload) {
           state.isPro = action.payload.isPro ?? state.isPro;
+          state.hasFreeTrial = action.payload.hasFreeTrial ?? state.hasFreeTrial;
+          state.freeTrial = action.payload.freeTrial ?? state.freeTrial;
           state.subscription = action.payload.subscription ?? state.subscription;
         }
       });

@@ -25,7 +25,7 @@ import { checkSubscriptionStatus } from '../store/slices/authSlice';
  */
 const ProGate = ({ children, feature = 'This feature' }) => {
     const dispatch = useDispatch();
-    const { isPro, subscription } = useSelector((s) => s.auth);
+    const { isPro, hasFreeTrial, freeTrial, subscription } = useSelector((s) => s.auth);
 
     const [loading, setLoading] = useState(false);
 
@@ -75,6 +75,32 @@ const ProGate = ({ children, feature = 'This feature' }) => {
     // Already subscribed → render content
     if (isPro) return children;
 
+    // Free trial still available → render content with trial banner
+    if (hasFreeTrial) {
+        const used = freeTrial?.updatesUsed || 0;
+        const max = freeTrial?.maxFreeUpdates || 25;
+        const remaining = Math.max(0, max - used);
+        return (
+            <View style={{ flex: 1 }}>
+                {/* Trial usage banner */}
+                <View style={styles.trialBanner}>
+                    <LinearGradient
+                        colors={['#7C3AED', '#4F46E5']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.trialBannerGradient}
+                    >
+                        <Ionicons name="gift-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
+                        <Text style={styles.trialBannerText}>
+                            Free Trial: {remaining}/{max} updates remaining
+                        </Text>
+                    </LinearGradient>
+                </View>
+                {children}
+            </View>
+        );
+    }
+
     // Not subscribed → render paywall
     return (
         <View style={styles.container}>
@@ -93,10 +119,20 @@ const ProGate = ({ children, feature = 'This feature' }) => {
 
                 {/* Description */}
                 <Text style={styles.description}>
-                    This feature is available exclusively with a{' '}
-                    <Text style={styles.bold}>HashView Pro</Text> subscription.
-                    {'\n\n'}
-                    Tap the button below to subscribe or manage your plan.
+                    {freeTrial?.updatesUsed >= (freeTrial?.maxFreeUpdates || 25)
+                        ? <>
+                            You've used all <Text style={styles.bold}>{freeTrial?.maxFreeUpdates || 25} free updates</Text>.
+                            {'\n\n'}
+                            Subscribe to <Text style={styles.bold}>HashView Pro</Text> to continue posting
+                            offers, updates, and sending notifications to your customers.
+                          </>
+                        : <>
+                            This feature is available exclusively with a{' '}
+                            <Text style={styles.bold}>HashView Pro</Text> subscription.
+                            {'\n\n'}
+                            Tap the button below to subscribe or manage your plan.
+                          </>
+                    }
                 </Text>
 
                 {/* Pro feature list */}
@@ -153,6 +189,21 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
+    },
+    trialBanner: {
+        marginHorizontal: 0,
+    },
+    trialBannerGradient: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+    },
+    trialBannerText: {
+        color: '#fff',
+        fontSize: 13,
+        fontWeight: '700',
     },
     card: {
         width: '100%',

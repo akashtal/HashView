@@ -60,6 +60,30 @@ exports.createBusinessUpdate = async (req, res, next) => {
       });
     }
 
+    // ── Free trial / Pro gate ─────────────────────────────────────────────────
+    const owner = await BusinessOwner
+      .findOne({ businesses: businessId })
+      .select('subscription pushNotifications freeTrial isPro');
+
+    if (!owner) {
+      return res.status(404).json({ success: false, message: 'Business owner not found' });
+    }
+
+    const canPost = owner.isPro || owner.hasFreeTrial;
+    if (!canPost) {
+      const max = owner.freeTrial?.maxFreeUpdates || 25;
+      return res.status(403).json({
+        success: false,
+        message: `You have used all ${max} free updates. Subscribe to HashView Pro to continue posting offers and updates.`,
+        trialExhausted: true,
+        freeTrial: {
+          updatesUsed: owner.freeTrial?.updatesUsed || 0,
+          maxFreeUpdates: max,
+          remaining: 0
+        }
+      });
+    }
+
     const update = await BusinessUpdate.create({
       business: businessId,
       type,
@@ -72,13 +96,17 @@ exports.createBusinessUpdate = async (req, res, next) => {
       createdBy: req.user.id
     });
 
-    // ── Push notification dispatch ──────────────────────────────────────────
-    // Only Pro subscribers may send push notifications
-    const owner = await BusinessOwner
-      .findOne({ businesses: businessId })
-      .select('subscription pushNotifications isPro');
+    // ── Increment free trial counter (only for non-Pro owners) ──────────────
+    if (!owner.isPro) {
+      await BusinessOwner.findByIdAndUpdate(owner._id, {
+        $inc: { 'freeTrial.updatesUsed': 1 }
+      });
+      logger.info(`[Updates] Free trial usage: ${(owner.freeTrial?.updatesUsed || 0) + 1}/${owner.freeTrial?.maxFreeUpdates || 25} for owner ${owner._id}`);
+    }
 
-    if (owner && owner.isPro) {
+    // ── Push notification dispatch ──────────────────────────────────────────
+    // Pro subscribers AND free trial users may send push notifications
+    if (owner.isPro || owner.hasFreeTrial) {
       try {
         const maxReach = owner.pushNotifications?.maxReach ?? 100;
         const alreadyReachedIds = owner.pushNotifications?.notifiedUserIds?.map(id => id.toString()) || [];
@@ -143,8 +171,8 @@ exports.createBusinessUpdate = async (req, res, next) => {
         // Notification failure must never block the create response
         logger.error('[Updates] Push notification error:', notifErr.message);
       }
-    } else if (owner && !owner.isPro) {
-      logger.info(`[Updates] Skipping push — owner is not Pro (businessId: ${businessId})`);
+    } else if (!owner.isPro && !owner.hasFreeTrial) {
+      logger.info(`[Updates] Skipping push — owner has no Pro or free trial (businessId: ${businessId})`);
     }
     // ── End push dispatch ───────────────────────────────────────────────────
 

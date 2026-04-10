@@ -25,6 +25,7 @@ const {
   deleteCoupon,
   getBusinessOwners,
   setOwnerNotificationLimit,
+  setOwnerFreeTrialLimit,
   promoteUserToBusiness
 } = require('../controllers/admin.controller');
 const { protect, authorize } = require('../middleware/auth.middleware');
@@ -60,9 +61,10 @@ router.get('/coupons', getAllCoupons);
 router.put('/coupons/:id/status', toggleCouponStatus);
 router.delete('/coupons/:id', deleteCoupon);
 
-// Business Owner notification limit (Admin control)
+// Business Owner notification limit & free trial limit (Admin control)
 router.get('/business-owners', getBusinessOwners);
 router.put('/business-owners/:ownerId/notification-limit', setOwnerNotificationLimit);
+router.put('/business-owners/:ownerId/free-trial-limit', setOwnerFreeTrialLimit);
 
 module.exports = router;
 

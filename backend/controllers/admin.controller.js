@@ -1517,7 +1517,7 @@ exports.getBusinessOwners = async (req, res, next) => {
     }
 
     const owners = await BusinessOwner.find(query)
-      .select('name email subscription.status pushNotifications createdAt')
+      .select('name email subscription.status pushNotifications freeTrial createdAt')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -1538,6 +1538,11 @@ exports.getBusinessOwners = async (req, res, next) => {
           maxReach:   o.pushNotifications?.maxReach ?? 100,
           totalSent:  o.pushNotifications?.totalSent ?? 0,
           totalUsersReached: o.pushNotifications?.notifiedUserIds?.length ?? 0
+        },
+        freeTrial: {
+          updatesUsed: o.freeTrial?.updatesUsed || 0,
+          maxFreeUpdates: o.freeTrial?.maxFreeUpdates || 25,
+          remaining: Math.max(0, (o.freeTrial?.maxFreeUpdates || 25) - (o.freeTrial?.updatesUsed || 0))
         }
       }))
     });
@@ -1582,6 +1587,52 @@ exports.setOwnerNotificationLimit = async (req, res, next) => {
           maxReach:  owner.pushNotifications.maxReach,
           totalSent: owner.pushNotifications.totalSent,
           totalUsersReached: owner.pushNotifications.notifiedUserIds?.length ?? 0
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Set free trial limit for a business owner (Admin control)
+// @route   PUT /api/admin/business-owners/:ownerId/free-trial-limit
+// @access  Private (Admin)
+exports.setOwnerFreeTrialLimit = async (req, res, next) => {
+  try {
+    const { ownerId } = req.params;
+    const { maxFreeUpdates } = req.body;
+
+    if (maxFreeUpdates === undefined || isNaN(maxFreeUpdates) || maxFreeUpdates < 0 || maxFreeUpdates > 10000) {
+      return res.status(400).json({
+        success: false,
+        message: 'maxFreeUpdates must be a number between 0 and 10,000'
+      });
+    }
+
+    const owner = await BusinessOwner.findByIdAndUpdate(
+      ownerId,
+      { $set: { 'freeTrial.maxFreeUpdates': parseInt(maxFreeUpdates) } },
+      { new: true }
+    ).select('name email freeTrial');
+
+    if (!owner) {
+      return res.status(404).json({ success: false, message: 'Business owner not found' });
+    }
+
+    const remaining = Math.max(0, (owner.freeTrial?.maxFreeUpdates || 25) - (owner.freeTrial?.updatesUsed || 0));
+
+    res.status(200).json({
+      success: true,
+      message: `Free trial limit updated to ${maxFreeUpdates} updates`,
+      owner: {
+        _id:  owner._id,
+        name: owner.name,
+        email: owner.email,
+        freeTrial: {
+          updatesUsed: owner.freeTrial?.updatesUsed || 0,
+          maxFreeUpdates: owner.freeTrial?.maxFreeUpdates || 25,
+          remaining
         }
       }
     });
