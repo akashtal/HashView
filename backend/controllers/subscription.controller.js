@@ -89,6 +89,12 @@ exports.getStatus = async (req, res, next) => {
         res.json({
             success: true,
             isPro: owner.isPro,
+            hasFreeTrial: owner.hasFreeTrial,
+            freeTrial: {
+                updatesUsed: owner.freeTrial?.updatesUsed || 0,
+                maxFreeUpdates: owner.freeTrial?.maxFreeUpdates || 25,
+                remaining: Math.max(0, (owner.freeTrial?.maxFreeUpdates || 25) - (owner.freeTrial?.updatesUsed || 0)),
+            },
             subscription: {
                 status: owner.subscription?.status || 'inactive',
                 plan: owner.subscription?.plan || null,
