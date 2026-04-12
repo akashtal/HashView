@@ -20,6 +20,7 @@ const couponRoutes = require('./routes/coupon.routes');
 const businessCouponRoutes = require('./routes/businessCoupon.routes');
 const categoryRoutes = require('./routes/category.routes');
 const adminRoutes = require('./routes/admin.routes');
+const rbacRoutes = require('./routes/rbac.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const oauthRoutes = require('./routes/oauth.routes');
 const chatRoutes = require('./routes/chat.routes');
@@ -113,6 +114,7 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/business-coupons', businessCouponRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin/rbac', rbacRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/upload', uploadRoutes);
@@ -209,6 +211,21 @@ mongoose.connect(process.env.MONGODB_URI, {
 
     // Create default admin account
     await createDefaultAdmin();
+
+    // RBAC MIGRATION: Clear any stale 'SUPER_ADMIN' adminRole values left from
+    // a previous development session. Existing admin accounts with adminRole=null
+    // automatically get full access via the ROLE_PERMISSIONS['admin'] mapping.
+    try {
+      const result = await User.updateMany(
+        { role: 'admin', adminRole: 'SUPER_ADMIN' },
+        { $set: { adminRole: null } }
+      );
+      if (result.modifiedCount > 0) {
+        console.log(`✅ RBAC MIGRATION: Cleared ${result.modifiedCount} stale SUPER_ADMIN adminRole(s) → null`);
+      }
+    } catch (e) {
+      console.log('ℹ️  RBAC migration check: ' + e.message);
+    }
   })
   .catch((err) => {
     logger.error('❌ MongoDB Connection Error:', err);

@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Eye, Trash2, Plus, Upload, FileSpreadsheet } from 'lucide-react';
 import { adminApi } from '../api/adminApi';
+import { useAuth } from '../context/AuthContext';
 import { format } from 'date-fns';
 
 const Businesses = () => {
   const navigate = useNavigate();
+  const { hasPermission } = useAuth();
+  const canCreate = hasPermission('CREATE_BUSINESS');
+  const canDelete = hasPermission('DELETE_BUSINESS');
   const [businesses, setBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -79,35 +83,38 @@ const Businesses = () => {
           <h1 className="text-3xl font-bold text-gray-900">Businesses Management</h1>
           <p className="text-gray-600 mt-1">Manage and verify business registrations</p>
         </div>
-        <button
-          onClick={() => navigate('/businesses/create')}
-          className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition flex items-center"
-        >
-          <Plus size={20} className="mr-2" />
-          Create Business
-        </button>
+        {canCreate && (
+          <button
+            onClick={() => navigate('/businesses/create')}
+            className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition flex items-center"
+          >
+            <Plus size={20} className="mr-2" />
+            Create Business
+          </button>
+        )}
       </div>
 
-      {/* Bulk Upload Section */}
-      <div className="flex justify-end mb-4">
-        <label className={`px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition flex items-center cursor-pointer ${isUploading ? 'opacity-70 cursor-wait' : ''}`}>
-          {isUploading ? (
-            'Uploading...'
-          ) : (
-            <>
-              <FileSpreadsheet size={20} className="mr-2" />
-              Import Excel
-            </>
-          )}
-          <input
-            type="file"
-            accept=".xlsx, .xls"
-            className="hidden"
-            onChange={handleFileUpload}
-            disabled={isUploading}
-          />
-        </label>
-      </div>
+      {canCreate && (
+        <div className="flex justify-end mb-4">
+          <label className={`px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition flex items-center cursor-pointer ${isUploading ? 'opacity-70 cursor-wait' : ''}`}>
+            {isUploading ? (
+              'Uploading...'
+            ) : (
+              <>
+                <FileSpreadsheet size={20} className="mr-2" />
+                Import Excel
+              </>
+            )}
+            <input
+              type="file"
+              accept=".xlsx, .xls"
+              className="hidden"
+              onChange={handleFileUpload}
+              disabled={isUploading}
+            />
+          </label>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
@@ -291,13 +298,15 @@ const Businesses = () => {
                         >
                           <Eye size={18} />
                         </Link>
-                        <button
-                          onClick={() => handleDelete(business._id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                          title="Delete Business"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                        {canDelete && (
+                          <button
+                            onClick={() => handleDelete(business._id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                            title="Delete Business"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

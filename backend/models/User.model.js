@@ -34,6 +34,23 @@ const userSchema = new mongoose.Schema({
     enum: ['customer', 'business', 'admin'],
     default: 'customer'
   },
+  // RBAC: Admin-tier sub-role (only relevant when role === 'admin')
+  adminRole: {
+    type: String,
+    enum: ['admin', 'BUSINESS_MANAGER', 'VIEWER', null],
+    default: null
+  },
+  // RBAC: Custom permission overrides (merged on top of role defaults)
+  permissions: {
+    type: [String],
+    default: []
+  },
+  // RBAC: Who created this user (audit trail)
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
   address: {
     buildingNumber: String,
     street: String,

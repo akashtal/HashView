@@ -446,9 +446,8 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    // Update last login
-    user.lastLogin = new Date();
-    await user.save();
+    // Update last login using updateOne to avoid Mongoose validation on stale DB fields
+    await User.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
 
     // For business owners, fetch their businesses from the Business collection
     let businesses = [];

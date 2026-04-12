@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
@@ -12,80 +13,73 @@ import Categories from './pages/Categories';
 import Coupons from './pages/Coupons';
 import TripAdvisor from './pages/TripAdvisor';
 import BusinessClaims from './pages/BusinessClaims';
+import AdminUsers from './pages/AdminUsers';
 import Layout from './components/Layout';
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Check if user is already logged in
-    const token = localStorage.getItem('adminToken');
-    if (token) {
-      setIsAuthenticated(true);
-    }
-    setLoading(false);
-  }, []);
-
-  const handleLogin = (token) => {
-    localStorage.setItem('adminToken', token);
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    setIsAuthenticated(false);
-  };
+// Inner component that reads from AuthContext (must be inside AuthProvider)
+function AppRoutes() {
+  const { isAuthenticated, loading, login, logout } = useAuth();
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-xl text-gray-600">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-500 text-sm">Loading...</p>
+        </div>
       </div>
     );
   }
 
   return (
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          isAuthenticated ? (
+            <Navigate to="/" replace />
+          ) : (
+            <Login onLogin={login} />
+          )
+        }
+      />
+      <Route
+        path="/*"
+        element={
+          isAuthenticated ? (
+            <Layout onLogout={logout}>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/categories" element={<Categories />} />
+                <Route path="/users" element={<Users />} />
+                <Route path="/businesses" element={<Businesses />} />
+                <Route path="/businesses/create" element={<CreateBusiness />} />
+                <Route path="/businesses/:id" element={<BusinessDetails />} />
+                <Route path="/coupons" element={<Coupons />} />
+                <Route path="/reviews" element={<Reviews />} />
+                <Route path="/tripadvisor" element={<TripAdvisor />} />
+                <Route path="/notifications" element={<Notifications />} />
+                <Route path="/business-claims" element={<BusinessClaims />} />
+                <Route path="/admin-users" element={<AdminUsers />} />
+              </Routes>
+            </Layout>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
     <BrowserRouter>
-      <Routes>
-        <Route
-          path="/login"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/" replace />
-            ) : (
-              <Login onLogin={handleLogin} />
-            )
-          }
-        />
-        <Route
-          path="/*"
-          element={
-            isAuthenticated ? (
-              <Layout onLogout={handleLogout}>
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/categories" element={<Categories />} />
-                  <Route path="/users" element={<Users />} />
-                  <Route path="/businesses" element={<Businesses />} />
-                  <Route path="/businesses/create" element={<CreateBusiness />} />
-                  <Route path="/businesses/:id" element={<BusinessDetails />} />
-                  <Route path="/coupons" element={<Coupons />} />
-                  <Route path="/reviews" element={<Reviews />} />
-                  <Route path="/tripadvisor" element={<TripAdvisor />} />
-                  <Route path="/notifications" element={<Notifications />} />
-                  <Route path="/business-claims" element={<BusinessClaims />} />
-                </Routes>
-              </Layout>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-      </Routes>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   );
 }
 
 export default App;
-

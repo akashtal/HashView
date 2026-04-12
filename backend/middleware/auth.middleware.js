@@ -1,46 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User.model');
 const BusinessOwner = require('../models/BusinessOwner.model');
-
-// Optional auth - Try to attach user if token exists, but don't fail if not
-exports.optionalAuth = async (req, res, next) => {
-  try {
-    let token;
-
-    // Check for token in headers
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      token = req.headers.authorization.split(' ')[1];
-    }
-
-    // If no token, just continue without setting req.user
-    if (!token) {
-      return next();
-    }
-
-    try {
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Get user from appropriate collection based on userType
-      if (decoded.userType === 'business') {
-        req.user = await BusinessOwner.findById(decoded.id).select('-passwordHash').populate('businesses');
-      } else {
-        req.user = await User.findById(decoded.id).select('-passwordHash');
-        
-        if (!req.user) {
-          req.user = await BusinessOwner.findById(decoded.id).select('-passwordHash').populate('businesses');
-        }
-      }
-    } catch (error) {
-      // Invalid token, but continue anyway
-      console.log('Invalid token in optional auth:', error.message);
-    }
-
-    next();
-  } catch (error) {
-    next(error);
-  }
-};
+const { getEffectivePermissions } = require('../constants/rbac');
 
 // Protect routes - Verify JWT token
 exports.protect = async (req, res, next) => {
@@ -103,15 +64,9 @@ exports.protect = async (req, res, next) => {
   }
 };
 
-// Grant access to specific roles
+// Grant access to specific roles (legacy — kept for backward compatibility)
 exports.authorize = (...roles) => {
   return (req, res, next) => {
-    console.log('🔐 Authorization Check:');
-    console.log('   Required roles:', roles);
-    console.log('   User role:', req.user?.role);
-    console.log('   User ID:', req.user?.id || req.user?._id);
-    console.log('   User type:', req.user?.constructor?.modelName);
-    
     if (!req.user || !req.user.role) {
       return res.status(403).json({
         success: false,
@@ -165,3 +120,60 @@ exports.optionalAuth = async (req, res, next) => {
   }
 };
 
+/**
+ * Middleware: Ensure user is logged in AND is an admin-tier user (role === 'admin').
+ * Used as a base guard for all admin management routes.
+ */
+exports.requireAdminTier = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: 'Not authenticated' });
+  }
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied. Admin privileges required.'
+    });
+  }
+  next();
+};
+
+/**
+ * Middleware factory: Check that the authenticated user has ALL of the specified
+ * permissions (combining role defaults + custom per-user overrides).
+ *
+ * - Users with role='admin' and NO adminRole set → treated as full admin (all permissions)
+ * - Users with role='admin' and adminRole='BUSINESS_MANAGER' or 'VIEWER' → restricted
+ *
+ * Usage:  router.post('/businesses', protect, checkPermission('CREATE_BUSINESS'), handler);
+ */
+exports.checkPermission = (...requiredPermissions) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.'
+      });
+    }
+
+    // adminRole (BUSINESS_MANAGER / VIEWER) overrides bare 'admin' for permission lookup.
+    // If adminRole is null/undefined the user is a legacy full admin → gets all perms.
+    const effectiveRole = req.user.adminRole || req.user.role;
+    const effectivePermissions = getEffectivePermissions(
+      effectiveRole,
+      req.user.permissions || []
+    );
+
+    const missing = requiredPermissions.filter(p => !effectivePermissions.includes(p));
+    if (missing.length > 0) {
+      return res.status(403).json({
+        success: false,
+        message: `Permission denied. Required: ${missing.join(', ')}`
+      });
+    }
+
+    next();
+  };
+};

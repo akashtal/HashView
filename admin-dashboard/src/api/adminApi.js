@@ -89,7 +89,29 @@ export const adminApi = {
   setOwnerNotificationLimit: (ownerId, maxReach) =>
     api.put(`/admin/business-owners/${ownerId}/notification-limit`, { maxReach }),
   promoteUserToBusiness: (userId) => api.post(`/admin/users/${userId}/promote-to-business`),
+
+  // ── RBAC / Admin User Management ─────────────────────────────────────────
+  // Get current user permissions
+  getMyPermissions: () => api.get('/admin/rbac/me'),
+
+  // Get all available roles and permissions metadata
+  getRolesAndPermissions: () => api.get('/admin/rbac/roles'),
+
+  // CRUD for admin-tier users
+  getAllAdminUsers: () => api.get('/admin/rbac/users'),
+  createAdminUser: (data) => api.post('/admin/rbac/users', data),
+  updateAdminUser: (userId, data) => api.put(`/admin/rbac/users/${userId}`, data),
+  deleteAdminUser: (userId) => api.delete(`/admin/rbac/users/${userId}`),
+
+  // Toggle active/inactive
+  toggleAdminUserStatus: (userId, isActive) =>
+    api.put(`/admin/rbac/users/${userId}/status`, { isActive }),
+
+  // Update only custom permissions
+  updateUserPermissions: (userId, permissions) =>
+    api.put(`/admin/rbac/users/${userId}/permissions`, { permissions }),
 };
 
 export default adminApi;
+
 

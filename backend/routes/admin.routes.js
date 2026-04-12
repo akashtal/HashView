@@ -28,43 +28,52 @@ const {
   setOwnerFreeTrialLimit,
   promoteUserToBusiness
 } = require('../controllers/admin.controller');
-const { protect, authorize } = require('../middleware/auth.middleware');
+const { protect, requireAdminTier, checkPermission } = require('../middleware/auth.middleware');
+const { PERMISSIONS } = require('../constants/rbac');
 
-// All routes are admin-only
-router.use(protect, authorize('admin'));
+// All admin routes require authentication and admin-tier role
+router.use(protect, requireAdminTier);
 
-router.get('/dashboard', getDashboardStats);
-router.get('/users', getAllUsers);
-router.get('/businesses', getAllBusinesses);
-router.get('/businesses/:id', getBusinessById);
-router.post('/businesses', createBusiness);
-router.put('/businesses/:id', updateBusiness);
-router.put('/businesses/:id/radius', updateBusinessRadius);
-router.put('/businesses/:id/kyc', updateBusinessKYC);
-router.post('/businesses/:id/generate-qr', generateBusinessQRCode);
-router.post('/users/:id/promote-to-business', promoteUserToBusiness);
-router.put('/users/:id/status', updateUserStatus);
-router.get('/reviews', getAllReviews);
-router.put('/reviews/:id/status', updateReviewStatus);
-router.post('/notifications/send', sendNotification);
-router.delete('/users/:id', deleteUser);
-router.delete('/businesses/:id', deleteBusiness);
+// ── Dashboard ────────────────────────────────────────────────────────────────
+router.get('/dashboard', checkPermission(PERMISSIONS.VIEW_DASHBOARD), getDashboardStats);
 
-// Suspension routes
-router.post('/users/:id/suspend', suspendUser);
-router.post('/businesses/:id/suspend', suspendBusiness);
-router.post('/suspended/:id/unsuspend', unsuspendAccount);
-router.get('/suspended', getAllSuspendedAccounts);
+// ── Users (app customers) ─────────────────────────────────────────────────────
+router.get('/users', checkPermission(PERMISSIONS.VIEW_USERS), getAllUsers);
+router.put('/users/:id/status', checkPermission(PERMISSIONS.EDIT_USER), updateUserStatus);
+router.post('/users/:id/suspend', checkPermission(PERMISSIONS.SUSPEND_ACCOUNTS), suspendUser);
+router.post('/users/:id/promote-to-business', checkPermission(PERMISSIONS.EDIT_USER), promoteUserToBusiness);
+router.delete('/users/:id', checkPermission(PERMISSIONS.DELETE_USER), deleteUser);
 
-// Coupon Management routes
-router.get('/coupons', getAllCoupons);
-router.put('/coupons/:id/status', toggleCouponStatus);
-router.delete('/coupons/:id', deleteCoupon);
+// ── Businesses ────────────────────────────────────────────────────────────────
+router.get('/businesses', checkPermission(PERMISSIONS.VIEW_BUSINESS), getAllBusinesses);
+router.get('/businesses/:id', checkPermission(PERMISSIONS.VIEW_BUSINESS), getBusinessById);
+router.post('/businesses', checkPermission(PERMISSIONS.CREATE_BUSINESS), createBusiness);
+router.put('/businesses/:id', checkPermission(PERMISSIONS.EDIT_BUSINESS), updateBusiness);
+router.put('/businesses/:id/radius', checkPermission(PERMISSIONS.EDIT_BUSINESS), updateBusinessRadius);
+router.put('/businesses/:id/kyc', checkPermission(PERMISSIONS.EDIT_BUSINESS), updateBusinessKYC);
+router.post('/businesses/:id/generate-qr', checkPermission(PERMISSIONS.EDIT_BUSINESS), generateBusinessQRCode);
+router.post('/businesses/:id/suspend', checkPermission(PERMISSIONS.SUSPEND_ACCOUNTS), suspendBusiness);
+router.delete('/businesses/:id', checkPermission(PERMISSIONS.DELETE_BUSINESS), deleteBusiness);
 
-// Business Owner notification limit & free trial limit (Admin control)
-router.get('/business-owners', getBusinessOwners);
-router.put('/business-owners/:ownerId/notification-limit', setOwnerNotificationLimit);
-router.put('/business-owners/:ownerId/free-trial-limit', setOwnerFreeTrialLimit);
+// ── Reviews ───────────────────────────────────────────────────────────────────
+router.get('/reviews', checkPermission(PERMISSIONS.VIEW_REVIEWS), getAllReviews);
+router.put('/reviews/:id/status', checkPermission(PERMISSIONS.MANAGE_REVIEWS), updateReviewStatus);
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+router.post('/notifications/send', checkPermission(PERMISSIONS.SEND_NOTIFICATIONS), sendNotification);
+
+// ── Suspended accounts ────────────────────────────────────────────────────────
+router.get('/suspended', checkPermission(PERMISSIONS.SUSPEND_ACCOUNTS), getAllSuspendedAccounts);
+router.post('/suspended/:id/unsuspend', checkPermission(PERMISSIONS.SUSPEND_ACCOUNTS), unsuspendAccount);
+
+// ── Coupons ───────────────────────────────────────────────────────────────────
+router.get('/coupons', checkPermission(PERMISSIONS.VIEW_COUPONS), getAllCoupons);
+router.put('/coupons/:id/status', checkPermission(PERMISSIONS.MANAGE_COUPONS), toggleCouponStatus);
+router.delete('/coupons/:id', checkPermission(PERMISSIONS.MANAGE_COUPONS), deleteCoupon);
+
+// ── Business Owners / Subscription limits ─────────────────────────────────────
+router.get('/business-owners', checkPermission(PERMISSIONS.VIEW_BUSINESS), getBusinessOwners);
+router.put('/business-owners/:ownerId/notification-limit', checkPermission(PERMISSIONS.MANAGE_SUBSCRIPTIONS), setOwnerNotificationLimit);
+router.put('/business-owners/:ownerId/free-trial-limit', checkPermission(PERMISSIONS.MANAGE_SUBSCRIPTIONS), setOwnerFreeTrialLimit);
 
 module.exports = router;
-

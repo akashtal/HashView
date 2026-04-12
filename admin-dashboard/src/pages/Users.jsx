@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Trash2, Ban, CheckCircle } from 'lucide-react';
 import { adminApi } from '../api/adminApi';
+import { useAuth } from '../context/AuthContext';
 import { format } from 'date-fns';
 
 const Users = () => {
+  const { hasPermission } = useAuth();
+  const canEdit = hasPermission('EDIT_USER');
+  const canDelete = hasPermission('DELETE_USER');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -179,30 +183,34 @@ const Users = () => {
                     </td>
                     <td className="px-6 py-4 text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
-                        {user.status === 'active' ? (
+                        {canEdit && (
+                          user.status === 'active' ? (
+                            <button
+                              onClick={() => handleStatusUpdate(user._id, 'suspended')}
+                              className="text-yellow-600 hover:text-yellow-900"
+                              title="Suspend User"
+                            >
+                              <Ban size={18} />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleStatusUpdate(user._id, 'active')}
+                              className="text-green-600 hover:text-green-900"
+                              title="Activate User"
+                            >
+                              <CheckCircle size={18} />
+                            </button>
+                          )
+                        )}
+                        {canDelete && (
                           <button
-                            onClick={() => handleStatusUpdate(user._id, 'suspended')}
-                            className="text-yellow-600 hover:text-yellow-900"
-                            title="Suspend User"
+                            onClick={() => handleDelete(user._id)}
+                            className="text-red-600 hover:text-red-900"
+                            title="Delete User"
                           >
-                            <Ban size={18} />
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleStatusUpdate(user._id, 'active')}
-                            className="text-green-600 hover:text-green-900"
-                            title="Activate User"
-                          >
-                            <CheckCircle size={18} />
+                            <Trash2 size={18} />
                           </button>
                         )}
-                        <button
-                          onClick={() => handleDelete(user._id)}
-                          className="text-red-600 hover:text-red-900"
-                          title="Delete User"
-                        >
-                          <Trash2 size={18} />
-                        </button>
                       </div>
                     </td>
                   </tr>
