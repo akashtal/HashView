@@ -9,6 +9,40 @@ const {
   uploadReviewVideos
 } = require('../config/cloudinary');
 
+// Helper: verify the caller owns (or is admin for) the given businessId
+// Throws with .status set for easy HTTP response
+const verifyBusinessOwnership = async (businessId, userId, userRole) => {
+  if (!businessId) return; // No businessId = skip (e.g. profile upload)
+  const Business = require('../models/Business.model');
+  const business = await Business.findById(businessId).select('owner');
+  if (!business) {
+    const err = new Error('Business not found');
+    err.status = 404;
+    throw err;
+  }
+  // null-safe — 74 businesses have no owner (admin-seeded)
+  const ownerId = business.owner?.toString?.() ?? null;
+  const isOwner = ownerId !== null && ownerId === userId;
+  const isAdmin = userRole === 'admin';
+  if (!isOwner && !isAdmin) {
+    const err = new Error('Not authorized to upload images for this business');
+    err.status = 403;
+    throw err;
+  }
+};
+
+// Helper: log every image operation for audit trail
+const logImageOp = (action, req, file) => {
+  console.log('[IMAGE_OP]', JSON.stringify({
+    action,
+    businessId: req.query.businessId || req.body.businessId || null,
+    userId: req.user?.id || null,
+    cloudinaryId: file?.filename || null,
+    folder: file?.destination || null,
+    timestamp: new Date().toISOString()
+  }));
+};
+
 // @desc    Upload profile image
 // @route   POST /api/upload/profile
 // @access  Private
@@ -61,7 +95,18 @@ exports.uploadBusinessLogo = [
         });
       }
 
-      // Ensure the response includes all necessary data
+      const businessId = req.query.businessId || req.body.businessId;
+
+      // ✅ Verify ownership BEFORE saving reference — delete orphaned file on failure
+      try {
+        await verifyBusinessOwnership(businessId, req.user.id, req.user.role);
+      } catch (authErr) {
+        await cloudinary.uploader.destroy(req.file.filename).catch(() => {});
+        return res.status(authErr.status || 403).json({ success: false, message: authErr.message });
+      }
+
+      logImageOp('logo_upload', req, req.file);
+
       const responseData = {
         success: true,
         message: 'Business logo uploaded successfully',
@@ -70,7 +115,6 @@ exports.uploadBusinessLogo = [
           publicId: req.file.filename,
           format: req.file.format
         },
-        // Also include at top level for easier access
         url: req.file.path,
         publicId: req.file.filename
       };
@@ -78,7 +122,7 @@ exports.uploadBusinessLogo = [
       console.log('✅ Logo uploaded to Cloudinary:', {
         url: req.file.path,
         publicId: req.file.filename,
-        folder: req.file.folder || 'hashview/business/logos'
+        folder: req.file.destination || `hashview/business/${businessId}/logo`
       });
 
       res.status(200).json(responseData);
@@ -110,6 +154,18 @@ exports.uploadBusinessCover = [
         });
       }
 
+      const businessId = req.query.businessId || req.body.businessId;
+
+      // ✅ Verify ownership BEFORE saving
+      try {
+        await verifyBusinessOwnership(businessId, req.user.id, req.user.role);
+      } catch (authErr) {
+        await cloudinary.uploader.destroy(req.file.filename).catch(() => {});
+        return res.status(authErr.status || 403).json({ success: false, message: authErr.message });
+      }
+
+      logImageOp('cover_upload', req, req.file);
+
       const responseData = {
         success: true,
         message: 'Business cover image uploaded successfully',
@@ -125,7 +181,7 @@ exports.uploadBusinessCover = [
       console.log('✅ Cover image uploaded to Cloudinary:', {
         url: req.file.path,
         publicId: req.file.filename,
-        folder: req.file.folder || 'hashview/business/covers'
+        folder: req.file.destination || `hashview/business/${businessId}/cover`
       });
 
       res.status(200).json(responseData);
@@ -186,7 +242,7 @@ exports.uploadBusinessDocuments = [
 // @route   POST /api/upload/business/gallery?businessId=xxx
 // @access  Private (Business Owner)
 exports.uploadBusinessGallery = [
-  uploadBusinessGallery.array('images', 10), // Max 10 images at once
+  uploadBusinessGallery.array('images', 10),
   async (req, res, next) => {
     try {
       if (!req.files || req.files.length === 0) {
@@ -196,13 +252,27 @@ exports.uploadBusinessGallery = [
         });
       }
 
+      const businessId = req.query.businessId || req.body.businessId;
+
+      // ✅ Verify ownership BEFORE saving
+      try {
+        await verifyBusinessOwnership(businessId, req.user.id, req.user.role);
+      } catch (authErr) {
+        for (const file of req.files) {
+          await cloudinary.uploader.destroy(file.filename).catch(() => {});
+        }
+        return res.status(authErr.status || 403).json({ success: false, message: authErr.message });
+      }
+
+      logImageOp('gallery_upload', req, req.files[0]);
+
       const uploadedImages = req.files.map(file => ({
         url: file.path,
         publicId: file.filename,
         format: file.format
       }));
 
-      console.log(`✅ ${uploadedImages.length} gallery image(s) uploaded to Cloudinary`);
+      console.log(`✅ ${uploadedImages.length} gallery image(s) uploaded to Cloudinary (business: ${businessId})`);
 
       res.status(200).json({
         success: true,
@@ -212,7 +282,6 @@ exports.uploadBusinessGallery = [
       });
     } catch (error) {
       console.error('❌ Error uploading business gallery:', error);
-      // Delete uploaded files if processing fails
       if (req.files && req.files.length > 0) {
         for (const file of req.files) {
           try {

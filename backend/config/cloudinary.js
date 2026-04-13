@@ -9,6 +9,14 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// IMPORTANT: Folder paths use businessId (not business name) to guarantee
+// uniqueness and prevent cross-business image collision.
+// A name-based path (e.g. "hashview/business/the-abode/logo") would be shared
+// by any two businesses with the same name. The MongoDB _id is permanent
+// and globally unique, making it the only correct choice for folder segregation.
+// ─────────────────────────────────────────────────────────────────────────────
+
 // Profile Image Storage
 const profileStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -22,37 +30,17 @@ const profileStorage = new CloudinaryStorage({
   }
 });
 
-// Helper function to sanitize business name for folder names
-const sanitizeFolderName = (name) => {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/-+/g, '-') // Replace multiple hyphens with single
-    .substring(0, 50); // Limit length
-};
-
-// Business Logo Storage - Dynamic folder based on business
+// Business Logo Storage — businessId-based folder path
 const businessLogoStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
-    // Get business ID from query params or body
     const businessId = req.query.businessId || req.body.businessId;
-    let folderPath = 'hashview/business/logos';
-    
-    if (businessId) {
-      try {
-        const Business = require('../models/Business.model');
-        const business = await Business.findById(businessId).select('name');
-        if (business && business.name) {
-          const folderName = sanitizeFolderName(business.name);
-          folderPath = `hashview/business/${folderName}/logo`;
-        }
-      } catch (err) {
-        console.error('Error getting business name for folder:', err);
-      }
-    }
-    
+
+    // ✅ Always use businessId — never business name
+    const folderPath = businessId
+      ? `hashview/business/${businessId}/logo`
+      : 'hashview/business/unassigned/logo';
+
     return {
       folder: folderPath,
       allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
@@ -66,26 +54,16 @@ const businessLogoStorage = new CloudinaryStorage({
   }
 });
 
-// Business Cover Image Storage
+// Business Cover Image Storage — businessId-based folder path
 const businessCoverStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
     const businessId = req.query.businessId || req.body.businessId;
-    let folderPath = 'hashview/business/covers';
-    
-    if (businessId) {
-      try {
-        const Business = require('../models/Business.model');
-        const business = await Business.findById(businessId).select('name');
-        if (business && business.name) {
-          const folderName = sanitizeFolderName(business.name);
-          folderPath = `hashview/business/${folderName}/cover`;
-        }
-      } catch (err) {
-        console.error('Error getting business name for folder:', err);
-      }
-    }
-    
+
+    const folderPath = businessId
+      ? `hashview/business/${businessId}/cover`
+      : 'hashview/business/unassigned/cover';
+
     return {
       folder: folderPath,
       allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
@@ -99,26 +77,16 @@ const businessCoverStorage = new CloudinaryStorage({
   }
 });
 
-// Business Documents Storage (KYC, licenses, etc.)
+// Business Documents Storage (KYC) — businessId-based folder path
 const businessDocumentStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
     const businessId = req.query.businessId || req.body.businessId;
-    let folderPath = 'hashview/business/documents';
-    
-    if (businessId) {
-      try {
-        const Business = require('../models/Business.model');
-        const business = await Business.findById(businessId).select('name');
-        if (business && business.name) {
-          const folderName = sanitizeFolderName(business.name);
-          folderPath = `hashview/business/${folderName}/documents`;
-        }
-      } catch (err) {
-        console.error('Error getting business name for folder:', err);
-      }
-    }
-    
+
+    const folderPath = businessId
+      ? `hashview/business/${businessId}/documents`
+      : 'hashview/business/unassigned/documents';
+
     return {
       folder: folderPath,
       allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
@@ -128,26 +96,16 @@ const businessDocumentStorage = new CloudinaryStorage({
   }
 });
 
-// Business Gallery Storage
+// Business Gallery Storage — businessId-based folder path
 const businessGalleryStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
     const businessId = req.query.businessId || req.body.businessId;
-    let folderPath = 'hashview/business/gallery';
-    
-    if (businessId) {
-      try {
-        const Business = require('../models/Business.model');
-        const business = await Business.findById(businessId).select('name');
-        if (business && business.name) {
-          const folderName = sanitizeFolderName(business.name);
-          folderPath = `hashview/business/${folderName}/gallery`;
-        }
-      } catch (err) {
-        console.error('Error getting business name for folder:', err);
-      }
-    }
-    
+
+    const folderPath = businessId
+      ? `hashview/business/${businessId}/gallery`
+      : 'hashview/business/unassigned/gallery';
+
     return {
       folder: folderPath,
       allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
@@ -164,37 +122,27 @@ const businessGalleryStorage = new CloudinaryStorage({
 // Create multer instances
 const uploadProfile = multer({
   storage: profileStorage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB
-  }
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB
 });
 
 const uploadBusinessLogo = multer({
   storage: businessLogoStorage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB
-  }
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB
 });
 
 const uploadBusinessCover = multer({
   storage: businessCoverStorage,
-  limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB
-  }
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
 });
 
 const uploadBusinessDocuments = multer({
   storage: businessDocumentStorage,
-  limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB per document
-  }
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB per document
 });
 
 const uploadBusinessGallery = multer({
   storage: businessGalleryStorage,
-  limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB per image
-  }
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB per image
 });
 
 // Review Media Storage (Photos)
@@ -225,16 +173,12 @@ const reviewVideoStorage = new CloudinaryStorage({
 
 const uploadReviewPhotos = multer({
   storage: reviewPhotoStorage,
-  limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB per photo
-  }
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB per photo
 });
 
 const uploadReviewVideos = multer({
   storage: reviewVideoStorage,
-  limits: {
-    fileSize: 50 * 1024 * 1024 // 50MB per video
-  }
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB per video
 });
 
 module.exports = {
@@ -247,4 +191,3 @@ module.exports = {
   uploadReviewPhotos,
   uploadReviewVideos
 };
-

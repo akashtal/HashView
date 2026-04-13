@@ -285,7 +285,8 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         });
       });
 
-      const response = await ApiService.uploadBusinessGallery(formData);
+      // ✅ Pass businessId so gallery images go to the business-specific folder
+      const response = await ApiService.uploadBusinessGallery(formData, businessId);
 
       if (response.success && response.images && response.images.length > 0) {
         return response.images.map((img, index) => ({

@@ -11,7 +11,15 @@ const businessSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'BusinessOwner'
-    // Optional - admin can create businesses without owner
+    // Optional — admin can create/import businesses without an owner.
+    // Owner is set when a real user registers or claims this business.
+  },
+  importedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+    // Set when an admin bulk-uploads this business via Excel import.
+    // Tracks who seeded the data; NOT the business owner.
   },
   ownerName: {
     type: String,

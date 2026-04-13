@@ -1113,8 +1113,12 @@ exports.updateBusinessImages = async (req, res, next) => {
       });
     }
 
-    // Verify ownership
-    if (business.owner.toString() !== req.user.id && req.user.role !== 'admin') {
+    // ✅ Null-safe ownership check — business.owner can be null for admin-seeded records
+    const ownerId = business.owner?.toString?.() ?? null;
+    const isOwner = ownerId !== null && ownerId === req.user.id;
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this business'
@@ -1123,82 +1127,109 @@ exports.updateBusinessImages = async (req, res, next) => {
 
     const updateData = {};
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // IMPORTANT: We do NOT delete old Cloudinary assets before saving the new
+    // data. Deleting first and then failing to save leaves the business with
+    // NO images at all — a permanent, unrecoverable loss.
+    //
+    // The safe pattern is:
+    //   1. Accept the new data into updateData (no deletion yet)
+    //   2. Save to MongoDB successfully
+    //   3. ONLY THEN delete the old Cloudinary asset (deferred cleanup)
+    //
+    // If step 3 fails (Cloudinary error), the old file stays in Cloudinary as
+    // a harmless orphan. That is infinitely preferable to losing user data.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // Collect old publicIds to delete AFTER successful DB save
+    const toDeleteAfterSave = [];
+
     // Update logo
     if (req.body.logo) {
-      // Delete old logo if exists
-      if (business.logo?.publicId) {
-        try {
-          await cloudinary.uploader.destroy(business.logo.publicId);
-        } catch (err) {
-          console.error('Error deleting old logo:', err);
-        }
+      // If there's an existing logo with a different publicId, queue it for cleanup
+      const incomingPublicId = req.body.logoPublicId || null;
+      const existingPublicId = business.logo?.publicId || null;
+      if (existingPublicId && existingPublicId !== incomingPublicId) {
+        toDeleteAfterSave.push({ publicId: existingPublicId, type: 'logo' });
       }
 
       if (typeof req.body.logo === 'string') {
         updateData.logo = {
           url: req.body.logo,
-          publicId: req.body.logoPublicId || null
+          publicId: incomingPublicId
         };
       }
     }
 
     // Update cover image
     if (req.body.coverImage) {
-      // Delete old cover if exists
-      if (business.coverImage?.publicId) {
-        try {
-          await cloudinary.uploader.destroy(business.coverImage.publicId);
-        } catch (err) {
-          console.error('Error deleting old cover:', err);
-        }
+      const incomingPublicId = req.body.coverImagePublicId || null;
+      const existingPublicId = business.coverImage?.publicId || null;
+      if (existingPublicId && existingPublicId !== incomingPublicId) {
+        toDeleteAfterSave.push({ publicId: existingPublicId, type: 'cover' });
       }
 
       if (typeof req.body.coverImage === 'string') {
         updateData.coverImage = {
           url: req.body.coverImage,
-          publicId: req.body.coverImagePublicId || null
+          publicId: incomingPublicId
         };
       }
     }
 
     // Update gallery images
     if (req.body.images !== undefined) {
-      // Delete old gallery images
-      if (business.images && business.images.length > 0) {
-        for (const img of business.images) {
-          if (img.publicId) {
-            try {
-              await cloudinary.uploader.destroy(img.publicId);
-            } catch (err) {
-              console.error('Error deleting old gallery image:', err);
+      if (Array.isArray(req.body.images)) {
+        const incomingPublicIds = new Set(
+          req.body.images.map(img => (typeof img === 'object' ? img.publicId : null)).filter(Boolean)
+        );
+
+        // Only queue gallery images that are truly being REMOVED (not in the new list)
+        if (business.images && business.images.length > 0) {
+          for (const img of business.images) {
+            if (img.publicId && !incomingPublicIds.has(img.publicId)) {
+              toDeleteAfterSave.push({ publicId: img.publicId, type: 'gallery' });
             }
           }
         }
-      }
 
-      if (Array.isArray(req.body.images)) {
         updateData.images = req.body.images.map(img => {
           if (typeof img === 'string') {
-            return {
-              url: img,
-              publicId: null
-            };
+            return { url: img, publicId: null };
           } else if (img.url) {
-            return {
-              url: img.url,
-              publicId: img.publicId || null
-            };
+            return { url: img.url, publicId: img.publicId || null };
           }
           return null;
         }).filter(img => img !== null);
       } else {
+        // Explicit empty array — queue all existing gallery for cleanup
+        if (business.images && business.images.length > 0) {
+          for (const img of business.images) {
+            if (img.publicId) toDeleteAfterSave.push({ publicId: img.publicId, type: 'gallery' });
+          }
+        }
         updateData.images = [];
       }
     }
 
-    // Update business
+    // ── Step 1: Save new data to MongoDB first ────────────────────────────
     Object.assign(business, updateData);
     await business.save();
+
+    // ── Step 2: DB save succeeded — NOW it is safe to delete old Cloudinary assets
+    if (toDeleteAfterSave.length > 0) {
+      console.log(`🗑️  Deferred cleanup: deleting ${toDeleteAfterSave.length} old Cloudinary asset(s)...`);
+      for (const item of toDeleteAfterSave) {
+        try {
+          await cloudinary.uploader.destroy(item.publicId);
+          console.log(`✅ Deleted old ${item.type}: ${item.publicId}`);
+        } catch (err) {
+          // Non-fatal: the DB already has the new data. The old file stays as an
+          // orphan in Cloudinary, which is harmless and can be cleaned up later.
+          console.warn(`⚠️  Could not delete old ${item.type} (${item.publicId}):`, err.message);
+        }
+      }
+    }
 
     // Refresh business data to ensure all fields are populated
     const updatedBusiness = await Business.findById(req.params.id)
@@ -1236,7 +1267,9 @@ exports.updateBusiness = async (req, res, next) => {
       });
     }
 
-    if (business.owner.toString() !== req.user.id) {
+    // ✅ Null-safe ownership check
+    const ownerId = business.owner?.toString?.() ?? null;
+    if (ownerId !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
         message: 'Not authorized'
@@ -1503,9 +1536,13 @@ exports.bulkUploadBusinesses = async (req, res, next) => {
           coverImage: row.CoverImageUrl ? { url: row.CoverImageUrl, publicId: null } : undefined,
           images: row.GalleryImageUrls ? row.GalleryImageUrls.split(',').map(url => ({ url: url.trim(), publicId: null })) : [],
 
-          owner: req.user.id, // Assigned to Admin who uploads
-          status: 'active',   // Auto-activate bulk uploaded businesses? Or 'pending'? Let's go with 'active' for admin uploads.
-          kycStatus: 'approved', // Admin trusted source
+          // ✅ Do NOT set owner for bulk-imported businesses. These are admin-seeded
+          // records with no individual user owner. Users claim them via the claim system.
+          // Setting owner: req.user.id would lock them to the admin account and cause
+          // all 74 businesses to appear as 'owner null' when admin account changes.
+          importedBy: req.user.id, // Track who imported (metadata only, not ownership)
+          status: 'active',
+          kycStatus: 'approved',
 
           address: {
             buildingNumber: row.BuildingNumber || '',
