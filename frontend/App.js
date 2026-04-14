@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import { StatusBar, Platform, LogBox } from 'react-native';
+import { StatusBar, Platform, LogBox, Alert } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
+import * as Updates from 'expo-updates';
 import store from './src/store';
 import AppNavigator from './src/navigation/AppNavigator';
 import AnimatedSplashScreen from './src/components/AnimatedSplashScreen';
@@ -43,6 +44,29 @@ LogBox.ignoreLogs([
 export default Sentry.wrap(function App() {
   const [isSplashComplete, setIsSplashComplete] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  // ─── OTA Update Check ────────────────────────────────────────────────────────
+  // Silently checks for a new JS bundle on every launch.
+  // If found: downloads it and reloads the app automatically.
+  // Skipped entirely in development mode (Expo Go / dev client).
+  useEffect(() => {
+    async function checkForOTAUpdate() {
+      if (__DEV__) return; // Skip in development
+      try {
+        const update = await Updates.checkForUpdateAsync();
+        if (update.isAvailable) {
+          console.log('📦 OTA update available — downloading...');
+          await Updates.fetchUpdateAsync();
+          console.log('✅ OTA update downloaded — reloading app');
+          await Updates.reloadAsync();
+        }
+      } catch (error) {
+        // Non-fatal — user continues with current version
+        console.log('ℹ️ OTA check skipped:', error.message);
+      }
+    }
+    checkForOTAUpdate();
+  }, []);
 
   useEffect(() => {
     console.log('🚀 App mounted - Starting initialization');

@@ -9,6 +9,19 @@ export default {
     userInterfaceStyle: "automatic",
     assetBundlePatterns: ["**/*"],
 
+    // ─── OTA Updates (EAS Update) ─────────────────────────────────────────────
+    // Lets you push JS/UI changes to all users instantly — no store review needed.
+    // Only change runtimeVersion when you add NEW native modules (requires store update).
+    updates: {
+      url: "https://u.expo.dev/d4838e65-984b-45e4-b2d8-a03d28a6fb43",
+      enabled: true,
+      checkAutomatically: "ON_LOAD",
+      fallbackToCacheTimeout: 0
+    },
+    runtimeVersion: {
+      policy: "appVersion"
+    },
+
     splash: {
       image: "./assets/HashViewSplash.png",
       resizeMode: "contain",
@@ -74,7 +87,6 @@ export default {
     plugins: [
       "expo-dev-client",
       [
-
         "expo-build-properties",
         {
           "ios": {
@@ -105,7 +117,6 @@ export default {
           "sounds": []
         }
       ],
-
       [
         "expo-image-picker",
         {
@@ -129,6 +140,7 @@ export default {
           backgroundColor: "#210059"
         }
       ],
+      "expo-updates",
       "@react-native-firebase/app",
       "expo-apple-authentication",
       [
