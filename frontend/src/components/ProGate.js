@@ -25,7 +25,7 @@ import { checkSubscriptionStatus } from '../store/slices/authSlice';
  */
 const ProGate = ({ children, feature = 'This feature' }) => {
     const dispatch = useDispatch();
-    const { isPro, hasFreeTrial, freeTrial, subscription } = useSelector((s) => s.auth);
+    const { isPro, hasFreeTrial, freeTrial, subscription, subscriptionEnabled } = useSelector((s) => s.auth);
 
     const [loading, setLoading] = useState(false);
 
@@ -71,6 +71,9 @@ const ProGate = ({ children, feature = 'This feature' }) => {
             setLoading(false);
         }
     }, [dispatch, isPro]);
+
+    // Kill switch: subscriptions disabled → everyone gets Pro access
+    if (!subscriptionEnabled) return children;
 
     // Already subscribed → render content
     if (isPro) return children;

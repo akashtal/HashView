@@ -459,6 +459,9 @@ exports.login = async (req, res, next) => {
     // Generate token with userType
     const token = generateToken(user._id, userType);
 
+    // Kill switch: if SUBSCRIPTION_ENABLED=false, every business owner is treated as Pro
+    const subscriptionEnabled = process.env.SUBSCRIPTION_ENABLED !== 'false';
+
     res.status(200).json({
       success: true,
       message: 'Login successful',
@@ -476,10 +479,11 @@ exports.login = async (req, res, next) => {
         // Include subscription status for business owners so the frontend
         // correctly sets isPro on login — without this, ProGate always shows the paywall
         ...(user.role === 'business' && {
-          isPro: user.isPro,
+          subscriptionEnabled,
+          isPro: subscriptionEnabled ? user.isPro : true,
           subscription: {
-            status: user.subscription?.status || 'inactive',
-            plan: user.subscription?.plan || null,
+            status: subscriptionEnabled ? (user.subscription?.status || 'inactive') : 'active',
+            plan: subscriptionEnabled ? (user.subscription?.plan || null) : 'pro_monthly',
             currentPeriodEnd: user.subscription?.currentPeriodEnd || null,
             cancelAtPeriodEnd: user.subscription?.cancelAtPeriodEnd || false,
             trialEnd: user.subscription?.trialEnd || null,
@@ -717,6 +721,9 @@ exports.getMe = async (req, res, next) => {
       businesses = await Business.find({ owner: user._id });
     }
 
+    // Kill switch: if SUBSCRIPTION_ENABLED=false, every business owner is treated as Pro
+    const subscriptionEnabled = process.env.SUBSCRIPTION_ENABLED !== 'false';
+
     // Return user data based on their role
     res.status(200).json({
       success: true,
@@ -735,10 +742,11 @@ exports.getMe = async (req, res, next) => {
         ...(user.role === 'customer' && { location: user.location }),
         // Include subscription status for business owners
         ...(user.role === 'business' && {
-          isPro: user.isPro,
+          subscriptionEnabled,
+          isPro: subscriptionEnabled ? user.isPro : true,
           subscription: {
-            status: user.subscription?.status || 'inactive',
-            plan: user.subscription?.plan || null,
+            status: subscriptionEnabled ? (user.subscription?.status || 'inactive') : 'active',
+            plan: subscriptionEnabled ? (user.subscription?.plan || null) : 'pro_monthly',
             currentPeriodEnd: user.subscription?.currentPeriodEnd || null,
             cancelAtPeriodEnd: user.subscription?.cancelAtPeriodEnd || false,
             trialEnd: user.subscription?.trialEnd || null,

@@ -10,7 +10,9 @@ import ToastService from '../../utils/ToastService';
 
 export default function BusinessProfileScreen({ navigation }) {
   const dispatch = useDispatch();
-  const { user, isPro } = useSelector((state) => state.auth);
+  const { user, isPro, subscriptionEnabled } = useSelector((state) => state.auth);
+  // When subscriptions are disabled globally, treat every business owner as Pro
+  const effectivelyPro = !subscriptionEnabled || isPro;
   const [myBusinesses, setMyBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -154,7 +156,7 @@ export default function BusinessProfileScreen({ navigation }) {
             <Text className="text-xl font-bold text-gray-900">{user?.name}</Text>
             <Text className="text-sm text-gray-500 mb-2">{user?.email}</Text>
 
-            {isPro ? (
+            {effectivelyPro ? (
               /* ── Pro subscriber ── */
               <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
                 <View style={{ backgroundColor: '#7C3AED', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5, flexDirection: 'row', alignItems: 'center' }}>

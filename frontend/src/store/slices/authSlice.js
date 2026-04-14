@@ -7,6 +7,7 @@ import NotificationService from '../../services/notification.service';
 // ─── Helper to extract subscription + freeTrial safely from API response ─────
 const extractSubscription = (user) => ({
   isPro: user?.isPro || false,
+  subscriptionEnabled: user?.subscriptionEnabled !== undefined ? user.subscriptionEnabled : true,
   hasFreeTrial: user?.hasFreeTrial || false,
   freeTrial: user?.freeTrial || { updatesUsed: 0, maxFreeUpdates: 25, remaining: 25 },
   subscription: user?.subscription || { status: 'inactive', plan: null, currentPeriodEnd: null },
@@ -173,6 +174,7 @@ const authSlice = createSlice({
     error: null,
     // ─── Subscription state ───────────────────────────────────────────
     isPro: false,
+    subscriptionEnabled: true,  // kill switch from backend
     hasFreeTrial: true,
     freeTrial: { updatesUsed: 0, maxFreeUpdates: 25, remaining: 25 },
     subscription: {
@@ -192,6 +194,7 @@ const authSlice = createSlice({
     // Directly update subscription state (e.g. after returning from browser payment)
     setSubscription: (state, action) => {
       state.isPro = action.payload.isPro ?? state.isPro;
+      state.subscriptionEnabled = action.payload.subscriptionEnabled ?? state.subscriptionEnabled;
       state.hasFreeTrial = action.payload.hasFreeTrial ?? state.hasFreeTrial;
       state.freeTrial = action.payload.freeTrial ?? state.freeTrial;
       state.subscription = action.payload.subscription ?? state.subscription;
@@ -207,6 +210,7 @@ const authSlice = createSlice({
       if (action.payload.user?.role === 'business') {
         const sub = extractSubscription(action.payload.user);
         state.isPro = sub.isPro;
+        state.subscriptionEnabled = sub.subscriptionEnabled;
         state.hasFreeTrial = sub.hasFreeTrial;
         state.freeTrial = sub.freeTrial;
         state.subscription = sub.subscription;
@@ -232,6 +236,7 @@ const authSlice = createSlice({
         if (action.payload.user?.role === 'business') {
           const sub = extractSubscription(action.payload.user);
           state.isPro = sub.isPro;
+          state.subscriptionEnabled = sub.subscriptionEnabled;
           state.hasFreeTrial = sub.hasFreeTrial;
           state.freeTrial = sub.freeTrial;
           state.subscription = sub.subscription;
@@ -261,6 +266,7 @@ const authSlice = createSlice({
         if (action.payload.user?.role === 'business') {
           const sub = extractSubscription(action.payload.user);
           state.isPro = sub.isPro;
+          state.subscriptionEnabled = sub.subscriptionEnabled;
           state.hasFreeTrial = sub.hasFreeTrial;
           state.freeTrial = sub.freeTrial;
           state.subscription = sub.subscription;
@@ -303,6 +309,7 @@ const authSlice = createSlice({
         if (action.payload.user?.role === 'business') {
           const sub = extractSubscription(action.payload.user);
           state.isPro = sub.isPro;
+          state.subscriptionEnabled = sub.subscriptionEnabled;
           state.hasFreeTrial = sub.hasFreeTrial;
           state.freeTrial = sub.freeTrial;
           state.subscription = sub.subscription;
@@ -318,6 +325,7 @@ const authSlice = createSlice({
       .addCase(checkSubscriptionStatus.fulfilled, (state, action) => {
         if (action.payload) {
           state.isPro = action.payload.isPro ?? state.isPro;
+          state.subscriptionEnabled = action.payload.subscriptionEnabled ?? state.subscriptionEnabled;
           state.hasFreeTrial = action.payload.hasFreeTrial ?? state.hasFreeTrial;
           state.freeTrial = action.payload.freeTrial ?? state.freeTrial;
           state.subscription = action.payload.subscription ?? state.subscription;

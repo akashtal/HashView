@@ -22,7 +22,7 @@ import { checkSubscriptionStatus } from '../../store/slices/authSlice';
 
 export default function SettingsScreen({ navigation }) {
   const dispatch = useDispatch();
-  const { user, isPro, subscription } = useSelector((s) => s.auth);
+  const { user, isPro, subscription, subscriptionEnabled } = useSelector((s) => s.auth);
   const isBusinessOwner = user?.role === 'business';
   const [subLoading, setSubLoading] = useState(false);
 
@@ -281,8 +281,8 @@ export default function SettingsScreen({ navigation }) {
               <Icon name="chevron-forward" size={20} color="#D1D5DB" />
             </TouchableOpacity>
 
-            {/* Manage Subscription — business owners only */}
-            {isBusinessOwner && (
+            {/* Manage Subscription — business owners only, when subscriptions are enabled */}
+            {isBusinessOwner && subscriptionEnabled && (
               <>
                 <View className="border-t border-gray-100 my-2" />
                 <TouchableOpacity

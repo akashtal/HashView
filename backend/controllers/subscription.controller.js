@@ -26,6 +26,19 @@ const getStripe = () => {
 // ─────────────────────────────────────────────────────────────────────────────
 exports.getStatus = async (req, res, next) => {
     try {
+        // ── Kill switch: SUBSCRIPTION_ENABLED=false → treat everyone as Pro ───
+        const subscriptionEnabled = process.env.SUBSCRIPTION_ENABLED !== 'false';
+        if (!subscriptionEnabled) {
+            return res.json({
+                success: true,
+                subscriptionEnabled: false,
+                isPro: true,
+                hasFreeTrial: false,
+                freeTrial: { updatesUsed: 0, maxFreeUpdates: 25, remaining: 25 },
+                subscription: { status: 'active', plan: 'pro_monthly', currentPeriodEnd: null, cancelAtPeriodEnd: false, trialEnd: null },
+            });
+        }
+
         const owner = await BusinessOwner
             .findById(req.user._id)
             .select('+subscription.stripeCustomerId +subscription.stripeSubscriptionId +subscription.stripePriceId');
@@ -88,6 +101,7 @@ exports.getStatus = async (req, res, next) => {
 
         res.json({
             success: true,
+            subscriptionEnabled: true,
             isPro: owner.isPro,
             hasFreeTrial: owner.hasFreeTrial,
             freeTrial: {
