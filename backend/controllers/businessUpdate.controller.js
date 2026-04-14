@@ -61,27 +61,34 @@ exports.createBusinessUpdate = async (req, res, next) => {
     }
 
     // ── Free trial / Pro gate ─────────────────────────────────────────────────
-    const owner = await BusinessOwner
-      .findOne({ businesses: businessId })
-      .select('subscription pushNotifications freeTrial isPro');
+    // Only enforced when SUBSCRIPTION_ENABLED=true in .env
+    const subscriptionEnabled = process.env.SUBSCRIPTION_ENABLED !== 'false';
 
-    if (!owner) {
-      return res.status(404).json({ success: false, message: 'Business owner not found' });
-    }
+    let owner = null;
 
-    const canPost = owner.isPro || owner.hasFreeTrial;
-    if (!canPost) {
-      const max = owner.freeTrial?.maxFreeUpdates || 25;
-      return res.status(403).json({
-        success: false,
-        message: `You have used all ${max} free updates. Subscribe to HashView Pro to continue posting offers and updates.`,
-        trialExhausted: true,
-        freeTrial: {
-          updatesUsed: owner.freeTrial?.updatesUsed || 0,
-          maxFreeUpdates: max,
-          remaining: 0
-        }
-      });
+    if (subscriptionEnabled) {
+      owner = await BusinessOwner
+        .findOne({ businesses: businessId })
+        .select('subscription pushNotifications freeTrial isPro');
+
+      if (!owner) {
+        return res.status(404).json({ success: false, message: 'Business owner not found' });
+      }
+
+      const canPost = owner.isPro || owner.hasFreeTrial;
+      if (!canPost) {
+        const max = owner.freeTrial?.maxFreeUpdates || 25;
+        return res.status(403).json({
+          success: false,
+          message: `You have used all ${max} free updates. Subscribe to HashView Pro to continue posting offers and updates.`,
+          trialExhausted: true,
+          freeTrial: {
+            updatesUsed: owner.freeTrial?.updatesUsed || 0,
+            maxFreeUpdates: max,
+            remaining: 0
+          }
+        });
+      }
     }
 
     const update = await BusinessUpdate.create({
@@ -96,8 +103,8 @@ exports.createBusinessUpdate = async (req, res, next) => {
       createdBy: req.user.id
     });
 
-    // ── Increment free trial counter (only for non-Pro owners) ──────────────
-    if (!owner.isPro) {
+    // ── Increment free trial counter (only when subscriptions enabled + non-Pro) ──
+    if (subscriptionEnabled && owner && !owner.isPro) {
       await BusinessOwner.findByIdAndUpdate(owner._id, {
         $inc: { 'freeTrial.updatesUsed': 1 }
       });
@@ -105,73 +112,125 @@ exports.createBusinessUpdate = async (req, res, next) => {
     }
 
     // ── Push notification dispatch ──────────────────────────────────────────
-    // Pro subscribers AND free trial users may send push notifications
-    if (owner.isPro || owner.hasFreeTrial) {
-      try {
-        const maxReach = owner.pushNotifications?.maxReach ?? 100;
-        const alreadyReachedIds = owner.pushNotifications?.notifiedUserIds?.map(id => id.toString()) || [];
+    // When subscriptions are disabled → always send push notifications.
+    // When enabled → only Pro or free trial users get push.
+    const shouldNotify = !subscriptionEnabled || (owner && (owner.isPro || owner.hasFreeTrial));
 
-        // Build notification text
-        let notificationTitle = `📢 ${business.name}`;
-        let notificationBody  = title;
-        if (type === 'offer' && discountValue > 0) {
-          const disc = discountType === 'percentage' ? `${discountValue}% OFF` : `£${discountValue} OFF`;
-          notificationTitle = `🎁 ${business.name} — New Offer!`;
-          notificationBody  = `${disc} · ${title}`;
-        }
-
-        // Query ALL users with a push token — prioritise those never reached by this owner
-        const User = require('../models/User.model');
-        const allUsers = await User.find({ pushToken: { $exists: true, $ne: null } }).select('_id pushToken');
-
-        // Split: fresh users (never notified by this owner) first, then already-notified
-        const freshUsers = allUsers.filter(u => !alreadyReachedIds.includes(u._id.toString()));
-        const poolUsers  = freshUsers.length >= maxReach
-          ? freshUsers.slice(0, maxReach)
-          : [
-              ...freshUsers,
-              ...allUsers
-                .filter(u => alreadyReachedIds.includes(u._id.toString()))
-                .slice(0, maxReach - freshUsers.length)
-            ];
-
-        if (poolUsers.length > 0) {
-          const userIds = poolUsers.map(u => u._id);
-          const { sentIds } = await sendBulkNotifications(
-            userIds,
-            notificationTitle,
-            notificationBody,
-            {
-              type: 'business_update',
-              businessId: businessId.toString(),
-              updateId: update._id.toString(),
-              screen: 'BusinessDetail'
-            }
-          );
-
-          // Track per-update and per-owner, then persist
-          if (sentIds.length > 0) {
-            update.notifiedUsers  = sentIds;
-            update.notificationSentAt = new Date();
-            await update.save();
-
-            // Append new recipients to owner's cumulative list (avoid duplicates)
-            const newIds = sentIds.filter(id => !alreadyReachedIds.includes(id.toString()));
-            await BusinessOwner.findByIdAndUpdate(owner._id, {
-              $push: { 'pushNotifications.notifiedUserIds': { $each: newIds } },
-              $inc:  { 'pushNotifications.totalSent': sentIds.length }
-            });
-
-            logger.info(`[Updates] Push sent for "${title}" by ${business.name} → ${sentIds.length} users`);
-          }
-        } else {
-          logger.info(`[Updates] No eligible users to notify for "${title}" (${business.name})`);
-        }
-      } catch (notifErr) {
-        // Notification failure must never block the create response
-        logger.error('[Updates] Push notification error:', notifErr.message);
+    if (shouldNotify) {
+      // ── Use business.owner directly — reliable, no businesses-array dependency ──
+      if (!owner) {
+        owner = await BusinessOwner
+          .findById(business.owner)
+          .select('pushNotifications');
       }
-    } else if (!owner.isPro && !owner.hasFreeTrial) {
+
+      if (!owner) {
+        logger.warn(`[Updates] Push skipped — could not find owner for business ${businessId}`);
+      } else {
+        try {
+          const maxReach = owner.pushNotifications?.maxReach ?? 100;
+          const alreadyReachedIds = (owner.pushNotifications?.notifiedUserIds || []).map(id => id.toString());
+
+          // Build notification text
+          let notificationTitle = `📢 ${business.name}`;
+          let notificationBody  = title;
+          if (type === 'offer' && discountValue > 0) {
+            const disc = discountType === 'percentage' ? `${discountValue}% OFF` : `£${discountValue} OFF`;
+            notificationTitle = `🎁 ${business.name} — New Offer!`;
+            notificationBody  = `${disc} · ${title}`;
+          }
+
+          // ── Target: users who reviewed OR favourited this specific business ──
+          const Review = require('../models/Review.model');
+
+          // ALL reviewer IDs (regardless of push token)
+          const allReviewerIds = await Review
+            .find({ business: businessId })
+            .distinct('user');
+
+          // ALL favouriter IDs (regardless of push token)
+          const allFavouriters = await User
+            .find({ favoritePlaces: businessId })
+            .select('_id pushToken email');
+
+          // Get reviewer user docs
+          const allReviewerDocs = await User
+            .find({ _id: { $in: allReviewerIds } })
+            .select('_id pushToken email');
+
+          // Merge & deduplicate
+          const seenAll = new Set();
+          const allTargets = [...allFavouriters, ...allReviewerDocs].filter(u => {
+            const id = u._id.toString();
+            if (seenAll.has(id)) return false;
+            seenAll.add(id);
+            return true;
+          });
+
+          // Split: who has a push token vs who doesn't
+          const withToken    = allTargets.filter(u => u.pushToken);
+          const withoutToken = allTargets.filter(u => !u.pushToken);
+
+          // Diagnostic log — shows exactly why only N people get notified
+          logger.info(
+            `[Updates] 📊 Push breakdown for "${title}" (business: ${business.name}):` +
+            ` Total reviewers: ${allReviewerDocs.length}` +
+            ` | Total favouriters: ${allFavouriters.length}` +
+            ` | Unique targets: ${allTargets.length}` +
+            ` | With push token: ${withToken.length}` +
+            ` | Without push token (can't notify): ${withoutToken.length}`
+          );
+          if (withoutToken.length > 0) {
+            logger.info(`[Updates] ⚠️  Users without push token: ${withoutToken.map(u => u.email || u._id).join(', ')}`);
+          }
+
+          const eligibleUsers = withToken;
+
+          if (eligibleUsers.length === 0) {
+            logger.info(`[Updates] No users have reviewed or favourited this business yet — no push sent`);
+          } else {
+            // Prioritise fresh users (never notified by this owner), then already-notified up to maxReach
+            const freshUsers  = eligibleUsers.filter(u => !alreadyReachedIds.includes(u._id.toString()));
+            const reachedUsers = eligibleUsers.filter(u => alreadyReachedIds.includes(u._id.toString()));
+            const poolUsers = freshUsers.length >= maxReach
+              ? freshUsers.slice(0, maxReach)
+              : [...freshUsers, ...reachedUsers.slice(0, maxReach - freshUsers.length)];
+
+            const userIds = poolUsers.map(u => u._id);
+            const { sentIds } = await sendBulkNotifications(
+              userIds,
+              notificationTitle,
+              notificationBody,
+              {
+                type: 'business_update',
+                businessId: businessId.toString(),
+                updateId: update._id.toString(),
+                screen: 'BusinessDetail'
+              }
+            );
+
+            if (sentIds.length > 0) {
+              update.notifiedUsers     = sentIds;
+              update.notificationSentAt = new Date();
+              await update.save();
+
+              const newIds = sentIds.filter(id => !alreadyReachedIds.includes(id.toString()));
+              await BusinessOwner.findByIdAndUpdate(owner._id, {
+                $push: { 'pushNotifications.notifiedUserIds': { $each: newIds } },
+                $inc:  { 'pushNotifications.totalSent': sentIds.length }
+              });
+
+              logger.info(`[Updates] ✅ Push sent for "${title}" by ${business.name} → ${sentIds.length} users`);
+            } else {
+              logger.info(`[Updates] Push attempted but 0 delivered for "${title}" (${business.name})`);
+            }
+          }
+        } catch (notifErr) {
+          // Notification failure must never block the create response
+          logger.error('[Updates] Push notification error:', notifErr.message);
+        }
+      }
+    } else {
       logger.info(`[Updates] Skipping push — owner has no Pro or free trial (businessId: ${businessId})`);
     }
     // ── End push dispatch ───────────────────────────────────────────────────
