@@ -1,12 +1,17 @@
 import axios from 'axios';
 
+// Format the base URL correctly, preventing double "/api/api" if the env var already includes it
+const configuredUrl = import.meta.env.PROD && import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL
+  : '';
+
+const baseURL = configuredUrl
+  ? (configuredUrl.endsWith('/api') ? configuredUrl : `${configuredUrl}/api`)
+  : '/api';
+
 // Create axios instance
 const api = axios.create({
-  // In production, use VITE_API_URL from .env.production
-  // In development, use proxy (configured in vite.config.js)
-  baseURL: import.meta.env.PROD && import.meta.env.VITE_API_URL
-    ? `${import.meta.env.VITE_API_URL}/api`  // Production: https://your-backend.com/api
-    : '/api',                                  // Development: uses Vite proxy
+  baseURL,
   headers: {
     'Content-Type': 'application/json'
   },
