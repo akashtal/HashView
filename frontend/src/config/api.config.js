@@ -2,8 +2,8 @@
 export const API_CONFIG = {
 
   // Local development server (ACTIVE - connecting to local backend)
-  BASE_URL: 'http://10.80.161.71:5001/api',
-  SOCKET_URL: 'http://10.80.161.71:5001',
+  BASE_URL: 'http://10.80.161.239:5001/api',
+  SOCKET_URL: 'http://10.80.161.239:5001',
 
   // Production URLs (commented out for now)
   //BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://hashview.44.249.50.162.nip.io/api',

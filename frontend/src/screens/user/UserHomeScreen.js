@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, ScrollView, TouchableOpacity, FlatList, RefreshControl, ActivityIndicator, Alert, StatusBar, TextInput, Modal, Keyboard, Platform } from 'react-native';
 import { Image } from 'expo-image';
 import ToastService from '../../utils/ToastService';
@@ -86,8 +87,7 @@ const BusinessCard = React.memo(({ item, onPress }) => {
               style={{ width: '100%', height: '100%' }}
               contentFit="cover"
               transition={200}
-              cachePolicy="disk"
-              recyclingKey={item._id}
+              cachePolicy="memory"
             />
           ) : (
             <LinearGradient
@@ -237,12 +237,18 @@ export default function UserHomeScreen({ navigation }) {
   }, [user]);
 
   const initializeScreen = async () => {
-    // Only fetch globally initially if we don't already have results cached in Redux
-    if (businesses.length === 0 && nearbyBusinesses.length === 0) {
-      dispatch(getAllActiveBusinesses());
-    }
+    // Always fetch on mount (do not skip even if Redux already has data)
+    dispatch(getAllActiveBusinesses());
     await checkLocationPermission();
   };
+
+  // Re-fetch every time this screen comes into focus so edits made
+  // on other screens (e.g. EditBusinessInfo) are immediately reflected.
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(getAllActiveBusinesses());
+    }, [dispatch])
+  );
 
   const loadCategories = async () => {
     try {

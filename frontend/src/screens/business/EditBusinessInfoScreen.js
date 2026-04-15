@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -18,9 +18,13 @@ import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
 import ToastService from '../../utils/ToastService';
 import CustomImageCropper from '../../components/CustomImageCropper';
+import BusinessPreviewCard from '../../components/BusinessPreviewCard';
+import { useDispatch } from 'react-redux';
+import { getAllActiveBusinesses } from '../../store/slices/businessSlice';
 
 export default function EditBusinessInfoScreen({ navigation, route }) {
   const { businessId } = route.params;
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
@@ -29,6 +33,12 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
   // Modal states
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [timePickerModal, setTimePickerModal] = useState({ visible: false, day: null, field: null });
+  const [previewModalVisible, setPreviewModalVisible] = useState(false);
+
+  // Prevent Android "AlreadyResumed" crash
+  const isPickingRef = useRef(false);
+  // Captures image type at PICK time so handleCropComplete never reads stale closure
+  const cropTypeRef = useRef(null);
 
   // State for Custom Image Cropper (same as Registration screen)
   const [cropModal, setCropModal] = useState({
@@ -171,6 +181,13 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
   };
 
   const pickImage = async (type) => {
+    // Guard: prevent Android double-trigger "AlreadyResumed" crash
+    if (isPickingRef.current) {
+      console.log('[ImagePicker] Already in progress, ignoring tap');
+      return;
+    }
+    isPickingRef.current = true;
+
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
@@ -187,10 +204,12 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
 
       if (!result.canceled) {
         if (type === 'gallery') {
-          // For gallery, add multiple images
-          setImages({ ...images, gallery: [...images.gallery, ...result.assets] });
+          // Functional updater avoids stale gallery state
+          setImages(prev => ({ ...prev, gallery: [...prev.gallery, ...result.assets] }));
         } else {
-          // Open custom crop modal for logo and cover images (same as Registration screen)
+          // Capture type in a ref AT PICK TIME — handleCropComplete reads this
+          // instead of the potentially stale cropModal closure value
+          cropTypeRef.current = type;
           setCropModal({
             visible: true,
             imageUri: result.assets[0].uri,
@@ -199,15 +218,23 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         }
       }
     } catch (error) {
-      ToastService.showError('Error', 'Failed to pick image');
+      console.error('[ImagePicker] Error:', error);
+      if (!String(error?.message).includes('Already resumed')) {
+        ToastService.showError('Error', 'Failed to pick image. Please try again.');
+      }
+    } finally {
+      isPickingRef.current = false;
     }
   };
 
   const handleCropComplete = (croppedImage) => {
-    const { type } = cropModal;
-    setImages({ ...images, [type]: croppedImage });
-    // Clear uploaded status when new cropped image is set
-    setUploadedImages({ ...uploadedImages, [type]: null });
+    // Read type from ref (captured at pick time) — never stale
+    const type = cropTypeRef.current;
+    if (!type) return;
+    // Functional updaters ensure freshest state is always used
+    setImages(prev => ({ ...prev, [type]: croppedImage }));
+    setUploadedImages(prev => ({ ...prev, [type]: null }));
+    cropTypeRef.current = null;
     setCropModal({ visible: false, imageUri: null, type: null });
   };
 
@@ -457,6 +484,9 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
       }
 
       ToastService.showSuccess('Success', 'Business information updated successfully');
+      // Force the home screen to re-fetch business data so the new cover image
+      // is loaded from the API (not served from the stale Redux cache).
+      dispatch(getAllActiveBusinesses());
       navigation.goBack();
     } catch (error) {
       ToastService.showError('Error', error.message || 'Failed to update business');
@@ -486,11 +516,31 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         colors={[COLORS.primary, COLORS.primaryDark]}
         className="pt-12 pb-6 px-6"
       >
-        <View className="flex-row items-center">
-          <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
-            <Icon name="arrow-back" size={24} color="#FFF" />
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center flex-1">
+            <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
+              <Icon name="arrow-back" size={24} color="#FFF" />
+            </TouchableOpacity>
+            <Text className="text-white text-xl font-bold" numberOfLines={1}>Edit Business Info</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => setPreviewModalVisible(true)}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: 'rgba(255,255,255,0.18)',
+              paddingHorizontal: 12,
+              paddingVertical: 7,
+              borderRadius: 20,
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.35)',
+              marginLeft: 8,
+            }}
+            activeOpacity={0.75}
+          >
+            <Icon name="eye-outline" size={16} color="#FFF" />
+            <Text style={{ color: '#FFF', fontSize: 12, fontWeight: '700', marginLeft: 5 }}>Preview</Text>
           </TouchableOpacity>
-          <Text className="text-white text-2xl font-bold">Edit Business Info</Text>
         </View>
       </LinearGradient>
 
@@ -515,6 +565,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
             {images.logo ? (
               <View className="items-center">
                 <Image
+                  key={images.logo?.uri}
                   source={{ uri: images.logo.uri }}
                   className="w-24 h-24 rounded-lg"
                   resizeMode="cover"
@@ -553,6 +604,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
             {images.coverImage ? (
               <View className="w-full relative">
                 <Image
+                  key={images.coverImage?.uri}
                   source={{ uri: images.coverImage.uri }}
                   className="w-full h-32 rounded-lg"
                   resizeMode="cover"
@@ -619,6 +671,66 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
               {images.gallery.length > 0 ? `Add More Images (${images.gallery.length} total)` : 'Add Gallery Images'}
             </Text>
           </TouchableOpacity>
+        </View>
+
+        {/* ═══════════════════════════════════════════════
+            LIVE LISTING PREVIEW STRIP
+            Updates in real-time as owner edits the form.
+        ═══════════════════════════════════════════════ */}
+        <View
+          style={{
+            marginBottom: 20,
+            backgroundColor: '#F3F0FF',
+            borderRadius: 16,
+            padding: 14,
+            borderWidth: 1,
+            borderColor: '#C4B5FD',
+          }}
+        >
+          {/* Header row */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+            <View
+              style={{
+                backgroundColor: '#5e399e',
+                borderRadius: 8,
+                padding: 6,
+                marginRight: 10,
+              }}
+            >
+              <Icon name="eye-outline" size={16} color="#FFF" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: '#3730a3' }}>
+                Live Preview
+              </Text>
+              <Text style={{ fontSize: 11, color: '#6D28D9' }}>
+                This is how your listing appears to customers
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => setPreviewModalVisible(true)}
+              style={{
+                backgroundColor: '#5e399e',
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+                borderRadius: 12,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+              activeOpacity={0.8}
+            >
+              <Icon name="expand-outline" size={13} color="#FFF" />
+              <Text style={{ color: '#FFF', fontSize: 11, fontWeight: '700', marginLeft: 4 }}>Full View</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Preview card */}
+          <BusinessPreviewCard
+            name={formData.name}
+            category={formData.category}
+            coverImageUri={images.coverImage?.uri || null}
+            address={formData.address}
+          />
         </View>
 
         {/* Business Name */}
@@ -860,6 +972,91 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         onCancel={() => setCropModal({ visible: false, imageUri: null, type: null })}
         onCropComplete={handleCropComplete}
       />
+
+      {/* ─── Full-Screen Preview Modal ─────────────────── */}
+      <Modal
+        visible={previewModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setPreviewModalVisible(false)}
+      >
+        <View style={{
+          flex: 1,
+          backgroundColor: 'rgba(10,0,30,0.92)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 16,
+        }}>
+          {/* Close button */}
+          <TouchableOpacity
+            onPress={() => setPreviewModalVisible(false)}
+            style={{
+              position: 'absolute',
+              top: 56,
+              right: 20,
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              borderRadius: 24,
+              padding: 10,
+              zIndex: 10,
+            }}
+            activeOpacity={0.8}
+          >
+            <Icon name="close" size={22} color="#FFF" />
+          </TouchableOpacity>
+
+          {/* Title */}
+          <View style={{ alignItems: 'center', marginBottom: 24, paddingTop: 60 }}>
+            <View style={{
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              borderRadius: 12,
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 8,
+            }}>
+              <Icon name="phone-portrait-outline" size={16} color="#C4B5FD" />
+              <Text style={{ color: '#C4B5FD', fontSize: 13, fontWeight: '700', marginLeft: 8 }}>
+                USER HOME SCREEN — AS SEEN BY CUSTOMERS
+              </Text>
+            </View>
+            <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11 }}>
+              This preview updates live as you edit your details
+            </Text>
+          </View>
+
+          {/* Preview card */}
+          <BusinessPreviewCard
+            name={formData.name}
+            category={formData.category}
+            coverImageUri={images.coverImage?.uri || null}
+            address={formData.address}
+            isFullScreen
+          />
+
+          {/* Hint */}
+          <View style={{ marginTop: 20, paddingHorizontal: 16 }}>
+            <Text style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, textAlign: 'center', lineHeight: 17 }}>
+              The cover image shown is exactly your cropped version.{`\n`}
+              Changes will be visible to customers after you save.
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => setPreviewModalVisible(false)}
+            style={{
+              marginTop: 28,
+              backgroundColor: '#5e399e',
+              paddingHorizontal: 32,
+              paddingVertical: 14,
+              borderRadius: 16,
+            }}
+            activeOpacity={0.8}
+          >
+            <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 15 }}>Done</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }

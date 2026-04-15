@@ -16,29 +16,36 @@ import * as ImageManipulator from 'expo-image-manipulator';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+// Max pixel dimension to render inside the cropper.
+// Images larger than this are resized BEFORE display so the UI stays fast.
+const MAX_PREVIEW_DIM = 1400;
+
 const CustomImageCropper = ({
     visible,
     imageUri,
-    aspectRatio = 1, // 1 for logo, 16/9 for cover
+    aspectRatio = 1, // 1 for logo (1:1), 16/9 for cover
     onCancel,
     onCropComplete
 }) => {
+    // workingUri / workingSize → the (possibly resized) image used for display and crop
+    const [workingUri, setWorkingUri] = useState(null);
     const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
+    const [loadError, setLoadError] = useState(null);
 
-    // Layout metrics
+    // Layout metrics for the crop window
     const maskWidth = SCREEN_WIDTH * 0.9;
     const maskHeight = maskWidth / aspectRatio;
 
     const pan = useRef(new Animated.ValueXY()).current;
     const scale = useRef(new Animated.Value(1)).current;
 
-    // Track current values
+    // Track current animated values synchronously
     const currentPan = useRef({ x: 0, y: 0 });
     const currentScale = useRef(1);
 
-    // Listeners to keep track of current animated values
+    // ─── Sync animated value listeners ─────────────────────────────────────
     useEffect(() => {
         const panListener = pan.addListener((value) => {
             currentPan.current = value;
@@ -46,47 +53,93 @@ const CustomImageCropper = ({
         const scaleListener = scale.addListener(({ value }) => {
             currentScale.current = value;
         });
-
         return () => {
             pan.removeListener(panListener);
             scale.removeListener(scaleListener);
         };
     }, [pan, scale]);
 
+    // ─── Prepare image when modal opens ────────────────────────────────────
+    // Resizes large images so the cropper is fast and responsive.
     useEffect(() => {
-        if (visible && imageUri) {
-            setLoading(true);
-            Image.getSize(
-                imageUri,
-                (width, height) => {
-                    setImageSize({ width, height });
+        if (!visible || !imageUri) return;
 
-                    // Reset pan/scale when a new image loads
-                    pan.setValue({ x: 0, y: 0 });
-                    scale.setValue(1);
-                    currentPan.current = { x: 0, y: 0 };
-                    currentScale.current = 1;
+        let cancelled = false;
+        setLoading(true);
+        setLoadError(null);
+        setWorkingUri(null);
 
-                    setLoading(false);
-                },
-                (error) => {
-                    console.error("Failed to get image size", error);
-                    setLoading(false);
+        const prepare = async () => {
+            try {
+                // First get the actual image dimensions
+                const { width: origW, height: origH } = await new Promise((resolve, reject) => {
+                    Image.getSize(
+                        imageUri,
+                        (w, h) => resolve({ width: w, height: h }),
+                        reject
+                    );
+                });
+
+                if (cancelled) return;
+
+                let finalUri = imageUri;
+                let finalW = origW;
+                let finalH = origH;
+
+                // Resize if the image is larger than MAX_PREVIEW_DIM to make the
+                // cropper fast — without degrading the visible crop quality.
+                if (origW > MAX_PREVIEW_DIM || origH > MAX_PREVIEW_DIM) {
+                    const ratio = Math.min(MAX_PREVIEW_DIM / origW, MAX_PREVIEW_DIM / origH);
+                    const targetW = Math.round(origW * ratio);
+                    const targetH = Math.round(origH * ratio);
+
+                    try {
+                        const resized = await ImageManipulator.manipulateAsync(
+                            imageUri,
+                            [{ resize: { width: targetW, height: targetH } }],
+                            { compress: 0.92, format: ImageManipulator.SaveFormat.JPEG }
+                        );
+                        finalUri = resized.uri;
+                        finalW = resized.width;
+                        finalH = resized.height;
+                    } catch (resizeErr) {
+                        // Resize failed → fall back to the original
+                        console.warn('[Cropper] resize failed, using original:', resizeErr.message);
+                    }
                 }
-            );
-        }
+
+                if (cancelled) return;
+
+                setWorkingUri(finalUri);
+                setImageSize({ width: finalW, height: finalH });
+
+                // Reset pan / scale for this new image
+                pan.setValue({ x: 0, y: 0 });
+                scale.setValue(1);
+                currentPan.current = { x: 0, y: 0 };
+                currentScale.current = 1;
+
+                setLoading(false);
+            } catch (err) {
+                if (cancelled) return;
+                console.error('[Cropper] Failed to prepare image:', err);
+                setLoadError('Could not load image. Please try again.');
+                setLoading(false);
+            }
+        };
+
+        prepare();
+        return () => { cancelled = true; };
     }, [visible, imageUri]);
 
+    // ─── Pan responder ──────────────────────────────────────────────────────
     const panResponder = useRef(
         PanResponder.create({
             onStartShouldSetPanResponder: () => true,
             onMoveShouldSetPanResponder: () => true,
 
             onPanResponderGrant: () => {
-                pan.setOffset({
-                    x: currentPan.current.x,
-                    y: currentPan.current.y
-                });
+                pan.setOffset({ x: currentPan.current.x, y: currentPan.current.y });
                 pan.setValue({ x: 0, y: 0 });
             },
 
@@ -101,84 +154,89 @@ const CustomImageCropper = ({
         })
     ).current;
 
+    // ─── Compute the initial rendered dimensions ────────────────────────────
     const getContainerDimensions = () => {
-        if (!imageSize.width || !imageSize.height) return { width: maskWidth, height: maskHeight };
-
-        // Fit image inside mask width initially
-        const scaleFactor = maskWidth / imageSize.width;
-        let initialRenderWidth = maskWidth;
-        let initialRenderHeight = imageSize.height * scaleFactor;
-
-        // If it's too short for the mask height, scale by height instead
-        if (initialRenderHeight < maskHeight) {
-            const heightScaleFactor = maskHeight / imageSize.height;
-            initialRenderWidth = imageSize.width * heightScaleFactor;
-            initialRenderHeight = maskHeight;
+        if (!imageSize.width || !imageSize.height) {
+            return { width: maskWidth, height: maskHeight };
         }
 
-        return { width: initialRenderWidth, height: initialRenderHeight };
+        // Scale to fit mask width
+        const scaleByWidth = maskWidth / imageSize.width;
+        let renderW = maskWidth;
+        let renderH = imageSize.height * scaleByWidth;
+
+        // If too short for mask height, scale by height instead
+        if (renderH < maskHeight) {
+            const scaleByHeight = maskHeight / imageSize.height;
+            renderW = imageSize.width * scaleByHeight;
+            renderH = maskHeight;
+        }
+
+        return { width: renderW, height: renderH };
     };
 
+    // ─── Apply crop ─────────────────────────────────────────────────────────
     const handleCrop = async () => {
+        if (!workingUri || !imageSize.width || !imageSize.height) return;
+
         try {
             setProcessing(true);
-            const renderDim = getContainerDimensions();
 
+            const renderDim = getContainerDimensions();
             const realScale = currentScale.current;
 
-            // Calculate how much the image was scaled initially to fit the screen
+            // How much the rendered image differs from original pixel dimensions
             const initialScaleX = imageSize.width / renderDim.width;
             const initialScaleY = imageSize.height / renderDim.height;
 
-            // Calculate the offset of the image relative to the center of the mask
-            // currentPan measures translation from center
             const offsetX = currentPan.current.x;
             const offsetY = currentPan.current.y;
 
-            // The mask is fixed at center. 
-            // Image center relative to Mask center is (offsetX, offsetY)
-            // So Mask top-left relative to Image top-left in rendering coordinates is:
+            // Position of the crop window's top-left, in rendered-image coordinates
             const maskLeftInRender = (renderDim.width * realScale - maskWidth) / 2 - offsetX;
             const maskTopInRender = (renderDim.height * realScale - maskHeight) / 2 - offsetY;
 
-            // Ensure we don't crop outside image bounds
-            let safeLeft = Math.max(0, maskLeftInRender);
-            let safeTop = Math.max(0, maskTopInRender);
+            // Clamp to non-negative
+            const safeLeft = Math.max(0, maskLeftInRender);
+            const safeTop = Math.max(0, maskTopInRender);
 
-            // Convert rendering coordinates back to original image pixels
-            const finalCropX = safeLeft * initialScaleX / realScale;
-            const finalCropY = safeTop * initialScaleY / realScale;
-            const finalCropWidth = maskWidth * initialScaleX / realScale;
-            const finalCropHeight = maskHeight * initialScaleY / realScale;
+            // Convert rendering coords → original image pixels
+            const rawX = safeLeft * initialScaleX / realScale;
+            const rawY = safeTop * initialScaleY / realScale;
+            const rawW = maskWidth * initialScaleX / realScale;
+            const rawH = maskHeight * initialScaleY / realScale;
 
-            // Clamp dimensions to actual image size
-            const cropAction = {
-                originX: Math.max(0, Math.floor(finalCropX)),
-                originY: Math.max(0, Math.floor(finalCropY)),
-                width: Math.min(imageSize.width, Math.floor(finalCropWidth)),
-                height: Math.min(imageSize.height, Math.floor(finalCropHeight)),
-            };
+            // ── Critical fix: ensure origin + size never exceeds image bounds ──
+            const originX = Math.max(0, Math.floor(rawX));
+            const originY = Math.max(0, Math.floor(rawY));
+            const cropW = Math.max(1, Math.min(imageSize.width - originX, Math.floor(rawW)));
+            const cropH = Math.max(1, Math.min(imageSize.height - originY, Math.floor(rawH)));
+
+            console.log('[Cropper] Crop action:', { originX, originY, cropW, cropH },
+                '| Image:', imageSize);
 
             const result = await ImageManipulator.manipulateAsync(
-                imageUri,
-                [{ crop: cropAction }],
-                { compress: 0.9, format: ImageManipulator.SaveFormat.JPEG }
+                workingUri,
+                [{ crop: { originX, originY, width: cropW, height: cropH } }],
+                { compress: 0.92, format: ImageManipulator.SaveFormat.JPEG }
             );
 
             setProcessing(false);
-            onCropComplete(result);
+            onCropComplete(result); // { uri, width, height }
         } catch (error) {
-            console.error("Error cropping image:", error);
+            console.error('[Cropper] Crop failed:', error);
             setProcessing(false);
-            alert("Failed to crop image.");
+            alert('Failed to crop the image. Please try again.');
         }
     };
 
     const renderDim = getContainerDimensions();
 
     return (
-        <Modal visible={visible} transparent={false} animationType="slide">
+        <Modal visible={visible} transparent={false} animationType="slide"
+            onRequestClose={onCancel}>
             <View style={styles.container}>
+
                 {/* Header */}
                 <View style={styles.header}>
                     <Text style={styles.title}>Crop Image</Text>
@@ -187,10 +245,23 @@ const CustomImageCropper = ({
                     </TouchableOpacity>
                 </View>
 
-                {/* Cropping Area */}
+                {/* Crop area */}
                 <View style={styles.cropContainer}>
                     {loading ? (
-                        <ActivityIndicator size="large" color="#6366f1" />
+                        <View style={styles.loadingBox}>
+                            <ActivityIndicator size="large" color="#6366f1" />
+                            <Text style={styles.loadingText}>Preparing image…</Text>
+                        </View>
+                    ) : loadError ? (
+                        <View style={styles.loadingBox}>
+                            <Icon name="alert-circle-outline" size={40} color="#EF4444" />
+                            <Text style={[styles.loadingText, { color: '#EF4444', marginTop: 12 }]}>
+                                {loadError}
+                            </Text>
+                            <TouchableOpacity style={styles.retryBtn} onPress={onCancel}>
+                                <Text style={{ color: '#FFF', fontWeight: '700' }}>Go Back</Text>
+                            </TouchableOpacity>
+                        </View>
                     ) : (
                         <View style={styles.workspace}>
                             {/* Draggable Image */}
@@ -210,19 +281,19 @@ const CustomImageCropper = ({
                                 ]}
                             >
                                 <Image
-                                    source={{ uri: imageUri }}
+                                    source={{ uri: workingUri }}
                                     style={{ width: '100%', height: '100%' }}
                                     resizeMode="cover"
                                 />
                             </Animated.View>
 
-                            {/* Mask Overlay (Pass-through touches via pointerEvents="none") */}
+                            {/* Mask overlay */}
                             <View style={styles.maskOverlay} pointerEvents="none">
                                 <View style={styles.maskTop} />
                                 <View style={styles.maskMiddleRow}>
                                     <View style={styles.maskSide} />
                                     <View style={[styles.maskCenter, { width: maskWidth, height: maskHeight }]}>
-                                        {/* Grid lines */}
+                                        {/* Rule-of-thirds grid */}
                                         <View style={styles.gridLineH} />
                                         <View style={[styles.gridLineH, { top: '66.6%' }]} />
                                         <View style={styles.gridLineV} />
@@ -236,52 +307,73 @@ const CustomImageCropper = ({
                     )}
                 </View>
 
-                {/* Controls Footer */}
-                <View style={styles.footer}>
-                    <Text style={styles.hintsText}>Drag to pan the image exactly how you want it</Text>
+                {/* Footer */}
+                {!loading && !loadError && (
+                    <View style={styles.footer}>
+                        <Text style={styles.hintsText}>
+                            Drag to reposition · Pinch or use buttons to zoom
+                        </Text>
 
-                    <View style={styles.sliderContainer}>
-                        <Text style={styles.sliderLabel}>Zoom</Text>
-                        {/* Simple buttons for zoom since slider requires additional packages */}
-                        <TouchableOpacity
-                            style={styles.zoomButton}
-                            onPress={() => scale.setValue(Math.max(1, currentScale.current - 0.2))}
-                        >
-                            <Icon name="remove" size={20} color="#374151" />
-                        </TouchableOpacity>
-
-                        <View style={styles.zoomBar}>
-                            <View style={[styles.zoomFill, { width: `${Math.min(100, (currentScale.current - 1) * 50)}%` }]} />
+                        {/* Zoom controls */}
+                        <View style={styles.sliderContainer}>
+                            <Text style={styles.sliderLabel}>Zoom</Text>
+                            <TouchableOpacity
+                                style={styles.zoomButton}
+                                onPress={() => {
+                                    const next = Math.max(1, currentScale.current - 0.15);
+                                    scale.setValue(next);
+                                }}
+                            >
+                                <Icon name="remove" size={20} color="#374151" />
+                            </TouchableOpacity>
+                            <View style={styles.zoomBar}>
+                                <Animated.View
+                                    style={[
+                                        styles.zoomFill,
+                                        {
+                                            width: scale.interpolate({
+                                                inputRange: [1, 3],
+                                                outputRange: ['0%', '100%'],
+                                                extrapolate: 'clamp',
+                                            })
+                                        }
+                                    ]}
+                                />
+                            </View>
+                            <TouchableOpacity
+                                style={styles.zoomButton}
+                                onPress={() => {
+                                    const next = Math.min(4, currentScale.current + 0.15);
+                                    scale.setValue(next);
+                                }}
+                            >
+                                <Icon name="add" size={20} color="#374151" />
+                            </TouchableOpacity>
                         </View>
 
-                        <TouchableOpacity
-                            style={styles.zoomButton}
-                            onPress={() => scale.setValue(Math.min(3, currentScale.current + 0.2))}
-                        >
-                            <Icon name="add" size={20} color="#374151" />
-                        </TouchableOpacity>
+                        {/* Actions */}
+                        <View style={styles.actionRow}>
+                            <TouchableOpacity style={styles.btnCancel} onPress={onCancel}>
+                                <Text style={styles.btnCancelText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.btnSave, processing && { opacity: 0.6 }]}
+                                onPress={handleCrop}
+                                disabled={processing}
+                            >
+                                {processing ? (
+                                    <ActivityIndicator size="small" color="#FFF" />
+                                ) : (
+                                    <>
+                                        <Icon name="checkmark" size={18} color="#FFF"
+                                            style={{ marginRight: 6 }} />
+                                        <Text style={styles.btnSaveText}>Apply Crop</Text>
+                                    </>
+                                )}
+                            </TouchableOpacity>
+                        </View>
                     </View>
-
-                    <View style={styles.actionRow}>
-                        <TouchableOpacity style={styles.btnCancel} onPress={onCancel}>
-                            <Text style={styles.btnCancelText}>Cancel</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.btnSave}
-                            onPress={handleCrop}
-                            disabled={processing || loading}
-                        >
-                            {processing ? (
-                                <ActivityIndicator size="small" color="#FFF" />
-                            ) : (
-                                <>
-                                    <Icon name="checkmark" size={18} color="#FFF" style={{ marginRight: 6 }} />
-                                    <Text style={styles.btnSaveText}>Apply Crop</Text>
-                                </>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                )}
             </View>
         </Modal>
     );
@@ -297,7 +389,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 16,
-        paddingTop: 50, // SafeArea roughly
+        paddingTop: 50,
         backgroundColor: '#FFF',
         borderBottomWidth: 1,
         borderBottomColor: '#F3F4F6',
@@ -319,6 +411,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         overflow: 'hidden',
     },
+    loadingBox: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 32,
+    },
+    loadingText: {
+        color: '#9CA3AF',
+        marginTop: 16,
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    retryBtn: {
+        marginTop: 20,
+        backgroundColor: '#EF4444',
+        paddingHorizontal: 24,
+        paddingVertical: 10,
+        borderRadius: 10,
+    },
     workspace: {
         width: SCREEN_WIDTH,
         height: '100%',
@@ -330,10 +440,7 @@ const styles = StyleSheet.create({
     },
     maskOverlay: {
         position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        top: 0, left: 0, right: 0, bottom: 0,
     },
     maskTop: {
         flex: 1,
@@ -357,41 +464,40 @@ const styles = StyleSheet.create({
     },
     gridLineH: {
         position: 'absolute',
-        left: 0,
-        right: 0,
+        left: 0, right: 0,
         height: 1,
-        backgroundColor: 'rgba(255,255,255,0.4)',
+        backgroundColor: 'rgba(255,255,255,0.35)',
         top: '33.3%',
     },
     gridLineV: {
         position: 'absolute',
-        top: 0,
-        bottom: 0,
+        top: 0, bottom: 0,
         width: 1,
-        backgroundColor: 'rgba(255,255,255,0.4)',
+        backgroundColor: 'rgba(255,255,255,0.35)',
         left: '33.3%',
     },
     footer: {
         backgroundColor: '#FFF',
         paddingHorizontal: 20,
-        paddingTop: 20,
+        paddingTop: 18,
         paddingBottom: 40,
     },
     hintsText: {
         textAlign: 'center',
-        color: '#374151',
+        color: '#6B7280',
         fontWeight: '500',
-        marginBottom: 20,
+        fontSize: 13,
+        marginBottom: 16,
     },
     sliderContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 24,
+        marginBottom: 20,
     },
     sliderLabel: {
         color: '#6B7280',
         fontWeight: '500',
-        marginRight: 16,
+        marginRight: 14,
     },
     zoomButton: {
         width: 36,
@@ -411,14 +517,14 @@ const styles = StyleSheet.create({
     },
     zoomFill: {
         height: '100%',
-        backgroundColor: '#4F46E5', // Primary color
+        backgroundColor: '#4F46E5',
     },
     actionRow: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
         borderTopWidth: 1,
         borderTopColor: '#F3F4F6',
-        paddingTop: 16,
+        paddingTop: 14,
     },
     btnCancel: {
         paddingVertical: 12,
@@ -438,12 +544,12 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 24,
         borderRadius: 8,
-        backgroundColor: '#4F46E5', // Primary
+        backgroundColor: '#4F46E5',
     },
     btnSaveText: {
         color: '#FFF',
         fontWeight: '600',
-    }
+    },
 });
 
 export default CustomImageCropper;
