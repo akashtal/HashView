@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { getBusiness } from '../../store/slices/businessSlice';
 import { getBusinessReviews } from '../../store/slices/reviewSlice';
+import { updateUser } from '../../store/slices/authSlice';
 import COLORS from '../../config/colors';
 import { API_CONFIG } from '../../config/api.config';
 import ApiService from '../../services/api.service';
@@ -31,25 +32,27 @@ export default function BusinessDetailScreen({ navigation, route }) {
   const [videoViewerVisible, setVideoViewerVisible] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
 
+  // Fetch business data — depends only on route params, NOT on user object
   useEffect(() => {
     if (fromQR && business) {
       setQrBusiness(business);
       fetchBusinessUpdates(business._id);
-
-      // Check if business is in user favorites
-      if (user && user.favoritePlaces && user.favoritePlaces.includes(business._id)) {
-        setIsFavorite(true);
-      }
     } else if (businessId) {
       dispatch(getBusiness(businessId));
       fetchBusinessUpdates(businessId);
-
-      // Check if business is in user favorites
-      if (user && user.favoritePlaces && user.favoritePlaces.includes(businessId)) {
-        setIsFavorite(true);
-      }
     }
-  }, [businessId, business, fromQR, user]);
+  }, [businessId, fromQR]);
+
+  // Check favorite status from Redux user.favoritePlaces
+  useEffect(() => {
+    const targetId = (fromQR && business) ? business._id : businessId;
+    if (targetId && user?.favoritePlaces) {
+      const isFav = user.favoritePlaces.some(
+        fav => (fav?._id || fav)?.toString() === targetId.toString()
+      );
+      setIsFavorite(isFav);
+    }
+  }, [businessId, fromQR, user?.favoritePlaces]);
 
   // Refetch reviews whenever the screen comes into focus
   useFocusEffect(
@@ -129,6 +132,9 @@ export default function BusinessDetailScreen({ navigation, route }) {
       const response = await ApiService.toggleFavoriteBusiness(displayBusiness._id);
 
       if (response.success) {
+        // Sync favorites to Redux (safe — MainNavigator uses targeted selectors)
+        dispatch(updateUser({ favoritePlaces: response.favorites }));
+
         ToastService.showSuccess(
           newFavoriteState ? 'Added to Favorites' : 'Removed from Favorites',
           newFavoriteState

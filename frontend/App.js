@@ -46,9 +46,8 @@ export default Sentry.wrap(function App() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   // ─── OTA Update Check ────────────────────────────────────────────────────────
-  // Silently checks for a new JS bundle on every launch.
-  // If found: downloads it and reloads the app automatically.
-  // Skipped entirely in development mode (Expo Go / dev client).
+  // Checks for new JS bundle on every launch.
+  // If found: downloads it, sends a local push notification, and prompts restart.
   useEffect(() => {
     async function checkForOTAUpdate() {
       if (__DEV__) return; // Skip in development
@@ -57,8 +56,37 @@ export default Sentry.wrap(function App() {
         if (update.isAvailable) {
           console.log('📦 OTA update available — downloading...');
           await Updates.fetchUpdateAsync();
-          console.log('✅ OTA update downloaded — reloading app');
-          await Updates.reloadAsync();
+          console.log('✅ OTA update downloaded');
+
+          // Send a local push notification about the update
+          try {
+            const Notifications = require('expo-notifications');
+            await Notifications.scheduleNotificationAsync({
+              content: {
+                title: '🎉 New Update Available',
+                body: 'A new version is available. Check out new features and explore new businesses.',
+                sound: 'default',
+                data: { type: 'ota_update' },
+              },
+              trigger: null, // immediate
+            });
+          } catch (notifErr) {
+            console.log('ℹ️ Could not send update notification:', notifErr.message);
+          }
+
+          // Show in-app alert prompting restart
+          Alert.alert(
+            'Update Available',
+            'A new version of HashView is ready! Restart now to enjoy the latest features.',
+            [
+              { text: 'Later', style: 'cancel' },
+              {
+                text: 'Restart Now',
+                style: 'default',
+                onPress: () => Updates.reloadAsync(),
+              },
+            ]
+          );
         }
       } catch (error) {
         // Non-fatal — user continues with current version

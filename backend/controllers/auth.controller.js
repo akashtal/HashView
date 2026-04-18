@@ -738,6 +738,7 @@ exports.getMe = async (req, res, next) => {
         phoneVerified: user.phoneVerified,
         status: user.status,
         createdAt: user.createdAt,
+        favoritePlaces: user.favoritePlaces || [],
         ...(user.role === 'business' && { businesses }),
         ...(user.role === 'customer' && { location: user.location }),
         // Include subscription status for business owners
