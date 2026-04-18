@@ -1,15 +1,14 @@
 import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
+import { Platform, Linking } from 'react-native';
 import Constants from 'expo-constants';
 
 /**
  * Notification Service
- * Handles push notification permissions, tokens, and event listeners
- * Uses Expo Notifications + Firebase Cloud Messaging (FCM)
+ * Handles push notification permissions, tokens, channels, and event listeners.
+ * Uses Expo Notifications → routes through FCM (Android) and APNs (iOS).
  */
-console.log("Notifications module:", Notifications);
 
-// Configure how notifications should be displayed when app is in foreground
+// ── Configure foreground notification display ────────────────────────────────
 try {
     if (Notifications && Notifications.setNotificationHandler) {
         Notifications.setNotificationHandler({
@@ -19,8 +18,6 @@ try {
                 shouldSetBadge: true,
             }),
         });
-    } else {
-        console.warn('⚠️ Notifications module not fully loaded, skipping setNotificationHandler');
     }
 } catch (error) {
     console.warn('⚠️ Failed to set notification handler:', error);
@@ -30,28 +27,55 @@ class NotificationService {
     constructor() {
         this.notificationListener = null;
         this.responseListener = null;
+        this._channelCreated = false;
     }
 
     /**
-     * Request notification permissions from the user
+     * Create Android notification channel (REQUIRED for Android 8+).
+     * Without this, Android silently drops ALL push notifications.
+     * Safe to call multiple times — Expo deduplicates by channelId.
+     */
+    async createAndroidChannel() {
+        if (Platform.OS !== 'android' || this._channelCreated) return;
+
+        try {
+            await Notifications.setNotificationChannelAsync('hashview-updates', {
+                name: 'Offers & Updates',
+                description: 'Notifications for business offers, updates and announcements',
+                importance: Notifications.AndroidImportance.HIGH,
+                vibrationPattern: [0, 250, 250, 250],
+                lightColor: '#210059',
+                sound: 'default',
+                enableLights: true,
+                enableVibrate: true,
+                showBadge: true,
+            });
+            this._channelCreated = true;
+            console.log('✅ Android notification channel "hashview-updates" created');
+        } catch (error) {
+            console.warn('⚠️ Failed to create Android notification channel:', error);
+        }
+    }
+
+    /**
+     * Request notification permissions from the user.
+     * On iOS, can only be called once — subsequent calls are no-ops.
      * @returns {Promise<boolean>} Whether permission was granted
      */
     async requestPermission() {
         try {
-            console.log('📱 Requesting notification permission...');
+            // Create Android channel first (must exist before any notifications arrive)
+            await this.createAndroidChannel();
 
-            // Check if we're on a physical device (not emulator/simulator)
-            // Note: Push notifications work on physical devices only
+            // Simulators don't support push
             if (Platform.OS === 'ios' && !Constants.isDevice) {
                 console.warn('⚠️ Must use physical device for push notifications');
                 return false;
             }
 
-            // Get current permission status
             const { status: existingStatus } = await Notifications.getPermissionsAsync();
             let finalStatus = existingStatus;
 
-            // If not granted, request permission
             if (existingStatus !== 'granted') {
                 const { status } = await Notifications.requestPermissionsAsync();
                 finalStatus = status;
@@ -71,7 +95,7 @@ class NotificationService {
     }
 
     /**
-     * Check if notification permissions are granted
+     * Check if notification permissions are currently granted.
      * @returns {Promise<boolean>}
      */
     async hasPermission() {
@@ -85,34 +109,66 @@ class NotificationService {
     }
 
     /**
-     * Get the Expo Push Token for this device
+     * Check if permission was permanently denied (user must go to Settings).
+     * @returns {Promise<boolean>} true if denied and can't ask again
+     */
+    async isPermissionDenied() {
+        try {
+            const settings = await Notifications.getPermissionsAsync();
+            // On iOS: if status is 'denied', system won't show the prompt again
+            // On Android: if canAskAgain is false, user selected "Don't ask again"
+            if (settings.status === 'denied') {
+                return !settings.canAskAgain;
+            }
+            return false;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    /**
+     * Open the device's Settings page for this app (so user can enable notifications).
+     */
+    async openNotificationSettings() {
+        try {
+            if (Platform.OS === 'ios') {
+                await Linking.openURL('app-settings:');
+            } else {
+                await Linking.openSettings();
+            }
+        } catch (error) {
+            console.error('❌ Could not open settings:', error);
+        }
+    }
+
+    /**
+     * Get the Expo Push Token for this device.
      * @returns {Promise<string|null>} The push token or null if failed
      */
     async getExpoPushToken() {
         try {
             if (Platform.OS === 'ios' && !Constants.isDevice) {
-                console.warn('⚠️ Must use physical device for push notifications');
                 return null;
             }
 
-            // Ensure we have permission first
+            // Ensure permission first
             const hasPermission = await this.hasPermission();
             if (!hasPermission) {
                 const granted = await this.requestPermission();
                 if (!granted) {
-                    console.log('❌ Cannot get push token without permission');
                     return null;
                 }
             }
 
-            // Get the project ID from app config
+            // Ensure Android channel exists
+            await this.createAndroidChannel();
+
             const projectId = Constants.expoConfig?.extra?.eas?.projectId;
             if (!projectId) {
                 console.error('❌ EAS project ID not found in app config');
                 return null;
             }
 
-            // Get the Expo push token
             const tokenData = await Notifications.getExpoPushTokenAsync({
                 projectId: projectId,
             });
@@ -127,57 +183,57 @@ class NotificationService {
     }
 
     /**
-     * Set up notification event listeners
-     * - Foreground notifications (app open)
-     * - Background/click notifications (app closed/background)
+     * Set up notification event listeners.
+     * - Foreground: notification appears as banner
+     * - Background tap: navigates to relevant screen
      */
     setupNotificationListeners(navigation) {
         console.log('🔔 Setting up notification listeners...');
 
-        // Listener for notifications received while app is in FOREGROUND
+        // Foreground notifications
         this.notificationListener = Notifications.addNotificationReceivedListener(notification => {
-            console.log('📬 Notification received (foreground):', notification);
-            // Notification is automatically shown by setNotificationHandler
+            console.log('📬 Notification received (foreground):', notification.request.content.title);
         });
 
-        // Listener for when user TAPS on a notification
+        // Notification tap handler
         this.responseListener = Notifications.addNotificationResponseReceivedListener(response => {
-            console.log('👆 Notification tapped:', response);
+            console.log('👆 Notification tapped');
             this.handleNotificationClick(response.notification, navigation);
+        });
+
+        // Check if app was opened from a notification (cold start)
+        Notifications.getLastNotificationResponseAsync().then(response => {
+            if (response) {
+                console.log('🚀 App opened from notification (cold start)');
+                this.handleNotificationClick(response.notification, navigation);
+            }
         });
 
         console.log('✅ Notification listeners initialized');
     }
 
     /**
-     * Handle notification click/tap
-     * Navigate to appropriate screen based on notification data
+     * Handle notification click/tap — navigate to relevant screen.
      */
     handleNotificationClick(notification, navigation) {
         try {
             const data = notification.request.content.data;
-            console.log('📱 Handling notification click with data:', data);
 
             if (!navigation) {
-                console.warn('⚠️ Navigation not available, cannot handle notification click');
+                console.warn('⚠️ Navigation not available');
                 return;
             }
 
-            // Navigate based on notification type
             if (data.type === 'business_update' && data.businessId) {
-                // Navigate to business detail
                 navigation.navigate('Home', {
                     screen: 'BusinessDetail',
                     params: { businessId: data.businessId }
                 });
             } else if (data.type === 'admin_broadcast') {
-                // Navigate to home screen
                 navigation.navigate('Home');
             } else if (data.screen) {
-                // Generic screen navigation
                 navigation.navigate(data.screen, data.params || {});
             } else {
-                // Default: navigate to home
                 navigation.navigate('Home');
             }
         } catch (error) {
@@ -186,8 +242,7 @@ class NotificationService {
     }
 
     /**
-     * Clean up notification listeners
-     * Call this when unmounting or logging out
+     * Clean up notification listeners.
      */
     removeNotificationListeners() {
         if (this.notificationListener) {
@@ -198,26 +253,22 @@ class NotificationService {
             Notifications.removeNotificationSubscription(this.responseListener);
             this.responseListener = null;
         }
-        console.log('🗑️ Notification listeners removed');
     }
 
     /**
-     * Register push token with backend
+     * Register push token with backend.
      * @param {string} token - The Expo push token
-     * @param {string} authToken - The user's auth token
+     * @param {string} authToken - The user's JWT auth token
      * @returns {Promise<boolean>} Whether registration was successful
      */
     async registerTokenWithBackend(token, authToken) {
         try {
-            // Use the environment variable if available, otherwise fallback to localhost (which fails on physical devices)
             let API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || Constants.expoConfig?.extra?.apiBaseUrl || 'https://hashview.44.249.50.162.nip.io';
 
-            // Remove trailing slash if present
             if (API_BASE_URL.endsWith('/')) {
                 API_BASE_URL = API_BASE_URL.slice(0, -1);
             }
 
-            // Construct full URL - handle double /api case
             const endpoint = API_BASE_URL.endsWith('/api')
                 ? `${API_BASE_URL}/notifications/register-token`
                 : `${API_BASE_URL}/api/notifications/register-token`;
