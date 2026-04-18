@@ -2,13 +2,19 @@ const { Expo } = require('expo-server-sdk');
 const Notification = require('../models/Notification.model');
 const logger = require('./logger');
 
-// Create a new Expo SDK client
-const expo = new Expo();
+// Create Expo SDK client — useFcmV1 uses the modern FCM HTTP v1 API
+const expo = new Expo({ useFcmV1: true });
 
-// Send push notification
+// Android notification channel ID — MUST match the one created in frontend
+const ANDROID_CHANNEL_ID = 'hashview-updates';
+
+/**
+ * Send push notification to a single user.
+ * Creates a Notification DB record and sends via Expo Push.
+ * Automatically cleans up stale tokens (DeviceNotRegistered).
+ */
 exports.sendPushNotification = async (userId, title, message, data = {}) => {
   try {
-    // Create notification record
     const notification = await Notification.create({
       title,
       message,
@@ -18,134 +24,244 @@ exports.sendPushNotification = async (userId, title, message, data = {}) => {
       status: 'pending'
     });
 
-    console.log(`🚀 Sending push to user ${userId}...`);
-
-    // Get user's push token
     const User = require('../models/User.model');
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('pushToken email');
 
     if (!user) {
-      console.error(`❌ User ${userId} not found`);
+      notification.status = 'failed';
+      notification.errorMessage = 'User not found';
+      await notification.save();
       return { success: false, message: 'User not found' };
     }
 
-    console.log(`👤 User found: ${user.email}, Token: ${user.pushToken}`);
-
     if (!user.pushToken) {
-      console.error(`❌ User ${userId} has no push token`);
       notification.status = 'failed';
-      notification.errorMessage = 'User push token not found';
+      notification.errorMessage = 'No push token';
       await notification.save();
       return { success: false, message: 'Push token not found' };
     }
 
-    // Check that push token is valid
     if (!Expo.isExpoPushToken(user.pushToken)) {
-      console.error(`❌ Invalid Expo push token: ${user.pushToken}`);
+      logger.warn(`[Push] Invalid token for ${user.email || userId}: ${user.pushToken} — clearing`);
+      await User.findByIdAndUpdate(userId, { $set: { pushToken: null } });
       notification.status = 'failed';
-      notification.errorMessage = 'Invalid push token format';
+      notification.errorMessage = 'Invalid push token format — cleared';
       await notification.save();
       return { success: false, message: 'Invalid push token' };
     }
 
-    // Construct message
-    const messages = [{
+    // Build Expo push message with full delivery config
+    const pushMessage = {
       to: user.pushToken,
       sound: 'default',
       title,
       body: message,
       data: data,
-      priority: 'high'
-    }];
+      priority: 'high',
+      channelId: ANDROID_CHANNEL_ID,       // Android 8+ channel (required)
+      _contentAvailable: true,              // iOS background delivery
+      mutableContent: true,                 // iOS notification service extension
+    };
 
-    // Send notifications
-    const chunks = expo.chunkPushNotifications(messages);
+    const chunks = expo.chunkPushNotifications([pushMessage]);
     const tickets = [];
 
-    for (let chunk of chunks) {
+    for (const chunk of chunks) {
       try {
-        console.log('📤 Sending chunk to Expo...');
         const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-        console.log('✅ Expo API Response:', JSON.stringify(ticketChunk));
         tickets.push(...ticketChunk);
       } catch (error) {
-        console.error('❌ Expo send error:', error);
-        logger.error('Error sending push notification chunk:', error);
+        logger.error(`[Push] Expo send error for ${user.email || userId}:`, error.message);
       }
     }
 
-    // Update notification status
     if (tickets.length > 0 && tickets[0].status === 'ok') {
       notification.status = 'sent';
       notification.expoTicketId = tickets[0].id;
     } else {
       notification.status = 'failed';
       notification.errorMessage = tickets[0]?.message || 'Unknown error';
+
+      // Auto-cleanup stale tokens
+      if (tickets[0]?.details?.error === 'DeviceNotRegistered') {
+        logger.info(`[Push] Token expired for ${user.email || userId} — clearing`);
+        await User.findByIdAndUpdate(userId, { $set: { pushToken: null } });
+      }
     }
 
     await notification.save();
-
-    return { success: true, notification, tickets };
+    return { success: notification.status === 'sent', notification, tickets };
   } catch (error) {
-    logger.error('Error in sendPushNotification:', error);
+    logger.error('[Push] sendPushNotification error:', error.message);
     return { success: false, message: error.message };
   }
 };
 
-// Send notification to multiple users — returns { sent, failed, sentIds }
+/**
+ * Send notifications to multiple users in BULK using Expo's batch API.
+ * Much faster than N individual calls — up to 100 messages per HTTP request.
+ * Automatically cleans up stale/invalid tokens.
+ */
 exports.sendBulkNotifications = async (userIds, title, message, data = {}) => {
-  const results = await Promise.allSettled(
-    userIds.map(userId => exports.sendPushNotification(userId, title, message, data))
-  );
+  if (!userIds || userIds.length === 0) {
+    return { sent: 0, failed: 0, sentIds: [] };
+  }
 
-  const sentIds = [];
-  let failed = 0;
-  results.forEach((result, idx) => {
-    if (result.status === 'fulfilled' && result.value?.success) {
-      sentIds.push(userIds[idx]);
-    } else {
-      failed++;
+  const User = require('../models/User.model');
+
+  // Step 1: Fetch all users with tokens in ONE query (not N queries)
+  const users = await User.find({
+    _id: { $in: userIds },
+    pushToken: { $exists: true, $ne: null }
+  }).select('_id pushToken email');
+
+  const usersWithoutToken = userIds.length - users.length;
+  if (usersWithoutToken > 0) {
+    logger.info(`[Push] Bulk: ${usersWithoutToken}/${userIds.length} users have no push token — skipped`);
+  }
+
+  // Filter valid Expo tokens & clean invalid ones
+  const validUsers = users.filter(u => Expo.isExpoPushToken(u.pushToken));
+  const invalidTokenUsers = users.filter(u => !Expo.isExpoPushToken(u.pushToken));
+
+  if (invalidTokenUsers.length > 0) {
+    const invalidIds = invalidTokenUsers.map(u => u._id);
+    await User.updateMany({ _id: { $in: invalidIds } }, { $set: { pushToken: null } });
+    logger.info(`[Push] Cleared ${invalidTokenUsers.length} invalid tokens`);
+  }
+
+  if (validUsers.length === 0) {
+    return { sent: 0, failed: userIds.length, sentIds: [] };
+  }
+
+  // Step 2: Build all messages with proper delivery config
+  const messages = validUsers.map(user => ({
+    to: user.pushToken,
+    sound: 'default',
+    title,
+    body: message,
+    data: data,
+    priority: 'high',
+    channelId: ANDROID_CHANNEL_ID,
+    _contentAvailable: true,
+    mutableContent: true,
+  }));
+
+  // Step 3: Send in Expo chunks (up to 100 per HTTP call)
+  const chunks = expo.chunkPushNotifications(messages);
+  const allTickets = [];
+
+  for (const chunk of chunks) {
+    try {
+      const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+      allTickets.push(...ticketChunk);
+    } catch (error) {
+      logger.error('[Push] Bulk chunk error:', error.message);
+      allTickets.push(...chunk.map(() => ({ status: 'error', message: error.message })));
     }
-  });
+  }
 
-  return { sent: sentIds.length, failed, sentIds };
+  // Step 4: Process results & create notification records
+  const sentIds = [];
+  let failedCount = 0;
+  const notificationDocs = [];
+  const staleTokenUserIds = [];
+
+  for (let i = 0; i < validUsers.length; i++) {
+    const user = validUsers[i];
+    const ticket = allTickets[i];
+    const success = ticket && ticket.status === 'ok';
+
+    notificationDocs.push({
+      title,
+      message,
+      sentTo: user._id,
+      type: data.type || 'general',
+      data,
+      status: success ? 'sent' : 'failed',
+      expoTicketId: success ? ticket.id : undefined,
+      errorMessage: success ? undefined : (ticket?.message || 'Send failed'),
+    });
+
+    if (success) {
+      sentIds.push(user._id);
+    } else {
+      failedCount++;
+      if (ticket?.details?.error === 'DeviceNotRegistered') {
+        staleTokenUserIds.push(user._id);
+      }
+    }
+  }
+
+  // Step 5: Batch insert notification records
+  try {
+    await Notification.insertMany(notificationDocs, { ordered: false });
+  } catch (err) {
+    logger.error('[Push] Bulk notification insert error:', err.message);
+  }
+
+  // Step 6: Clean up stale tokens
+  if (staleTokenUserIds.length > 0) {
+    await User.updateMany(
+      { _id: { $in: staleTokenUserIds } },
+      { $set: { pushToken: null } }
+    );
+    logger.info(`[Push] Cleaned ${staleTokenUserIds.length} stale (DeviceNotRegistered) tokens`);
+  }
+
+  return { sent: sentIds.length, failed: failedCount + usersWithoutToken, sentIds };
 };
 
-// Check notification receipts
+/**
+ * Check notification receipts from Expo and update DB records.
+ * Should be called periodically (e.g. every 15 minutes via cron).
+ */
 exports.checkNotificationReceipts = async () => {
   try {
     const notifications = await Notification.find({
       status: 'sent',
       expoTicketId: { $exists: true }
-    });
+    }).limit(500);
 
     if (notifications.length === 0) return;
 
     const receiptIds = notifications.map(n => n.expoTicketId);
     const receiptIdChunks = expo.chunkPushNotificationReceiptIds(receiptIds);
 
-    for (let chunk of receiptIdChunks) {
+    const User = require('../models/User.model');
+    const staleTokenUserIds = [];
+
+    for (const chunk of receiptIdChunks) {
       try {
         const receipts = await expo.getPushNotificationReceiptsAsync(chunk);
 
-        for (let [receiptId, receipt] of Object.entries(receipts)) {
+        for (const [receiptId, receipt] of Object.entries(receipts)) {
           const notification = notifications.find(n => n.expoTicketId === receiptId);
-
           if (!notification) continue;
 
           if (receipt.status === 'error') {
             notification.status = 'failed';
             notification.errorMessage = receipt.message;
-          }
+            await notification.save();
 
-          await notification.save();
+            if (receipt.details?.error === 'DeviceNotRegistered') {
+              staleTokenUserIds.push(notification.sentTo);
+            }
+          }
         }
       } catch (error) {
-        logger.error('Error checking notification receipts:', error);
+        logger.error('[Push] Receipt check error:', error.message);
       }
     }
+
+    if (staleTokenUserIds.length > 0) {
+      await User.updateMany(
+        { _id: { $in: staleTokenUserIds } },
+        { $set: { pushToken: null } }
+      );
+      logger.info(`[Push] Receipt check: cleaned ${staleTokenUserIds.length} stale tokens`);
+    }
   } catch (error) {
-    logger.error('Error in checkNotificationReceipts:', error);
+    logger.error('[Push] checkNotificationReceipts error:', error.message);
   }
 };
-
