@@ -141,6 +141,8 @@ exports.createBusinessUpdate = async (req, res, next) => {
               .find({ business: businessId })
               .distinct('user');
 
+            logger.info(`[Updates] 🔍 Found ${reviewerUserIds.length} reviewer IDs for business ${businessId}`);
+
             // ── Step 2: Get ALL favouriter user docs ─────────────────────────
             const favouriterDocs = await User
               .find({
@@ -149,13 +151,18 @@ exports.createBusinessUpdate = async (req, res, next) => {
               })
               .select('_id pushToken email');
 
-            // ── Step 3: Get reviewer user docs ──────────────────────────────
-            const reviewerDocs = await User
-              .find({
-                _id: { $in: reviewerUserIds },
-                status: 'active'
-              })
-              .select('_id pushToken email');
+            // ── Step 3: Get reviewer user docs ───────────────────────────────
+            // Guard against empty array — MongoDB $in:[] returns all docs!
+            const reviewerDocs = reviewerUserIds.length > 0
+              ? await User
+                  .find({
+                    _id: { $in: reviewerUserIds },
+                    status: 'active'
+                  })
+                  .select('_id pushToken email')
+              : [];
+
+            logger.info(`[Updates] 🔍 Reviewer users found in DB: ${reviewerDocs.length} (from ${reviewerUserIds.length} review IDs)`);
 
             // ── Step 4: Merge & deduplicate by _id ──────────────────────────
             const seen = new Set();
@@ -166,30 +173,23 @@ exports.createBusinessUpdate = async (req, res, next) => {
               return true;
             });
 
-            // ── Step 5: Split by push token availability ────────────────────
-            const withToken    = allTargetUsers.filter(u => u.pushToken);
+            // ── Step 5: Diagnostic logging ───────────────────────────────────
             const withoutToken = allTargetUsers.filter(u => !u.pushToken);
 
-            // ── Step 6: Diagnostic logging ──────────────────────────────────
             logger.info(
               `[Updates] 📊 Push breakdown for "${title}" (${business.name}):` +
               ` Reviewers: ${reviewerDocs.length}` +
               ` | Favouriters: ${favouriterDocs.length}` +
               ` | Unique targets: ${allTargetUsers.length}` +
-              ` | With push token: ${withToken.length}` +
-              ` | Without token: ${withoutToken.length}`
+              ` | Without token (skipping): ${withoutToken.length}`
             );
 
-            if (withoutToken.length > 0) {
-              logger.info(`[Updates] ⚠️ Users without push token (can't notify): ${withoutToken.map(u => u.email || u._id).join(', ')}`);
-            }
-
-            if (withToken.length === 0) {
-              logger.info(`[Updates] No eligible users with push tokens — skipping push`);
+            if (allTargetUsers.length === 0) {
+              logger.info(`[Updates] No eligible users to notify — skipping push`);
               return;
             }
 
-            // ── Step 7: Build notification payload ──────────────────────────
+            // ── Step 6: Build notification payload ───────────────────────────
             let notificationTitle = `📢 ${business.name}`;
             let notificationBody  = title;
             if (type === 'offer' && discountValue > 0) {
@@ -200,10 +200,12 @@ exports.createBusinessUpdate = async (req, res, next) => {
               notificationBody  = `${disc} · ${title}`;
             }
 
-            // ── Step 8: Send to ALL eligible users (no maxReach cap) ────────
-            const userIds = withToken.map(u => u._id);
+            // ── Step 7: Send ALL unique target IDs to sendBulkNotifications ──
+            // Pass ALL user IDs (not pre-filtered by token).
+            // sendBulkNotifications internally handles token validation & filtering.
+            const allTargetIds = allTargetUsers.map(u => u._id);
             const { sentIds, failed } = await sendBulkNotifications(
-              userIds,
+              allTargetIds,
               notificationTitle,
               notificationBody,
               {
@@ -214,9 +216,9 @@ exports.createBusinessUpdate = async (req, res, next) => {
               }
             );
 
-            // ── Step 9: Persist results ─────────────────────────────────────
+            // ── Step 8: Persist results ──────────────────────────────────────
             if (sentIds.length > 0) {
-              update.notifiedUsers     = sentIds;
+              update.notifiedUsers      = sentIds;
               update.notificationSentAt = new Date();
               await update.save();
 
@@ -230,9 +232,9 @@ exports.createBusinessUpdate = async (req, res, next) => {
                 });
               }
 
-              logger.info(`[Updates] ✅ Push sent for "${title}" by ${business.name} → ${sentIds.length} delivered, ${failed} failed`);
+              logger.info(`[Updates] ✅ Push sent for "${title}" by ${business.name} → ${sentIds.length} delivered (reviewers + favouriters), ${failed} skipped/failed`);
             } else {
-              logger.info(`[Updates] ⚠️ Push attempted but 0 delivered for "${title}" (${business.name}) — ${failed} failed`);
+              logger.info(`[Updates] ⚠️ Push attempted but 0 delivered for "${title}" (${business.name}) — ${failed} failed. Check if users have push tokens registered.`);
             }
           } catch (notifErr) {
             // Notification failure must NEVER block the create response
@@ -243,7 +245,7 @@ exports.createBusinessUpdate = async (req, res, next) => {
     } else {
       logger.info(`[Updates] Skipping push — owner has no Pro or free trial (businessId: ${businessId})`);
     }
-    // ── End push dispatch ───────────────────────────────────────────────────
+    // ── End push dispatch ────────────────────────────────────────────────────
 
     res.status(201).json({
       success: true,
@@ -302,7 +304,7 @@ exports.updateBusinessUpdate = async (req, res, next) => {
 
 // @desc    Delete business update/offer
 // @route   DELETE /api/business/updates/:updateId
-// @access  Private (Business owner)
+// @access  Private (Business owner)\
 exports.deleteBusinessUpdate = async (req, res, next) => {
   try {
     const update = await BusinessUpdate.findById(req.params.updateId);
