@@ -161,7 +161,7 @@ class FCMService {
     }
 
     /**
-     * Send notification to customers who favorited a specific business
+     * Send notification to customers who reviewed OR favorited a specific business
      * @param {string} businessId - Business ID
      * @param {object} User - User model
      * @param {string} title - Notification title
@@ -171,15 +171,41 @@ class FCMService {
      */
     async sendToBusinessCustomers(businessId, User, title, message, data = {}) {
         try {
-            console.log(`📊 Fetching customers who favorited business ${businessId}...`);
+            const Review = require('../models/Review.model');
 
-            // Get all users who favorited this business and have push tokens
-            const users = await User.find({
+            console.log(`📊 Fetching customers who reviewed or favorited business ${businessId}...`);
+
+            // Step 1: Get reviewer user IDs
+            const reviewerUserIds = await Review
+                .find({ business: businessId })
+                .distinct('user');
+
+            // Step 2: Get favouriters with push tokens
+            const favouriters = await User.find({
                 favoritePlaces: businessId,
                 pushToken: { $exists: true, $ne: null },
-            }).select('pushToken');
+                status: 'active',
+            }).select('_id pushToken');
 
-            if (!users || users.length === 0) {
+            // Step 3: Get reviewers with push tokens
+            const reviewers = await User.find({
+                _id: { $in: reviewerUserIds },
+                pushToken: { $exists: true, $ne: null },
+                status: 'active',
+            }).select('_id pushToken');
+
+            // Step 4: Merge & deduplicate
+            const seen = new Set();
+            const uniqueUsers = [...reviewers, ...favouriters].filter(u => {
+                const id = u._id.toString();
+                if (seen.has(id)) return false;
+                seen.add(id);
+                return true;
+            });
+
+            console.log(`📊 Found ${reviewers.length} reviewers, ${favouriters.length} favouriters, ${uniqueUsers.length} unique users with tokens`);
+
+            if (uniqueUsers.length === 0) {
                 return {
                     success: false,
                     error: 'No customers with push tokens found for this business',
@@ -187,7 +213,7 @@ class FCMService {
                 };
             }
 
-            const tokens = users.map(user => user.pushToken);
+            const tokens = uniqueUsers.map(user => user.pushToken);
             console.log(`📤 Sending notification to ${tokens.length} customers...`);
 
             return await this.sendToMultipleTokens(tokens, title, message, {

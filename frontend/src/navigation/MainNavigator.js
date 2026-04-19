@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { useSelector } from 'react-redux';
+import { useSelector, shallowEqual } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { COLORS } from '../config/colors';
 
@@ -78,11 +78,13 @@ function UserStack() {
 
 // Business Stack
 function BusinessStack() {
-  const { user } = useSelector((state) => state.auth);
+  // Only subscribe to businesses array — NOT the entire user object.
+  // This prevents re-render when unrelated fields (like favoritePlaces) change.
+  const businesses = useSelector((state) => state.auth.user?.businesses);
 
   // Check if business exists and KYC status
   // Note: user.businesses is populated by getMe/login endpoints
-  const business = user?.businesses && user.businesses.length > 0 ? user.businesses[0] : null;
+  const business = businesses && businesses.length > 0 ? businesses[0] : null;
 
   // KYC Status Check
   // Default to pending if not set
@@ -166,9 +168,10 @@ function BusinessProfileStack() {
 }
 
 export default function MainNavigator() {
-  const { user } = useSelector((state) => state.auth);
+  // Only subscribe to role — prevents re-render on favoritePlaces changes
+  const userRole = useSelector((state) => state.auth.user?.role);
 
-  if (user?.role === 'business') {
+  if (userRole === 'business') {
     return (
       <Tab.Navigator
         screenOptions={({ route }) => ({

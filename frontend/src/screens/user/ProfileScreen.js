@@ -14,11 +14,14 @@ export default function ProfileScreen({ navigation }) {
   const [loadingBusiness, setLoadingBusiness] = React.useState(false);
 
   // Fetch business ID for business owners
+  // Depend on user?.role (not the full user object) to avoid infinite re-renders
+  const userRole = user?.role;
+  const userBusinesses = user?.businesses;
   React.useEffect(() => {
-    if (user?.role === 'business') {
+    if (userRole === 'business') {
       fetchBusinessId();
     }
-  }, [user]);
+  }, [userRole]);
 
   const fetchBusinessId = async () => {
     try {

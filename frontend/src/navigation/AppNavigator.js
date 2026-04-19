@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react';
-import { View, ActivityIndicator, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator, AppState } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useSelector, useDispatch } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { loadUser } from '../store/slices/authSlice';
 import * as Linking from 'expo-linking';
 import NotificationService from '../services/notification.service';
+import NotificationPermissionBanner from '../components/NotificationPermissionBanner';
 
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
@@ -44,52 +46,68 @@ const authLinking = {
   }
 };
 
+/**
+ * Register push token with backend — with retry logic.
+ * Called on login, app launch, and app foreground.
+ */
+async function ensurePushTokenRegistered(authToken) {
+  try {
+    // Create Android channel first (must exist before notifications arrive)
+    await NotificationService.createAndroidChannel();
+
+    const token = await NotificationService.getExpoPushToken();
+    if (token && authToken) {
+      await NotificationService.registerTokenWithBackend(token, authToken);
+    }
+  } catch (err) {
+    console.log('⚠️ Push token registration failed:', err.message || err);
+  }
+}
+
 export default function AppNavigator() {
   const dispatch = useDispatch();
   const { isAuthenticated, loading } = useSelector((state) => state.auth);
   const [isReady, setIsReady] = React.useState(false);
+  const [showPermissionBanner, setShowPermissionBanner] = useState(false);
+  const authTokenRef = React.useRef(null);
+
+  // Create a navigation ref to pass to notification service
+  const navigationRef = React.useRef(null);
 
   useEffect(() => {
     let isMounted = true;
     const initializeApp = async () => {
       try {
-        // Try to load user, but don't fail if no token exists (first time user)
         const result = await dispatch(loadUser()).unwrap();
 
-        // If user is authenticated, check notification permission
         if (result && result.user && !result.user.isGuest) {
-          console.log('✅ User is authenticated, checking notification permission...');
+          authTokenRef.current = result.token;
 
-          // Check and request notification permission if needed
-          setTimeout(async () => {
-            try {
-              const NotificationService = require('../services/notification.service').default;
-              const hasPermission = await NotificationService.hasPermission();
+          // Create Android channel immediately
+          await NotificationService.createAndroidChannel();
 
-              if (!hasPermission) {
-                console.log('🔔 User is logged in but has not granted notification permission');
-                await NotificationService.requestPermission();
+          // Check permission and register token
+          const hasPermission = await NotificationService.hasPermission();
+
+          if (!hasPermission) {
+            // First time — request permission
+            const granted = await NotificationService.requestPermission();
+            if (!granted && isMounted) {
+              // Check if permanently denied
+              const denied = await NotificationService.isPermissionDenied();
+              if (denied) {
+                setShowPermissionBanner(true);
               }
-
-              // ALWAYS try to register token on app launch if authenticated
-              console.log('🔄 ensuring push token is registered with backend...');
-              const token = await NotificationService.getExpoPushToken();
-              if (token) {
-                // access token from state or store if needed, but the service might need it passed
-                // actually, we can get the auth token from the state here
-                await NotificationService.registerTokenWithBackend(token, result.token);
-              }
-
-            } catch (err) {
-              console.log('⚠️ Could not check/request notification permission:', err);
             }
-          }, 2000); // Give time for app to initialize
+          }
+
+          // Register token with backend (even if permission check above already got it)
+          await ensurePushTokenRegistered(result.token);
         }
       } catch (error) {
-        // Silently ignore token errors for first-time users
         const errorMsg = error?.message || error;
         if (typeof errorMsg === 'string' && errorMsg.includes('No token found')) {
-          // Silent
+          // Silent — first time user
         } else {
           console.log('User load error:', error);
         }
@@ -107,21 +125,39 @@ export default function AppNavigator() {
     };
   }, [dispatch]);
 
-  // Setup notification listeners once navigation is ready
+  // ── Re-register push token when app comes to foreground ──────────────────
+  // Tokens can change at any time (OS refresh, reinstall). Re-registering
+  // on every foreground event ensures the backend always has the latest token.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', async (nextState) => {
+      if (nextState === 'active' && authTokenRef.current) {
+        // Re-register token silently
+        await ensurePushTokenRegistered(authTokenRef.current);
+
+        // Re-check permission status for banner
+        const hasPermission = await NotificationService.hasPermission();
+        if (!hasPermission) {
+          const denied = await NotificationService.isPermissionDenied();
+          setShowPermissionBanner(denied);
+        } else {
+          setShowPermissionBanner(false);
+        }
+      }
+    });
+
+    return () => subscription?.remove();
+  }, []);
+
+  // ── Setup notification listeners once navigation is ready ─────────────────
   useEffect(() => {
     if (isReady && navigationRef.current) {
-      console.log('🔔 Setting up notification listeners with navigation...');
       NotificationService.setupNotificationListeners(navigationRef.current);
 
       return () => {
-        console.log('🗑️ Cleaning up notification listeners...');
         NotificationService.removeNotificationListeners();
       };
     }
   }, [isReady]);
-
-  // Create a navigation ref to pass to notification service
-  const navigationRef = React.useRef(null);
 
   // Show loading screen while checking auth
   if (!isReady || loading) {
@@ -137,6 +173,13 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer ref={navigationRef} linking={linking}>
+      {/* Show permission banner when notification permission is denied */}
+      {isAuthenticated && showPermissionBanner && (
+        <NotificationPermissionBanner
+          onDismiss={() => setShowPermissionBanner(false)}
+          onOpenSettings={() => NotificationService.openNotificationSettings()}
+        />
+      )}
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <Stack.Screen name="Main" component={MainNavigator} />

@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StatusBar, ScrollView, Image, Dimensions } from 'react-native';
+import React, { useEffect, useCallback, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StatusBar, ScrollView, Image, Dimensions, RefreshControl } from 'react-native';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,19 +9,35 @@ import QRCode from 'react-native-qrcode-svg';
 import { getCoupons } from '../../store/slices/couponSlice';
 import COLORS from '../../config/colors';
 
-export default function CouponsScreen() {
+export default function CouponsScreen({ navigation }) {
   const dispatch = useDispatch();
   const { coupons, loading } = useSelector((state) => state.coupon);
   const [selectedCoupon, setSelectedCoupon] = React.useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     dispatch(getCoupons({ status: 'active' }));
   }, []);
 
+  // Auto-refresh when screen comes into focus (e.g. after posting a review)
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      dispatch(getCoupons({ status: 'active' }));
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await dispatch(getCoupons({ status: 'active' }));
+    setRefreshing(false);
+  }, [dispatch]);
+
   const renderCoupon = ({ item }) => {
-    const isExpired = new Date(item.validUntil) < new Date();
-    const hoursLeft = Math.max(0, Math.floor((new Date(item.validUntil) - new Date()) / (1000 * 60 * 60)));
-    const minutesLeft = Math.max(0, Math.floor(((new Date(item.validUntil) - new Date()) % (1000 * 60 * 60)) / (1000 * 60)));
+    const isExpired = item.validUntil ? new Date(item.validUntil) < new Date() : false;
+    const timeLeft = item.validUntil ? new Date(item.validUntil) - new Date() : null;
+    const hoursLeft = timeLeft ? Math.max(0, Math.floor(timeLeft / (1000 * 60 * 60))) : null;
+    const minutesLeft = timeLeft ? Math.max(0, Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60))) : null;
 
     return (
       <TouchableOpacity
@@ -51,8 +67,8 @@ export default function CouponsScreen() {
         <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
           <View className="flex-row items-center">
             <Icon name="time-outline" size={16} color={hoursLeft < 1 ? '#EF4444' : '#6B7280'} />
-            <Text className={`text-xs ml-1 font-semibold ${hoursLeft < 1 ? 'text-red-600' : 'text-gray-600'}`}>
-              {isExpired ? 'Expired' : `${hoursLeft}h ${minutesLeft}m left`}
+            <Text className={`text-xs ml-1 font-semibold ${hoursLeft !== null && hoursLeft < 1 ? 'text-red-600' : 'text-gray-600'}`}>
+              {isExpired ? 'Expired' : hoursLeft === null ? 'No expiry' : `${hoursLeft}h ${minutesLeft}m left`}
             </Text>
           </View>
           <TouchableOpacity onPress={() => setSelectedCoupon(item)}>
@@ -100,6 +116,14 @@ export default function CouponsScreen() {
             renderItem={renderCoupon}
             keyExtractor={(item) => item._id}
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[COLORS.primary]}
+                tintColor={COLORS.primary}
+              />
+            }
           />
         )}
       </View>
