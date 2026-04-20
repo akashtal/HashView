@@ -78,31 +78,28 @@ export default function AppNavigator() {
     let isMounted = true;
     const initializeApp = async () => {
       try {
+        // ✅ REQUEST PERMISSION EARLY — before we even know if the user is logged in.
+        // On iOS, the permission prompt must be triggered as early as possible.
+        // This ensures first-time users see the prompt even before logging in.
+        const hasPermission = await NotificationService.hasPermission();
+        if (!hasPermission) {
+          console.log('[Push] Requesting permission early (pre-login)...');
+          await NotificationService.requestPermission();
+        }
+
         const result = await dispatch(loadUser()).unwrap();
 
         if (result && result.user && !result.user.isGuest) {
           authTokenRef.current = result.token;
 
-          // Create Android channel immediately
-          await NotificationService.createAndroidChannel();
-
-          // Check permission and register token
-          const hasPermission = await NotificationService.hasPermission();
-
-          if (!hasPermission) {
-            // First time — request permission
-            const granted = await NotificationService.requestPermission();
-            if (!granted && isMounted) {
-              // Check if permanently denied
-              const denied = await NotificationService.isPermissionDenied();
-              if (denied) {
-                setShowPermissionBanner(true);
-              }
-            }
-          }
-
-          // Register token with backend (even if permission check above already got it)
+          // Register token with backend
           await ensurePushTokenRegistered(result.token);
+
+          // Show banner if permanently denied
+          const denied = await NotificationService.isPermissionDenied();
+          if (denied && isMounted) {
+            setShowPermissionBanner(true);
+          }
         }
       } catch (error) {
         const errorMsg = error?.message || error;
@@ -147,6 +144,16 @@ export default function AppNavigator() {
 
     return () => subscription?.remove();
   }, []);
+
+  // ── Register token when user logs in (isAuthenticated changes to true) ──────
+  // Handles case where user was NOT logged in on first launch (permission prompt
+  // appeared pre-login) — after they log in, register their token immediately.
+  useEffect(() => {
+    const token = authTokenRef.current;
+    if (isAuthenticated && token) {
+      ensurePushTokenRegistered(token);
+    }
+  }, [isAuthenticated]);
 
   // ── Setup notification listeners once navigation is ready ─────────────────
   useEffect(() => {

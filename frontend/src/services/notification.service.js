@@ -1,4 +1,5 @@
 import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
 import { Platform, Linking } from 'react-native';
 import Constants from 'expo-constants';
 
@@ -59,6 +60,7 @@ class NotificationService {
 
     /**
      * Request notification permissions from the user.
+     * On iOS, MUST pass explicit options — without them iOS silently ignores the call.
      * On iOS, can only be called once — subsequent calls are no-ops.
      * @returns {Promise<boolean>} Whether permission was granted
      */
@@ -67,29 +69,44 @@ class NotificationService {
             // Create Android channel first (must exist before any notifications arrive)
             await this.createAndroidChannel();
 
-            // Simulators don't support push
-            if (Platform.OS === 'ios' && !Constants.isDevice) {
-                console.warn('⚠️ Must use physical device for push notifications');
+            // Emulators/Simulators don't support push notifications
+            // Use Device.isDevice (expo-device) — more reliable than Constants.isDevice
+            if (!Device.isDevice) {
+                console.warn('⚠️ [Push] Must use a physical device for push notifications');
                 return false;
             }
 
+            console.log(`[Push] Platform: ${Platform.OS} | Requesting permission...`);
+
             const { status: existingStatus } = await Notifications.getPermissionsAsync();
+            console.log(`[Push] Current permission status: ${existingStatus}`);
             let finalStatus = existingStatus;
 
             if (existingStatus !== 'granted') {
-                const { status } = await Notifications.requestPermissionsAsync();
+                // ✅ CRITICAL iOS FIX: Must explicitly pass iOS permission options.
+                // Without these, iOS silently rejects the request with no prompt shown.
+                const { status } = await Notifications.requestPermissionsAsync({
+                    ios: {
+                        allowAlert: true,
+                        allowBadge: true,
+                        allowSound: true,
+                        allowCriticalAlerts: false,
+                        provideAppNotificationSettings: false,
+                    },
+                });
                 finalStatus = status;
+                console.log(`[Push] Permission response: ${status}`);
             }
 
             if (finalStatus !== 'granted') {
-                console.log('❌ Notification permission denied');
+                console.warn(`[Push] ❌ Notification permission denied (${finalStatus})`);
                 return false;
             }
 
-            console.log('✅ Notification permission granted');
+            console.log('[Push] ✅ Notification permission granted');
             return true;
         } catch (error) {
-            console.error('❌ Error requesting notification permission:', error);
+            console.error('[Push] ❌ Error requesting notification permission:', error);
             return false;
         }
     }
@@ -147,15 +164,22 @@ class NotificationService {
      */
     async getExpoPushToken() {
         try {
-            if (Platform.OS === 'ios' && !Constants.isDevice) {
+            console.log(`[Push] getExpoPushToken called | Platform: ${Platform.OS} | isDevice: ${Device.isDevice}`);
+
+            // Emulators/Simulators can't receive push notifications
+            if (!Device.isDevice) {
+                console.warn('[Push] ⚠️ Push tokens not available on simulators/emulators');
                 return null;
             }
 
             // Ensure permission first
             const hasPermission = await this.hasPermission();
+            console.log(`[Push] Has permission: ${hasPermission}`);
+
             if (!hasPermission) {
                 const granted = await this.requestPermission();
                 if (!granted) {
+                    console.warn('[Push] ❌ Permission not granted — cannot get push token');
                     return null;
                 }
             }
@@ -165,19 +189,21 @@ class NotificationService {
 
             const projectId = Constants.expoConfig?.extra?.eas?.projectId;
             if (!projectId) {
-                console.error('❌ EAS project ID not found in app config');
+                console.error('[Push] ❌ EAS project ID not found in app config');
                 return null;
             }
+
+            console.log(`[Push] Getting Expo push token for projectId: ${projectId}`);
 
             const tokenData = await Notifications.getExpoPushTokenAsync({
                 projectId: projectId,
             });
 
             const token = tokenData.data;
-            console.log('✅ Expo Push Token:', token);
+            console.log(`[Push] ✅ Expo Push Token (${Platform.OS}):`, token);
             return token;
         } catch (error) {
-            console.error('❌ Error getting Expo push token:', error);
+            console.error('[Push] ❌ Error getting Expo push token:', error.message || error);
             return null;
         }
     }
