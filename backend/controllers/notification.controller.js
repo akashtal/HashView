@@ -142,7 +142,8 @@ exports.deleteNotification = async (req, res, next) => {
 const User = require('../models/User.model');
 const BusinessOwner = require('../models/BusinessOwner.model');
 const Business = require('../models/Business.model');
-const FCMService = require('../services/fcm.service');
+const Review = require('../models/Review.model');
+const { sendBulkNotifications, sendPushNotification } = require('../utils/notification');
 
 /**
  * @desc    Register push token for user/business owner
@@ -213,31 +214,43 @@ exports.sendAdminBroadcast = async (req, res, next) => {
 
     console.log(`📢 Admin ${req.user.id} sending broadcast notification...`);
 
-    // Send to all users
-    const result = await FCMService.sendToAllUsers(
-      User,
-      title,
-      message,
-      {
-        type: 'admin_broadcast',
-        ...data
-      }
-    );
+    // Fetch ALL customer user IDs with push tokens (both User and BusinessOwner collections)
+    const [customerUsers, businessOwners] = await Promise.all([
+      User.find({ pushToken: { $exists: true, $ne: null } }).select('_id'),
+      BusinessOwner.find({ pushToken: { $exists: true, $ne: null } }).select('_id'),
+    ]);
 
-    if (!result.success) {
-      return res.status(500).json({
-        success: false,
-        message: result.error || 'Failed to send notification'
+    const allUserIds = [
+      ...customerUsers.map(u => u._id),
+      ...businessOwners.map(u => u._id),
+    ];
+
+    if (allUserIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: 'No users with push tokens found',
+        sent: 0,
+        failed: 0
       });
     }
 
-    console.log(`✅ Broadcast sent: ${result.successCount} succeeded, ${result.failureCount} failed`);
+    console.log(`📤 Broadcasting to ${allUserIds.length} users (${customerUsers.length} customers + ${businessOwners.length} business owners)...`);
+
+    // Use Expo Push Service — the only correct path for ExponentPushToken[] values
+    const result = await sendBulkNotifications(
+      allUserIds,
+      title,
+      message,
+      { type: 'admin_broadcast', ...data }
+    );
+
+    console.log(`✅ Broadcast: sent=${result.sent}, failed=${result.failed}`);
 
     res.status(200).json({
       success: true,
       message: 'Broadcast sent successfully',
-      successCount: result.successCount,
-      failureCount: result.failureCount
+      sent: result.sent,
+      failed: result.failed
     });
   } catch (error) {
     console.error('❌ Error sending admin broadcast:', error);
@@ -263,7 +276,6 @@ exports.sendBusinessNotification = async (req, res, next) => {
 
     console.log(`📢 Business owner ${req.user.id} sending notification...`);
 
-    // Get the business owned by this user
     const business = await Business.findOne({ owner: req.user.id });
 
     if (!business) {
@@ -273,10 +285,41 @@ exports.sendBusinessNotification = async (req, res, next) => {
       });
     }
 
-    // Send to customers who favorited this business
-    const result = await FCMService.sendToBusinessCustomers(
-      business._id,
-      User,
+    // Get unique customer IDs who reviewed OR favorited this business
+    const [reviewerIds, favouriters] = await Promise.all([
+      Review.find({ business: business._id }).distinct('user'),
+      User.find({
+        favoritePlaces: business._id,
+        pushToken: { $exists: true, $ne: null },
+        status: 'active',
+      }).select('_id'),
+    ]);
+
+    // Merge + deduplicate
+    const seen = new Set();
+    const allTargetIds = [];
+    for (const id of [...reviewerIds, ...favouriters.map(u => u._id)]) {
+      const key = id.toString();
+      if (!seen.has(key)) {
+        seen.add(key);
+        allTargetIds.push(id);
+      }
+    }
+
+    if (allTargetIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: 'No customers to notify (none have reviewed or favorited your business)',
+        sent: 0,
+        failed: 0
+      });
+    }
+
+    console.log(`📤 Sending to ${allTargetIds.length} unique customers for business ${business._id}...`);
+
+    // Use Expo Push Service
+    const result = await sendBulkNotifications(
+      allTargetIds,
       title,
       message,
       {
@@ -287,25 +330,13 @@ exports.sendBusinessNotification = async (req, res, next) => {
       }
     );
 
-    if (!result.success && result.error !== 'No customers with push tokens found for this business') {
-      return res.status(500).json({
-        success: false,
-        message: result.error || 'Failed to send notification'
-      });
-    }
-
-    const successCount = result.successCount || 0;
-    const failureCount = result.failureCount || 0;
-
-    console.log(`✅ Business notification sent: ${successCount} succeeded, ${failureCount} failed`);
+    console.log(`✅ Business notification: sent=${result.sent}, failed=${result.failed}`);
 
     res.status(200).json({
       success: true,
-      message: successCount > 0
-        ? 'Notification sent successfully'
-        : 'No customers to notify (none have favorited your business or enabled notifications)',
-      successCount: successCount,
-      failureCount: failureCount
+      message: result.sent > 0 ? 'Notification sent successfully' : 'No customers with push notifications enabled',
+      sent: result.sent,
+      failed: result.failed
     });
   } catch (error) {
     console.error('❌ Error sending business notification:', error);

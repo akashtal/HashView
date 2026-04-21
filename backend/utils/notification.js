@@ -108,14 +108,23 @@ exports.sendBulkNotifications = async (userIds, title, message, data = {}) => {
   }
 
   const User = require('../models/User.model');
+  const BusinessOwner = require('../models/BusinessOwner.model');
 
-  // Step 1: Fetch all users with tokens in ONE query (not N queries)
-  const users = await User.find({
-    _id: { $in: userIds },
-    pushToken: { $exists: true, $ne: null }
-  }).select('_id pushToken email');
+  // Step 1: Fetch tokens from BOTH User and BusinessOwner collections
+  const [customers, businessOwners] = await Promise.all([
+    User.find({
+      _id: { $in: userIds },
+      pushToken: { $exists: true, $ne: null }
+    }).select('_id pushToken email'),
+    BusinessOwner.find({
+      _id: { $in: userIds },
+      pushToken: { $exists: true, $ne: null }
+    }).select('_id pushToken email'),
+  ]);
 
+  const users = [...customers, ...businessOwners];
   const usersWithoutToken = userIds.length - users.length;
+
   if (usersWithoutToken > 0) {
     logger.info(`[Push] Bulk: ${usersWithoutToken}/${userIds.length} users have no push token — skipped`);
   }
@@ -125,16 +134,22 @@ exports.sendBulkNotifications = async (userIds, title, message, data = {}) => {
   const invalidTokenUsers = users.filter(u => !Expo.isExpoPushToken(u.pushToken));
 
   if (invalidTokenUsers.length > 0) {
+    logger.warn(`[Push] ${invalidTokenUsers.length} non-Expo tokens found (likely stale FCM tokens) — clearing`);
     const invalidIds = invalidTokenUsers.map(u => u._id);
-    await User.updateMany({ _id: { $in: invalidIds } }, { $set: { pushToken: null } });
-    logger.info(`[Push] Cleared ${invalidTokenUsers.length} invalid tokens`);
+    await Promise.all([
+      User.updateMany({ _id: { $in: invalidIds } }, { $set: { pushToken: null } }),
+      BusinessOwner.updateMany({ _id: { $in: invalidIds } }, { $set: { pushToken: null } }),
+    ]);
   }
 
   if (validUsers.length === 0) {
+    logger.info('[Push] No valid Expo tokens found — nothing to send');
     return { sent: 0, failed: userIds.length, sentIds: [] };
   }
 
-  // Step 2: Build all messages with proper delivery config
+  logger.info(`[Push] Sending "${title}" to ${validUsers.length} devices via Expo Push Service...`);
+
+  // Step 2: Build all messages with full iOS + Android config
   const messages = validUsers.map(user => ({
     to: user.pushToken,
     sound: 'default',
@@ -142,9 +157,9 @@ exports.sendBulkNotifications = async (userIds, title, message, data = {}) => {
     body: message,
     data: data,
     priority: 'high',
-    channelId: ANDROID_CHANNEL_ID,
-    _contentAvailable: true,
-    mutableContent: true,
+    channelId: ANDROID_CHANNEL_ID,  // Android 8+ (ignored on iOS)
+    _contentAvailable: true,         // iOS background delivery
+    mutableContent: true,            // iOS notification service extension
   }));
 
   // Step 3: Send in Expo chunks (up to 100 per HTTP call)
@@ -172,6 +187,22 @@ exports.sendBulkNotifications = async (userIds, title, message, data = {}) => {
     const ticket = allTickets[i];
     const success = ticket && ticket.status === 'ok';
 
+    // Detect platform from Expo token prefix for logging
+    const platform = user.pushToken.includes('ExponentPushToken') ? '📱 Expo' : 'Unknown';
+
+    if (success) {
+      logger.info(`[Push] ✅ ${platform} | ${user.email || user._id} | ticketId=${ticket.id}`);
+      sentIds.push(user._id);
+    } else {
+      const errMsg = ticket?.message || 'Unknown error';
+      const errCode = ticket?.details?.error || 'N/A';
+      logger.warn(`[Push] ❌ ${platform} | ${user.email || user._id} | ${errCode}: ${errMsg}`);
+      failedCount++;
+      if (errCode === 'DeviceNotRegistered') {
+        staleTokenUserIds.push(user._id);
+      }
+    }
+
     notificationDocs.push({
       title,
       message,
@@ -182,15 +213,6 @@ exports.sendBulkNotifications = async (userIds, title, message, data = {}) => {
       expoTicketId: success ? ticket.id : undefined,
       errorMessage: success ? undefined : (ticket?.message || 'Send failed'),
     });
-
-    if (success) {
-      sentIds.push(user._id);
-    } else {
-      failedCount++;
-      if (ticket?.details?.error === 'DeviceNotRegistered') {
-        staleTokenUserIds.push(user._id);
-      }
-    }
   }
 
   // Step 5: Batch insert notification records
@@ -200,15 +222,16 @@ exports.sendBulkNotifications = async (userIds, title, message, data = {}) => {
     logger.error('[Push] Bulk notification insert error:', err.message);
   }
 
-  // Step 6: Clean up stale tokens
+  // Step 6: Clean up stale tokens from both collections
   if (staleTokenUserIds.length > 0) {
-    await User.updateMany(
-      { _id: { $in: staleTokenUserIds } },
-      { $set: { pushToken: null } }
-    );
+    await Promise.all([
+      User.updateMany({ _id: { $in: staleTokenUserIds } }, { $set: { pushToken: null } }),
+      BusinessOwner.updateMany({ _id: { $in: staleTokenUserIds } }, { $set: { pushToken: null } }),
+    ]);
     logger.info(`[Push] Cleaned ${staleTokenUserIds.length} stale (DeviceNotRegistered) tokens`);
   }
 
+  logger.info(`[Push] ✅ Bulk complete: ${sentIds.length} sent, ${failedCount + usersWithoutToken} failed (${usersWithoutToken} had no token)`);
   return { sent: sentIds.length, failed: failedCount + usersWithoutToken, sentIds };
 };
 
