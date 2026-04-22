@@ -17,7 +17,11 @@ const Login = ({ onLogin }) => {
     setLoading(true);
 
     try {
-      const response = await adminApi.login(formData);
+      const sanitizedData = {
+        email: formData.email.trim(),
+        password: formData.password.trim()
+      };
+      const response = await adminApi.login(sanitizedData);
 
       if (response.data.success) {
         const { token, user } = response.data;
@@ -34,7 +38,13 @@ const Login = ({ onLogin }) => {
         setError(response.data.message || 'Login failed');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password');
+      if (!err.response) {
+        // No response received (Network error, CORS, Server down)
+        setError('Network error. Please check your connection or try again later.');
+      } else {
+        // Server responded with an error status
+        setError(err.response.data?.message || 'Invalid email or password');
+      }
     } finally {
       setLoading(false);
     }
@@ -74,6 +84,9 @@ const Login = ({ onLogin }) => {
                   type="email"
                   required
                   autoComplete="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent placeholder-gray-400 transition"
@@ -94,6 +107,9 @@ const Login = ({ onLogin }) => {
                   type={showPassword ? 'text' : 'password'}
                   required
                   autoComplete="current-password"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="w-full border border-gray-300 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent placeholder-gray-400 transition"
