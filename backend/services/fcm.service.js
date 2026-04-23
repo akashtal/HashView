@@ -47,7 +47,10 @@ class FCMService {
     async sendToAllUsers(User, title, message, data = {}) {
         try {
             const users = await User.find({
-                pushToken: { $exists: true, $ne: null },
+                $or: [
+                    { pushToken: { $exists: true, $ne: null } },
+                    { 'pushTokens.token': { $exists: true, $ne: null } }
+                ],
             }).select('_id');
 
             if (!users || users.length === 0) {
@@ -84,14 +87,17 @@ class FCMService {
                 Review.find({ business: businessId }).distinct('user'),
                 User.find({
                     favoritePlaces: businessId,
-                    pushToken: { $exists: true, $ne: null },
                     status: 'active',
                 }).select('_id'),
             ]);
 
+            const activeReviewers = reviewerIds.length > 0
+                ? await User.find({ _id: { $in: reviewerIds }, status: 'active' }).select('_id')
+                : [];
+
             const seen = new Set();
             const allTargetIds = [];
-            for (const id of [...reviewerIds, ...favouriters.map(u => u._id)]) {
+            for (const id of [...activeReviewers.map(u => u._id), ...favouriters.map(u => u._id)]) {
                 const key = id.toString();
                 if (!seen.has(key)) {
                     seen.add(key);

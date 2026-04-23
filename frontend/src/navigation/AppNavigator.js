@@ -66,13 +66,17 @@ async function ensurePushTokenRegistered(authToken) {
 
 export default function AppNavigator() {
   const dispatch = useDispatch();
-  const { isAuthenticated, loading } = useSelector((state) => state.auth);
+  const { isAuthenticated, loading, token } = useSelector((state) => state.auth);
   const [isReady, setIsReady] = React.useState(false);
   const [showPermissionBanner, setShowPermissionBanner] = useState(false);
   const authTokenRef = React.useRef(null);
 
   // Create a navigation ref to pass to notification service
   const navigationRef = React.useRef(null);
+
+  useEffect(() => {
+    authTokenRef.current = token;
+  }, [token]);
 
   useEffect(() => {
     let isMounted = true;
@@ -149,11 +153,11 @@ export default function AppNavigator() {
   // Handles case where user was NOT logged in on first launch (permission prompt
   // appeared pre-login) — after they log in, register their token immediately.
   useEffect(() => {
-    const token = authTokenRef.current;
     if (isAuthenticated && token) {
+      authTokenRef.current = token;
       ensurePushTokenRegistered(token);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, token]);
 
   // ── Setup notification listeners once navigation is ready ─────────────────
   useEffect(() => {

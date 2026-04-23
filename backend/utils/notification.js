@@ -1,6 +1,10 @@
 const { Expo } = require('expo-server-sdk');
 const Notification = require('../models/Notification.model');
 const logger = require('./logger');
+const {
+  getActivePushTokenEntries,
+  removePushTokenEverywhere
+} = require('./pushTokenRegistry');
 
 // Create Expo SDK client — useFcmV1 uses the modern FCM HTTP v1 API
 const expo = new Expo({ useFcmV1: true });
@@ -15,44 +19,63 @@ const ANDROID_CHANNEL_ID = 'hashview-updates';
  */
 exports.sendPushNotification = async (userId, title, message, data = {}) => {
   try {
+    const User = require('../models/User.model');
+    const BusinessOwner = require('../models/BusinessOwner.model');
+    // Search BOTH collections — business owners live in BusinessOwner, not User
+    let user = await User.findById(userId).select('pushToken email');
+    let sentToModel = 'User';
+    if (!user) {
+      user = await BusinessOwner.findById(userId).select('pushToken pushTokens email');
+      sentToModel = 'BusinessOwner';
+    } else {
+      user = await User.findById(userId).select('pushToken pushTokens email');
+    }
+
     const notification = await Notification.create({
       title,
       message,
       sentTo: userId,
+      sentToModel,
       type: data.type || 'general',
       data,
       status: 'pending'
     });
 
-    const User = require('../models/User.model');
-    const user = await User.findById(userId).select('pushToken email');
-
     if (!user) {
       notification.status = 'failed';
-      notification.errorMessage = 'User not found';
+      notification.errorMessage = 'User not found in either collection';
       await notification.save();
+      logger.error(`[Push] ❌ userId ${userId} not found in User or BusinessOwner`);
       return { success: false, message: 'User not found' };
     }
+    const tokenEntries = getActivePushTokenEntries(user, sentToModel);
+    logger.info(`[Push] Found ${user.email || userId} | activeTokens=${tokenEntries.length}`);
 
-    if (!user.pushToken) {
+    if (tokenEntries.length === 0) {
       notification.status = 'failed';
       notification.errorMessage = 'No push token';
       await notification.save();
       return { success: false, message: 'Push token not found' };
     }
 
-    if (!Expo.isExpoPushToken(user.pushToken)) {
-      logger.warn(`[Push] Invalid token for ${user.email || userId}: ${user.pushToken} — clearing`);
-      await User.findByIdAndUpdate(userId, { $set: { pushToken: null } });
+    const validTokenEntries = tokenEntries.filter(entry => Expo.isExpoPushToken(entry.token));
+    const invalidTokenEntries = tokenEntries.filter(entry => !Expo.isExpoPushToken(entry.token));
+
+    if (invalidTokenEntries.length > 0) {
+      logger.warn(`[Push] Invalid Expo tokens for ${user.email || userId}: ${invalidTokenEntries.length} — clearing`);
+      await Promise.all(invalidTokenEntries.map(entry => removePushTokenEverywhere(entry.token)));
+    }
+
+    if (validTokenEntries.length === 0) {
       notification.status = 'failed';
-      notification.errorMessage = 'Invalid push token format — cleared';
+      notification.errorMessage = 'No valid Expo push tokens';
       await notification.save();
       return { success: false, message: 'Invalid push token' };
     }
 
     // Build Expo push message with full delivery config
-    const pushMessage = {
-      to: user.pushToken,
+    const pushMessages = validTokenEntries.map(entry => ({
+      to: entry.token,
       sound: 'default',
       title,
       body: message,
@@ -61,9 +84,9 @@ exports.sendPushNotification = async (userId, title, message, data = {}) => {
       channelId: ANDROID_CHANNEL_ID,       // Android 8+ channel (required)
       _contentAvailable: true,              // iOS background delivery
       mutableContent: true,                 // iOS notification service extension
-    };
+    }));
 
-    const chunks = expo.chunkPushNotifications([pushMessage]);
+    const chunks = expo.chunkPushNotifications(pushMessages);
     const tickets = [];
 
     for (const chunk of chunks) {
@@ -75,18 +98,24 @@ exports.sendPushNotification = async (userId, title, message, data = {}) => {
       }
     }
 
-    if (tickets.length > 0 && tickets[0].status === 'ok') {
+    const successfulTickets = tickets.filter(ticket => ticket?.status === 'ok');
+    const staleTickets = tickets.filter(ticket => ticket?.details?.error === 'DeviceNotRegistered');
+
+    if (successfulTickets.length > 0) {
       notification.status = 'sent';
-      notification.expoTicketId = tickets[0].id;
+      notification.expoTicketId = successfulTickets[0].id;
+      notification.expoPushToken = validTokenEntries[tickets.indexOf(successfulTickets[0])]?.token;
     } else {
       notification.status = 'failed';
       notification.errorMessage = tickets[0]?.message || 'Unknown error';
+    }
 
-      // Auto-cleanup stale tokens
-      if (tickets[0]?.details?.error === 'DeviceNotRegistered') {
-        logger.info(`[Push] Token expired for ${user.email || userId} — clearing`);
-        await User.findByIdAndUpdate(userId, { $set: { pushToken: null } });
-      }
+    if (staleTickets.length > 0) {
+      const staleTokens = staleTickets
+        .map(ticket => validTokenEntries[tickets.indexOf(ticket)]?.token)
+        .filter(Boolean);
+      logger.info(`[Push] Token expired for ${user.email || userId} — clearing ${staleTokens.length} token(s)`);
+      await Promise.all(staleTokens.map(token => removePushTokenEverywhere(token)));
     }
 
     await notification.save();
@@ -110,48 +139,62 @@ exports.sendBulkNotifications = async (userIds, title, message, data = {}) => {
   const User = require('../models/User.model');
   const BusinessOwner = require('../models/BusinessOwner.model');
 
-  // Step 1: Fetch tokens from BOTH User and BusinessOwner collections
+  // Step 1: Fetch users from BOTH collections, then expand each user into all active device tokens.
   const [customers, businessOwners] = await Promise.all([
     User.find({
-      _id: { $in: userIds },
-      pushToken: { $exists: true, $ne: null }
-    }).select('_id pushToken email'),
+      _id: { $in: userIds }
+    }).select('_id pushToken pushTokens email'),
     BusinessOwner.find({
-      _id: { $in: userIds },
-      pushToken: { $exists: true, $ne: null }
-    }).select('_id pushToken email'),
+      _id: { $in: userIds }
+    }).select('_id pushToken pushTokens email'),
   ]);
 
-  const users = [...customers, ...businessOwners];
-  const usersWithoutToken = userIds.length - users.length;
+  const users = [
+    ...customers.map(user => ({ user, modelName: 'User' })),
+    ...businessOwners.map(user => ({ user, modelName: 'BusinessOwner' }))
+  ];
+
+  const tokenEntries = users.flatMap(({ user, modelName }) => getActivePushTokenEntries(user, modelName));
+  const usersWithToken = new Set(tokenEntries.map(entry => entry.userId.toString()));
+  const usersWithoutToken = userIds.filter(id => !usersWithToken.has(id.toString())).length;
 
   if (usersWithoutToken > 0) {
     logger.info(`[Push] Bulk: ${usersWithoutToken}/${userIds.length} users have no push token — skipped`);
   }
 
   // Filter valid Expo tokens & clean invalid ones
-  const validUsers = users.filter(u => Expo.isExpoPushToken(u.pushToken));
-  const invalidTokenUsers = users.filter(u => !Expo.isExpoPushToken(u.pushToken));
+  const allValidTokenEntries = tokenEntries.filter(entry => Expo.isExpoPushToken(entry.token));
+  const invalidTokenEntries = tokenEntries.filter(entry => !Expo.isExpoPushToken(entry.token));
+  const seenDeviceTokens = new Set();
+  const validTokenEntries = [];
 
-  if (invalidTokenUsers.length > 0) {
-    logger.warn(`[Push] ${invalidTokenUsers.length} non-Expo tokens found (likely stale FCM tokens) — clearing`);
-    const invalidIds = invalidTokenUsers.map(u => u._id);
-    await Promise.all([
-      User.updateMany({ _id: { $in: invalidIds } }, { $set: { pushToken: null } }),
-      BusinessOwner.updateMany({ _id: { $in: invalidIds } }, { $set: { pushToken: null } }),
-    ]);
+  allValidTokenEntries.forEach((entry) => {
+    if (seenDeviceTokens.has(entry.token)) return;
+    seenDeviceTokens.add(entry.token);
+    validTokenEntries.push(entry);
+  });
+
+  const duplicateDeviceCount = allValidTokenEntries.length - validTokenEntries.length;
+  if (duplicateDeviceCount > 0) {
+    logger.warn(`[Push] ${duplicateDeviceCount} duplicate device token(s) skipped for this send`);
   }
 
-  if (validUsers.length === 0) {
+  if (invalidTokenEntries.length > 0) {
+    logger.warn(`[Push] ${invalidTokenEntries.length} non-Expo tokens found — clearing`);
+    const invalidTokens = [...new Set(invalidTokenEntries.map(entry => entry.token))];
+    await Promise.all(invalidTokens.map(token => removePushTokenEverywhere(token)));
+  }
+
+  if (validTokenEntries.length === 0) {
     logger.info('[Push] No valid Expo tokens found — nothing to send');
     return { sent: 0, failed: userIds.length, sentIds: [] };
   }
 
-  logger.info(`[Push] Sending "${title}" to ${validUsers.length} devices via Expo Push Service...`);
+  logger.info(`[Push] Sending "${title}" to ${validTokenEntries.length} devices via Expo Push Service...`);
 
   // Step 2: Build all messages with full iOS + Android config
-  const messages = validUsers.map(user => ({
-    to: user.pushToken,
+  const messages = validTokenEntries.map(entry => ({
+    to: entry.token,
     sound: 'default',
     title,
     body: message,
@@ -182,36 +225,63 @@ exports.sendBulkNotifications = async (userIds, title, message, data = {}) => {
   const notificationDocs = [];
   const staleTokenUserIds = [];
 
-  for (let i = 0; i < validUsers.length; i++) {
-    const user = validUsers[i];
+  const userDelivery = new Map();
+
+  for (let i = 0; i < validTokenEntries.length; i++) {
+    const entry = validTokenEntries[i];
     const ticket = allTickets[i];
     const success = ticket && ticket.status === 'ok';
+    const deliveryKey = `${entry.modelName}:${entry.userId.toString()}`;
 
-    // Detect platform from Expo token prefix for logging
-    const platform = user.pushToken.includes('ExponentPushToken') ? '📱 Expo' : 'Unknown';
+    if (!userDelivery.has(deliveryKey)) {
+      userDelivery.set(deliveryKey, {
+        userId: entry.userId,
+        modelName: entry.modelName,
+        email: entry.email,
+        success: false,
+        ticketId: null,
+        token: null,
+        errors: []
+      });
+    }
+
+    const delivery = userDelivery.get(deliveryKey);
+    const platform = entry.platform || 'unknown';
 
     if (success) {
-      logger.info(`[Push] ✅ ${platform} | ${user.email || user._id} | ticketId=${ticket.id}`);
-      sentIds.push(user._id);
+      logger.info(`[Push] OK | ${platform} | ${entry.email || entry.userId} | ticketId=${ticket.id}`);
+      delivery.success = true;
+      delivery.ticketId = delivery.ticketId || ticket.id;
+      delivery.token = delivery.token || entry.token;
     } else {
       const errMsg = ticket?.message || 'Unknown error';
       const errCode = ticket?.details?.error || 'N/A';
-      logger.warn(`[Push] ❌ ${platform} | ${user.email || user._id} | ${errCode}: ${errMsg}`);
-      failedCount++;
+      logger.warn(`[Push] FAILED | ${platform} | ${entry.email || entry.userId} | ${errCode}: ${errMsg}`);
+      delivery.errors.push(`${errCode}: ${errMsg}`);
       if (errCode === 'DeviceNotRegistered') {
-        staleTokenUserIds.push(user._id);
+        staleTokenUserIds.push(entry.token);
       }
+    }
+  }
+
+  for (const delivery of userDelivery.values()) {
+    if (delivery.success) {
+      sentIds.push(delivery.userId);
+    } else {
+      failedCount++;
     }
 
     notificationDocs.push({
       title,
       message,
-      sentTo: user._id,
+      sentTo: delivery.userId,
+      sentToModel: delivery.modelName,
       type: data.type || 'general',
       data,
-      status: success ? 'sent' : 'failed',
-      expoTicketId: success ? ticket.id : undefined,
-      errorMessage: success ? undefined : (ticket?.message || 'Send failed'),
+      status: delivery.success ? 'sent' : 'failed',
+      expoTicketId: delivery.success ? delivery.ticketId : undefined,
+      expoPushToken: delivery.success ? delivery.token : undefined,
+      errorMessage: delivery.success ? undefined : (delivery.errors.join('; ') || 'Send failed'),
     });
   }
 
@@ -224,10 +294,7 @@ exports.sendBulkNotifications = async (userIds, title, message, data = {}) => {
 
   // Step 6: Clean up stale tokens from both collections
   if (staleTokenUserIds.length > 0) {
-    await Promise.all([
-      User.updateMany({ _id: { $in: staleTokenUserIds } }, { $set: { pushToken: null } }),
-      BusinessOwner.updateMany({ _id: { $in: staleTokenUserIds } }, { $set: { pushToken: null } }),
-    ]);
+    await Promise.all([...new Set(staleTokenUserIds)].map(token => removePushTokenEverywhere(token)));
     logger.info(`[Push] Cleaned ${staleTokenUserIds.length} stale (DeviceNotRegistered) tokens`);
   }
 
@@ -252,7 +319,7 @@ exports.checkNotificationReceipts = async () => {
     const receiptIdChunks = expo.chunkPushNotificationReceiptIds(receiptIds);
 
     const User = require('../models/User.model');
-    const staleTokenUserIds = [];
+    const staleTokenRecords = [];
 
     for (const chunk of receiptIdChunks) {
       try {
@@ -268,7 +335,10 @@ exports.checkNotificationReceipts = async () => {
             await notification.save();
 
             if (receipt.details?.error === 'DeviceNotRegistered') {
-              staleTokenUserIds.push(notification.sentTo);
+              staleTokenRecords.push({
+                userId: notification.sentTo,
+                token: notification.expoPushToken
+              });
             }
           }
         }
@@ -277,12 +347,19 @@ exports.checkNotificationReceipts = async () => {
       }
     }
 
-    if (staleTokenUserIds.length > 0) {
-      await User.updateMany(
-        { _id: { $in: staleTokenUserIds } },
-        { $set: { pushToken: null } }
-      );
-      logger.info(`[Push] Receipt check: cleaned ${staleTokenUserIds.length} stale tokens`);
+    if (staleTokenRecords.length > 0) {
+      const BusinessOwner = require('../models/BusinessOwner.model');
+      const staleTokens = staleTokenRecords.map(record => record.token).filter(Boolean);
+      const staleUserIdsWithoutToken = staleTokenRecords
+        .filter(record => !record.token)
+        .map(record => record.userId);
+
+      await Promise.all([
+        ...[...new Set(staleTokens)].map(token => removePushTokenEverywhere(token)),
+        User.updateMany({ _id: { $in: staleUserIdsWithoutToken } }, { $set: { pushToken: null } }),
+        BusinessOwner.updateMany({ _id: { $in: staleUserIdsWithoutToken } }, { $set: { pushToken: null } }),
+      ]);
+      logger.info(`[Push] Receipt check: cleaned ${staleTokenRecords.length} stale token record(s)`);
     }
   } catch (error) {
     logger.error('[Push] checkNotificationReceipts error:', error.message);

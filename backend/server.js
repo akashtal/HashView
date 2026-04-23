@@ -8,6 +8,7 @@ const compression = require('compression');
 const morgan = require('morgan');
 const http = require('http');
 const socketIO = require('socket.io');
+const cron = require('node-cron');
 const { initializeSentry, Sentry } = require('./config/sentry');
 
 // Import routes
@@ -34,6 +35,7 @@ const { handleWebhook } = require('./controllers/subscription.controller');
 const errorHandler = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
 const { initializeRedis, closeRedis } = require('./config/redis');
+const { checkNotificationReceipts } = require('./utils/notification');
 
 // Import models
 const User = require('./models/User.model');
@@ -238,7 +240,15 @@ const PORT = process.env.PORT || 5001;
 server.listen(PORT, '0.0.0.0', () => {
   logger.info(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
   console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
-  console.log(`📡 Server accessible at http://localhost:${PORT} and https://hashview.44.249.50.162.nip.io:${PORT}`);
+  console.log(`📡 Server accessible at http://localhost:${PORT} and https://api.hashview.co.uk`);
+});
+
+cron.schedule('*/15 * * * *', async () => {
+  try {
+    await checkNotificationReceipts();
+  } catch (error) {
+    logger.error('[Push] Scheduled receipt check failed:', error.message);
+  }
 });
 
 // Graceful shutdown
@@ -263,4 +273,3 @@ process.on('SIGTERM', async () => {
 });
 
 module.exports = { app, io };
-

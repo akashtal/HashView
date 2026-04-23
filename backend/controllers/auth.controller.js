@@ -5,6 +5,7 @@ const { generateToken } = require('../utils/jwt');
 const crypto = require('crypto');
 const logger = require('../utils/logger');
 const { sendOTPEmail, sendPasswordResetEmail } = require('../utils/emailService');
+const { registerDevicePushToken } = require('../utils/pushTokenRegistry');
 
 // In-memory OTP storage (in production, use Redis)
 const otpStore = new Map();
@@ -765,17 +766,35 @@ exports.getMe = async (req, res, next) => {
 // @access  Private
 exports.updatePushToken = async (req, res, next) => {
   try {
-    const { pushToken } = req.body;
+    const { pushToken, platform, deviceId, installationId, appVersion } = req.body;
 
-    // req.user is already populated by auth middleware with correct user
-    req.user.pushToken = pushToken;
-    await req.user.save();
+    if (!pushToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Push token is required'
+      });
+    }
+
+    const registration = await registerDevicePushToken(req.user, pushToken, {
+      platform,
+      deviceId,
+      installationId,
+      appVersion
+    });
 
     res.status(200).json({
       success: true,
-      message: 'Push token updated successfully'
+      message: 'Push token updated successfully',
+      activeTokenCount: registration.activeTokenCount
     });
   } catch (error) {
+    if (error.code === 'INVALID_EXPO_PUSH_TOKEN') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid Expo push token'
+      });
+    }
+
     next(error);
   }
 };

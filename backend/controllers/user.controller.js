@@ -117,6 +117,27 @@ exports.toggleFavoriteBusiness = async (req, res, next) => {
 
     await user.save();
 
+    // Notify the business owner when someone adds their business to favorites (fire-and-forget)
+    if (isFavorited) {
+      (async () => {
+        try {
+          const Business = require('../models/Business.model');
+          const { sendPushNotification } = require('../utils/notification');
+          const business = await Business.findById(businessId).select('name owner');
+          if (business && business.owner) {
+            await sendPushNotification(
+              business.owner,
+              '❤️ New Favorite!',
+              `${user.name} added ${business.name} to their favorites!`,
+              { type: 'general', businessId: businessId.toString(), screen: 'BusinessDashboard' }
+            );
+          }
+        } catch (notifErr) {
+          console.error('❌ Failed to send favorite notification:', notifErr.message);
+        }
+      })();
+    }
+
     res.status(200).json({
       success: true,
       isFavorited,

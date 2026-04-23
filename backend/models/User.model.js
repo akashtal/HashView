@@ -95,6 +95,49 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  pushTokenUpdatedAt: {
+    type: Date,
+    default: null
+  },
+  pushTokens: [{
+    token: {
+      type: String,
+      required: true
+    },
+    platform: {
+      type: String,
+      enum: ['ios', 'android', 'web', 'unknown'],
+      default: 'unknown'
+    },
+    deviceId: {
+      type: String,
+      default: null
+    },
+    installationId: {
+      type: String,
+      default: null
+    },
+    appVersion: {
+      type: String,
+      default: null
+    },
+    lastRegisteredAt: {
+      type: Date,
+      default: Date.now
+    },
+    disabledAt: {
+      type: Date,
+      default: null
+    },
+    lastError: {
+      type: String,
+      default: null
+    },
+    lastErrorAt: {
+      type: Date,
+      default: null
+    }
+  }],
   businesses: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Business'
@@ -158,6 +201,7 @@ const userSchema = new mongoose.Schema({
 
 // Index for geospatial queries
 userSchema.index({ location: '2dsphere' });
+userSchema.index({ 'pushTokens.token': 1 });
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {
@@ -193,4 +237,3 @@ userSchema.methods.getPublicProfile = function () {
 };
 
 module.exports = mongoose.model('User', userSchema);
-

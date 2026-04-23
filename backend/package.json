@@ -10,7 +10,9 @@
     "test:watch": "jest --watch",
     "test:unit": "jest tests/unit",
     "test:integration": "jest tests/integration",
-    "test:ci": "echo 'Tests skipped for deployment'"
+    "test:ci": "echo 'Tests skipped for deployment'",
+    "push:test": "node scripts/manualExpoPushTest.js",
+    "push:audit": "node scripts/auditPushTokens.js"
   },
   "keywords": [
     "hashview",

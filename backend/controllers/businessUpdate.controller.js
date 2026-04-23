@@ -3,6 +3,7 @@ const Business        = require('../models/Business.model');
 const BusinessOwner   = require('../models/BusinessOwner.model');
 const User            = require('../models/User.model');
 const { sendBulkNotifications } = require('../utils/notification');
+const { getActivePushTokenEntries } = require('../utils/pushTokenRegistry');
 const logger          = require('../utils/logger');
 
 // @desc    Get all updates/offers for a business
@@ -149,7 +150,7 @@ exports.createBusinessUpdate = async (req, res, next) => {
                 favoritePlaces: businessId,
                 status: 'active'
               })
-              .select('_id pushToken email');
+              .select('_id pushToken pushTokens email');
 
             // ── Step 3: Get reviewer user docs ───────────────────────────────
             // Guard against empty array — MongoDB $in:[] returns all docs!
@@ -159,7 +160,7 @@ exports.createBusinessUpdate = async (req, res, next) => {
                     _id: { $in: reviewerUserIds },
                     status: 'active'
                   })
-                  .select('_id pushToken email')
+                  .select('_id pushToken pushTokens email')
               : [];
 
             logger.info(`[Updates] 🔍 Reviewer users found in DB: ${reviewerDocs.length} (from ${reviewerUserIds.length} review IDs)`);
@@ -174,7 +175,7 @@ exports.createBusinessUpdate = async (req, res, next) => {
             });
 
             // ── Step 5: Diagnostic logging ───────────────────────────────────
-            const withoutToken = allTargetUsers.filter(u => !u.pushToken);
+            const withoutToken = allTargetUsers.filter(u => getActivePushTokenEntries(u, 'User').length === 0);
 
             logger.info(
               `[Updates] 📊 Push breakdown for "${title}" (${business.name}):` +

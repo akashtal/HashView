@@ -53,6 +53,7 @@ const notificationSchema = new mongoose.Schema({
     default: 'medium'
   },
   expoTicketId: String,
+  expoPushToken: String,
   errorMessage: String
 }, {
   timestamps: true
@@ -64,4 +65,3 @@ notificationSchema.index({ status: 1 });
 notificationSchema.index({ type: 1 });
 
 module.exports = mongoose.model('Notification', notificationSchema);
-

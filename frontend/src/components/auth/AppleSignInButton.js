@@ -6,8 +6,8 @@ import auth from '@react-native-firebase/auth';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../../store/slices/authSlice';
 import axios from 'axios';
-import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons';
+import API_CONFIG from '../../config/api.config';
 
 export default function AppleSignInButton({ role = 'customer', style }) {
     const dispatch = useDispatch();
@@ -62,13 +62,6 @@ export default function AppleSignInButton({ role = 'customer', style }) {
 
             // 5. Send to our backend
             console.log('📤 Sending token to backend...');
-            const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl || 'https://hashview.44.249.50.162.nip.io/api';
-
-            // Handle potential double /api issue (safety check)
-            const cleanBaseUrl = API_BASE_URL.endsWith('/api')
-                ? API_BASE_URL
-                : `${API_BASE_URL}/api`;
-
             // Prepare user name if available (Apple only sends this on first login)
             let userName = null;
             if (fullName) {
@@ -79,7 +72,7 @@ export default function AppleSignInButton({ role = 'customer', style }) {
                 }
             }
 
-            const response = await axios.post(`${cleanBaseUrl}/auth/oauth/apple`, {
+            const response = await axios.post(`${API_CONFIG.BASE_URL}/auth/oauth/apple`, {
                 idToken,
                 role,
                 fullName: userName // Send name to backend

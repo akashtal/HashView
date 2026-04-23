@@ -68,6 +68,49 @@ const businessOwnerSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  pushTokenUpdatedAt: {
+    type: Date,
+    default: null
+  },
+  pushTokens: [{
+    token: {
+      type: String,
+      required: true
+    },
+    platform: {
+      type: String,
+      enum: ['ios', 'android', 'web', 'unknown'],
+      default: 'unknown'
+    },
+    deviceId: {
+      type: String,
+      default: null
+    },
+    installationId: {
+      type: String,
+      default: null
+    },
+    appVersion: {
+      type: String,
+      default: null
+    },
+    lastRegisteredAt: {
+      type: Date,
+      default: Date.now
+    },
+    disabledAt: {
+      type: Date,
+      default: null
+    },
+    lastError: {
+      type: String,
+      default: null
+    },
+    lastErrorAt: {
+      type: Date,
+      default: null
+    }
+  }],
   firebaseUid: {
     type: String,
     unique: true,
@@ -153,6 +196,8 @@ businessOwnerSchema.virtual('hasFreeTrial').get(function () {
   if (!ft) return true; // Schema default: 0 used, 25 max
   return ft.updatesUsed < (ft.maxFreeUpdates || 25);
 });
+
+businessOwnerSchema.index({ 'pushTokens.token': 1 });
 
 // Hash password before saving
 businessOwnerSchema.pre('save', async function (next) {

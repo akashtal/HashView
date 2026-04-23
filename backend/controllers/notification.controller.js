@@ -144,6 +144,7 @@ const BusinessOwner = require('../models/BusinessOwner.model');
 const Business = require('../models/Business.model');
 const Review = require('../models/Review.model');
 const { sendBulkNotifications, sendPushNotification } = require('../utils/notification');
+const { registerDevicePushToken } = require('../utils/pushTokenRegistry');
 
 /**
  * @desc    Register push token for user/business owner
@@ -152,7 +153,7 @@ const { sendBulkNotifications, sendPushNotification } = require('../utils/notifi
  */
 exports.registerPushToken = async (req, res, next) => {
   try {
-    const { pushToken } = req.body;
+    const { pushToken, platform, deviceId, installationId, appVersion } = req.body;
 
     if (!pushToken) {
       return res.status(400).json({
@@ -179,18 +180,28 @@ exports.registerPushToken = async (req, res, next) => {
       });
     }
 
-    // Update push token
-    user.pushToken = pushToken;
-    user.pushTokenUpdatedAt = new Date();
-    await user.save();
+    const registration = await registerDevicePushToken(user, pushToken, {
+      platform,
+      deviceId,
+      installationId,
+      appVersion
+    });
 
-    console.log(`✅ Push token registered for user ${req.user.id}`);
+    console.log(`✅ Push token registered for user ${req.user.id}; active devices=${registration.activeTokenCount}`);
 
     res.status(200).json({
       success: true,
-      message: 'Push token registered successfully'
+      message: 'Push token registered successfully',
+      activeTokenCount: registration.activeTokenCount
     });
   } catch (error) {
+    if (error.code === 'INVALID_EXPO_PUSH_TOKEN') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid Expo push token'
+      });
+    }
+
     console.error('❌ Error registering push token:', error);
     next(error);
   }
@@ -216,8 +227,20 @@ exports.sendAdminBroadcast = async (req, res, next) => {
 
     // Fetch ALL customer user IDs with push tokens (both User and BusinessOwner collections)
     const [customerUsers, businessOwners] = await Promise.all([
-      User.find({ pushToken: { $exists: true, $ne: null } }).select('_id'),
-      BusinessOwner.find({ pushToken: { $exists: true, $ne: null } }).select('_id'),
+      User.find({
+        status: 'active',
+        $or: [
+          { pushToken: { $exists: true, $ne: null } },
+          { 'pushTokens.token': { $exists: true, $ne: null } }
+        ]
+      }).select('_id'),
+      BusinessOwner.find({
+        status: 'active',
+        $or: [
+          { pushToken: { $exists: true, $ne: null } },
+          { 'pushTokens.token': { $exists: true, $ne: null } }
+        ]
+      }).select('_id'),
     ]);
 
     const allUserIds = [
@@ -290,15 +313,21 @@ exports.sendBusinessNotification = async (req, res, next) => {
       Review.find({ business: business._id }).distinct('user'),
       User.find({
         favoritePlaces: business._id,
-        pushToken: { $exists: true, $ne: null },
         status: 'active',
       }).select('_id'),
     ]);
 
+    const activeReviewers = reviewerIds.length > 0
+      ? await User.find({
+          _id: { $in: reviewerIds },
+          status: 'active'
+        }).select('_id')
+      : [];
+
     // Merge + deduplicate
     const seen = new Set();
     const allTargetIds = [];
-    for (const id of [...reviewerIds, ...favouriters.map(u => u._id)]) {
+    for (const id of [...activeReviewers.map(u => u._id), ...favouriters.map(u => u._id)]) {
       const key = id.toString();
       if (!seen.has(key)) {
         seen.add(key);
@@ -343,4 +372,3 @@ exports.sendBusinessNotification = async (req, res, next) => {
     next(error);
   }
 };
-

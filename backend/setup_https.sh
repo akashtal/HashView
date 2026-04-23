@@ -14,4 +14,4 @@ sudo systemctl reload nginx
 
 # 4. Install the Certificate (using the one we just got)
 echo "Installing SSL Certificate..."
-sudo certbot install --cert-name hashview.44.249.50.162.nip.io --nginx
+sudo certbot install --cert-name api.hashview.co.uk --nginx

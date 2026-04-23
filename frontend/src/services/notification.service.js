@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform, Linking } from 'react-native';
 import Constants from 'expo-constants';
+import API_CONFIG from '../config/api.config';
 
 /**
  * Notification Service
@@ -289,17 +290,10 @@ class NotificationService {
      */
     async registerTokenWithBackend(token, authToken) {
         try {
-            let API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || Constants.expoConfig?.extra?.apiBaseUrl || 'https://hashview.44.249.50.162.nip.io';
-
-            if (API_BASE_URL.endsWith('/')) {
-                API_BASE_URL = API_BASE_URL.slice(0, -1);
-            }
-
-            const endpoint = API_BASE_URL.endsWith('/api')
-                ? `${API_BASE_URL}/notifications/register-token`
-                : `${API_BASE_URL}/api/notifications/register-token`;
+            const endpoint = `${API_CONFIG.BASE_URL.replace(/\/$/, '')}/notifications/register-token`;
 
             console.log(`📤 Registering push token at: ${endpoint}`);
+            console.log(`[Push] Token registration details | platform=${Platform.OS} | token=${token}`);
 
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -307,7 +301,13 @@ class NotificationService {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authToken}`
                 },
-                body: JSON.stringify({ pushToken: token })
+                body: JSON.stringify({
+                    pushToken: token,
+                    platform: Platform.OS,
+                    appVersion: Constants.expoConfig?.version || Constants.nativeAppVersion || null,
+                    deviceId: Constants.sessionId || null,
+                    installationId: Constants.installationId || null
+                })
             });
 
             const data = await response.json();

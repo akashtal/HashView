@@ -4,7 +4,6 @@ const BusinessOwner = require('../models/BusinessOwner.model');
 const SuspendedAccount = require('../models/SuspendedAccount.model');
 const Review = require('../models/Review.model');
 const Coupon = require('../models/Coupon.model');
-const Notification = require('../models/Notification.model');
 const { sendPushNotification, sendBulkNotifications } = require('../utils/notification');
 const { sendEmail } = require('../utils/emailService');
 const { generateBusinessQRCode } = require('../utils/qrcode');
@@ -882,6 +881,9 @@ exports.sendNotification = async (req, res, next) => {
 
     // Load BusinessOwner model once (used in multiple cases)
     const BusinessOwner = require('../models/BusinessOwner.model');
+    let recipientList = [];
+    let sentCount = 0;
+    let failedCount = 0;
 
     switch (recipientType) {
       case 'all_users':
@@ -896,15 +898,16 @@ exports.sendNotification = async (req, res, next) => {
         recipientList = allUsers.map(u => u._id);
 
         // Send in batches
-        await sendBulkNotifications(
+        const allUsersResult = await sendBulkNotifications(
           recipientList,
           title,
           message,
           { type: 'admin_broadcast', ...data }
         );
 
-        sentCount = recipientList.length;
-        console.log(`   ✅ Notification broadcast sent to ${sentCount} users`);
+        sentCount = allUsersResult.sent;
+        failedCount = allUsersResult.failed;
+        console.log(`   ✅ Notification broadcast sent to ${sentCount} users; failed/skipped=${failedCount}`);
         break;
 
       case 'all_businesses':
@@ -918,15 +921,16 @@ exports.sendNotification = async (req, res, next) => {
         recipientList = allBusinessOwners.map(b => b._id);
 
         // Send in batches
-        await sendBulkNotifications(
+        const allBusinessResult = await sendBulkNotifications(
           recipientList,
           title,
           message,
           { type: 'admin_broadcast', ...data }
         );
 
-        sentCount = recipientList.length;
-        console.log(`   ✅ Notification broadcast sent to ${sentCount} owners`);
+        sentCount = allBusinessResult.sent;
+        failedCount = allBusinessResult.failed;
+        console.log(`   ✅ Notification broadcast sent to ${sentCount} owners; failed/skipped=${failedCount}`);
         break;
 
       case 'specific_user':
@@ -942,14 +946,15 @@ exports.sendNotification = async (req, res, next) => {
 
         console.log(`   📊 Sending to ${recipientList.length} specific user(s)`);
 
-        await sendBulkNotifications(
+        const specificUserResult = await sendBulkNotifications(
           recipientList,
           title,
           message,
           { type: 'admin_broadcast', ...data }
         );
 
-        sentCount = recipientList.length;
+        sentCount = specificUserResult.sent;
+        failedCount = specificUserResult.failed;
         break;
 
       case 'specific_business':
@@ -975,13 +980,14 @@ exports.sendNotification = async (req, res, next) => {
         recipientList = ownerIds;
 
         if (recipientList.length > 0) {
-          await sendBulkNotifications(
+          const specificBusinessResult = await sendBulkNotifications(
             recipientList,
             title,
             message,
             { type: 'admin_broadcast', ...data }
           );
-          sentCount = recipientList.length;
+          sentCount = specificBusinessResult.sent;
+          failedCount = specificBusinessResult.failed;
         }
 
         console.log(`   ✅ Notification sent to ${sentCount} business owner(s)`);
@@ -994,55 +1000,11 @@ exports.sendNotification = async (req, res, next) => {
         });
     }
 
-    // Save individual notification records for each recipient (for notification history)
-    const allRecipients = recipientList.length > 0 ? recipientList : (recipientIds || []);
-
-    console.log(`   💾 Preparing to save notifications for ${allRecipients.length} recipients`);
-
-    if (allRecipients && allRecipients.length > 0) {
-      let savedCount = 0;
-      let failedCount = 0;
-
-      const notificationPromises = allRecipients.map(async (recipientId) => {
-        try {
-          // Determine if recipient is User or BusinessOwner based on recipientType
-          const sentToModel = (recipientType === 'all_businesses' || recipientType === 'specific_business')
-            ? 'BusinessOwner'
-            : 'User';
-
-          const notification = await Notification.create({
-            title,
-            message,
-            sentTo: recipientId,
-            sentToModel,
-            sentBy: req.user.id,
-            type: 'admin_broadcast',
-            data: data || {},
-            recipientType,
-            status: 'sent'
-          });
-          savedCount++;
-          return notification;
-        } catch (err) {
-          failedCount++;
-          console.error(`   ❌ Failed to save notification for recipient ${recipientId}:`, err.message);
-          return null;
-        }
-      });
-
-      await Promise.all(notificationPromises);
-      console.log(`   ✅ Saved ${savedCount} notification records to database`);
-      if (failedCount > 0) {
-        console.log(`   ⚠️  Failed to save ${failedCount} notification records`);
-      }
-    } else {
-      console.log(`   ⚠️  No recipients to save notifications for`);
-    }
-
     res.status(200).json({
       success: true,
       message: `Notification sent successfully to ${sentCount} recipient(s)`,
       sentCount,
+      failedCount,
       recipientType,
       notification: {
         title,
