@@ -17,12 +17,14 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function BusinessDetailScreen({ navigation, route }) {
   const dispatch = useDispatch();
-  const { businessId, business, fromQR } = route.params || {};
+  const { businessId, business, fromQR, initialTab } = route.params || {};
   const { selectedBusiness, loading } = useSelector((state) => state.business);
   const { reviews } = useSelector((state) => state.review);
   const { user } = useSelector((state) => state.auth);
   const [qrBusiness, setQrBusiness] = useState(null);
-  const [activeTab, setActiveTab] = useState('reviews');
+  // initialTab param is provided when opening from a push notification
+  // (e.g. offer/update notification sets initialTab = 'updates')
+  const [activeTab, setActiveTab] = useState(initialTab || 'reviews');
   const [isFavorite, setIsFavorite] = useState(false);
   const [updates, setUpdates] = useState([]);
   const [loadingUpdates, setLoadingUpdates] = useState(false);

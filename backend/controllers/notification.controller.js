@@ -352,10 +352,11 @@ exports.sendBusinessNotification = async (req, res, next) => {
       title,
       message,
       {
-        type: 'business_update',
+        ...data,
+        type: 'BUSINESS_UPDATE',
         businessId: business._id.toString(),
         screen: 'BusinessDetail',
-        ...data
+        targetTab: 'updates'
       }
     );
 

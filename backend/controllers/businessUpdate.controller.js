@@ -6,6 +6,20 @@ const { sendBulkNotifications } = require('../utils/notification');
 const { getActivePushTokenEntries } = require('../utils/pushTokenRegistry');
 const logger          = require('../utils/logger');
 
+const buildShortNotificationBody = ({ type, title, description, discountType, discountValue }) => {
+  const baseText = (description || title || '').trim();
+  const shortText = baseText.length > 120 ? `${baseText.slice(0, 117)}...` : baseText;
+
+  if (type === 'offer' && discountValue > 0) {
+    const discount = discountType === 'percentage'
+      ? `${discountValue}% OFF`
+      : `£${discountValue} OFF`;
+    return shortText ? `${discount} - ${shortText}` : discount;
+  }
+
+  return shortText || 'Tap to see the latest update.';
+};
+
 // @desc    Get all updates/offers for a business
 // @route   GET /api/business/:businessId/updates
 // @access  Public
@@ -191,15 +205,16 @@ exports.createBusinessUpdate = async (req, res, next) => {
             }
 
             // ── Step 6: Build notification payload ───────────────────────────
-            let notificationTitle = `📢 ${business.name}`;
-            let notificationBody  = title;
-            if (type === 'offer' && discountValue > 0) {
-              const disc = discountType === 'percentage'
-                ? `${discountValue}% OFF`
-                : `£${discountValue} OFF`;
-              notificationTitle = `🎁 ${business.name} — New Offer!`;
-              notificationBody  = `${disc} · ${title}`;
-            }
+            const notificationTitle = type === 'offer'
+              ? `New Offer from ${business.name}`
+              : `New Update from ${business.name}`;
+            const notificationBody = buildShortNotificationBody({
+              type,
+              title,
+              description,
+              discountType,
+              discountValue
+            });
 
             // ── Step 7: Send ALL unique target IDs to sendBulkNotifications ──
             // Pass ALL user IDs (not pre-filtered by token).
@@ -210,10 +225,12 @@ exports.createBusinessUpdate = async (req, res, next) => {
               notificationTitle,
               notificationBody,
               {
-                type: 'business_update',
+                type: 'BUSINESS_UPDATE',
                 businessId: businessId.toString(),
                 updateId: update._id.toString(),
-                screen: 'BusinessDetail'
+                updateType: type,
+                screen: 'BusinessDetail',
+                targetTab: 'updates'
               }
             );
 

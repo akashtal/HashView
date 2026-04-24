@@ -11,6 +11,23 @@ const expo = new Expo({ useFcmV1: true });
 
 // Android notification channel ID — MUST match the one created in frontend
 const ANDROID_CHANNEL_ID = 'hashview-updates';
+const NOTIFICATION_RECORD_TYPES = new Set([
+  'general',
+  'coupon',
+  'review',
+  'business_verification',
+  'kyc',
+  'system',
+  'admin_broadcast',
+  'promotion',
+  'announcement',
+  'business_update'
+]);
+
+const getNotificationRecordType = (type) => {
+  const normalized = String(type || 'general').toLowerCase();
+  return NOTIFICATION_RECORD_TYPES.has(normalized) ? normalized : 'general';
+};
 
 /**
  * Send push notification to a single user.
@@ -36,7 +53,7 @@ exports.sendPushNotification = async (userId, title, message, data = {}) => {
       message,
       sentTo: userId,
       sentToModel,
-      type: data.type || 'general',
+      type: getNotificationRecordType(data.type),
       data,
       status: 'pending'
     });
@@ -276,7 +293,7 @@ exports.sendBulkNotifications = async (userIds, title, message, data = {}) => {
       message,
       sentTo: delivery.userId,
       sentToModel: delivery.modelName,
-      type: data.type || 'general',
+      type: getNotificationRecordType(data.type),
       data,
       status: delivery.success ? 'sent' : 'failed',
       expoTicketId: delivery.success ? delivery.ticketId : undefined,

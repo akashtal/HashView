@@ -30,6 +30,7 @@ class NotificationService {
         this.notificationListener = null;
         this.responseListener = null;
         this._channelCreated = false;
+        this._coldStartHandled = false; // Prevent duplicate cold-start handling
     }
 
     /**
@@ -211,60 +212,125 @@ class NotificationService {
 
     /**
      * Set up notification event listeners.
-     * - Foreground: notification appears as banner
-     * - Background tap: navigates to relevant screen
+     * ⚠️  MUST be called AFTER NavigationContainer.onReady fires — not before.
+     *
+     * - Foreground: notification appears as banner, logs payload
+     * - Background tap: extracts businessId and navigates to BusinessDetail
+     *
+     * @param {object} navigation - A ready navigation ref (navigationRef.current)
      */
     setupNotificationListeners(navigation) {
-        console.log('🔔 Setting up notification listeners...');
+        console.log('[Push] 🔔 Setting up notification listeners...');
 
-        // Foreground notifications
+        // ── Foreground: notification received while app is open ────────────────
         this.notificationListener = Notifications.addNotificationReceivedListener(notification => {
-            console.log('📬 Notification received (foreground):', notification.request.content.title);
+            const data = notification?.request?.content?.data || {};
+            console.log('[Push] 📬 Notification received (foreground):', notification.request.content.title);
+            console.log('[Push] Foreground payload:', JSON.stringify(data));
         });
 
-        // Notification tap handler
+        // ── Background/Foreground tap: user tapped the notification ────────────
         this.responseListener = Notifications.addNotificationResponseReceivedListener(response => {
-            console.log('👆 Notification tapped');
+            console.log('[Push] 👆 Notification tapped by user');
             this.handleNotificationClick(response.notification, navigation);
         });
 
-        // Check if app was opened from a notification (cold start)
-        Notifications.getLastNotificationResponseAsync().then(response => {
-            if (response) {
-                console.log('🚀 App opened from notification (cold start)');
-                this.handleNotificationClick(response.notification, navigation);
-            }
-        });
-
-        console.log('✅ Notification listeners initialized');
+        console.log('[Push] ✅ Notification listeners initialized');
     }
 
     /**
-     * Handle notification click/tap — navigate to relevant screen.
+     * Handle cold-start: app was launched by tapping a notification while killed.
+     * ⚠️  MUST be called AFTER NavigationContainer.onReady fires.
+     *
+     * @param {object} navigation - A ready navigation ref (navigationRef.current)
+     */
+    async handleColdStartNotification(navigation) {
+        // Guard: only handle once per app session
+        if (this._coldStartHandled) return;
+        this._coldStartHandled = true;
+
+        try {
+            console.log('[Push] 🚀 Checking for cold-start notification...');
+            const response = await Notifications.getLastNotificationResponseAsync();
+
+            if (response) {
+                console.log('[Push] 🧊 Cold-start notification detected:', response.notification?.request?.content?.title);
+                // Small delay to ensure navigator stack is fully mounted after onReady
+                setTimeout(() => {
+                    this.handleNotificationClick(response.notification, navigation);
+                }, 500);
+            } else {
+                console.log('[Push] ℹ️ No cold-start notification found');
+            }
+        } catch (error) {
+            console.error('[Push] ❌ Cold-start check error:', error.message || error);
+        }
+    }
+
+    /**
+     * Handle notification click/tap — navigate to the correct screen.
+     *
+     * Navigation hierarchy:
+     *   NavigationContainer
+     *   └── Stack (Main)
+     *       └── Tab (Home)
+     *           └── Stack (UserStack)
+     *               └── Screen: BusinessDetail   ← target
+     *
+     * To reach a nested screen we must navigate:
+     *   navigate('Home', { screen: 'BusinessDetail', params: { businessId } })
+     *
+     * @param {object} notification - The Expo notification object
+     * @param {object} navigation   - A ready navigation ref
      */
     handleNotificationClick(notification, navigation) {
         try {
-            const data = notification.request.content.data;
+            const data = notification?.request?.content?.data || {};
+
+            console.log('[Push] 📲 handleNotificationClick triggered');
+            console.log('[Push] Raw data payload:', JSON.stringify(data));
 
             if (!navigation) {
-                console.warn('⚠️ Navigation not available');
+                console.warn('[Push] ⚠️ Navigation ref not available — cannot redirect');
                 return;
             }
 
-            if (data.type === 'business_update' && data.businessId) {
+            // ── Normalise type to UPPERCASE for reliable comparison ────────────
+            // Backend sends 'BUSINESS_UPDATE'; older records may send 'business_update'.
+            const type       = (data.type || '').toUpperCase();
+            const businessId = data.businessId;
+            // targetTab is sent from backend; default to 'updates' so user sees offers
+            const initialTab = data.targetTab || 'updates';
+
+            console.log(`[Push] type="${type}" | businessId="${businessId}" | initialTab="${initialTab}"`);
+
+            if ((type === 'BUSINESS_UPDATE' || type === 'BUSINESS_UPDATES') && businessId) {
+                // ── Navigate to BusinessDetail → Updates tab ───────────────────
+                console.log(`[Push] ✅ Navigating → Home > BusinessDetail | businessId=${businessId} | tab=${initialTab}`);
                 navigation.navigate('Home', {
                     screen: 'BusinessDetail',
-                    params: { businessId: data.businessId }
+                    params: { businessId, initialTab }
                 });
-            } else if (data.type === 'admin_broadcast') {
+
+            } else if (type === 'ADMIN_BROADCAST') {
+                console.log('[Push] 📢 Admin broadcast — navigating to Home');
                 navigation.navigate('Home');
-            } else if (data.screen) {
-                navigation.navigate(data.screen, data.params || {});
+
+            } else if (businessId) {
+                // ── Fallback: any notification with a businessId ───────────────
+                console.log(`[Push] 🔁 Fallback (unknown type="${type}") — navigating to BusinessDetail | businessId=${businessId}`);
+                navigation.navigate('Home', {
+                    screen: 'BusinessDetail',
+                    params: { businessId, initialTab }
+                });
+
             } else {
+                // ── No businessId → safe fallback to Home ─────────────────────
+                console.log(`[Push] ℹ️ No businessId found (type="${type}") — navigating to Home`);
                 navigation.navigate('Home');
             }
         } catch (error) {
-            console.error('❌ Error handling notification click:', error);
+            console.error('[Push] ❌ Error in handleNotificationClick:', error.message || error);
         }
     }
 

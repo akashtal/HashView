@@ -159,16 +159,14 @@ export default function AppNavigator() {
     }
   }, [isAuthenticated, token]);
 
-  // ── Setup notification listeners once navigation is ready ─────────────────
+  // ── Cleanup notification listeners on unmount ────────────────────────────
+  // Listeners are SET UP inside NavigationContainer.onReady (below) to guarantee
+  // the navigator is fully mounted before any navigation attempt is made.
   useEffect(() => {
-    if (isReady && navigationRef.current) {
-      NotificationService.setupNotificationListeners(navigationRef.current);
-
-      return () => {
-        NotificationService.removeNotificationListeners();
-      };
-    }
-  }, [isReady]);
+    return () => {
+      NotificationService.removeNotificationListeners();
+    };
+  }, []);
 
   // Show loading screen while checking auth
   if (!isReady || loading) {
@@ -183,7 +181,18 @@ export default function AppNavigator() {
   const linking = isAuthenticated ? mainLinking : authLinking;
 
   return (
-    <NavigationContainer ref={navigationRef} linking={linking}>
+    <NavigationContainer
+      ref={navigationRef}
+      linking={linking}
+      onReady={() => {
+        // ✅ NavigationContainer is GUARANTEED ready here — safe to navigate.
+        // Set up foreground + background tap listeners.
+        console.log('[Push] 🗺️ NavigationContainer ready — initializing notification listeners');
+        NotificationService.setupNotificationListeners(navigationRef.current);
+        // Handle cold-start: app opened by tapping a notification while killed.
+        NotificationService.handleColdStartNotification(navigationRef.current);
+      }}
+    >
       {/* Show permission banner when notification permission is denied */}
       {isAuthenticated && showPermissionBanner && (
         <NotificationPermissionBanner

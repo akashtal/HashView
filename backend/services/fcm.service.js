@@ -114,9 +114,11 @@ class FCMService {
             }
 
             const result = await sendBulkNotifications(allTargetIds, title, message, {
-                type: 'business_update',
-                businessId: businessId.toString(),
                 ...data,
+                type: 'BUSINESS_UPDATE',
+                businessId: businessId.toString(),
+                screen: 'BusinessDetail',
+                targetTab: 'updates',
             });
 
             return {
