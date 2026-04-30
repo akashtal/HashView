@@ -166,6 +166,9 @@ const ApiService = {
   deleteReview: (id) => apiClient.delete(buildEndpoint(API_CONFIG.ENDPOINTS.DELETE_REVIEW, { id })),
   markHelpful: (id) => apiClient.post(buildEndpoint(API_CONFIG.ENDPOINTS.MARK_HELPFUL, { id })),
 
+  // Visit tracking — fire-and-forget (no auth required)
+  trackBusinessVisit: (businessId) => apiClient.post(`/business/${businessId}/track-visit`),
+
   // Coupon APIs (Review-reward coupons)
   getCoupons: (params) => apiClient.get(API_CONFIG.ENDPOINTS.GET_COUPONS, { params }),
   getCoupon: (id) => apiClient.get(buildEndpoint(API_CONFIG.ENDPOINTS.GET_COUPON, { id })),

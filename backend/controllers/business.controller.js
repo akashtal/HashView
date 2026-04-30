@@ -1935,3 +1935,58 @@ exports.reviewBusinessClaim = async (req, res, next) => {
     next(error);
   }
 };
+
+// ─────────────────────────────────────────────────────────────
+//  VISIT COUNTER
+// ─────────────────────────────────────────────────────────────
+
+// In-memory cooldown store: key = `${userId || ip}_${businessId}`, value = timestamp
+// Prevents the same client from inflating the counter on repeated rapid opens.
+const visitCooldownStore = new Map();
+const VISIT_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes per user per business
+
+// @desc    Track a profile visit for a business
+// @route   POST /api/business/:id/track-visit
+// @access  Public (works for guests too)
+exports.trackVisit = async (req, res, next) => {
+  try {
+    const { id: businessId } = req.params;
+
+    // Build a dedup key — prefer userId, fall back to IP
+    const clientKey = req.user?.id || req.ip || 'anon';
+    const cooldownKey = `${clientKey}_${businessId}`;
+
+    const lastVisit = visitCooldownStore.get(cooldownKey);
+    const now = Date.now();
+
+    if (lastVisit && now - lastVisit < VISIT_COOLDOWN_MS) {
+      // Within cooldown window — acknowledge but don't increment
+      return res.status(200).json({ success: true, throttled: true });
+    }
+
+    // Atomically increment (safe even under concurrent requests)
+    const updated = await Business.findByIdAndUpdate(
+      businessId,
+      { $inc: { visitCount: 1 } },
+      { new: true, select: 'visitCount' }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Business not found' });
+    }
+
+    // Record cooldown timestamp
+    visitCooldownStore.set(cooldownKey, now);
+
+    // Periodically clean up stale cooldown entries (every 500 visits)
+    if (visitCooldownStore.size > 500) {
+      for (const [key, ts] of visitCooldownStore.entries()) {
+        if (now - ts > VISIT_COOLDOWN_MS) visitCooldownStore.delete(key);
+      }
+    }
+
+    return res.status(200).json({ success: true, visitCount: updated.visitCount });
+  } catch (error) {
+    next(error);
+  }
+};

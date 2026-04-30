@@ -56,6 +56,14 @@ const RatingBadge = ({ source, rating, reviews }) => {
   );
 };
 
+// Formats large visit numbers: 1200 → 1.2k, 1000000 → 1M
+const formatVisitCount = (n) => {
+  if (!n || n < 1) return null;
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, '')}k`;
+  return `${n}`;
+};
+
 // BUSINESS CARD RENDER - Memoized to prevent heavy re-renders in FlatList
 const BusinessCard = React.memo(({ item, onPress }) => {
   const parseRating = (rating) => {
@@ -103,15 +111,28 @@ const BusinessCard = React.memo(({ item, onPress }) => {
             className="absolute inset-0"
           />
 
-          {/* Rating Badge */}
-          <View className="absolute top-2 right-2">
-            <View className="bg-[#5e399e] flex-row items-center px-2.5 py-1 rounded-full shadow border border-[#FDE68A]">
-              <Icon name="star" size={13} color="#F4B400" />
-              <Text className="text-[#F4B400] font-semibold text-xs ml-1">
-                {hashviewRating ? hashviewRating.toFixed(1) : 'New'}
-              </Text>
+          {/* Rating / Visit Badge — star if rated, eye icon always for unrated */}
+          {hashviewRating > 0 ? (
+            <View className="absolute top-2 right-2">
+              <View className="bg-[#5e399e] flex-row items-center px-2.5 py-1 rounded-full shadow border border-[#FDE68A]">
+                <Icon name="star" size={13} color="#F4B400" />
+                <Text className="text-[#F4B400] font-semibold text-xs ml-1">
+                  {hashviewRating.toFixed(1)}
+                </Text>
+              </View>
             </View>
-          </View>
+          ) : (
+            <View className="absolute top-2 right-2">
+              <View className="bg-black/50 flex-row items-center px-2.5 py-1 rounded-full shadow border border-white/20">
+                <Icon name="eye-outline" size={13} color="#FFFFFF" />
+                {item.visitCount > 0 && (
+                  <Text className="text-white font-semibold text-xs ml-1">
+                    {formatVisitCount(item.visitCount)}
+                  </Text>
+                )}
+              </View>
+            </View>
+          )}
 
           {/* Distance badge */}
           {item.distance !== undefined && item.distance > 0 && (
@@ -167,7 +188,10 @@ const BusinessCard = React.memo(({ item, onPress }) => {
         <View className="px-4 pb-4">
           <View className="flex-row items-center justify-between mb-2.5">
             <Text className="text-xs font-semibold text-gray-900">Overall Rating</Text>
-            <Text className="text-xs text-gray-500">{hashviewCount} reviews</Text>
+            <View className="flex-row items-center gap-2">
+              {/* Visit Count — now shown in the image badge above */}
+              <Text className="text-xs text-gray-500">{hashviewCount} reviews</Text>
+            </View>
           </View>
           <View className="space-y-1.5">
             <RatingBadge source="google" rating={googleRatingValue} reviews={googleCount} />
@@ -187,6 +211,7 @@ const BusinessCard = React.memo(({ item, onPress }) => {
   return p._id === n._id &&
     p.distance === n.distance &&
     p.rating?.average === n.rating?.average &&
+    p.visitCount === n.visitCount &&
     prevImage === nextImage &&
     p.name === n.name &&
     prevAddr === nextAddr &&

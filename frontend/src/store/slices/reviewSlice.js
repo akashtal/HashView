@@ -18,7 +18,7 @@ export const getBusinessReviews = createAsyncThunk(
   async ({ businessId, params }, { rejectWithValue }) => {
     try {
       const response = await ApiService.getBusinessReviews(businessId, params);
-      return response;
+      return { ...response, type: params?.type };
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -40,14 +40,19 @@ export const getUserReviews = createAsyncThunk(
 const reviewSlice = createSlice({
   name: 'review',
   initialState: {
-    reviews: [],
+    reviews: [],           // recent (last 7 days) or all reviews
+    oldReviews: [],        // reviews older than 7 days (lazy-loaded)
+    oldReviewCount: 0,     // how many old reviews exist (for "Show Older Reviews" button)
+    oldReviewsLoading: false,
+    oldReviewsPage: 1,
+    oldReviewsHasMore: false,
     userReviews: [],
     loading: false,
     error: null,
     successMessage: null,
-    createdCoupon: null,     // coupon earned after review
-    isNearbyCoupon: false,   // true when coupon is from a nearby business
-    couponBusinessName: null // name of the business that issued the coupon
+    createdCoupon: null,
+    isNearbyCoupon: false,
+    couponBusinessName: null
   },
   reducers: {
     clearError: (state) => {
@@ -61,6 +66,11 @@ const reviewSlice = createSlice({
       state.isNearbyCoupon = false;
       state.couponBusinessName = null;
     },
+    clearOldReviews: (state) => {
+      state.oldReviews = [];
+      state.oldReviewsPage = 1;
+      state.oldReviewsHasMore = false;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -72,7 +82,6 @@ const reviewSlice = createSlice({
         state.loading = false;
         state.successMessage = action.payload.message;
         state.reviews.unshift(action.payload.review);
-        // Store the coupon if one was awarded
         if (action.payload.coupon) {
           state.createdCoupon = action.payload.coupon;
           state.isNearbyCoupon = action.payload.isNearbyCoupon || false;
@@ -83,16 +92,39 @@ const reviewSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(getBusinessReviews.pending, (state) => {
-        state.loading = true;
+      .addCase(getBusinessReviews.pending, (state, action) => {
+        const isOld = action.meta?.arg?.params?.type === 'old';
+        if (isOld) {
+          state.oldReviewsLoading = true;
+        } else {
+          state.loading = true;
+        }
         state.error = null;
       })
       .addCase(getBusinessReviews.fulfilled, (state, action) => {
-        state.loading = false;
-        state.reviews = action.payload.reviews;
+        const { reviews, oldReviewCount, hasMore, page, type } = action.payload;
+        if (type === 'old') {
+          state.oldReviewsLoading = false;
+          // Append for pagination (page > 1), replace for fresh load
+          if (page > 1) {
+            state.oldReviews = [...state.oldReviews, ...reviews];
+          } else {
+            state.oldReviews = reviews;
+          }
+          state.oldReviewsPage = page || 1;
+          state.oldReviewsHasMore = hasMore || false;
+        } else {
+          state.loading = false;
+          state.reviews = reviews;
+          // Backend sends oldReviewCount whenever type != 'old'
+          if (typeof oldReviewCount === 'number') {
+            state.oldReviewCount = oldReviewCount;
+          }
+        }
       })
       .addCase(getBusinessReviews.rejected, (state, action) => {
         state.loading = false;
+        state.oldReviewsLoading = false;
         state.error = action.payload;
       })
       .addCase(getUserReviews.pending, (state) => {
@@ -110,6 +142,7 @@ const reviewSlice = createSlice({
   },
 });
 
-export const { clearError, clearSuccessMessage, clearCreatedCoupon } = reviewSlice.actions;
+export const { clearError, clearSuccessMessage, clearCreatedCoupon, clearOldReviews } = reviewSlice.actions;
 export default reviewSlice.reducer;
+
 

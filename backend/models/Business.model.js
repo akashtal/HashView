@@ -240,6 +240,13 @@ const businessSchema = new mongoose.Schema({
     ref: 'User'
   },
 
+  // Profile Visit Analytics
+  visitCount: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+
   // Business Claim System
   claimRequest: {
     status: {

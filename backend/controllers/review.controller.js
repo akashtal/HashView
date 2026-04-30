@@ -576,27 +576,55 @@ exports.createReview = async (req, res, next) => {
 };
 
 // @desc    Get reviews for a business
-// @route   GET /api/reviews/business/:businessId
+// @route   GET /api/reviews/business/:businessId?type=recent|old&page=1&limit=10
 // @access  Public
 exports.getBusinessReviews = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
+    const { type } = req.query; // 'recent' | 'old' | undefined (all)
 
-    const reviews = await Review.find({
+    const SEVEN_DAYS_AGO = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    // Build date filter based on type
+    let dateFilter = {};
+    if (type === 'recent') {
+      dateFilter = { createdAt: { $gte: SEVEN_DAYS_AGO } };
+    } else if (type === 'old') {
+      dateFilter = { createdAt: { $lt: SEVEN_DAYS_AGO } };
+    }
+
+    const baseFilter = {
       business: req.params.businessId,
-      status: 'approved'
-    })
+      status: 'approved',
+      ...dateFilter
+    };
+
+    // Sort: for recent → updatedAt desc (most recently edited first), then createdAt desc
+    // For old/all → createdAt desc
+    const sortOrder = type === 'recent'
+      ? { updatedAt: -1, createdAt: -1 }
+      : { createdAt: -1 };
+
+    const reviews = await Review.find(baseFilter)
       .populate('user', 'name profileImage')
-      .sort({ createdAt: -1 })
+      .sort(sortOrder)
       .skip(skip)
       .limit(limit);
 
-    const total = await Review.countDocuments({
-      business: req.params.businessId,
-      status: 'approved'
-    });
+    const total = await Review.countDocuments(baseFilter);
+
+    // Also return the count of old reviews so the frontend can decide whether
+    // to show the "Show Older Reviews" button even before the user taps it
+    let oldReviewCount = 0;
+    if (!type || type === 'recent') {
+      oldReviewCount = await Review.countDocuments({
+        business: req.params.businessId,
+        status: 'approved',
+        createdAt: { $lt: SEVEN_DAYS_AGO }
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -604,12 +632,15 @@ exports.getBusinessReviews = async (req, res, next) => {
       total,
       page,
       pages: Math.ceil(total / limit),
+      hasMore: page < Math.ceil(total / limit),
+      oldReviewCount,
       reviews
     });
   } catch (error) {
     next(error);
   }
 };
+
 
 // @desc    Get single review
 // @route   GET /api/reviews/:id

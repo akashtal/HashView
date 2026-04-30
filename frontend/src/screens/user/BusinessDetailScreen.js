@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StatusBar, Image, Dimensions, Linking, Share, Modal, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Video, ResizeMode } from 'expo-av';
@@ -7,23 +7,138 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { getBusiness } from '../../store/slices/businessSlice';
-import { getBusinessReviews } from '../../store/slices/reviewSlice';
+import { getBusinessReviews, clearOldReviews } from '../../store/slices/reviewSlice';
 import { updateUser } from '../../store/slices/authSlice';
 import COLORS from '../../config/colors';
 import { API_CONFIG } from '../../config/api.config';
 import ApiService from '../../services/api.service';
 
+// Lightweight relative-time formatter — no external dependency
+const formatRelativeTime = (dateStr) => {
+  if (!dateStr) return '';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins  = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days  = Math.floor(diff / 86400000);
+  const months = Math.floor(days / 30);
+  const years  = Math.floor(days / 365);
+  if (mins  < 1)  return 'just now';
+  if (mins  < 60) return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days  < 30) return `${days} day${days > 1 ? 's' : ''} ago`;
+  if (months < 12) return `${months} month${months > 1 ? 's' : ''} ago`;
+  return `${years} year${years > 1 ? 's' : ''} ago`;
+};
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+// ─── Reusable Review Card Component ────────────────────────────────────────────
+const ReviewCard = ({ review, handleVideoPress, colors, isOld = false }) => {
+  const CATEGORY_KEYS = [
+    { key: 'staff', label: 'Staff' },
+    { key: 'facilities', label: 'Facilities' },
+    { key: 'cleanliness', label: 'Cleanliness' },
+    { key: 'comfort', label: 'Comfort' },
+    { key: 'valueForMoney', label: 'Value' },
+    { key: 'location', label: 'Location' },
+  ];
+  const initial = review.user?.name?.charAt(0)?.toUpperCase() || 'U';
+  const avatarColors = ['#6C47FF', '#F59E0B', '#10B981', '#EF4444', '#3B82F6', '#EC4899'];
+  const avatarColor = avatarColors[initial.charCodeAt(0) % avatarColors.length];
+  const timeAgo = formatRelativeTime(review.updatedAt || review.createdAt);
+
+  return (
+    <View className="mb-5 pb-5" style={{ borderBottomWidth: 1, borderBottomColor: '#F3F4F6', opacity: isOld ? 0.88 : 1 }}>
+      {/* Reviewer row */}
+      <View className="flex-row items-center mb-3">
+        <View className="w-12 h-12 rounded-full items-center justify-center mr-3" style={{ backgroundColor: avatarColor }}>
+          <Text className="text-white text-lg font-bold">{initial}</Text>
+        </View>
+        <View className="flex-1">
+          <Text className="text-sm font-bold text-gray-900">{review.user?.name || 'Anonymous'}</Text>
+          <View className="flex-row items-center mt-0.5">
+            <Text className="text-xs font-semibold" style={{ color: isOld ? '#9CA3AF' : '#7C3AED' }}>{timeAgo}</Text>
+          </View>
+        </View>
+        <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: colors.primary }}>
+          <Text className="text-white text-sm font-black">{(review.rating * 2).toFixed(0)}</Text>
+        </View>
+      </View>
+
+      {/* Stars + Emotion */}
+      <View className="flex-row items-center mb-2">
+        {[...Array(5)].map((_, i) => (
+          <Icon key={i} name={i < review.rating ? 'star' : 'star-outline'} size={14} color={i < review.rating ? '#FFA500' : '#D5D5D5'} style={{ marginRight: 1 }} />
+        ))}
+        {review.emotion && <Text className="text-xs text-gray-400 ml-2">· {review.emotion}</Text>}
+      </View>
+
+      {/* Review text */}
+      <Text className="text-sm text-gray-800 leading-5 mb-3">{review.comment}</Text>
+
+      {/* Category rating pills */}
+      {review.categoryRatings && (() => {
+        const rated = CATEGORY_KEYS.filter(c => review.categoryRatings[c.key]);
+        if (rated.length === 0) return null;
+        return (
+          <View className="flex-row flex-wrap mb-3" style={{ gap: 6 }}>
+            {rated.map(({ key, label }) => {
+              const val = review.categoryRatings[key];
+              const color = val >= 8 ? '#10B981' : val >= 6 ? '#F59E0B' : '#EF4444';
+              return (
+                <View key={key} className="px-2.5 py-1 rounded-full" style={{ backgroundColor: color + '18' }}>
+                  <Text className="text-[11px] font-semibold" style={{ color }}>{label} {val.toFixed(1)}</Text>
+                </View>
+              );
+            })}
+          </View>
+        );
+      })()}
+
+      {/* Photos */}
+      {review.images && review.images.length > 0 && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }} className="mb-2">
+          {review.images.map((img, idx) => (
+            <TouchableOpacity key={idx} activeOpacity={0.85}>
+              <Image source={{ uri: img.url }} style={{ width: 100, height: 100, borderRadius: 10 }} resizeMode="cover" />
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
+
+      {/* Videos */}
+      {review.videos && review.videos.length > 0 && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+          {review.videos.map((video, idx) => (
+            <TouchableOpacity key={idx} activeOpacity={0.85} style={{ width: 100, height: 100, borderRadius: 10, backgroundColor: '#1a1a1a', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }} onPress={() => handleVideoPress(video.url)}>
+              {video.thumbnail && <Image source={{ uri: video.thumbnail }} style={{ width: 100, height: 100, position: 'absolute' }} resizeMode="cover" />}
+              <View style={{ backgroundColor: 'rgba(0,0,0,0.55)', width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="play" size={18} color="#FFF" />
+              </View>
+              {video.duration && (
+                <View style={{ position: 'absolute', bottom: 5, right: 5, backgroundColor: 'rgba(0,0,0,0.8)', borderRadius: 3, paddingHorizontal: 5, paddingVertical: 2 }}>
+                  <Text style={{ color: '#FFF', fontSize: 9, fontWeight: '600' }}>
+                    {Math.floor(video.duration / 60)}:{(video.duration % 60).toString().padStart(2, '0')}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
+    </View>
+  );
+};
+
 export default function BusinessDetailScreen({ navigation, route }) {
+
   const dispatch = useDispatch();
   const { businessId, business, fromQR, initialTab } = route.params || {};
   const { selectedBusiness, loading } = useSelector((state) => state.business);
-  const { reviews } = useSelector((state) => state.review);
+  const { reviews, oldReviews, oldReviewCount, oldReviewsLoading, oldReviewsHasMore, oldReviewsPage } = useSelector((state) => state.review);
   const { user } = useSelector((state) => state.auth);
   const [qrBusiness, setQrBusiness] = useState(null);
   // initialTab param is provided when opening from a push notification
-  // (e.g. offer/update notification sets initialTab = 'updates')
   const [activeTab, setActiveTab] = useState(initialTab || 'reviews');
   const [isFavorite, setIsFavorite] = useState(false);
   const [updates, setUpdates] = useState([]);
@@ -32,7 +147,8 @@ export default function BusinessDetailScreen({ navigation, route }) {
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [videoViewerVisible, setVideoViewerVisible] = useState(false);
-  const [showAllReviews, setShowAllReviews] = useState(false);
+  const [showOldReviews, setShowOldReviews] = useState(false);
+  const visitTrackedRef = useRef(false);
 
   // Fetch business data — depends only on route params, NOT on user object
   useEffect(() => {
@@ -43,6 +159,8 @@ export default function BusinessDetailScreen({ navigation, route }) {
       dispatch(getBusiness(businessId));
       fetchBusinessUpdates(businessId);
     }
+    // Clean up old reviews when leaving screen
+    return () => { dispatch(clearOldReviews()); };
   }, [businessId, fromQR]);
 
   // Check favorite status from Redux user.favoritePlaces
@@ -61,7 +179,15 @@ export default function BusinessDetailScreen({ navigation, route }) {
     useCallback(() => {
       const idToFetch = (fromQR && business) ? business._id : businessId;
       if (idToFetch) {
+        // Load ALL reviews so existing reviews always appear regardless of age
         dispatch(getBusinessReviews({ businessId: idToFetch, params: { limit: 100 } }));
+        setShowOldReviews(false);
+        dispatch(clearOldReviews());
+      }
+      // Track visit (fire-and-forget, once per focus, 5-min server-side cooldown)
+      if (idToFetch && !visitTrackedRef.current) {
+        visitTrackedRef.current = true;
+        ApiService.trackBusinessVisit(idToFetch).catch(() => {});
       }
     }, [businessId, business, fromQR, dispatch])
   );
@@ -647,113 +773,94 @@ export default function BusinessDetailScreen({ navigation, route }) {
                     );
                   })()}
 
-                  {/* ── "Guest reviews" heading ── */}
-                  <View className="flex-row items-center justify-between mb-5">
-                    <Text className="text-base font-black text-gray-900">Guest reviews</Text>
-                    <Text className="text-xs text-gray-400">{reviews.length} total</Text>
+                  {/* ── Reviews heading ── */}
+                  <View className="flex-row items-center justify-between mb-4">
+                    <View>
+                      <Text className="text-base font-black text-gray-900">All Reviews</Text>
+                      <Text className="text-xs text-gray-400 mt-0.5">Most recent first</Text>
+                    </View>
+                    <View className="bg-purple-50 border border-purple-100 rounded-full px-3 py-1">
+                      <Text className="text-xs font-bold text-purple-700">{reviews.length} review{reviews.length !== 1 ? 's' : ''}</Text>
+                    </View>
                   </View>
 
-                  {/* ── All Review Cards — full detail, always visible ── */}
-                  {reviews.map((review) => {
-                    const CATEGORY_KEYS = [
-                      { key: 'staff', label: 'Staff' },
-                      { key: 'facilities', label: 'Facilities' },
-                      { key: 'cleanliness', label: 'Cleanliness' },
-                      { key: 'comfort', label: 'Comfort' },
-                      { key: 'valueForMoney', label: 'Value' },
-                      { key: 'location', label: 'Location' },
-                    ];
-                    const initial = review.user?.name?.charAt(0)?.toUpperCase() || 'U';
-                    const avatarColors = ['#6C47FF', '#F59E0B', '#10B981', '#EF4444', '#3B82F6', '#EC4899'];
-                    const avatarColor = avatarColors[initial.charCodeAt(0) % avatarColors.length];
-                    return (
-                      <View key={review._id} className="mb-5 pb-5" style={{ borderBottomWidth: 1, borderBottomColor: '#F3F4F6' }}>
+                  {/* ── Review Cards ── */}
+                  {reviews.length === 0 ? (
+                    <View className="items-center py-8 bg-gray-50 rounded-2xl mb-4">
+                      <Icon name="chatbubbles-outline" size={40} color="#D1D5DB" />
+                      <Text className="text-gray-400 mt-3 font-medium">No reviews yet</Text>
+                      <Text className="text-gray-300 text-xs mt-1">Be the first to share your experience!</Text>
+                    </View>
+                  ) : (
+                    reviews.map((review) => <ReviewCard key={review._id} review={review} handleVideoPress={handleVideoPress} colors={COLORS} />)
+                  )}
 
-                        {/* Reviewer row */}
-                        <View className="flex-row items-center mb-3">
-                          <View className="w-12 h-12 rounded-full items-center justify-center mr-3" style={{ backgroundColor: avatarColor }}>
-                            <Text className="text-white text-lg font-bold">{initial}</Text>
-                          </View>
-                          <View className="flex-1">
-                            <Text className="text-sm font-bold text-gray-900">{review.user?.name || 'Anonymous'}</Text>
-                            <Text className="text-xs text-gray-500 mt-0.5">
-                              Reviewed: {new Date(review.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-                            </Text>
-                          </View>
-                          <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: COLORS.primary }}>
-                            <Text className="text-white text-sm font-black">{(review.rating * 2).toFixed(0)}</Text>
-                          </View>
+                  {/* ── Show Older Reviews button ── */}
+                  {oldReviewCount > 0 && !showOldReviews && (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setShowOldReviews(true);
+                        const idToFetch = (fromQR && business) ? business._id : businessId;
+                        dispatch(getBusinessReviews({ businessId: idToFetch, params: { type: 'old', limit: 10, page: 1 } }));
+                      }}
+                      activeOpacity={0.8}
+                      className="flex-row items-center justify-center py-3.5 px-5 rounded-2xl border border-gray-200 bg-gray-50 mb-4"
+                    >
+                      <Icon name="chevron-down-circle-outline" size={18} color="#6B7280" />
+                      <Text className="text-sm font-semibold text-gray-600 ml-2">
+                        Show {oldReviewCount} Older Review{oldReviewCount > 1 ? 's' : ''}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {/* ── Older Reviews (lazy-loaded) ── */}
+                  {showOldReviews && (
+                    <View>
+                      <View className="flex-row items-center mb-4">
+                        <View className="flex-1 h-px bg-gray-200" />
+                        <View className="mx-3 bg-amber-50 border border-amber-100 rounded-full px-3 py-1">
+                          <Text className="text-xs font-bold text-amber-700">Older Reviews</Text>
                         </View>
-
-                        {/* Stars + Emotion */}
-                        <View className="flex-row items-center mb-2">
-                          {[...Array(5)].map((_, i) => (
-                            <Icon key={i} name={i < review.rating ? 'star' : 'star-outline'} size={14} color={i < review.rating ? '#FFA500' : '#D5D5D5'} style={{ marginRight: 1 }} />
-                          ))}
-                          {review.emotion && <Text className="text-xs text-gray-400 ml-2">· {review.emotion}</Text>}
-                        </View>
-
-                        {/* Full review text */}
-                        <Text className="text-sm text-gray-800 leading-5 mb-3">{review.comment}</Text>
-
-                        {/* Category rating pills */}
-                        {review.categoryRatings && (() => {
-                          const rated = CATEGORY_KEYS.filter(c => review.categoryRatings[c.key]);
-                          if (rated.length === 0) return null;
-                          return (
-                            <View className="flex-row flex-wrap mb-3" style={{ gap: 6 }}>
-                              {rated.map(({ key, label }) => {
-                                const val = review.categoryRatings[key];
-                                const color = val >= 8 ? '#10B981' : val >= 6 ? '#F59E0B' : '#EF4444';
-                                return (
-                                  <View key={key} className="px-2.5 py-1 rounded-full" style={{ backgroundColor: color + '18' }}>
-                                    <Text className="text-[11px] font-semibold" style={{ color }}>{label} {val.toFixed(1)}</Text>
-                                  </View>
-                                );
-                              })}
-                            </View>
-                          );
-                        })()}
-
-                        {/* Photos */}
-                        {review.images && review.images.length > 0 && (
-                          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }} className="mb-2">
-                            {review.images.map((img, idx) => (
-                              <TouchableOpacity key={idx} activeOpacity={0.85}>
-                                <Image source={{ uri: img.url }} style={{ width: 100, height: 100, borderRadius: 10 }} resizeMode="cover" />
-                              </TouchableOpacity>
-                            ))}
-                          </ScrollView>
-                        )}
-
-                        {/* Videos */}
-                        {review.videos && review.videos.length > 0 && (
-                          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-                            {review.videos.map((video, idx) => (
-                              <TouchableOpacity key={idx} activeOpacity={0.85} style={{ width: 100, height: 100, borderRadius: 10, backgroundColor: '#1a1a1a', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }} onPress={() => handleVideoPress(video.url)}>
-                                {video.thumbnail && <Image source={{ uri: video.thumbnail }} style={{ width: 100, height: 100, position: 'absolute' }} resizeMode="cover" />}
-                                <View style={{ backgroundColor: 'rgba(0,0,0,0.55)', width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' }}>
-                                  <Icon name="play" size={18} color="#FFF" />
-                                </View>
-                                {video.duration && (
-                                  <View style={{ position: 'absolute', bottom: 5, right: 5, backgroundColor: 'rgba(0,0,0,0.8)', borderRadius: 3, paddingHorizontal: 5, paddingVertical: 2 }}>
-                                    <Text style={{ color: '#FFF', fontSize: 9, fontWeight: '600' }}>
-                                      {Math.floor(video.duration / 60)}:{(video.duration % 60).toString().padStart(2, '0')}
-                                    </Text>
-                                  </View>
-                                )}
-                              </TouchableOpacity>
-                            ))}
-                          </ScrollView>
-                        )}
+                        <View className="flex-1 h-px bg-gray-200" />
                       </View>
-                    );
-                  })}
+
+                      {oldReviewsLoading && oldReviews.length === 0 ? (
+                        <View className="items-center py-8">
+                          <ActivityIndicator size="small" color={COLORS.primary} />
+                          <Text className="text-gray-400 text-xs mt-2">Loading older reviews...</Text>
+                        </View>
+                      ) : (
+                        oldReviews.map((review) => <ReviewCard key={review._id} review={review} handleVideoPress={handleVideoPress} colors={COLORS} isOld />)
+                      )}
+
+                      {oldReviewsHasMore && (
+                        <TouchableOpacity
+                          onPress={() => {
+                            const idToFetch = (fromQR && business) ? business._id : businessId;
+                            dispatch(getBusinessReviews({ businessId: idToFetch, params: { type: 'old', limit: 10, page: oldReviewsPage + 1 } }));
+                          }}
+                          disabled={oldReviewsLoading}
+                          activeOpacity={0.8}
+                          className="flex-row items-center justify-center py-3 rounded-xl border border-gray-200 bg-white mb-4"
+                        >
+                          {oldReviewsLoading ? (
+                            <ActivityIndicator size="small" color={COLORS.primary} />
+                          ) : (
+                            <>
+                              <Icon name="add-circle-outline" size={16} color={COLORS.primary} />
+                              <Text className="text-sm font-semibold ml-2" style={{ color: COLORS.primary }}>Load More</Text>
+                            </>
+                          )}
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  )}
 
                 </View>
               )}
             </View>
           )}
+
 
           {/* Updates & Offers Tab */}
           {activeTab === 'updates' && (

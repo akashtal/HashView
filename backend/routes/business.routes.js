@@ -14,6 +14,7 @@ const {
   getMyBusinesses,
   getBusinessByQRCode,
   updateTripAdvisorRating,
+  trackVisit,
   // Business Claim
   claimBusiness,
   uploadClaimDocuments,
@@ -37,6 +38,9 @@ router.post('/qr/scan', getBusinessByQRCode);
 router.get('/admin/claims', protect, authorize('admin'), getBusinessClaims);
 
 router.get('/:id', getBusiness);
+
+// Visit tracking — public (guests contribute too; optional auth for dedup)
+router.post('/:id/track-visit', trackVisit);
 
 // Protected routes
 router.post('/register', protect, authorize('business'), validate(schemas.createBusiness), registerBusiness);
