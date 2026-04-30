@@ -64,6 +64,22 @@ const formatVisitCount = (n) => {
   return `${n}`;
 };
 
+// Formats lastReviewAt date into review label for business cards
+const formatLastReview = (dateStr) => {
+  if (!dateStr) return null;
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  const months = Math.floor(days / 30);
+  if (mins < 2) return 'Recent review';
+  if (mins < 60) return `Review ${mins}m ago`;
+  if (hours < 24) return `Review ${hours}h ago`;
+  if (days < 30) return `Last Review ${days} day${days > 1 ? 's' : ''} ago`;
+  if (months < 12) return `Last Review ${months} month${months > 1 ? 's' : ''} ago`;
+  return null; // too old — don't show
+};
+
 // BUSINESS CARD RENDER - Memoized to prevent heavy re-renders in FlatList
 const BusinessCard = React.memo(({ item, onPress }) => {
   const parseRating = (rating) => {
@@ -77,7 +93,8 @@ const BusinessCard = React.memo(({ item, onPress }) => {
   const hashviewRating = parseRating(item.rating?.average) || 0;
   const hashviewCount = item.rating?.count || 0;
   const coverImageUri = item.coverImage?.url || item.images?.[0]?.url || item.logo?.url || null;
-  const categoryLabel = item.category || 'Business';
+  const categoryLabel = (item.category || 'Business')
+    .replace(/\b\w/g, c => c.toUpperCase());
   const locationText = item.address?.fullAddress || [item.address?.area, item.address?.city].filter(Boolean).join(', ') || item.address?.city || item.address?.street || 'Location not specified';
 
   return (
@@ -111,28 +128,25 @@ const BusinessCard = React.memo(({ item, onPress }) => {
             className="absolute inset-0"
           />
 
-          {/* Rating / Visit Badge — star if rated, eye icon always for unrated */}
-          {hashviewRating > 0 ? (
-            <View className="absolute top-2 right-2">
+          {/* Badges — star (when rated) + eye (always) stacked in top-right */}
+          <View className="absolute top-2 right-2" style={{ gap: 5 }}>
+            {hashviewRating > 0 && (
               <View className="bg-[#5e399e] flex-row items-center px-2.5 py-1 rounded-full shadow border border-[#FDE68A]">
                 <Icon name="star" size={13} color="#F4B400" />
                 <Text className="text-[#F4B400] font-semibold text-xs ml-1">
                   {hashviewRating.toFixed(1)}
                 </Text>
               </View>
+            )}
+            <View className="bg-black/50 flex-row items-center px-2.5 py-1 rounded-full shadow border border-white/20">
+              <Icon name="eye-outline" size={13} color="#FFFFFF" />
+              {item.visitCount > 0 && (
+                <Text className="text-white font-semibold text-xs ml-1">
+                  {formatVisitCount(item.visitCount)}
+                </Text>
+              )}
             </View>
-          ) : (
-            <View className="absolute top-2 right-2">
-              <View className="bg-black/50 flex-row items-center px-2.5 py-1 rounded-full shadow border border-white/20">
-                <Icon name="eye-outline" size={13} color="#FFFFFF" />
-                {item.visitCount > 0 && (
-                  <Text className="text-white font-semibold text-xs ml-1">
-                    {formatVisitCount(item.visitCount)}
-                  </Text>
-                )}
-              </View>
-            </View>
-          )}
+          </View>
 
           {/* Distance badge */}
           {item.distance !== undefined && item.distance > 0 && (
@@ -186,13 +200,22 @@ const BusinessCard = React.memo(({ item, onPress }) => {
 
         {/* Content */}
         <View className="px-4 pb-4">
-          <View className="flex-row items-center justify-between mb-2.5">
+          <View className="flex-row items-center justify-between mb-1.5">
             <Text className="text-xs font-semibold text-gray-900">Overall Rating</Text>
             <View className="flex-row items-center gap-2">
               {/* Visit Count — now shown in the image badge above */}
               <Text className="text-xs text-gray-500">{hashviewCount} reviews</Text>
             </View>
           </View>
+          {/* Last review timestamp */}
+          {formatLastReview(item.lastReviewAt) && (
+            <View className="flex-row items-center mb-2.5">
+              <Icon name="time-outline" size={11} color="#10B981" />
+              <Text className="text-[11px] text-green-600 font-medium ml-1">
+                {formatLastReview(item.lastReviewAt)}
+              </Text>
+            </View>
+          )}
           <View className="space-y-1.5">
             <RatingBadge source="google" rating={googleRatingValue} reviews={googleCount} />
           </View>
@@ -212,6 +235,7 @@ const BusinessCard = React.memo(({ item, onPress }) => {
     p.distance === n.distance &&
     p.rating?.average === n.rating?.average &&
     p.visitCount === n.visitCount &&
+    p.lastReviewAt === n.lastReviewAt &&
     prevImage === nextImage &&
     p.name === n.name &&
     prevAddr === nextAddr &&

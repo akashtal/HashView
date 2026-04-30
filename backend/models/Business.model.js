@@ -240,6 +240,12 @@ const businessSchema = new mongoose.Schema({
     ref: 'User'
   },
 
+  // Last review timestamp — updated whenever a new review is submitted
+  lastReviewAt: {
+    type: Date,
+    default: null
+  },
+
   // Profile Visit Analytics
   visitCount: {
     type: Number,

@@ -348,6 +348,7 @@ exports.createReview = async (req, res, next) => {
     business.rating.average = avgRating;
     business.rating.count = reviews.length;
     business.reviewCount = reviews.length;
+    business.lastReviewAt = new Date(); // ← stamp last review time for home screen cards
     await business.save();
 
     // ── SMART COUPON REWARD LOGIC ──────────────────────────────────────────
