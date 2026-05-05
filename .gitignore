@@ -15,3 +15,10 @@ graphify-out/
 .graphifyignore
 .agents
 HASHVIEW_WEB_MIGRATION_PLAN.md
+hashview-apps-release.keystore
+debug.keystore
+KEYSTORE_BACKUP_APPS.zip
+HASHVIEW_MOBILE_MIGRATION_GUIDE.md
+COMPLIANCE_STRIPE_GUIDE.md
+TEST_PLAN_COMPLETE.md
+TECHNICAL_AUDIT.md
