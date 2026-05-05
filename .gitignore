@@ -13,3 +13,5 @@ yarn-error.log*
 graphify-out/
 .agent
 .graphifyignore
+.agents
+HASHVIEW_WEB_MIGRATION_PLAN.md
