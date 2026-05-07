@@ -20,6 +20,8 @@ export default function ExplorePage() {
   const { user } = useAuth();
   const { data: categoriesData, isLoading: catLoading } = useCategories();
 
+  const isGuest = user?.role === 'guest' || user?.isGuest;
+
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
@@ -119,12 +121,16 @@ export default function ExplorePage() {
               <p className="text-white/70 text-sm mt-0.5">Discover amazing businesses</p>
             </div>
             <div className="flex items-center gap-2.5">
-              <Link href="/notifications" className="relative w-10 h-10 rounded-full bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors">
-                <Bell className="w-4.5 h-4.5 text-white" />
-              </Link>
-              <Link href="/coupons" className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors">
-                <Gift className="w-4.5 h-4.5 text-white" />
-              </Link>
+              {!isGuest && (
+                <>
+                  <Link href="/notifications" className="relative w-10 h-10 rounded-full bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors">
+                    <Bell className="w-4.5 h-4.5 text-white" />
+                  </Link>
+                  <Link href="/coupons" className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors">
+                    <Gift className="w-4.5 h-4.5 text-white" />
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 

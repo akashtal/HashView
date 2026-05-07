@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   User, Settings, Lock, Ticket, History,
   HelpCircle, LogOut, ChevronRight, Building2, Star, Crown,
-  Shield, Mail
+  Shield, Mail, Globe, UserPlus, LogIn
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,59 @@ export default function ProfilePage() {
   const { user, logout, isPro } = useAuth();
 
   if (!user) return null;
+
+  const isGuest = user.role === 'guest' || user.isGuest;
+
+  // ── Guest profile ────────────────────────────────────────────────────────────
+  if (isGuest) {
+    return (
+      <div className="min-h-full">
+        <div className="bg-gradient-to-br from-violet-600 to-purple-800 pt-6 pb-12 px-4 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 70% 50%, #fff 0%, transparent 60%)' }} />
+          <div className="relative max-w-lg mx-auto text-center pt-8 pb-4">
+            <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
+              <Globe className="w-10 h-10 text-white" />
+            </div>
+            <h1 className="text-2xl font-display font-bold text-white mb-1">Guest User</h1>
+            <p className="text-white/70 text-sm">Exploring without an account</p>
+          </div>
+        </div>
+        <div className="max-w-lg mx-auto px-4 -mt-6 pb-8 space-y-4">
+          <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
+            <p className="text-center text-muted-foreground text-sm mb-5">Create a free account to unlock reviews, favorites, coupons, and more.</p>
+            <div className="space-y-3">
+              <Link href="/register" className="flex items-center gap-3 p-4 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+                <UserPlus className="w-5 h-5" />
+                <div>
+                  <p className="font-bold text-sm">Create Free Account</p>
+                  <p className="text-xs text-white/70">Takes less than a minute</p>
+                </div>
+              </Link>
+              <Link href="/login" className="flex items-center gap-3 p-4 rounded-xl border border-border hover:bg-muted/50 transition-colors">
+                <LogIn className="w-5 h-5 text-foreground" />
+                <div>
+                  <p className="font-bold text-sm text-foreground">Sign In</p>
+                  <p className="text-xs text-muted-foreground">Already have an account</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+          <div className="bg-card rounded-2xl divide-y divide-border border border-border">
+            <Link href="/help" className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/40 transition-colors rounded-t-2xl">
+              <HelpCircle className="w-5 h-5 text-muted-foreground" />
+              <span className="flex-1 text-sm font-medium text-foreground">Help &amp; Support</span>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </Link>
+            <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-muted/40 transition-colors rounded-b-2xl">
+              <LogOut className="w-5 h-5 text-muted-foreground" />
+              <span className="flex-1 text-left text-sm font-medium text-foreground">Exit Guest Mode</span>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const initial = user.name.charAt(0).toUpperCase();
   const avatarColor = AVATAR_COLORS[initial.charCodeAt(0) % AVATAR_COLORS.length];

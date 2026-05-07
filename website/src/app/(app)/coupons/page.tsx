@@ -6,6 +6,7 @@ import { DownloadAppBanner } from "@/components/app/DownloadAppBanner";
 import { cn } from "@/lib/utils";
 import type { Coupon } from "@/lib/types";
 import Image from "next/image";
+import { useGuestGuard } from "@/lib/hooks/useGuestGuard";
 
 function CouponCard({ coupon }: { coupon: Coupon }) {
   const isExpired = coupon.validUntil ? new Date(coupon.validUntil) < new Date() : false;
@@ -92,10 +93,13 @@ function CouponCard({ coupon }: { coupon: Coupon }) {
 }
 
 export default function CouponsPage() {
+  const redirecting = useGuestGuard();
   const { data: coupons, isLoading } = useUserCoupons();
   const allCoupons = coupons ?? [];
   const active = allCoupons.filter((c) => c.status !== "redeemed" && (!c.validUntil || new Date(c.validUntil) >= new Date()));
   const past = allCoupons.filter((c) => c.status === "redeemed" || (c.validUntil && new Date(c.validUntil) < new Date()));
+
+  if (redirecting) return null;
 
   return (
     <div className="min-h-full">

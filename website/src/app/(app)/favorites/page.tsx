@@ -8,10 +8,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { BusinessGridSkeleton } from "@/components/app/Skeletons";
 import { StaggerList, StaggerItem } from "@/components/app/FadeIn";
+import { useGuestGuard } from "@/lib/hooks/useGuestGuard";
 
 export default function FavoritesPage() {
+  const redirecting = useGuestGuard();
   const { data: favorites, isLoading } = useFavoriteBusinesses();
   const toggleFavorite = useToggleFavorite();
+
+  if (redirecting) return null;
 
   return (
     <div className="min-h-full">

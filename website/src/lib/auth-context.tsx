@@ -46,6 +46,7 @@ interface AuthState {
 
 interface AuthContextValue extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
+  loginAsGuest: () => void;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => void;
   clearError: () => void;
@@ -56,6 +57,7 @@ interface AuthContextValue extends AuthState {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const USER_KEY = 'hv_user';
+const GUEST_KEY = 'hv_guest';  // sessionStorage — clears on tab close
 
 const defaultFreeTrial: FreeTrialInfo = { updatesUsed: 0, maxFreeUpdates: 25, remaining: 25 };
 const defaultSubscription: SubscriptionInfo = {
@@ -104,6 +106,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const hydrate = async () => {
       const token = tokenStorage.get();
       const userRaw = typeof window !== 'undefined' ? localStorage.getItem(USER_KEY) : null;
+
+      // Check for guest session first (sessionStorage)
+      const guestRaw = typeof window !== 'undefined' ? sessionStorage.getItem(GUEST_KEY) : null;
+      if (guestRaw) {
+        try {
+          const user = JSON.parse(guestRaw) as AuthUser;
+          setState((s) => ({ ...s, user, token: 'guest-token', isAuthenticated: true, loading: false }));
+        } catch {
+          sessionStorage.removeItem(GUEST_KEY);
+          setState((s) => ({ ...s, loading: false }));
+        }
+        return;
+      }
 
       if (!token) {
         setState((s) => ({ ...s, loading: false }));
@@ -196,6 +211,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
       }
 
+      if (typeof window !== 'undefined') sessionStorage.removeItem(GUEST_KEY);
       tokenStorage.set(response.token);
       localStorage.setItem(USER_KEY, JSON.stringify(response.user));
 
@@ -221,6 +237,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({ ...s, loading: true, error: null }));
     try {
       const response = await ApiService.register(payload);
+      if (typeof window !== 'undefined') sessionStorage.removeItem(GUEST_KEY);
       tokenStorage.set(response.token);
       localStorage.setItem(USER_KEY, JSON.stringify(response.user));
       const sub = response.user.role === 'business' ? extractSubscription(response.user) : {};
@@ -240,10 +257,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // ── loginAsGuest ──────────────────────────────────────────────────────────
+  const loginAsGuest = useCallback(() => {
+    const guestUser: AuthUser = {
+      _id: 'guest-user-id',
+      name: 'Guest User',
+      email: 'guest@hashview.app',
+      role: 'guest',
+      isGuest: true,
+      status: 'active',
+      emailVerified: false,
+      phoneVerified: false,
+      createdAt: new Date().toISOString(),
+    } as AuthUser;
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(GUEST_KEY, JSON.stringify(guestUser));
+    }
+    setState((s) => ({
+      ...s,
+      user: guestUser,
+      token: 'guest-token',
+      isAuthenticated: true,
+      loading: false,
+      error: null,
+    }));
+  }, []);
+
   // ── logout ───────────────────────────────────────────────────────────────────
   const logout = useCallback(() => {
     tokenStorage.remove();
     localStorage.removeItem(USER_KEY);
+    if (typeof window !== 'undefined') sessionStorage.removeItem(GUEST_KEY);
     if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
     setState({ ...initialState, loading: false });
     window.location.href = '/login';
@@ -284,6 +328,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value: AuthContextValue = {
     ...state,
     login,
+    loginAsGuest,
     register,
     logout,
     clearError,

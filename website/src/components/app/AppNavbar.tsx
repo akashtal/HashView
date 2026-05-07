@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Compass, Search, Heart, Bell, User, Building2, LayoutDashboard } from "lucide-react";
+import { Compass, Search, Heart, Bell, User, Building2, LayoutDashboard, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { useUnreadNotificationCount } from "@/lib/hooks/useNotifications";
@@ -24,6 +24,12 @@ const customerNav = [
   { href: "/account/profile", label: "Account", icon: User },
 ];
 
+// Guests can only browse — no personalized routes
+const guestNav = [
+  { href: "/explore", label: "Explore", icon: Compass },
+  { href: "/search", label: "Search", icon: Search },
+];
+
 const businessNav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/explore", label: "Explore", icon: Compass },
@@ -33,12 +39,15 @@ const businessNav = [
 
 export function AppNavbar() {
   const pathname = usePathname();
-  const { user } = useAuth();
-  const { data: unreadCount } = useUnreadNotificationCount();
+  const { user, isAuthenticated } = useAuth();
+  
+  const isGuest = user?.role === 'guest' || user?.isGuest;
+  const isBusiness = user?.role === "business";
+  
+  const { data: unreadCount } = useUnreadNotificationCount({ enabled: !!isAuthenticated && !isGuest });
   const [gateFeature, setGateFeature] = useState<FeatureGateKey | null>(null);
 
-  const isBusiness = user?.role === "business";
-  const navItems = isBusiness ? businessNav : customerNav;
+  const navItems = isGuest ? guestNav : isBusiness ? businessNav : customerNav;
 
   return (
     <>
@@ -80,7 +89,7 @@ export function AppNavbar() {
           })}
         </nav>
 
-        {!isBusiness && (
+        {!isBusiness && !isGuest && (
           <button
             onClick={() => setGateFeature("QR_SCAN")}
             className="hidden md:flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-bold hover:bg-primary/90 transition-colors ml-4 shrink-0"
@@ -90,8 +99,19 @@ export function AppNavbar() {
           </button>
         )}
 
-        {/* User chip */}
-        {user && (
+        {/* Guest Sign In CTA */}
+        {isGuest && (
+          <Link
+            href="/login"
+            className="flex items-center gap-2 ml-4 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-bold hover:bg-primary/90 transition-colors shrink-0"
+          >
+            <LogIn className="w-4 h-4" />
+            Sign In
+          </Link>
+        )}
+
+        {/* User chip — hidden for guests */}
+        {user && !isGuest && (
           <Link href="/account/profile" className="flex items-center gap-2.5 ml-auto shrink-0 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
               {user.name.charAt(0).toUpperCase()}
@@ -133,14 +153,23 @@ export function AppNavbar() {
         })}
       </nav>
 
-      {/* Mobile Scan FAB for Customers */}
-      {!isBusiness && (
+      {/* Mobile Scan FAB for Customers (not guests) */}
+      {!isBusiness && !isGuest && (
         <button
           onClick={() => setGateFeature("QR_SCAN")}
           className="md:hidden fixed bottom-20 right-6 z-40 w-14 h-14 bg-primary text-primary-foreground rounded-[1.25rem] flex items-center justify-center shadow-xl shadow-primary/30 active:scale-95 transition-transform border-2 border-white/20"
         >
           <QrCode className="w-6 h-6" />
         </button>
+      )}
+      {/* Mobile Sign In FAB for Guests */}
+      {isGuest && (
+        <Link
+          href="/login"
+          className="md:hidden fixed bottom-20 right-6 z-40 w-14 h-14 bg-primary text-primary-foreground rounded-[1.25rem] flex items-center justify-center shadow-xl shadow-primary/30 active:scale-95 transition-transform border-2 border-white/20"
+        >
+          <LogIn className="w-6 h-6" />
+        </Link>
       )}
 
       <DownloadAppModal feature={gateFeature} onClose={() => setGateFeature(null)} />

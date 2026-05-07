@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Eye, EyeOff, Mail, Lock, User, Building2, ChevronRight, Loader2, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Building2, ChevronRight, Loader2, ArrowLeft, Globe, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,7 @@ type Role = "customer" | "business";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, loading, error, isAuthenticated, user, clearError } = useAuth();
+  const { login, loginAsGuest, loading, error, isAuthenticated, user, clearError } = useAuth();
 
   const [role, setRole] = useState<Role>("customer");
   const [step, setStep] = useState<"role" | "form">("role");
@@ -26,15 +26,24 @@ function LoginForm() {
 
   const redirectTo = searchParams.get("redirect") || null;
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated (but NOT if guest)
   useEffect(() => {
     if (isAuthenticated && user) {
+      if (user.role === 'guest' || user.isGuest) {
+        // Guests should be allowed to view the login page so they can sign in!
+        return;
+      }
       const dest =
         redirectTo ||
         (user.role === "business" ? "/dashboard" : "/explore");
       router.replace(dest);
     }
   }, [isAuthenticated, user, redirectTo, router]);
+
+  const handleGuestLogin = () => {
+    loginAsGuest();
+    router.push('/explore');
+  };
 
   // Clear API error on input change
   useEffect(() => {
@@ -182,7 +191,24 @@ function LoginForm() {
                 })}
               </div>
 
-              <p className="text-center text-sm text-muted-foreground mt-8">
+              {/* Guest access */}
+              <button
+                onClick={handleGuestLogin}
+                className="w-full mt-4 group flex items-center justify-between p-4 rounded-2xl border border-border bg-muted/30 hover:bg-muted/60 hover:border-primary/30 transition-all duration-200"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                    <Globe className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-foreground text-sm">Continue as Guest</p>
+                    <p className="text-muted-foreground text-xs">Explore businesses without an account</p>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+              </button>
+
+              <p className="text-center text-sm text-muted-foreground mt-6">
                 Don&apos;t have an account?{" "}
                 <Link href="/register" className="text-primary font-semibold hover:underline">
                   Create one free

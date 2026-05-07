@@ -70,9 +70,13 @@ function RegisterForm() {
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated (but NOT if guest)
   useEffect(() => {
     if (isAuthenticated && user) {
+      if (user.role === 'guest' || user.isGuest) {
+        // Guests should be allowed to view the register page so they can sign up!
+        return;
+      }
       router.replace(user.role === "business" ? "/dashboard" : "/explore");
     }
   }, [isAuthenticated, user, router]);

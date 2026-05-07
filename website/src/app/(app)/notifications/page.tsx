@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import type { Notification } from "@/lib/types";
 import { NotificationSkeleton } from "@/components/app/Skeletons";
 import { StaggerList, StaggerItem } from "@/components/app/FadeIn";
+import { useGuestGuard } from "@/lib/hooks/useGuestGuard";
 
 function formatRelativeTime(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -60,12 +61,15 @@ function NotificationItem({ notif, onRead }: { notif: Notification; onRead: (id:
 }
 
 export default function NotificationsPage() {
+  const redirecting = useGuestGuard();
   const { data, isLoading, refetch } = useNotifications();
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
 
   const notifications = data?.notifications ?? [];
   const unreadCount = data?.unreadCount ?? 0;
+
+  if (redirecting) return null;
 
   const handleMarkAll = async () => {
     await markAllRead.mutateAsync();

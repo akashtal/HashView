@@ -11,23 +11,25 @@ export const NOTIFICATION_KEYS = {
 };
 
 /** All notifications for authenticated user */
-export function useNotifications(params?: Record<string, unknown>) {
+export function useNotifications(params?: Record<string, unknown>, options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: NOTIFICATION_KEYS.list(params),
     queryFn: () => ApiService.getNotifications(params),
     staleTime: 30 * 1000, // 30 sec — notifications need to feel real-time
     refetchInterval: 60 * 1000, // poll every 1 min
+    enabled: options.enabled,
   });
 }
 
 /** Unread count only (lightweight, used for badge) */
-export function useUnreadNotificationCount() {
+export function useUnreadNotificationCount(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: NOTIFICATION_KEYS.unread,
     queryFn: () => ApiService.getNotifications({ limit: 1 }),
     staleTime: 30 * 1000,
     refetchInterval: 60 * 1000,
     select: (data) => data.unreadCount,
+    enabled: options.enabled,
   });
 }
 

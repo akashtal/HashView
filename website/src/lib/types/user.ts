@@ -49,7 +49,7 @@ export interface User {
   name: string;
   email: string;
   phone?: string;
-  role: 'customer' | 'business' | 'admin';
+  role: 'customer' | 'business' | 'admin' | 'guest';
   adminRole?: 'admin' | 'BUSINESS_MANAGER' | 'VIEWER' | null;
   permissions?: string[];
   profileImage?: string;
@@ -101,6 +101,7 @@ export interface BusinessOwner {
     maxReach: number;
     totalSent: number;
   };
+  isGuest?: boolean;
 }
 
 /** Union type — whatever /auth/me returns */

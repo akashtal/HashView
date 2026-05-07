@@ -4,6 +4,7 @@ import { History, MapPin, Star, Calendar } from "lucide-react";
 import { useRewardHistory } from "@/lib/hooks/useDashboard";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useGuestGuard } from "@/lib/hooks/useGuestGuard";
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-GB", {
@@ -12,8 +13,11 @@ function formatDate(dateStr: string) {
 }
 
 export default function HistoryPage() {
+  const redirecting = useGuestGuard();
   const { data, isLoading } = useRewardHistory();
   const history = (data as { history?: { _id: string; business?: { name?: string; logo?: { url?: string }; _id?: string }; createdAt: string; points?: number; reviewRating?: number; type?: string }[] })?.history ?? [];
+
+  if (redirecting) return null;
 
   return (
     <div className="min-h-full">
