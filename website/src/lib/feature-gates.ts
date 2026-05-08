@@ -65,6 +65,13 @@ export const FEATURE_GATES = {
       'Scanning customer coupons and verifying reviews requires the HashView mobile app for Business Owners. Download the app to securely process transactions in-store.',
     icon: 'QrCode',
   },
+  GENERAL_DOWNLOAD: {
+    restricted: true,
+    ctaLabel: 'Download HashView App',
+    ctaDescription:
+      'Get the free HashView mobile app to write reviews, claim offers, and earn rewards on the go.',
+    icon: 'Smartphone',
+  },
 } as const satisfies Record<string, FeatureGate>;
 
 export type FeatureGateKey = keyof typeof FEATURE_GATES;

@@ -40,10 +40,10 @@ const businessNav = [
 export function AppNavbar() {
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
-  
+
   const isGuest = user?.role === 'guest' || user?.isGuest;
   const isBusiness = user?.role === "business";
-  
+
   const { data: unreadCount } = useUnreadNotificationCount({ enabled: !!isAuthenticated && !isGuest });
   const [gateFeature, setGateFeature] = useState<FeatureGateKey | null>(null);
 
@@ -54,7 +54,7 @@ export function AppNavbar() {
       {/* Top navbar (desktop) */}
       <header className="hidden md:flex fixed top-0 left-0 right-0 z-40 h-16 bg-card/90 backdrop-blur-xl border-b border-border items-center px-6 gap-6">
         {/* Logo */}
-        <Link href={isBusiness ? "/dashboard" : "/explore"} className="flex items-center gap-2.5 shrink-0">
+        <Link href={isBusiness ? "/dashboard" : "/"} className="flex items-center gap-2.5 shrink-0">
           <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow">
             <Image src="/logo.png" alt="HashView" width={24} height={24} className="object-contain" />
           </div>

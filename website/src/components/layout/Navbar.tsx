@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import Image from "next/image";
 import logo from "@/assets/logo.png";
+import { DownloadAppModal } from "@/components/app/DownloadAppModal";
+import type { FeatureGateKey } from "@/lib/feature-gates";
 
 // Note: You may need to configure next.config.ts to handle .png imports
 
@@ -18,11 +20,13 @@ const navLinks = [
   { name: "Pricing", path: "/pricing" },
   { name: "Blog", path: "/blog" },
   { name: "Contact", path: "/contact" },
+  { name: "Browse Businesses", path: "/explore" },
 ];
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showDownloadGate, setShowDownloadGate] = useState<FeatureGateKey | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -38,7 +42,7 @@ export const Navbar = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "glass py-3" : "bg-transparent py-5"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled || isOpen ? "glass py-3" : "bg-transparent py-5"
         }`}
     >
       <div className="container mx-auto px-4 lg:px-8">
@@ -77,33 +81,16 @@ export const Navbar = () => {
           {/* Theme Toggle & CTA Button */}
           <div className="hidden md:flex items-center gap-3">
             <ThemeToggle />
+            <Button variant="default" asChild>
+              <Link href="/login">Log In</Link>
+            </Button>
             <Button
               variant="outline"
               size="default"
-              asChild
               className="flex items-center gap-2"
+              onClick={() => setShowDownloadGate('GENERAL_DOWNLOAD')}
             >
-              <a
-                href="https://apps.apple.com/us/app/hashview/id6756681321"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Download iOS
-              </a>
-            </Button>
-            <Button
-              variant="hero"
-              size="default"
-              asChild
-              className="flex items-center gap-2"
-            >
-              <a
-                href="https://play.google.com/store/apps/details?id=com.hashview.apps&pcampaignid=web_share"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Download Android
-              </a>
+              Download App
             </Button>
           </div>
 
@@ -157,28 +144,18 @@ export const Navbar = () => {
                 >
                   <div className="flex items-center justify-center gap-3">
                     <ThemeToggle />
-                    <span className="text-sm text-muted-foreground">Toggle Theme</span>
+                    <span className="text-sm text-muted-foreground">Dark/Light</span>
                   </div>
+                  <Button variant="default" className="w-full" asChild>
+                    <Link href="/login" onClick={() => setIsOpen(false)}>Log In</Link>
+                  </Button>
                   <div className="flex gap-3">
-                    <Button variant="outline" className="flex-1" asChild>
-                      <a
-                        href="https://apps.apple.com/us/app/hashview/id6756681321"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center"
-                      >
-                        Download iOS
-                      </a>
-                    </Button>
-                    <Button variant="hero" className="flex-1" asChild>
-                      <a
-                        href="https://play.google.com/store/apps/details?id=com.hashview.apps&pcampaignid=web_share"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center"
-                      >
-                        Download Android
-                      </a>
+                    <Button 
+                      variant="outline" 
+                      className="flex-1 flex items-center justify-center"
+                      onClick={() => setShowDownloadGate('GENERAL_DOWNLOAD')}
+                    >
+                      Download App
                     </Button>
                   </div>
                 </motion.div>
@@ -187,6 +164,11 @@ export const Navbar = () => {
           )}
         </AnimatePresence>
       </div>
+
+      <DownloadAppModal
+        feature={showDownloadGate}
+        onClose={() => setShowDownloadGate(null)}
+      />
     </motion.header>
   );
 };

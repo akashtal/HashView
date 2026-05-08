@@ -18,9 +18,11 @@ interface LoaderProps {
 }
 
 export default function cloudinaryLoader({ src, width, quality = 80 }: LoaderProps): string {
-  // Only transform Cloudinary URLs; pass everything else through as-is
+  // Only transform Cloudinary URLs; pass everything else through with a dummy width
+  // query parameter to satisfy Next.js's "loader does not implement width" check.
   if (!src.includes('res.cloudinary.com')) {
-    return src;
+    const separator = src.includes('?') ? '&' : '?';
+    return `${src}${separator}w=${width}&q=${quality || 75}`;
   }
 
   // Cloudinary URL format:
