@@ -199,6 +199,9 @@ export interface NearbyBusinessesParams {
   page?: number;
   limit?: number;
   category?: string;
+  ratingSource?: string;
+  minRating?: number;
+  distance?: string;
 }
 
 export interface SearchBusinessesParams {

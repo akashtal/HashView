@@ -114,9 +114,9 @@ export function AppNavbar() {
         {user && !isGuest && (
           <Link href="/account/profile" className="flex items-center gap-2.5 ml-auto shrink-0 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
-              {user.name.charAt(0).toUpperCase()}
+              {(user.name || "User").charAt(0).toUpperCase()}
             </div>
-            <span className="text-sm font-medium text-foreground max-w-[120px] truncate">{user.name.split(" ")[0]}</span>
+            <span className="text-sm font-medium text-foreground max-w-[120px] truncate">{(user.name || "User").split(" ")[0]}</span>
             {isBusiness && <Building2 className="w-3.5 h-3.5 text-muted-foreground" />}
           </Link>
         )}

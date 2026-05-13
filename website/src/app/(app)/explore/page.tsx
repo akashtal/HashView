@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Search, SlidersHorizontal, Bell, Gift, MapPin, RefreshCw, Navigation, AlertCircle } from "lucide-react";
+import { Search, Bell, Gift, MapPin, RefreshCw, Navigation, AlertCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useAllBusinesses, useNearbyBusinesses, useCategories } from "@/lib/hooks/useBusinesses";
 import { useUserLocation, DEFAULT_LOCATION } from "@/lib/hooks/useUserLocation";
 import { BusinessCard } from "@/components/app/BusinessCard";
 import { CategoryFilter } from "@/components/app/CategoryFilter";
+import { ExploreFilterDrawer, type FilterState, EMPTY_FILTERS, countActiveFilters } from "@/components/app/ExploreFilterDrawer";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useInView } from "react-intersection-observer";
@@ -22,19 +23,47 @@ export default function ExplorePage() {
   const isGuest = user?.role === "guest" || user?.isGuest;
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
+  const activeFilterCount = countActiveFilters(filters);
 
   // ─── Location ──────────────────────────────────────────────────────────────
-  // Mirrors UserHomeScreen.js: request real location, cache it, fall back to London
-  const { location: realLocation, loading: locationLoading, denied, hasRealLocation, retry: retryLocation } = useUserLocation();
+  const {
+    location: realLocation,
+    loading: locationLoading,
+    denied,
+    hasRealLocation,
+    retry: retryLocation,
+  } = useUserLocation();
 
-  // Build the params object that's passed to the nearby API.
-  // While we haven't resolved location yet (loading), keep it null so the
-  // query stays disabled and we show a skeleton instead of a flash of London data.
+  // Build the params object for the nearby API.
+  // While location is still resolving, keep null so the query is disabled.
   const nearbyParams = (() => {
-    if (locationLoading) return null;                          // still waiting — hold
-    if (realLocation) return { ...realLocation, radius: 20_000_000, category: selectedCategory || undefined };
-    if (denied) return { ...DEFAULT_LOCATION, radius: 20_000_000, category: selectedCategory || undefined };
-    return null;
+    if (locationLoading) return null;
+    const coords = realLocation ?? (denied ? DEFAULT_LOCATION : null);
+    if (!coords) return null;
+
+    // Resolve distance radius from filter
+    const distanceRadiusMap: Record<string, number> = {
+      nearme: 1_000,
+      "1km": 1_000,
+      "5km": 5_000,
+      "10km": 10_000,
+      "25km": 25_000,
+    };
+    const radius = filters.distance
+      ? distanceRadiusMap[filters.distance]
+      : 20_000_000; // global (show all sorted by distance)
+
+    return {
+      ...coords,
+      radius,
+      category: selectedCategory || undefined,
+      ...(filters.ratingSource && filters.minRating
+        ? { ratingSource: filters.ratingSource, minRating: filters.minRating }
+        : {}),
+      ...(filters.distance ? { distance: filters.distance } : {}),
+    };
   })();
 
   // ─── Data fetching ─────────────────────────────────────────────────────────
@@ -47,7 +76,6 @@ export default function ExplorePage() {
     isFetchingNextPage: isFetchingNextNearby,
   } = useNearbyBusinesses(nearbyParams);
 
-  // Fallback: all businesses (only enabled when we can't use nearby at all)
   const {
     data: allData,
     isLoading: allLoading,
@@ -74,7 +102,6 @@ export default function ExplorePage() {
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const isLoading = locationLoading || nearbyLoading || allLoading;
-
   const firstName = user?.name?.split(" ")[0] || "there";
   const categories = categoriesData ?? [];
 
@@ -82,7 +109,6 @@ export default function ExplorePage() {
     refetchNearby();
   }, [refetchNearby]);
 
-  // ─── Location status label ─────────────────────────────────────────────────
   const locationLabel = (() => {
     if (locationLoading) return "Getting your location...";
     if (hasRealLocation) return "Showing businesses near you";
@@ -92,9 +118,8 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-full">
-      {/* Header */}
+      {/* ─── Header ─────────────────────────────────────────────────────────── */}
       <div className="bg-gradient-to-br from-violet-900 via-purple-900 to-violet-800 pt-6 pb-8 px-4 relative overflow-hidden">
-        {/* Decorative orbs */}
         <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-orange-500/10 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-violet-400/10 blur-2xl pointer-events-none" />
 
@@ -102,9 +127,7 @@ export default function ExplorePage() {
           {/* Greeting row */}
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h1 className="text-2xl font-display font-bold text-white">
-                Hi {firstName} 👋
-              </h1>
+              <h1 className="text-2xl font-display font-bold text-white">Hi {firstName} 👋</h1>
               <p className="text-white/70 text-sm mt-0.5">Discover amazing businesses</p>
             </div>
             <div className="flex items-center gap-2.5">
@@ -127,15 +150,80 @@ export default function ExplorePage() {
             </div>
           </div>
 
-          {/* Search bar */}
-          <button
-            onClick={() => router.push("/search")}
-            className="w-full flex items-center gap-3 bg-white/15 hover:bg-white/20 border border-white/20 rounded-2xl px-4 py-3.5 text-left transition-all duration-200"
-          >
-            <Search className="w-4 h-4 text-white/60 shrink-0" />
-            <span className="text-white/60 text-sm">Search businesses, categories...</span>
-            <SlidersHorizontal className="w-4 h-4 text-white/60 ml-auto shrink-0" />
-          </button>
+          {/* Search bar — clicking the filter icon opens the drawer */}
+          <div className="relative">
+            <button
+              onClick={() => router.push("/search")}
+              className="w-full flex items-center gap-3 bg-white/15 hover:bg-white/20 border border-white/20 rounded-2xl px-4 py-3.5 text-left transition-all duration-200"
+            >
+              <Search className="w-4 h-4 text-white/60 shrink-0" />
+              <span className="text-white/60 text-sm flex-1">Search businesses, categories...</span>
+            </button>
+
+            {/* Filter icon button — separate so it opens drawer, not search */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setFilterDrawerOpen(true);
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-xl hover:bg-white/20 transition-colors"
+              aria-label="Open filters"
+            >
+              {/* SlidersHorizontal with active badge */}
+              <div className="relative">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-white/70"
+                >
+                  <line x1="21" x2="14" y1="4" y2="4" />
+                  <line x1="10" x2="3" y1="4" y2="4" />
+                  <line x1="21" x2="12" y1="12" y2="12" />
+                  <line x1="8" x2="3" y1="12" y2="12" />
+                  <line x1="21" x2="16" y1="20" y2="20" />
+                  <line x1="12" x2="3" y1="20" y2="20" />
+                  <line x1="14" x2="14" y1="2" y2="6" />
+                  <line x1="8" x2="8" y1="10" y2="14" />
+                  <line x1="16" x2="16" y1="18" y2="22" />
+                </svg>
+                {activeFilterCount > 0 && (
+                  <span className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-orange-500 text-white text-[9px] font-bold flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </div>
+            </button>
+          </div>
+
+          {/* Active filters pill strip */}
+          {activeFilterCount > 0 && (
+            <div className="flex items-center gap-2 mt-3 flex-wrap">
+              <span className="text-white/60 text-xs">Filters:</span>
+              {filters.ratingSource && filters.minRating && (
+                <span className="flex items-center gap-1 bg-white/20 rounded-full px-2.5 py-0.5 text-white text-xs font-semibold">
+                  {filters.minRating}+ ⭐ {filters.ratingSource === "hashview" ? "HashView" : filters.ratingSource === "google" ? "Google" : "TripAdvisor"}
+                </span>
+              )}
+              {filters.distance && (
+                <span className="flex items-center gap-1 bg-white/20 rounded-full px-2.5 py-0.5 text-white text-xs font-semibold">
+                  📍 {filters.distance === "nearme" ? "Near Me" : filters.distance.toUpperCase()}
+                </span>
+              )}
+              <button
+                onClick={() => setFilters(EMPTY_FILTERS)}
+                className="text-white/50 hover:text-white text-xs underline transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          )}
 
           {/* Location status row */}
           <div className="flex items-center gap-2 mt-3">
@@ -145,8 +233,6 @@ export default function ExplorePage() {
               <MapPin className="w-3 h-3 text-white/50 shrink-0" />
             )}
             <span className="text-white/50 text-xs flex-1">{locationLabel}</span>
-
-            {/* Retry button shown when permission was denied */}
             {denied && (
               <button
                 onClick={retryLocation}
@@ -160,9 +246,10 @@ export default function ExplorePage() {
         </div>
       </div>
 
+      {/* ─── Body ───────────────────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        {/* Location permission denied banner */}
+        {/* Location denied banner */}
         {denied && (
           <FadeIn>
             <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-2xl p-4 mb-6">
@@ -228,11 +315,19 @@ export default function ExplorePage() {
             <p className="text-muted-foreground text-sm mb-5">
               {selectedCategory
                 ? `No businesses in "${selectedCategory}" yet`
+                : activeFilterCount > 0
+                ? "No businesses match your filters"
                 : "No businesses available right now"}
             </p>
-            {selectedCategory && (
-              <Button variant="outline" onClick={() => setSelectedCategory(null)}>
-                Clear filter
+            {(selectedCategory || activeFilterCount > 0) && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedCategory(null);
+                  setFilters(EMPTY_FILTERS);
+                }}
+              >
+                Clear all filters
               </Button>
             )}
           </div>
@@ -246,7 +341,7 @@ export default function ExplorePage() {
           </StaggerList>
         )}
 
-        {/* Loading trigger for infinite scroll */}
+        {/* Infinite scroll trigger */}
         {businesses.length > 0 && hasNextPage && (
           <div ref={ref} className="py-8 flex justify-center">
             {isFetchingNextPage && (
@@ -255,6 +350,19 @@ export default function ExplorePage() {
           </div>
         )}
       </div>
+
+      {/* ─── Filter drawer ───────────────────────────────────────────────────── */}
+      <ExploreFilterDrawer
+        open={filterDrawerOpen}
+        onClose={() => setFilterDrawerOpen(false)}
+        filters={filters}
+        onChange={setFilters}
+        hasLocation={hasRealLocation}
+        onRequestLocation={() => {
+          retryLocation();
+          setFilterDrawerOpen(false);
+        }}
+      />
     </div>
   );
 }

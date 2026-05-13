@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { User, Mail, Phone, Camera, Loader2, CheckCircle2, ChevronLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -15,7 +15,13 @@ const AVATAR_COLORS = ["#6C47FF", "#F59E0B", "#10B981", "#EF4444", "#3B82F6", "#
 
 export default function EditProfilePage() {
   const router = useRouter();
-  const { user, updateUser } = useAuth();
+  const { user, loading, updateUser } = useAuth();
+  
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login?redirect=/account/edit');
+    }
+  }, [user, loading, router]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -62,8 +68,16 @@ export default function EditProfilePage() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   if (!user) return null;
-  const initial = user.name.charAt(0).toUpperCase();
+  const initial = (user.name || "User").charAt(0).toUpperCase();
   const avatarColor = AVATAR_COLORS[initial.charCodeAt(0) % AVATAR_COLORS.length];
   const isBusiness = user.role === "business";
 

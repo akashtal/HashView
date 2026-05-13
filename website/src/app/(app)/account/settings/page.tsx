@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Settings, Bell, Moon, Sun, Globe, Shield, Trash2, ChevronRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "next-themes";
@@ -66,9 +66,16 @@ function SettingRow({
 }
 
 export default function SettingsPage() {
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login?redirect=/account/settings');
+    }
+  }, [user, loading, router]);
+
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(true);
@@ -89,6 +96,14 @@ export default function SettingsPage() {
       alert("Failed to delete account. Please contact support.");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (!user) return null;
 

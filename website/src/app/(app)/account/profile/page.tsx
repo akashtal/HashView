@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import {
   User, Settings, Lock, Ticket, History,
   HelpCircle, LogOut, ChevronRight, Building2, Star, Crown,
@@ -15,7 +16,21 @@ const AVATAR_COLORS = ["#6C47FF", "#F59E0B", "#10B981", "#EF4444", "#3B82F6", "#
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, logout, isPro } = useAuth();
+  const { user, loading, logout, isPro } = useAuth();
+  
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login?redirect=/account/profile');
+    }
+  }, [user, loading, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
 
   if (!user) return null;
 
@@ -72,7 +87,8 @@ export default function ProfilePage() {
     );
   }
 
-  const initial = user.name.charAt(0).toUpperCase();
+  const userName = user.name || "User";
+  const initial = userName.charAt(0).toUpperCase();
   const avatarColor = AVATAR_COLORS[initial.charCodeAt(0) % AVATAR_COLORS.length];
   const isBusiness = user.role === "business";
 
