@@ -130,6 +130,10 @@ app.use('/api/subscription', subscriptionRoutes);
 const chatSocket = require('./sockets/chat.socket');
 chatSocket(io);
 
+// Initialize live business stats socket
+const businessLiveController = require('./controllers/businessLive.controller');
+businessLiveController.setSocketIO(io);
+
 // Initialize automatic sync jobs (cron)
 if (process.env.ENABLE_AUTO_SYNC !== 'false') {
   const { initializeSyncJobs } = require('./utils/syncJobs');

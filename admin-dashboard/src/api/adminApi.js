@@ -59,6 +59,10 @@ export const adminApi = {
   getAllReviews: (params) => api.get('/admin/reviews', { params }),
   updateReviewStatus: (reviewId, status) =>
     api.put(`/admin/reviews/${reviewId}/status`, { status }),
+  getLiveTopReviewers: (businessIds) => 
+    api.post('/business/top-reviewers', { businessIds }),
+  // 📊 Review Analytics (admin-only leaderboard)
+  getReviewAnalytics: (params) => api.get('/admin/reviews/analytics', { params }),
 
   // Notifications - Enhanced for full admin control
   sendNotification: (data) => api.post('/admin/notifications/send', data),

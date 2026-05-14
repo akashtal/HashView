@@ -14,6 +14,7 @@ import {
   FileCheck,
   ShieldCheck,
   ChevronRight,
+  BarChart3,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -33,22 +34,26 @@ const Layout = ({ children, onLogout }) => {
 
   // Navigation items — each gated by a permission
   const allNavItems = [
-    { name: 'Dashboard',       href: '/',               icon: LayoutDashboard, permission: 'VIEW_DASHBOARD' },
-    { name: 'Categories',      href: '/categories',      icon: Grid,            permission: 'MANAGE_CATEGORIES' },
-    { name: 'Users',           href: '/users',           icon: Users,           permission: 'VIEW_USERS' },
-    { name: 'Businesses',      href: '/businesses',      icon: Building2,       permission: 'VIEW_BUSINESS' },
-    { name: 'Coupons',         href: '/coupons',         icon: Tag,             permission: 'VIEW_COUPONS' },
-    { name: 'Reviews',         href: '/reviews',         icon: Star,            permission: 'VIEW_REVIEWS' },
-    { name: 'Business Claims', href: '/business-claims', icon: FileCheck,       permission: 'VIEW_CLAIMS' },
-    { name: 'Notifications',   href: '/notifications',   icon: Bell,            permission: 'SEND_NOTIFICATIONS' },
-    { name: 'Admin Users',     href: '/admin-users',     icon: ShieldCheck,     permission: 'MANAGE_ROLES' },
+    { name: 'Dashboard',        href: '/',                  icon: LayoutDashboard, permission: 'VIEW_DASHBOARD' },
+    { name: 'Categories',       href: '/categories',         icon: Grid,            permission: 'MANAGE_CATEGORIES' },
+    { name: 'Users',            href: '/users',              icon: Users,           permission: 'VIEW_USERS' },
+    { name: 'Businesses',       href: '/businesses',         icon: Building2,       permission: 'VIEW_BUSINESS' },
+    { name: 'Coupons',          href: '/coupons',            icon: Tag,             permission: 'VIEW_COUPONS' },
+    { name: 'Reviews',          href: '/reviews',            icon: Star,            permission: 'VIEW_REVIEWS' },
+    { name: 'Review Analytics', href: '/reviews/analytics',  icon: BarChart3,       permission: 'VIEW_REVIEWS' },
+    { name: 'Business Claims',  href: '/business-claims',   icon: FileCheck,       permission: 'VIEW_CLAIMS' },
+    { name: 'Notifications',    href: '/notifications',      icon: Bell,            permission: 'SEND_NOTIFICATIONS' },
+    { name: 'Admin Users',      href: '/admin-users',        icon: ShieldCheck,     permission: 'MANAGE_ROLES' },
   ];
 
   // Only show nav items the user has permission to access
   const navigation = allNavItems.filter(item => hasPermission(item.permission));
 
-  const isActive = (href) =>
-    href === '/' ? location.pathname === '/' : location.pathname.startsWith(href);
+  const isActive = (href) => {
+    if (href === '/') return location.pathname === '/';
+    if (href === '/reviews') return location.pathname === '/reviews';
+    return location.pathname.startsWith(href);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">

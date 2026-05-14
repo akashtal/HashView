@@ -12,6 +12,7 @@ const {
   updateUserStatus,
   getAllReviews,
   updateReviewStatus,
+  getReviewAnalytics,
   sendNotification,
   deleteUser,
   deleteBusiness,
@@ -56,6 +57,8 @@ router.post('/businesses/:id/suspend', checkPermission(PERMISSIONS.SUSPEND_ACCOU
 router.delete('/businesses/:id', checkPermission(PERMISSIONS.DELETE_BUSINESS), deleteBusiness);
 
 // ── Reviews ───────────────────────────────────────────────────────────────────
+// IMPORTANT: /analytics MUST be before /:id routes to avoid Express treating 'analytics' as an ID param
+router.get('/reviews/analytics', checkPermission(PERMISSIONS.VIEW_REVIEWS), getReviewAnalytics);
 router.get('/reviews', checkPermission(PERMISSIONS.VIEW_REVIEWS), getAllReviews);
 router.put('/reviews/:id/status', checkPermission(PERMISSIONS.MANAGE_REVIEWS), updateReviewStatus);
 

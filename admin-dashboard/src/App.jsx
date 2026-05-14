@@ -8,6 +8,7 @@ import Businesses from './pages/Businesses';
 import BusinessDetails from './pages/BusinessDetails';
 import CreateBusiness from './pages/CreateBusiness';
 import Reviews from './pages/Reviews';
+import ReviewAnalytics from './pages/ReviewAnalytics';
 import Notifications from './pages/Notifications';
 import Categories from './pages/Categories';
 import Coupons from './pages/Coupons';
@@ -57,6 +58,7 @@ function AppRoutes() {
                 <Route path="/businesses/:id" element={<BusinessDetails />} />
                 <Route path="/coupons" element={<Coupons />} />
                 <Route path="/reviews" element={<Reviews />} />
+                <Route path="/reviews/analytics" element={<ReviewAnalytics />} />
                 <Route path="/tripadvisor" element={<TripAdvisor />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/business-claims" element={<BusinessClaims />} />

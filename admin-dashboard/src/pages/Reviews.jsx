@@ -9,10 +9,47 @@ const Reviews = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [businessFilter, setBusinessFilter] = useState('');
+  const [businesses, setBusinesses] = useState([]);
+  const [topReviewersList, setTopReviewersList] = useState([]);
 
   useEffect(() => {
     fetchReviews();
-  }, [page, statusFilter]);
+    fetchTopReviewers();
+  }, [page, statusFilter, businessFilter]);
+
+  const fetchTopReviewers = async () => {
+    if (!businessFilter) {
+      setTopReviewersList([]);
+      return;
+    }
+    try {
+      const res = await adminApi.getLiveTopReviewers([businessFilter]);
+      if (res.data && res.data[businessFilter]) {
+        setTopReviewersList(res.data[businessFilter]);
+      } else {
+        setTopReviewersList([]);
+      }
+    } catch (error) {
+      console.error('Error fetching top reviewers:', error);
+      setTopReviewersList([]);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch businesses for the filter dropdown
+    const fetchBusinesses = async () => {
+      try {
+        const response = await adminApi.getAllBusinesses({ limit: 1000 });
+        if (response.data && response.data.businesses) {
+          setBusinesses(response.data.businesses);
+        }
+      } catch (error) {
+        console.error('Error fetching businesses for filter:', error);
+      }
+    };
+    fetchBusinesses();
+  }, []);
 
   const fetchReviews = async () => {
     setLoading(true);
@@ -24,6 +61,9 @@ const Reviews = () => {
         params.status = 'active,approved';
       } else if (statusFilter) {
         params.status = statusFilter;
+      }
+      if (businessFilter) {
+        params.businessId = businessFilter;
       }
 
       const response = await adminApi.getAllReviews(params);
@@ -85,7 +125,63 @@ const Reviews = () => {
             <option value="removed">Removed / Rejected</option>
           </select>
         </div>
+
+        <div className="flex items-center gap-4 mt-4">
+          <label className="text-sm font-medium text-gray-700">Filter by Business:</label>
+          <select
+            value={businessFilter}
+            onChange={(e) => {
+              setBusinessFilter(e.target.value);
+              setPage(1);
+            }}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none flex-1 max-w-md"
+          >
+            <option value="">All Businesses</option>
+            {businesses.map((b) => (
+              <option key={b._id} value={b._id}>{b.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
+
+      {/* Top Reviewers Leaderboard (only shows when a business is selected) */}
+      {businessFilter && topReviewersList.length > 0 && (
+        <div className="bg-purple-50 rounded-xl shadow-sm border border-purple-100 p-6 mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <Star className="text-purple-600" size={24} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-purple-900">Top Reviewers</h2>
+              <p className="text-sm text-purple-700">Users who have submitted the most reviews for this business.</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {topReviewersList.map((reviewer, index) => (
+              <div key={reviewer.user?._id || index} className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-4 border border-purple-100">
+                <div className="relative">
+                  {reviewer.user?.profileImage ? (
+                    <img src={reviewer.user.profileImage} alt={reviewer.user.name} className="w-12 h-12 rounded-full object-cover border-2 border-purple-200" />
+                  ) : (
+                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center border-2 border-purple-200">
+                      <span className="text-purple-600 font-bold text-lg">{reviewer.user?.name?.charAt(0) || '?'}</span>
+                    </div>
+                  )}
+                  {index === 0 && (
+                    <div className="absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm border border-yellow-500">
+                      #1
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 truncate" title={reviewer.user?.name}>{reviewer.user?.name}</h3>
+                  <p className="text-sm font-medium text-purple-600">{reviewer.reviewCount} review{reviewer.reviewCount !== 1 ? 's' : ''}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Reviews List */}
       <div className="space-y-4">
@@ -118,10 +214,15 @@ const Reviews = () => {
 
                   <p className="text-gray-900 mb-3">{review.comment}</p>
 
-                  <div className="flex items-center text-sm text-gray-500">
-                    <span className="font-medium">{review.user?.name}</span>
+                  <div className="flex items-center text-sm text-gray-500 flex-wrap gap-y-2">
+                    <span className="font-medium text-gray-900">{review.user?.name}</span>
+                    {review.userReviewCountForBusiness !== undefined && (
+                      <span className="ml-2 px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
+                        {review.userReviewCountForBusiness} review{review.userReviewCountForBusiness !== 1 ? 's' : ''} here
+                      </span>
+                    )}
                     <span className="mx-2">•</span>
-                    <span>for {review.business?.name}</span>
+                    <span>for <span className="font-semibold text-gray-800">{review.business?.name}</span></span>
                     <span className="mx-2">•</span>
                     <span>{format(new Date(review.createdAt), 'MMM dd, yyyy')}</span>
                   </div>

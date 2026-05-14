@@ -6,6 +6,7 @@ const { generateCouponCode, calculateCouponExpiry } = require('../utils/coupon')
 const { sendPushNotification } = require('../utils/notification');
 const { generateCouponQRCode } = require('../utils/qrcode');
 const logger = require('../utils/logger');
+const { invalidateAndEmitTopReviewer } = require('./businessLive.controller');
 
 // In-memory suspicious behavior log (in production, use MongoDB collection)
 const suspiciousActivityLog = [];
@@ -350,6 +351,9 @@ exports.createReview = async (req, res, next) => {
     business.reviewCount = reviews.length;
     business.lastReviewAt = new Date(); // ← stamp last review time for home screen cards
     await business.save();
+
+    // Invalidate live top reviewer cache and trigger websocket update
+    invalidateAndEmitTopReviewer(businessId);
 
     // ── SMART COUPON REWARD LOGIC ──────────────────────────────────────────
     // 1. Fetch ALL active, non-expired coupon templates for the reviewed business
@@ -728,6 +732,9 @@ exports.deleteReview = async (req, res, next) => {
     }
 
     await review.deleteOne();
+
+    // Invalidate live top reviewer cache and trigger websocket update
+    invalidateAndEmitTopReviewer(review.business);
 
     res.status(200).json({
       success: true,

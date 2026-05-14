@@ -8,6 +8,11 @@ const { sendPushNotification, sendBulkNotifications } = require('../utils/notifi
 const { sendEmail } = require('../utils/emailService');
 const { generateBusinessQRCode } = require('../utils/qrcode');
 const { syncGoogleRatingsForBusiness } = require('./externalReviews.controller');
+const { getBusinessLeaderboards } = require('../utils/businessStats');
+
+// ── Analytics cache: avoids re-aggregating within 30s ─────────────────────
+const analyticsCache = new Map(); // key → { data, cachedAt }
+const ANALYTICS_CACHE_TTL_MS = 30 * 1000; // 30 seconds
 
 // @desc    Get admin dashboard stats
 // @route   GET /api/admin/dashboard
@@ -795,7 +800,7 @@ exports.getAllReviews = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
-    const { status } = req.query;
+    const { status, businessId } = req.query;
 
     const query = {};
     if (status) {
@@ -805,13 +810,31 @@ exports.getAllReviews = async (req, res, next) => {
         query.status = status;
       }
     }
+    
+    if (businessId) {
+      query.business = businessId;
+    }
 
     const reviews = await Review.find(query)
-      .populate('user', 'name email')
+      .populate('user', 'name email profileImage')
       .populate('business', 'name')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean(); // Use lean to easily add properties
+
+    // Attach how many times this user has reviewed this specific business
+    for (let i = 0; i < reviews.length; i++) {
+      const review = reviews[i];
+      if (review.user && review.business) {
+        review.userReviewCountForBusiness = await Review.countDocuments({
+          user: review.user._id,
+          business: review.business._id
+        });
+      } else {
+        review.userReviewCountForBusiness = 0;
+      }
+    }
 
     const total = await Review.countDocuments(query);
 
@@ -851,6 +874,71 @@ exports.updateReviewStatus = async (req, res, next) => {
       success: true,
       message: 'Review status updated successfully',
       review
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get Review Analytics leaderboard (per-business reviewer rankings)
+// @route   GET /api/admin/reviews/analytics
+// @access  Private (Admin — VIEW_REVIEWS permission)
+exports.getReviewAnalytics = async (req, res, next) => {
+  try {
+    const {
+      businessId,
+      dateFrom,
+      dateTo,
+      minReviews = 1,
+      sortBy = 'reviewCount',
+      page = 1,
+      limit = 20,
+      leaderboardLimit = 10,
+      forceRefresh
+    } = req.query;
+
+    // Build a cache key from the filter set
+    const cacheKey = JSON.stringify({
+      businessId, dateFrom, dateTo, minReviews, sortBy, page, limit, leaderboardLimit
+    });
+
+    // Serve from cache if fresh (unless forceRefresh is requested)
+    const cached = analyticsCache.get(cacheKey);
+    if (!forceRefresh && cached && (Date.now() - cached.cachedAt) < ANALYTICS_CACHE_TTL_MS) {
+      return res.status(200).json({
+        success: true,
+        cached: true,
+        cachedAt: cached.cachedAt,
+        ...cached.data
+      });
+    }
+
+    // Run the analytics aggregation
+    const result = await getBusinessLeaderboards({
+      businessId,
+      dateFrom,
+      dateTo,
+      minReviews: parseInt(minReviews) || 1,
+      sortBy,
+      page: parseInt(page) || 1,
+      limit: Math.min(parseInt(limit) || 20, 50), // max 50 cards per page
+      leaderboardLimit: Math.min(parseInt(leaderboardLimit) || 10, 20)
+    });
+
+    // Store in cache
+    analyticsCache.set(cacheKey, { data: result, cachedAt: Date.now() });
+
+    // Evict old cache entries (keep map small)
+    if (analyticsCache.size > 100) {
+      const firstKey = analyticsCache.keys().next().value;
+      analyticsCache.delete(firstKey);
+    }
+
+    res.status(200).json({
+      success: true,
+      cached: false,
+      cachedAt: Date.now(),
+      ...result
     });
   } catch (error) {
     next(error);

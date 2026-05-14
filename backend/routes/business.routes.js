@@ -34,6 +34,10 @@ router.get('/nearby', getNearbyBusinesses);
 router.get('/search', searchBusinesses);
 router.post('/qr/scan', getBusinessByQRCode);
 
+// Live Stats
+const { getLiveTopReviewers } = require('../controllers/businessLive.controller');
+router.post('/top-reviewers', getLiveTopReviewers);
+
 // ⚠️  Admin claims must come BEFORE /:id to avoid route shadowing
 router.get('/admin/claims', protect, authorize('admin'), getBusinessClaims);
 

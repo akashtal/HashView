@@ -134,5 +134,9 @@ reviewSchema.index({ geolocation: '2dsphere' });
 // Prevent duplicate reviews (one review per user per business per day)
 reviewSchema.index({ user: 1, business: 1, createdAt: 1 });
 
+// 📊 Admin Analytics: compound index for the leaderboard aggregation pipeline
+// Covers: $match on (business, status, createdAt) → $group by (business, user)
+reviewSchema.index({ business: 1, user: 1, status: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Review', reviewSchema);
 
