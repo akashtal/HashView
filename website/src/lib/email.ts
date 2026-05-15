@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+﻿import nodemailer from "nodemailer";
 
 const SMTP_HOST = process.env.SMTP_HOST || "smtp.gmail.com";
 const SMTP_PORT = parseInt(process.env.SMTP_PORT || "587");
@@ -9,12 +9,12 @@ const FROM_EMAIL = process.env.FROM_EMAIL || SMTP_USER;
 
 // Log configuration on module load (for debugging)
 if (typeof window === "undefined") {
-  console.log("📧 [EMAIL INIT] SMTP Configuration loaded:", {
+  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [EMAIL INIT] SMTP Configuration loaded:", {
     host: SMTP_HOST,
     port: SMTP_PORT,
-    user: SMTP_USER || "❌ NOT SET",
-    passConfigured: SMTP_PASS ? `✅ ${SMTP_PASS.length} chars` : "❌ NOT SET",
-    from: FROM_EMAIL || "❌ NOT SET",
+    user: SMTP_USER || "ÃƒÂ¢Ã‚ÂÃ…â€™ NOT SET",
+    passConfigured: SMTP_PASS ? `ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ ${SMTP_PASS.length} chars` : "ÃƒÂ¢Ã‚ÂÃ…â€™ NOT SET",
+    from: FROM_EMAIL || "ÃƒÂ¢Ã‚ÂÃ…â€™ NOT SET",
   });
 }
 
@@ -40,24 +40,24 @@ interface EmailOptions {
 }
 
 export async function sendEmail(options: EmailOptions) {
-  console.log("📧 [EMAIL] Attempting to send email...");
-  console.log("📧 [EMAIL] SMTP Config Check:", {
+  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [EMAIL] Attempting to send email...");
+  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [EMAIL] SMTP Config Check:", {
     host: SMTP_HOST,
     port: SMTP_PORT,
-    user: SMTP_USER || "❌ NOT SET",
+    user: SMTP_USER || "ÃƒÂ¢Ã‚ÂÃ…â€™ NOT SET",
     passLength: SMTP_PASS?.length || 0,
-    passSet: SMTP_PASS ? "✅ SET" : "❌ NOT SET",
-    from: FROM_EMAIL || "❌ NOT SET",
+    passSet: SMTP_PASS ? "ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ SET" : "ÃƒÂ¢Ã‚ÂÃ…â€™ NOT SET",
+    from: FROM_EMAIL || "ÃƒÂ¢Ã‚ÂÃ…â€™ NOT SET",
   });
 
   try {
     // Skip email if credentials are not configured
     if (!SMTP_USER || !SMTP_PASS || SMTP_USER === "" || SMTP_PASS === "") {
-      console.log("❌ [EMAIL] SMTP credentials not configured - skipping email");
+      console.log("ÃƒÂ¢Ã‚ÂÃ…â€™ [EMAIL] SMTP credentials not configured - skipping email");
       return { success: false, error: "SMTP not configured", skipped: true };
     }
 
-    console.log("✅ [EMAIL] SMTP credentials found, proceeding with email send...");
+    console.log("ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ [EMAIL] SMTP credentials found, proceeding with email send...");
 
     const mailOptions = {
       from: `"HashView" <${FROM_EMAIL}>`,
@@ -67,23 +67,23 @@ export async function sendEmail(options: EmailOptions) {
       html: options.html,
     };
 
-    console.log("📧 [EMAIL] Sending email to:", mailOptions.to);
-    console.log("📧 [EMAIL] Subject:", mailOptions.subject);
+    console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [EMAIL] Sending email to:", mailOptions.to);
+    console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [EMAIL] Subject:", mailOptions.subject);
 
     const info = await transporter.sendMail(mailOptions);
-    console.log("✅ [EMAIL] Email sent successfully!");
-    console.log("✅ [EMAIL] Message ID:", info.messageId);
+    console.log("ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ [EMAIL] Email sent successfully!");
+    console.log("ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ [EMAIL] Message ID:", info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("❌ [EMAIL] Error sending email:");
-    console.error("❌ [EMAIL] Error type:", error instanceof Error ? error.constructor.name : typeof error);
-    console.error("❌ [EMAIL] Error message:", error instanceof Error ? error.message : String(error));
+    console.error("ÃƒÂ¢Ã‚ÂÃ…â€™ [EMAIL] Error sending email:");
+    console.error("ÃƒÂ¢Ã‚ÂÃ…â€™ [EMAIL] Error type:", error instanceof Error ? error.constructor.name : typeof error);
+    console.error("ÃƒÂ¢Ã‚ÂÃ…â€™ [EMAIL] Error message:", error instanceof Error ? error.message : String(error));
 
     // Check for Gmail-specific errors
     if (error instanceof Error && error.message.includes("BadCredentials")) {
-      console.error("❌ [EMAIL] GMAIL AUTHENTICATION ERROR!");
-      console.error("❌ [EMAIL] The password is incorrect or you need to use a Gmail App Password.");
-      console.error("❌ [EMAIL] See SETUP_EMAIL.md for instructions on how to get a Gmail App Password.");
+      console.error("ÃƒÂ¢Ã‚ÂÃ…â€™ [EMAIL] GMAIL AUTHENTICATION ERROR!");
+      console.error("ÃƒÂ¢Ã‚ÂÃ…â€™ [EMAIL] The password is incorrect or you need to use a Gmail App Password.");
+      console.error("ÃƒÂ¢Ã‚ÂÃ…â€™ [EMAIL] See SETUP_EMAIL.md for instructions on how to get a Gmail App Password.");
     }
 
     return { success: false, error: error instanceof Error ? error.message : "Unknown error", skipped: false };
@@ -96,8 +96,8 @@ export async function sendContactNotification(contactData: {
   subject: string;
   message: string;
 }) {
-  console.log("📧 [CONTACT EMAIL] Preparing contact form email notification...");
-  console.log("📧 [CONTACT EMAIL] Contact data:", {
+  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [CONTACT EMAIL] Preparing contact form email notification...");
+  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [CONTACT EMAIL] Contact data:", {
     name: contactData.name,
     email: contactData.email,
     subject: contactData.subject,
@@ -135,24 +135,24 @@ export async function sendContactNotification(contactData: {
       <body>
         <div class="email-container">
           <div class="header">
-            <h1>📧 New Contact Form Submission</h1>
+            <h1>ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ New Contact Form Submission</h1>
             <p>You have received a new message from your website</p>
           </div>
           <div class="content">
             <div class="field">
-              <div class="label">👤 Name</div>
+              <div class="label">ÃƒÂ°Ã…Â¸Ã¢â‚¬ËœÃ‚Â¤ Name</div>
               <div class="value">${contactData.name}</div>
             </div>
             <div class="field">
-              <div class="label">📮 Email Address</div>
+              <div class="label">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â® Email Address</div>
               <div class="value email">${contactData.email}</div>
             </div>
             <div class="field">
-              <div class="label">📌 Subject</div>
+              <div class="label">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã…â€™ Subject</div>
               <div class="value">${contactData.subject}</div>
             </div>
             <div class="field">
-              <div class="label">💬 Message</div>
+              <div class="label">ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¬ Message</div>
               <div class="message-box">${contactData.message.replace(/\n/g, "\n")}</div>
             </div>
           </div>
@@ -166,19 +166,19 @@ export async function sendContactNotification(contactData: {
   `;
 
   // Send to admin (optional - silent if fails)
-  console.log("📧 [CONTACT EMAIL] Sending admin notification email...");
+  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [CONTACT EMAIL] Sending admin notification email...");
   const adminResult = await sendEmail({
     to: FROM_EMAIL,
-    subject: `🔔 New Contact: ${contactData.subject}`,
+    subject: `ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â New Contact: ${contactData.subject}`,
     html: adminHtml,
   });
 
   if (adminResult.success) {
-    console.log("✅ [CONTACT EMAIL] Admin notification sent successfully");
+    console.log("ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ [CONTACT EMAIL] Admin notification sent successfully");
   } else if (adminResult.skipped) {
-    console.log("⏭️ [CONTACT EMAIL] Admin notification skipped (SMTP not configured)");
+    console.log("ÃƒÂ¢Ã‚ÂÃ‚Â­ÃƒÂ¯Ã‚Â¸Ã‚Â [CONTACT EMAIL] Admin notification skipped (SMTP not configured)");
   } else {
-    console.log("❌ [CONTACT EMAIL] Admin notification failed:", adminResult.error);
+    console.log("ÃƒÂ¢Ã‚ÂÃ…â€™ [CONTACT EMAIL] Admin notification failed:", adminResult.error);
   }
 
   // Send confirmation to user
@@ -213,7 +213,7 @@ export async function sendContactNotification(contactData: {
   `;
 
   // Send confirmation to user (optional - fails silently if email not configured)
-  console.log("📧 [CONTACT EMAIL] Sending user confirmation email...");
+  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [CONTACT EMAIL] Sending user confirmation email...");
   const userResult = await sendEmail({
     to: contactData.email,
     subject: "We've Received Your Message - HashView",
@@ -221,11 +221,11 @@ export async function sendContactNotification(contactData: {
   });
 
   if (userResult.success) {
-    console.log("✅ [CONTACT EMAIL] User confirmation sent successfully");
+    console.log("ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ [CONTACT EMAIL] User confirmation sent successfully");
   } else if (userResult.skipped) {
-    console.log("⏭️ [CONTACT EMAIL] User confirmation skipped (SMTP not configured)");
+    console.log("ÃƒÂ¢Ã‚ÂÃ‚Â­ÃƒÂ¯Ã‚Â¸Ã‚Â [CONTACT EMAIL] User confirmation skipped (SMTP not configured)");
   } else {
-    console.log("❌ [CONTACT EMAIL] User confirmation failed:", userResult.error);
+    console.log("ÃƒÂ¢Ã‚ÂÃ…â€™ [CONTACT EMAIL] User confirmation failed:", userResult.error);
   }
 }
 
@@ -238,8 +238,8 @@ export async function sendSurveyNotification(surveyData: {
     phone: string;
   };
 }) {
-  console.log("📧 [SURVEY EMAIL] Preparing survey email notification...");
-  console.log("📧 [SURVEY EMAIL] Survey data:", {
+  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [SURVEY EMAIL] Preparing survey email notification...");
+  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [SURVEY EMAIL] Survey data:", {
     type: surveyData.type,
     answerCount: Object.keys(surveyData.answers).length,
     contactName: surveyData.contactDetails.name,
@@ -303,21 +303,21 @@ export async function sendSurveyNotification(surveyData: {
       <body>
         <div class="email-container">
           <div class="header">
-            <h1>📊 New ${surveyType} Survey Submission</h1>
+            <h1>ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã…Â  New ${surveyType} Survey Submission</h1>
             <p>You have received a new ${surveyType.toLowerCase()} survey response from <strong>${surveyData.contactDetails.name}</strong></p>
           </div>
           <div class="content">
             <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
                <div class="field">
-                <div class="label">👤 Name</div>
+                <div class="label">ÃƒÂ°Ã…Â¸Ã¢â‚¬ËœÃ‚Â¤ Name</div>
                 <div class="value">${surveyData.contactDetails.name}</div>
               </div>
               <div class="field">
-                <div class="label">📮 Email</div>
+                <div class="label">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â® Email</div>
                 <div class="value email">${surveyData.contactDetails.email}</div>
               </div>
               <div class="field">
-                <div class="label">📞 Phone</div>
+                <div class="label">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã…Â¾ Phone</div>
                 <div class="value">${surveyData.contactDetails.phone}</div>
               </div>
             </div>
@@ -331,7 +331,7 @@ export async function sendSurveyNotification(surveyData: {
     </html>
   `;
 
-  console.log("📧 [SURVEY EMAIL] Sending survey notification email...");
+  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [SURVEY EMAIL] Sending survey notification email...");
   const surveyResult = await sendEmail({
     to: FROM_EMAIL,
     subject: `New ${surveyType} Survey Submission - HashView`,
@@ -339,11 +339,343 @@ export async function sendSurveyNotification(surveyData: {
   });
 
   if (surveyResult.success) {
-    console.log("✅ [SURVEY EMAIL] Survey notification sent successfully");
+    console.log("ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ [SURVEY EMAIL] Survey notification sent successfully");
   } else if (surveyResult.skipped) {
-    console.log("⏭️ [SURVEY EMAIL] Survey notification skipped (SMTP not configured)");
+    console.log("ÃƒÂ¢Ã‚ÂÃ‚Â­ÃƒÂ¯Ã‚Â¸Ã‚Â [SURVEY EMAIL] Survey notification skipped (SMTP not configured)");
+    console.log("ÃƒÂ¢ Ã‚Â­ÃƒÂ¯Ã‚Â¸  [SURVEY EMAIL] Survey notification skipped (SMTP not configured)");
   } else {
-    console.log("❌ [SURVEY EMAIL] Survey notification failed:", surveyResult.error);
+    console.log("ÃƒÂ¢ Ã…â€™ [SURVEY EMAIL] Survey notification failed:", surveyResult.error);
   }
 }
 
+
+// -- QR Inquiry Email ----------------------------------------------------------
+
+export async function sendQrInquiryNotification(data: {
+  name: string;
+  email: string;
+  phone: string;
+  address?: string;
+  referralSource?: string;
+}) {
+  console.log("[QR INQUIRY EMAIL] Preparing QR inquiry email notification...");
+
+  const referralMap: Record<string, string> = {
+    facebook: "Facebook",
+    instagram: "Instagram",
+    google: "Google",
+    linkedin: "LinkedIn",
+    twitter: "X / Twitter",
+    tiktok: "TikTok",
+    friend: "Friend / Word of Mouth",
+    other: "Other",
+  };
+  const referralLabel = data.referralSource
+    ? (referralMap[data.referralSource] || data.referralSource)
+    : "Not specified";
+
+  const now = new Date().toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "numeric", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+
+  const initials = data.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  // NOTE: All emojis inside HTML use decimal HTML entities (e.g. &#127919;)
+  // to avoid UTF-8 / Windows-1252 encoding corruption.
+  const adminHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New QR Code Inquiry</title>
+</head>
+<body style="margin:0;padding:0;background:#0f0f13;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f0f13;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
+
+        <!-- LOGO BAR -->
+        <tr><td style="padding-bottom:24px;text-align:center;">
+          <table cellpadding="0" cellspacing="0" style="display:inline-block;background:#1a1a24;border-radius:12px;padding:12px 24px;border:1px solid #2a2a3a;">
+            <tr>
+              <td style="vertical-align:middle;padding-right:10px;">
+                <div style="width:32px;height:32px;background:linear-gradient(135deg,#7C3AED,#F97316);border-radius:8px;display:inline-block;text-align:center;line-height:32px;font-size:16px;color:#fff;">#</div>
+              </td>
+              <td style="vertical-align:middle;">
+                <span style="font-size:18px;font-weight:800;color:#ffffff;letter-spacing:-0.3px;">Hash<span style="color:#F97316;">View</span></span>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+
+        <!-- MAIN CARD -->
+        <tr><td style="background:#1a1a24;border-radius:20px;overflow:hidden;border:1px solid #2a2a3a;">
+
+          <!-- GRADIENT HEADER -->
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="background:linear-gradient(135deg,#7C3AED 0%,#9333ea 40%,#F97316 100%);padding:36px 32px 32px;text-align:center;">
+                <div style="display:inline-block;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:100px;padding:5px 16px;margin-bottom:20px;">
+                  <span style="color:#fff;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;">&#9889; New Lead</span>
+                </div>
+                <div style="font-size:36px;margin-bottom:8px;">&#127919;</div>
+                <h1 style="color:#ffffff;font-size:26px;font-weight:800;margin:0 0 8px;letter-spacing:-0.5px;">New QR Code Inquiry</h1>
+                <p style="color:rgba(255,255,255,0.8);font-size:14px;margin:0;">A business owner wants their free QR code &mdash; reply within 24h</p>
+                <p style="color:rgba(255,255,255,0.5);font-size:12px;margin:12px 0 0;">Received: ${now} IST</p>
+              </td>
+            </tr>
+          </table>
+
+          <!-- LEAD IDENTITY CARD -->
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="padding:28px 32px 0;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="background:#252535;border-radius:14px;border:1px solid #32324a;">
+                  <tr>
+                    <td style="padding:20px 24px;">
+                      <table cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="vertical-align:top;padding-right:16px;">
+                            <div style="width:52px;height:52px;background:linear-gradient(135deg,#7C3AED,#F97316);border-radius:50%;text-align:center;line-height:52px;font-size:18px;font-weight:800;color:#fff;">${initials}</div>
+                          </td>
+                          <td style="vertical-align:top;">
+                            <div style="font-size:20px;font-weight:800;color:#ffffff;margin-bottom:4px;">${data.name}</div>
+                            <a href="mailto:${data.email}" style="color:#a78bfa;font-size:14px;text-decoration:none;">${data.email}</a>
+                            <div style="color:#94a3b8;font-size:13px;margin-top:3px;">${data.phone}</div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <!-- DETAILS -->
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="padding:20px 32px 0;">
+              <p style="color:#64748b;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin:0 0 12px;">Contact Details</p>
+            </td></tr>
+
+            <!-- Name + Phone row -->
+            <tr><td style="padding:0 32px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="48%" style="vertical-align:top;padding-right:8px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background:#252535;border-radius:12px;border:1px solid #32324a;">
+                      <tr><td style="padding:16px 18px;">
+                        <div style="color:#7C3AED;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">Full Name</div>
+                        <div style="color:#e2e8f0;font-size:15px;font-weight:600;">${data.name}</div>
+                      </td></tr>
+                    </table>
+                  </td>
+                  <td width="4%"></td>
+                  <td width="48%" style="vertical-align:top;padding-left:8px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background:#252535;border-radius:12px;border:1px solid #32324a;">
+                      <tr><td style="padding:16px 18px;">
+                        <div style="color:#7C3AED;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">Phone</div>
+                        <div style="color:#e2e8f0;font-size:15px;font-weight:600;">${data.phone}</div>
+                      </td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td></tr>
+
+            <!-- Email -->
+            <tr><td style="padding:12px 32px 0;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#252535;border-radius:12px;border-left:4px solid #F97316;border:1px solid #32324a;border-left:4px solid #F97316;">
+                <tr><td style="padding:16px 18px;">
+                  <div style="color:#F97316;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">Email Address</div>
+                  <a href="mailto:${data.email}" style="color:#fb923c;font-size:16px;font-weight:700;text-decoration:none;">${data.email}</a>
+                </td></tr>
+              </table>
+            </td></tr>
+
+            ${data.address ? `
+            <!-- Address -->
+            <tr><td style="padding:12px 32px 0;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#252535;border-radius:12px;border:1px solid #32324a;">
+                <tr><td style="padding:16px 18px;">
+                  <div style="color:#7C3AED;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">Business Address</div>
+                  <div style="color:#e2e8f0;font-size:15px;">${data.address}</div>
+                </td></tr>
+              </table>
+            </td></tr>` : ""}
+
+            <!-- Referral Source -->
+            <tr><td style="padding:12px 32px 0;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#252535;border-radius:12px;border:1px solid #32324a;">
+                <tr><td style="padding:16px 18px;">
+                  <div style="color:#7C3AED;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px;">How They Found Us</div>
+                  <span style="display:inline-block;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.4);border-radius:100px;padding:5px 16px;color:#c4b5fd;font-size:13px;font-weight:600;">${referralLabel}</span>
+                </td></tr>
+              </table>
+            </td></tr>
+          </table>
+
+          <!-- CTA -->
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="padding:28px 32px 32px;text-align:center;">
+              <a href="mailto:${data.email}?subject=Your%20Free%20HashView%20QR%20Code&body=Hi%20${encodeURIComponent(data.name)},"
+                 style="display:inline-block;background:linear-gradient(135deg,#7C3AED,#F97316);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:100px;">
+                &#128231; Reply to ${data.name}
+              </a>
+              <p style="color:#475569;font-size:12px;margin:14px 0 0;">Aim to respond within 24 hours for best conversion</p>
+            </td></tr>
+          </table>
+
+        </td></tr>
+
+        <!-- FOOTER -->
+        <tr><td style="padding:20px 0;text-align:center;">
+          <p style="color:#475569;font-size:12px;margin:0;">Submitted via <strong style="color:#7C3AED;">HashView</strong> &mdash; &ldquo;Get Your Free QR Code&rdquo; form</p>
+          <p style="color:#334155;font-size:11px;margin:6px 0 0;">This is an automated notification. Do not reply to this email directly.</p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  const confirmationHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>We have received your request</title>
+</head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
+
+        <!-- LOGO -->
+        <tr><td style="padding-bottom:20px;text-align:center;">
+          <span style="font-size:20px;font-weight:800;color:#1e293b;">Hash<span style="color:#F97316;">View</span></span>
+        </td></tr>
+
+        <!-- CARD -->
+        <tr><td style="background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.07);border:1px solid #e2e8f0;">
+
+          <!-- HEADER -->
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="background:linear-gradient(135deg,#7C3AED 0%,#F97316 100%);padding:36px 32px;text-align:center;">
+              <div style="font-size:40px;margin-bottom:12px;">&#127881;</div>
+              <h1 style="color:#ffffff;font-size:24px;font-weight:800;margin:0 0 8px;">We have Got Your Request!</h1>
+              <p style="color:rgba(255,255,255,0.85);font-size:14px;margin:0;">Your free QR code is on its way</p>
+            </td></tr>
+          </table>
+
+          <!-- BODY -->
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="padding:32px;">
+              <p style="color:#1e293b;font-size:16px;margin:0 0 8px;">Hi <strong>${data.name}</strong>,</p>
+              <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 24px;">
+                Thank you for your interest in <strong>HashView</strong>! We have received your request and our team will be in touch within <strong style="color:#7C3AED;">24 hours</strong>.
+              </p>
+
+              <!-- Steps timeline -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:14px;margin-bottom:24px;">
+                <tr><td style="padding:20px 20px 4px;">
+                  <p style="color:#64748b;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin:0 0 16px;">What happens next</p>
+                </td></tr>
+                <tr><td style="padding:0 20px 20px;">
+
+                  <!-- Step 1 -->
+                  <table cellpadding="0" cellspacing="0" style="margin-bottom:14px;width:100%;">
+                    <tr>
+                      <td style="vertical-align:top;padding-right:14px;width:36px;">
+                        <div style="width:28px;height:28px;background:linear-gradient(135deg,#7C3AED,#9333ea);border-radius:50%;text-align:center;line-height:28px;color:#fff;font-size:12px;font-weight:700;">1</div>
+                      </td>
+                      <td style="vertical-align:middle;">
+                        <div style="color:#1e293b;font-size:14px;font-weight:600;">Our team reviews your details</div>
+                        <div style="color:#94a3b8;font-size:13px;">We will verify your business information</div>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Step 2 -->
+                  <table cellpadding="0" cellspacing="0" style="margin-bottom:14px;width:100%;">
+                    <tr>
+                      <td style="vertical-align:top;padding-right:14px;width:36px;">
+                        <div style="width:28px;height:28px;background:linear-gradient(135deg,#9333ea,#c026d3);border-radius:50%;text-align:center;line-height:28px;color:#fff;font-size:12px;font-weight:700;">2</div>
+                      </td>
+                      <td style="vertical-align:middle;">
+                        <div style="color:#1e293b;font-size:14px;font-weight:600;">We will contact you on <strong>${data.phone}</strong></div>
+                        <div style="color:#94a3b8;font-size:13px;">Or we will reply to ${data.email}</div>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Step 3 -->
+                  <table cellpadding="0" cellspacing="0" style="width:100%;">
+                    <tr>
+                      <td style="vertical-align:top;padding-right:14px;width:36px;">
+                        <div style="width:28px;height:28px;background:linear-gradient(135deg,#F97316,#ea580c);border-radius:50%;text-align:center;line-height:28px;color:#fff;font-size:12px;font-weight:700;">3</div>
+                      </td>
+                      <td style="vertical-align:middle;">
+                        <div style="color:#1e293b;font-size:14px;font-weight:600;">Your QR code gets set up &mdash; completely free!</div>
+                        <div style="color:#94a3b8;font-size:13px;">Start collecting verified reviews instantly</div>
+                      </td>
+                    </tr>
+                  </table>
+
+                </td></tr>
+              </table>
+
+              <p style="color:#94a3b8;font-size:14px;margin:0 0 4px;">Any urgent questions? Just reply to this email.</p>
+              <p style="color:#475569;font-size:15px;margin:20px 0 0;">Best regards,<br/><strong style="color:#1e293b;">The HashView Team</strong></p>
+            </td></tr>
+          </table>
+
+        </td></tr>
+
+        <!-- FOOTER -->
+        <tr><td style="padding:20px 0;text-align:center;">
+          <p style="color:#94a3b8;font-size:12px;margin:0;">You received this because you submitted a QR code request at <strong>hashview.app</strong></p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  // Admin alert
+  const adminResult = await sendEmail({
+    to: FROM_EMAIL,
+    subject: `[HashView] New QR Lead: ${data.name} (${data.phone})`,
+    html: adminHtml,
+  });
+  console.log(
+    adminResult.success
+      ? "[QR INQUIRY EMAIL] Admin alert sent successfully"
+      : adminResult.skipped
+      ? "[QR INQUIRY EMAIL] Admin alert skipped (SMTP not configured)"
+      : `[QR INQUIRY EMAIL] Admin alert failed: ${adminResult.error}`
+  );
+
+  // User confirmation
+  const userResult = await sendEmail({
+    to: data.email,
+    subject: `[HashView] We have received your QR Code request!`,
+    html: confirmationHtml,
+  });
+  console.log(
+    userResult.success
+      ? "[QR INQUIRY EMAIL] User confirmation sent"
+      : userResult.skipped
+      ? "[QR INQUIRY EMAIL] User confirmation skipped (SMTP not configured)"
+      : `[QR INQUIRY EMAIL] User confirmation failed: ${userResult.error}`
+  );
+}

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Star, Users, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CSSHashtagScene } from "@/components/3d/CSSHashtagScene";
-import { SurveyModal } from "@/components/home/SurveyModal";
+import { ContactModal } from "@/components/home/ContactModal";
 import { PartnerSurveyModal } from "@/components/home/PartnerSurveyModal";
 import Image from "next/image";
 import logo from "@/assets/logo.png";
@@ -17,7 +17,7 @@ const stats = [
 ];
 
 export const HeroSection = () => {
-  const [surveyOpen, setSurveyOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   const [partnerSurveyOpen, setPartnerSurveyOpen] = useState(false);
 
   return (
@@ -72,6 +72,7 @@ export const HeroSection = () => {
           >
             <a>would you like to collect verified reviews for free </a>
           </motion.p>
+
           {/* CTA Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -79,8 +80,8 @@ export const HeroSection = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
           >
-            <Button variant="hero" size="xl" onClick={() => setSurveyOpen(true)}>
-              Get Started Free
+            <Button variant="hero" size="xl" onClick={() => setContactOpen(true)}>
+              Get Your Free QR Code
               <ArrowRight className="ml-2" />
             </Button>
             <Button variant="hero-outline" size="xl" onClick={() => setPartnerSurveyOpen(true)}>
@@ -136,8 +137,8 @@ export const HeroSection = () => {
         </motion.div>
       </motion.div>
 
-      {/* Survey Modals */}
-      <SurveyModal open={surveyOpen} onOpenChange={setSurveyOpen} />
+      {/* Modals */}
+      <ContactModal open={contactOpen} onOpenChange={setContactOpen} />
       <PartnerSurveyModal open={partnerSurveyOpen} onOpenChange={setPartnerSurveyOpen} />
     </section>
   );
