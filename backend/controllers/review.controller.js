@@ -362,7 +362,13 @@ exports.createReview = async (req, res, next) => {
       business: businessId,
       type: 'business',
       isActive: true,
+      status: { $in: ['active', null] },
       $or: [{ validUntil: null }, { validUntil: { $gt: now } }]
+    });
+
+    logger.info(`🎟️ [COUPON DEBUG] Business ${business.name} (${businessId}): Found ${allTemplates.length} template(s) with isActive=true`);
+    allTemplates.forEach((t, i) => {
+      logger.info(`  Template ${i + 1}: "${t.title || t.code}" | status=${t.status} | isActive=${t.isActive} | validUntil=${t.validUntil || 'none'} | redemptionLimit=${t.redemptionLimit} | redemptionCount=${t.redemptionCount} | usageLimit=${t.usageLimit} | usageCount=${t.usageCount}`);
     });
 
     // Filter out templates whose redemptionLimit has been fully reached (store scan limit)
@@ -371,19 +377,25 @@ exports.createReview = async (req, res, next) => {
     // We gate by redemptionLimit (physical store redemptions), NOT usageCount (issued count)
     const validTemplates = allTemplates.filter(t => {
       if (t.redemptionLimit !== null && t.redemptionLimit !== undefined) {
-        return t.redemptionCount < t.redemptionLimit;
+        const valid = t.redemptionCount < t.redemptionLimit;
+        if (!valid) logger.info(`  ❌ Template "${t.title || t.code}" rejected: redemptionCount(${t.redemptionCount}) >= redemptionLimit(${t.redemptionLimit})`);
+        return valid;
       }
       if (t.usageLimit !== null && t.usageLimit !== undefined) {
-        return t.usageCount < t.usageLimit;
+        const valid = t.usageCount < t.usageLimit;
+        if (!valid) logger.info(`  ❌ Template "${t.title || t.code}" rejected: usageCount(${t.usageCount}) >= usageLimit(${t.usageLimit})`);
+        return valid;
       }
       return true; // no limit set
     });
+
+    logger.info(`🎟️ [COUPON DEBUG] After limit filtering: ${validTemplates.length} valid template(s) remain`);
 
     // Pick a random template from the valid ones (so different coupons are offered)
     let couponTemplate = null;
     if (validTemplates.length > 0) {
       couponTemplate = validTemplates[Math.floor(Math.random() * validTemplates.length)];
-      logger.info(`Picked template "${couponTemplate.title || couponTemplate.code}" (${couponTemplate._id}) from ${validTemplates.length} valid template(s) for business ${businessId}`);
+      logger.info(`✅ Picked template "${couponTemplate.title || couponTemplate.code}" (${couponTemplate._id}) from ${validTemplates.length} valid template(s) for business ${businessId}`);
     }
 
     // Track which business the coupon will belong to (own or nearby)
@@ -393,27 +405,55 @@ exports.createReview = async (req, res, next) => {
 
     // 2. If this business has no valid template, find a nearby business (within 5 km) that does
     if (!couponTemplate) {
-      logger.info(`No valid coupon template for business ${businessId} (${allTemplates.length} template(s) exist but all exhausted/expired). Searching nearby businesses...`);
+      logger.info(`🔍 [NEARBY SEARCH] No valid coupon for ${business.name}. Searching nearby businesses within 5km...`);
+      logger.info(`🔍 [NEARBY SEARCH] Using coordinates: lon=${businessLon}, lat=${businessLat}`);
 
-      const nearbyBusinesses = await Business.aggregate([
-        {
-          $geoNear: {
-            near: { type: 'Point', coordinates: [businessLon, businessLat] },
-            distanceField: 'dist',
-            maxDistance: 5000, // 5 km
-            spherical: true,
-            query: { _id: { $ne: business._id }, status: 'active' }
-          }
-        },
-        { $limit: 20 }
-      ]);
+      let nearbyBusinesses = [];
+      try {
+        // Query distinct business IDs that have active coupon templates
+        const activeCouponBizIds = await Coupon.distinct('business', {
+          type: 'business',
+          isActive: true,
+          status: { $in: ['active', null] },
+          $or: [{ validUntil: null }, { validUntil: { $gt: now } }]
+        });
+
+        nearbyBusinesses = await Business.aggregate([
+          {
+            $geoNear: {
+              near: { type: 'Point', coordinates: [businessLon, businessLat] },
+              distanceField: 'dist',
+              maxDistance: 5000, // 5 km
+              spherical: true,
+              query: { 
+                _id: { $in: activeCouponBizIds, $ne: business._id }, 
+                status: 'active' 
+              }
+            }
+          },
+          { $limit: 20 }
+        ]);
+        logger.info(`🔍 [NEARBY SEARCH] $geoNear returned ${nearbyBusinesses.length} nearby business(es) with active coupons`);
+        nearbyBusinesses.forEach((nb, i) => {
+          logger.info(`  ${i + 1}. "${nb.name}" (${nb._id}) — ${Math.round(nb.dist)}m away`);
+        });
+      } catch (geoError) {
+        logger.error(`❌ [NEARBY SEARCH] $geoNear aggregation FAILED:`, geoError.message);
+        logger.error(`   This likely means the business location coordinates are invalid or the 2dsphere index is missing.`);
+      }
 
       for (const nb of nearbyBusinesses) {
         const nbTemplates = await Coupon.find({
           business: nb._id,
           type: 'business',
           isActive: true,
+          status: { $in: ['active', null] },
           $or: [{ validUntil: null }, { validUntil: { $gt: now } }]
+        });
+
+        logger.info(`  🎟️ "${nb.name}": ${nbTemplates.length} template(s) found`);
+        nbTemplates.forEach((t, i) => {
+          logger.info(`    Template ${i + 1}: "${t.title || t.code}" | status=${t.status} | redemptionLimit=${t.redemptionLimit} | redemptionCount=${t.redemptionCount} | usageLimit=${t.usageLimit} | usageCount=${t.usageCount}`);
         });
 
         const nbValid = nbTemplates.filter(t => {
@@ -426,20 +466,26 @@ exports.createReview = async (req, res, next) => {
           return true;
         });
 
+        logger.info(`  🎟️ "${nb.name}": ${nbValid.length} valid after limit check`);
+
         if (nbValid.length > 0) {
           couponTemplate = nbValid[Math.floor(Math.random() * nbValid.length)];
           couponBusinessId = nb._id;
           couponBusinessName = nb.name;
           isNearbyCoupon = true;
-          logger.info(`Found nearby coupon template from business: ${nb.name} (${nb._id})`);
+          logger.info(`✅ [NEARBY SEARCH] Found coupon from nearby business: ${nb.name} (${nb._id}), template: "${couponTemplate.title || couponTemplate.code}"`);
           break;
         }
+      }
+
+      if (!couponTemplate) {
+        logger.info(`❌ [NEARBY SEARCH] Exhausted all ${nearbyBusinesses.length} nearby businesses — none had valid coupons`);
       }
     }
 
     // 3. If still no template found → no coupon, just return the review
     if (!couponTemplate) {
-      logger.info(`No coupon template available (own or nearby) for review on business ${businessId}. Skipping coupon.`);
+      logger.info(`🚫 [COUPON RESULT] No coupon template available (own or nearby) for review on ${business.name} (${businessId}). User gets "Sorry" scratch card.`);
 
       try {
         const User = require('../models/User.model');

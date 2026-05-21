@@ -111,8 +111,8 @@ const BusinessCard = React.memo(({ item, onPress }) => {
               source={{ uri: optimizeImageUri(coverImageUri, 800, 500) }}
               style={{ width: '100%', height: '100%' }}
               contentFit="cover"
-              transition={200}
-              cachePolicy="memory"
+              recyclingKey={item._id}
+              cachePolicy="memory-disk"
             />
           ) : (
             <LinearGradient
