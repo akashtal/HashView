@@ -41,7 +41,7 @@ const { EJSON } = require('bson');
     .split('.')[0]; // Format: YYYY-MM-DD-HHMMSS
 
   const backupDirName = `backup-${timestamp}`;
-  const backupParentDir = path.join(__dirname, '../backups');
+  const backupParentDir = path.join(__dirname, '../.backups');
   const backupDir = path.join(backupParentDir, backupDirName);
 
   if (!fs.existsSync(backupParentDir)) {
@@ -83,7 +83,7 @@ const { EJSON } = require('bson');
 
   console.log('\n==================================================');
   console.log('🎉 SUCCESS: Full database backup completed!');
-  console.log(`📁 Backup Folder: backend/backups/${backupDirName}`);
+  console.log(`📁 Backup Folder: backend/.backups/${backupDirName}`);
   console.log('==================================================');
 
   await mongoose.disconnect();

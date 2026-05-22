@@ -11,11 +11,11 @@
     "ownerName": "Chaulay Saensri",
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "107",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "107 Mostyn St, Llandudno LL30 2PD, UK"
     },
     "location": {
       "type": "Point",
@@ -137,7 +137,7 @@
     "lastReviewAt": {
       "$date": "2026-04-08T19:10:00.044Z"
     },
-    "visitCount": 4,
+    "visitCount": 5,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -148,7 +148,7 @@
       "$date": "2026-05-21T20:07:43.252Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T10:57:58.507Z"
+      "$date": "2026-05-22T19:45:51.390Z"
     },
     "__v": 1,
     "coverImage": {
@@ -172,7 +172,42 @@
       "tripAdvisor": {}
     },
     "email": "sakshimahajan911@gmail.com",
-    "phone": "+447394539977"
+    "phone": "+447394539977",
+    "openingHours": {
+      "monday": {
+        "closed": true
+      },
+      "tuesday": {
+        "open": "16:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "16:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "16:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "16:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "16:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "16:00",
+        "close": "22:00",
+        "closed": false
+      }
+    }
   },
   {
     "_id": {
@@ -187,10 +222,10 @@
     "category": "hotel",
     "address": {
       "buildingNumber": "",
-      "street": "Mostyn Street",
+      "street": "",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "Central Promenade, Llandudno LL30 2XS, UK"
     },
     "location": {
       "type": "Point",
@@ -312,7 +347,7 @@
     "lastReviewAt": {
       "$date": "2026-02-28T15:19:11.464Z"
     },
-    "visitCount": 2,
+    "visitCount": 4,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -345,7 +380,7 @@
       "$date": "2026-05-21T20:07:43.880Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T10:57:58.883Z"
+      "$date": "2026-05-22T19:45:52.489Z"
     },
     "__v": 1,
     "coverImage": {
@@ -368,7 +403,8 @@
       }
     },
     "email": "reservations@chatsworth-hotel.co.uk",
-    "phone": ""
+    "phone": "",
+    "description": "Simple rooms, some with sea views, in a hotel offering indoor heated pools & a genteel restaurant."
   },
   {
     "_id": {
@@ -382,11 +418,11 @@
     "ownerName": "Theresa curbishly",
     "category": "hotel",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "4-22",
+      "street": "Deganwy Avenue",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "4-22 Deganwy Ave, Llandudno LL30 2YB, UK"
     },
     "location": {
       "type": "Point",
@@ -519,7 +555,7 @@
       "$date": "2026-05-21T20:07:44.949Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T10:57:59.293Z"
+      "$date": "2026-05-22T19:45:52.995Z"
     },
     "__v": 1,
     "coverImage": {
@@ -538,7 +574,8 @@
       }
     },
     "email": "reservations@lorettahotel.co.uk",
-    "phone": "+4401492879587"
+    "phone": "+4401492879587",
+    "description": "Townhouse-style choice with free Wi-Fi, plus a restaurant, a bar and a bright conservatory."
   },
   {
     "_id": {
@@ -552,11 +589,11 @@
     "ownerName": "ShauWn",
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "96",
+      "street": "Gloddaeth Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "96 Gloddaeth St, Llandudno LL30 2DS, UK"
     },
     "location": {
       "type": "Point",
@@ -687,7 +724,7 @@
       "$date": "2026-05-21T20:07:45.564Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T10:57:59.660Z"
+      "$date": "2026-05-22T19:45:53.514Z"
     },
     "__v": 1,
     "coverImage": {
@@ -706,7 +743,45 @@
       }
     },
     "email": "be96ltd@gmail.com",
-    "phone": "+4401492870178"
+    "phone": "+4401492870178",
+    "description": "Unpretentious first-floor curry house with bright decor dishing up Bangladeshi and Indian staples.",
+    "openingHours": {
+      "monday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      }
+    }
   },
   {
     "_id": {
@@ -716,11 +791,11 @@
     "importedBy": null,
     "category": "hotel",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "10",
+      "street": "Gloddaeth Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "10 Gloddaeth St, Llandudno LL30 2DS, UK"
     },
     "location": {
       "type": "Point",
@@ -851,7 +926,7 @@
       "$date": "2026-05-21T20:07:46.070Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:15:50.513Z"
+      "$date": "2026-05-22T19:35:13.521Z"
     },
     "__v": 1,
     "coverImage": {
@@ -868,6 +943,45 @@
           "$date": "2026-05-22T07:15:50.509Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "12:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "tuesday": {
+        "closed": true
+      },
+      "wednesday": {
+        "open": "17:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "12:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "12:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "12:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 709298",
+    "socialMedia": {
+      "website": "https://www.facebook.com/people/The-Abode/61572802363108/"
     }
   },
   {
@@ -878,11 +992,11 @@
     "importedBy": null,
     "category": "caf",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "2-6",
+      "street": "Gloddaeth Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "2-6 Gloddaeth St, Llandudno LL30 2DS, UK"
     },
     "location": {
       "type": "Point",
@@ -1002,7 +1116,7 @@
       ]
     },
     "lastReviewAt": null,
-    "visitCount": 0,
+    "visitCount": 1,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -1013,7 +1127,7 @@
       "$date": "2026-05-21T20:07:46.487Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:15:53.292Z"
+      "$date": "2026-05-22T19:35:14.047Z"
     },
     "__v": 1,
     "coverImage": {
@@ -1030,6 +1144,41 @@
           "$date": "2026-05-22T07:15:53.285Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "09:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "09:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "09:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "thursday": {
+        "closed": true
+      },
+      "friday": {
+        "closed": true
+      },
+      "saturday": {
+        "closed": true
+      },
+      "sunday": {
+        "open": "09:00",
+        "close": "23:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 353197",
+    "socialMedia": {
+      "website": "https://thelounges.co.uk/ormo"
     }
   },
   {
@@ -1040,11 +1189,11 @@
     "importedBy": null,
     "category": "caf",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "3",
+      "street": "Church Walks",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "3 Church Walks, Llandudno LL30 2HD, UK"
     },
     "location": {
       "type": "Point",
@@ -1175,7 +1324,7 @@
       "$date": "2026-05-21T20:07:46.992Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:15:55.848Z"
+      "$date": "2026-05-22T19:35:14.646Z"
     },
     "__v": 1,
     "coverImage": {
@@ -1192,6 +1341,47 @@
           "$date": "2026-05-22T07:15:55.843Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "15:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "15:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "15:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "15:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "15:00",
+        "close": "22:30",
+        "closed": false
+      },
+      "saturday": {
+        "open": "15:00",
+        "close": "22:30",
+        "closed": false
+      },
+      "sunday": {
+        "open": "15:00",
+        "close": "22:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 701457",
+    "socialMedia": {
+      "website": "http://snoozewinebar.com/"
     }
   },
   {
@@ -1203,10 +1393,10 @@
     "category": "restaurant",
     "address": {
       "buildingNumber": "",
-      "street": "Mostyn Street",
+      "street": "Mostyn Avenue",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "Mostyn Ave, Llandudno LL30 1YY, UK"
     },
     "location": {
       "type": "Point",
@@ -1339,7 +1529,7 @@
       "$date": "2026-05-21T20:07:47.506Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T11:14:58.659Z"
+      "$date": "2026-05-22T19:35:15.159Z"
     },
     "__v": 1,
     "coverImage": {
@@ -1356,6 +1546,47 @@
           "$date": "2026-05-22T07:15:58.712Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "15:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "15:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "10:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "10:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "10:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "10:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "10:00",
+        "close": "22:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 702311",
+    "socialMedia": {
+      "website": "https://www.facebook.com/profile.php?id=61550807413610"
     }
   },
   {
@@ -1367,10 +1598,10 @@
     "category": "restaurant",
     "address": {
       "buildingNumber": "",
-      "street": "Mostyn Street",
+      "street": "Market Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "Market St, Llandudno LL30 2SR, UK"
     },
     "location": {
       "type": "Point",
@@ -1503,7 +1734,7 @@
       "$date": "2026-05-21T20:07:47.965Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T11:07:09.954Z"
+      "$date": "2026-05-22T19:35:15.671Z"
     },
     "__v": 1,
     "coverImage": {
@@ -1520,6 +1751,48 @@
           "$date": "2026-05-22T07:16:01.382Z"
         }
       }
+    },
+    "description": "Cosy inn offering cask ales and pub grub, plus a conservatory-style garden room and outside tables.",
+    "openingHours": {
+      "monday": {
+        "open": "11:30",
+        "close": "22:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "11:30",
+        "close": "22:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "11:30",
+        "close": "22:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "11:30",
+        "close": "22:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "11:30",
+        "close": "23:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "11:30",
+        "close": "23:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "11:30",
+        "close": "22:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 870762",
+    "socialMedia": {
+      "website": "http://www.the-cottageloaf.co.uk/"
     }
   },
   {
@@ -1530,11 +1803,11 @@
     "importedBy": null,
     "category": "caf",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "11",
+      "street": "Llewelyn Avenue",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "11 Llewelyn Ave, Llandudno LL30 2ER, UK"
     },
     "location": {
       "type": "Point",
@@ -1665,7 +1938,7 @@
       "$date": "2026-05-21T20:07:48.374Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:04.032Z"
+      "$date": "2026-05-22T19:35:16.160Z"
     },
     "__v": 1,
     "coverImage": {
@@ -1686,6 +1959,9 @@
           "$date": "2026-05-22T07:16:04.024Z"
         }
       }
+    },
+    "socialMedia": {
+      "website": "https://bandbinllandudno.co.uk/business/characters-tea-room/"
     }
   },
   {
@@ -1696,11 +1972,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "127",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "127 Mostyn St, Llandudno LL30 2PE, UK"
     },
     "location": {
       "type": "Point",
@@ -1831,7 +2107,7 @@
       "$date": "2026-05-21T20:07:48.785Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:06.603Z"
+      "$date": "2026-05-22T19:35:16.656Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -1844,6 +2120,45 @@
           "$date": "2026-05-22T07:16:06.596Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "09:30",
+        "close": "17:30",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "09:30",
+        "close": "17:30",
+        "closed": false
+      },
+      "wednesday": {
+        "closed": true
+      },
+      "thursday": {
+        "open": "09:30",
+        "close": "17:30",
+        "closed": false
+      },
+      "friday": {
+        "open": "09:30",
+        "close": "17:30",
+        "closed": false
+      },
+      "saturday": {
+        "open": "09:30",
+        "close": "17:30",
+        "closed": false
+      },
+      "sunday": {
+        "open": "09:30",
+        "close": "17:30",
+        "closed": false
+      }
+    },
+    "phone": "01492 701689",
+    "socialMedia": {
+      "website": "http://www.dudleyandgeorges.co.uk/"
     }
   },
   {
@@ -1854,11 +2169,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "12",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "12 Mostyn St, Llandudno LL30 2PS, UK"
     },
     "location": {
       "type": "Point",
@@ -1989,7 +2304,7 @@
       "$date": "2026-05-21T20:07:49.197Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:09.572Z"
+      "$date": "2026-05-22T19:35:17.149Z"
     },
     "__v": 1,
     "coverImage": {
@@ -2006,6 +2321,47 @@
           "$date": "2026-05-22T07:16:09.565Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "09:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "09:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "09:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "09:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "09:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "09:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "10:00",
+        "close": "16:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 875043",
+    "socialMedia": {
+      "website": "https://mymenuweb.com/uk/restaurants/756779/?utm_source=google_profile&utm_medium=google_profile&utm_campaign=admin"
     }
   },
   {
@@ -2016,11 +2372,11 @@
     "importedBy": null,
     "category": "caf",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "104",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "104 Mostyn St, Llandudno LL30 2SW, UK"
     },
     "location": {
       "type": "Point",
@@ -2151,7 +2507,7 @@
       "$date": "2026-05-21T20:07:49.632Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:12.235Z"
+      "$date": "2026-05-22T19:35:17.651Z"
     },
     "__v": 1,
     "coverImage": {
@@ -2168,6 +2524,45 @@
           "$date": "2026-05-22T07:16:12.228Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "sunday": {
+        "closed": true
+      }
+    },
+    "phone": "01492 875378",
+    "socialMedia": {
+      "website": "https://wmap.top/kava-2"
     }
   },
   {
@@ -2178,11 +2573,11 @@
     "importedBy": null,
     "category": "caf",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "2",
+      "street": "Gloddaeth Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "2 Gloddaeth St, Llandudno LL30 2DS, UK"
     },
     "location": {
       "type": "Point",
@@ -2313,7 +2708,7 @@
       "$date": "2026-05-21T20:07:50.061Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:14.967Z"
+      "$date": "2026-05-22T19:35:18.235Z"
     },
     "__v": 1,
     "coverImage": {
@@ -2330,6 +2725,47 @@
           "$date": "2026-05-22T07:16:14.961Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "08:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "08:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "08:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "08:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "08:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "08:00",
+        "close": "16:30",
+        "closed": false
+      },
+      "sunday": {
+        "open": "09:00",
+        "close": "16:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 877741",
+    "socialMedia": {
+      "website": "https://www.facebook.com/takeabreakcafeLlandudno/?locale=en_GB"
     }
   },
   {
@@ -2340,11 +2776,11 @@
     "importedBy": null,
     "category": "caf",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "17",
+      "street": "Gloddaeth Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "17 Gloddaeth St, Llandudno LL30 2SY, UK"
     },
     "location": {
       "type": "Point",
@@ -2464,7 +2900,7 @@
       ]
     },
     "lastReviewAt": null,
-    "visitCount": 0,
+    "visitCount": 1,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -2475,7 +2911,7 @@
       "$date": "2026-05-21T20:07:50.469Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:17.556Z"
+      "$date": "2026-05-22T19:35:18.743Z"
     },
     "__v": 1,
     "coverImage": {
@@ -2492,6 +2928,48 @@
           "$date": "2026-05-22T07:16:17.552Z"
         }
       }
+    },
+    "description": "High-end American retailer known for fine jewelry, china & silver, plus wedding registry.",
+    "openingHours": {
+      "monday": {
+        "open": "11:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "11:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "11:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "11:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "11:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "11:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "11:00",
+        "close": "16:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 879326",
+    "socialMedia": {
+      "website": "https://www.facebook.com/TiffanyCafeBar"
     }
   },
   {
@@ -2502,11 +2980,11 @@
     "importedBy": null,
     "category": "caf",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "79",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "79 Mostyn St, Llandudno LL30 2NN, UK"
     },
     "location": {
       "type": "Point",
@@ -2637,7 +3115,7 @@
       "$date": "2026-05-21T20:07:50.879Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:20.423Z"
+      "$date": "2026-05-22T19:35:19.255Z"
     },
     "__v": 1,
     "coverImage": {
@@ -2654,6 +3132,47 @@
           "$date": "2026-05-22T07:16:20.419Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "09:00",
+        "close": "17:30",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "09:00",
+        "close": "17:30",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "09:00",
+        "close": "17:30",
+        "closed": false
+      },
+      "thursday": {
+        "open": "09:00",
+        "close": "17:30",
+        "closed": false
+      },
+      "friday": {
+        "open": "09:00",
+        "close": "17:30",
+        "closed": false
+      },
+      "saturday": {
+        "open": "09:00",
+        "close": "17:30",
+        "closed": false
+      },
+      "sunday": {
+        "open": "09:00",
+        "close": "15:30",
+        "closed": false
+      }
+    },
+    "phone": "01492 868222",
+    "socialMedia": {
+      "website": "https://bandbinllandudno.co.uk/business/cafe-culture/"
     }
   },
   {
@@ -2664,11 +3183,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "1",
+      "street": "Mostyn Broadway",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "1 Mostyn Broadway, Llandudno LL30 1YL, UK"
     },
     "location": {
       "type": "Point",
@@ -2788,7 +3307,7 @@
       ]
     },
     "lastReviewAt": null,
-    "visitCount": 0,
+    "visitCount": 1,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -2799,7 +3318,7 @@
       "$date": "2026-05-21T20:07:51.286Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:23.190Z"
+      "$date": "2026-05-22T19:46:55.827Z"
     },
     "__v": 1,
     "coverImage": {
@@ -2816,6 +3335,47 @@
           "$date": "2026-05-22T07:16:23.183Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "09:30",
+        "close": "17:30",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "09:30",
+        "close": "17:30",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "09:30",
+        "close": "17:30",
+        "closed": false
+      },
+      "thursday": {
+        "open": "09:30",
+        "close": "17:30",
+        "closed": false
+      },
+      "friday": {
+        "open": "09:30",
+        "close": "17:30",
+        "closed": false
+      },
+      "saturday": {
+        "open": "09:30",
+        "close": "17:30",
+        "closed": false
+      },
+      "sunday": {
+        "open": "10:30",
+        "close": "17:30",
+        "closed": false
+      }
+    },
+    "phone": "01492 471193",
+    "socialMedia": {
+      "website": "https://www.facebook.com/Fortes-Ice-Cream-Llandudno-927803980603894/"
     }
   },
   {
@@ -2826,11 +3386,11 @@
     "importedBy": null,
     "category": "caf",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "7",
+      "street": "Madoc Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "7 Madoc St, Llandudno LL30 2TL, UK"
     },
     "location": {
       "type": "Point",
@@ -2961,7 +3521,7 @@
       "$date": "2026-05-21T20:07:51.820Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:26.568Z"
+      "$date": "2026-05-22T19:35:20.262Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -2974,6 +3534,43 @@
           "$date": "2026-05-22T07:16:26.562Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "saturday": {
+        "closed": true
+      },
+      "sunday": {
+        "closed": true
+      }
+    },
+    "phone": "01492 870489",
+    "socialMedia": {
+      "website": "https://www.facebook.com/HAVEN-CAFE-812067818993771/"
     }
   },
   {
@@ -2984,11 +3581,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "29",
+      "street": "Lloyd Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "29 Lloyd St, Llandudno LL30 2YA, UK"
     },
     "location": {
       "type": "Point",
@@ -3119,7 +3716,7 @@
       "$date": "2026-05-21T20:07:52.230Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T08:39:07.231Z"
+      "$date": "2026-05-22T19:35:20.772Z"
     },
     "__v": 1,
     "coverImage": {
@@ -3136,6 +3733,48 @@
           "$date": "2026-05-22T07:16:29.603Z"
         }
       }
+    },
+    "description": "Family-run restaurant with contemporary decor and candlelit tables, for British and European dishes.",
+    "openingHours": {
+      "monday": {
+        "open": "17:30",
+        "close": "22:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "17:30",
+        "close": "22:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "17:30",
+        "close": "22:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "17:30",
+        "close": "22:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "17:30",
+        "close": "22:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "17:30",
+        "close": "22:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 874422",
+    "socialMedia": {
+      "website": "https://candlesllandudno.com/"
     }
   },
   {
@@ -3146,11 +3785,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "56",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "56 Mostyn St, Llandudno LL30 2RP, UK"
     },
     "location": {
       "type": "Point",
@@ -3281,7 +3920,7 @@
       "$date": "2026-05-21T20:07:52.729Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:32.163Z"
+      "$date": "2026-05-22T19:35:21.314Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -3294,6 +3933,47 @@
           "$date": "2026-05-22T07:16:32.159Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "09:00",
+        "close": "18:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "09:00",
+        "close": "18:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 860928",
+    "socialMedia": {
+      "website": "https://bandbinllandudno.co.uk/business/kitchen-50-six/"
     }
   },
   {
@@ -3304,11 +3984,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "3A",
+      "street": "Gloddaeth Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "3A Gloddaeth St, Llandudno LL30 2DD, UK"
     },
     "location": {
       "type": "Point",
@@ -3439,7 +4119,7 @@
       "$date": "2026-05-21T20:07:53.141Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:34.759Z"
+      "$date": "2026-05-22T19:35:21.838Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -3452,6 +4132,43 @@
           "$date": "2026-05-22T07:16:34.755Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "17:30",
+        "close": "21:30",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "17:30",
+        "close": "21:30",
+        "closed": false
+      },
+      "wednesday": {
+        "closed": true
+      },
+      "thursday": {
+        "open": "17:30",
+        "close": "21:30",
+        "closed": false
+      },
+      "friday": {
+        "open": "17:30",
+        "close": "21:30",
+        "closed": false
+      },
+      "saturday": {
+        "open": "17:30",
+        "close": "21:30",
+        "closed": false
+      },
+      "sunday": {
+        "closed": true
+      }
+    },
+    "phone": "01492 872074",
+    "socialMedia": {
+      "website": "https://davenezia.co.uk/"
     }
   },
   {
@@ -3462,11 +4179,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "5",
+      "street": "Gloddaeth Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "5 Gloddaeth St, Llandudno LL30 2DD, UK"
     },
     "location": {
       "type": "Point",
@@ -3597,7 +4314,7 @@
       "$date": "2026-05-21T20:07:53.620Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:37.422Z"
+      "$date": "2026-05-22T19:35:22.434Z"
     },
     "__v": 1,
     "coverImage": {
@@ -3614,6 +4331,45 @@
           "$date": "2026-05-22T07:16:37.417Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "16:00",
+        "close": "21:30",
+        "closed": false
+      },
+      "tuesday": {
+        "closed": true
+      },
+      "wednesday": {
+        "open": "16:00",
+        "close": "21:30",
+        "closed": false
+      },
+      "thursday": {
+        "open": "16:00",
+        "close": "21:30",
+        "closed": false
+      },
+      "friday": {
+        "open": "16:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "16:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "16:00",
+        "close": "21:30",
+        "closed": false
+      }
+    },
+    "phone": "01492 878788",
+    "socialMedia": {
+      "website": "https://dinosllandudno.com/pt9I"
     }
   },
   {
@@ -3628,7 +4384,7 @@
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "Mostyn St, Llandudno LL30, UK"
     },
     "location": {
       "type": "Point",
@@ -3688,7 +4444,7 @@
       "$date": "2026-05-21T20:07:54.056Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:40.031Z"
+      "$date": "2026-05-22T20:30:27.803Z"
     },
     "__v": 0,
     "coverImage": {
@@ -3700,10 +4456,11 @@
         "businessName": "Mostyn St",
         "placeId": "ChIJ-5mAuxweZUgRm9LgbbmFnws",
         "lastSynced": {
-          "$date": "2026-05-22T07:16:40.029Z"
+          "$date": "2026-05-22T20:30:27.801Z"
         }
       }
-    }
+    },
+    "description": "Charming, major thoroughfare offering diverse shops & restaurants, plus religious landmarks."
   },
   {
     "_id": {
@@ -3713,11 +4470,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "102",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "102 Mostyn St, Llandudno LL30 2SW, UK"
     },
     "location": {
       "type": "Point",
@@ -3848,7 +4605,7 @@
       "$date": "2026-05-21T20:07:54.530Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:42.851Z"
+      "$date": "2026-05-22T19:35:23.560Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -3861,6 +4618,45 @@
           "$date": "2026-05-22T07:16:42.845Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "closed": true
+      },
+      "tuesday": {
+        "open": "16:30",
+        "close": "22:30",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "16:30",
+        "close": "22:30",
+        "closed": false
+      },
+      "thursday": {
+        "open": "16:30",
+        "close": "22:30",
+        "closed": false
+      },
+      "friday": {
+        "open": "16:30",
+        "close": "22:30",
+        "closed": false
+      },
+      "saturday": {
+        "open": "16:30",
+        "close": "22:30",
+        "closed": false
+      },
+      "sunday": {
+        "open": "16:30",
+        "close": "22:30",
+        "closed": false
+      }
+    },
+    "phone": "01492 877912",
+    "socialMedia": {
+      "website": "https://www.facebook.com/pages/Emperor%20Chinese%20Restaurant/147169841986585/"
     }
   },
   {
@@ -3871,11 +4667,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "69",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "69 Mostyn St, Llandudno LL30 2NN, UK"
     },
     "location": {
       "type": "Point",
@@ -4006,7 +4802,7 @@
       "$date": "2026-05-21T20:07:54.938Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:45.501Z"
+      "$date": "2026-05-22T19:35:24.089Z"
     },
     "__v": 1,
     "coverImage": {
@@ -4023,6 +4819,48 @@
           "$date": "2026-05-22T07:16:45.495Z"
         }
       }
+    },
+    "description": "Numerous classic & exotic ice cream flavours offered with burgers, pizza, coffee, tea & more.",
+    "openingHours": {
+      "monday": {
+        "open": "09:00",
+        "close": "18:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "09:00",
+        "close": "18:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "09:00",
+        "close": "18:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "09:00",
+        "close": "18:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "09:00",
+        "close": "18:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "09:00",
+        "close": "18:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "09:00",
+        "close": "18:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 877910",
+    "socialMedia": {
+      "website": "https://bandbinllandudno.co.uk/business/fortes-restaurant/"
     }
   },
   {
@@ -4033,11 +4871,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "72",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "90s, 72 Mostyn St, Llandudno LL30 2SB, UK"
     },
     "location": {
       "type": "Point",
@@ -4159,7 +4997,7 @@
     "lastReviewAt": {
       "$date": "2026-05-08T20:13:04.232Z"
     },
-    "visitCount": 1,
+    "visitCount": 2,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -4170,7 +5008,7 @@
       "$date": "2026-05-21T20:07:55.357Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T11:07:32.849Z"
+      "$date": "2026-05-22T19:35:24.696Z"
     },
     "__v": 1,
     "coverImage": {
@@ -4187,6 +5025,48 @@
           "$date": "2026-05-22T07:16:48.265Z"
         }
       }
+    },
+    "description": "American memorabilia adorns this modern joint for grill classics including burgers, steaks and ribs.",
+    "openingHours": {
+      "monday": {
+        "open": "11:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "11:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "11:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "11:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "11:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "11:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "11:00",
+        "close": "21:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 873373",
+    "socialMedia": {
+      "website": "http://www.harveysnewyorkbarandgrill.co.uk/"
     }
   },
   {
@@ -4197,11 +5077,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "139",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "139 Mostyn St, Llandudno LL30 2PE, UK"
     },
     "location": {
       "type": "Point",
@@ -4332,7 +5212,7 @@
       "$date": "2026-05-21T20:07:55.781Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:51.220Z"
+      "$date": "2026-05-22T19:35:25.295Z"
     },
     "__v": 1,
     "coverImage": {
@@ -4349,6 +5229,48 @@
           "$date": "2026-05-22T07:16:51.216Z"
         }
       }
+    },
+    "description": "Home-style British fare, including seafood & roasts, in a stylish, earth-toned setting with wines.",
+    "openingHours": {
+      "monday": {
+        "open": "10:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "10:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "10:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "10:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "10:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "10:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "10:00",
+        "close": "21:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 876585",
+    "socialMedia": {
+      "website": "https://homecookin-llandudno.co.uk/"
     }
   },
   {
@@ -4359,11 +5281,11 @@
     "importedBy": null,
     "category": "take-away",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "129",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "129 Mostyn St, Llandudno LL30 2PE, UK"
     },
     "location": {
       "type": "Point",
@@ -4494,7 +5416,7 @@
       "$date": "2026-05-21T20:07:56.189Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:53.909Z"
+      "$date": "2026-05-22T19:35:25.819Z"
     },
     "__v": 1,
     "coverImage": {
@@ -4511,6 +5433,44 @@
           "$date": "2026-05-22T07:16:53.903Z"
         }
       }
+    },
+    "description": "Rustic, brick-clad place serving wood-fired pizza with creative toppings, cocktails, beer & wine.",
+    "openingHours": {
+      "monday": {
+        "closed": true
+      },
+      "tuesday": {
+        "closed": true
+      },
+      "wednesday": {
+        "open": "16:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "16:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "16:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 817111",
+    "socialMedia": {
+      "website": "http://www.johnnydoughs.com/"
     }
   },
   {
@@ -4521,11 +5481,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "83",
+      "street": "Church Walks",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "83 A, 83 Church Walks, Llandudno LL30 2HD, UK"
     },
     "location": {
       "type": "Point",
@@ -4656,7 +5616,7 @@
       "$date": "2026-05-21T20:07:56.598Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:56.588Z"
+      "$date": "2026-05-22T19:35:26.323Z"
     },
     "__v": 1,
     "coverImage": {
@@ -4673,6 +5633,45 @@
           "$date": "2026-05-22T07:16:56.583Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "17:30",
+        "close": "21:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "17:30",
+        "close": "21:00",
+        "closed": false
+      },
+      "wednesday": {
+        "closed": true
+      },
+      "thursday": {
+        "open": "17:30",
+        "close": "21:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "17:30",
+        "close": "21:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "17:30",
+        "close": "21:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "17:30",
+        "close": "21:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 878800",
+    "socialMedia": {
+      "website": "https://www.facebook.com/latavernarestaurantllandudno/"
     }
   },
   {
@@ -4683,11 +5682,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "5",
+      "street": "Gloddaeth Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "5 Gloddaeth St, Llandudno LL30 2DD, UK"
     },
     "location": {
       "type": "Point",
@@ -4818,7 +5817,7 @@
       "$date": "2026-05-21T20:07:57.009Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:16:59.233Z"
+      "$date": "2026-05-22T19:35:26.829Z"
     },
     "__v": 1,
     "coverImage": {
@@ -4835,6 +5834,43 @@
           "$date": "2026-05-22T07:16:59.228Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "17:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "tuesday": {
+        "closed": true
+      },
+      "wednesday": {
+        "closed": true
+      },
+      "thursday": {
+        "open": "17:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "17:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "17:00",
+        "close": "22:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 558822",
+    "socialMedia": {
+      "website": "https://llandudnotandoori.co.uk/"
     }
   },
   {
@@ -4845,11 +5881,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "11A",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "11A Mostyn St, Llandudno LL30 2NL, UK"
     },
     "location": {
       "type": "Point",
@@ -4980,7 +6016,7 @@
       "$date": "2026-05-21T20:07:57.438Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:01.896Z"
+      "$date": "2026-05-22T19:35:27.350Z"
     },
     "__v": 1,
     "coverImage": {
@@ -4997,6 +6033,47 @@
           "$date": "2026-05-22T07:17:01.890Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "11:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "11:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "11:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "11:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "11:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "11:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "11:00",
+        "close": "20:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 860222",
+    "socialMedia": {
+      "website": "https://bandbinllandudno.co.uk/business/pebble-restaurant/"
     }
   },
   {
@@ -5007,11 +6084,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "25",
+      "street": "Lloyd Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "25 Lloyd St, Llandudno LL30 2UU, UK"
     },
     "location": {
       "type": "Point",
@@ -5131,7 +6208,7 @@
       ]
     },
     "lastReviewAt": null,
-    "visitCount": 0,
+    "visitCount": 1,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -5142,7 +6219,7 @@
       "$date": "2026-05-21T20:07:57.846Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:04.433Z"
+      "$date": "2026-05-22T19:35:27.864Z"
     },
     "__v": 1,
     "coverImage": {
@@ -5159,6 +6236,11 @@
           "$date": "2026-05-22T07:17:04.429Z"
         }
       }
+    },
+    "description": "Authentic yet innovative Mediterranean cuisine on a weekly-changing menu, with an emphasis on fish.",
+    "phone": "01492 877777",
+    "socialMedia": {
+      "website": "http://www.ristoranteromeo.com/"
     }
   },
   {
@@ -5170,10 +6252,10 @@
     "category": "restaurant",
     "address": {
       "buildingNumber": "",
-      "street": "Mostyn Street",
+      "street": "Glan Y Mor Parade",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "Glan Y Mor Parade, Llandudno LL30 2LL, UK"
     },
     "location": {
       "type": "Point",
@@ -5304,7 +6386,7 @@
       "$date": "2026-05-21T20:07:58.262Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:07.219Z"
+      "$date": "2026-05-22T19:35:28.357Z"
     },
     "__v": 1,
     "coverImage": {
@@ -5321,6 +6403,47 @@
           "$date": "2026-05-22T07:17:07.215Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "08:00",
+        "close": "20:30",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "08:00",
+        "close": "20:30",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "08:00",
+        "close": "20:30",
+        "closed": false
+      },
+      "thursday": {
+        "open": "08:00",
+        "close": "20:30",
+        "closed": false
+      },
+      "friday": {
+        "open": "08:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "08:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "08:00",
+        "close": "20:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 353189",
+    "socialMedia": {
+      "website": "https://www.thegoat-llandudno.co.uk/"
     }
   },
   {
@@ -5331,11 +6454,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "20",
+      "street": "Gloddaeth Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "Next Door Hotel, 20 Gloddaeth St, Llandudno LL30 2DP, UK"
     },
     "location": {
       "type": "Point",
@@ -5466,7 +6589,7 @@
       "$date": "2026-05-21T20:07:58.672Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:09.971Z"
+      "$date": "2026-05-22T19:35:28.916Z"
     },
     "__v": 1,
     "coverImage": {
@@ -5483,6 +6606,43 @@
           "$date": "2026-05-22T07:17:09.965Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "closed": true
+      },
+      "tuesday": {
+        "closed": true
+      },
+      "wednesday": {
+        "open": "17:30",
+        "close": "20:30",
+        "closed": false
+      },
+      "thursday": {
+        "open": "17:30",
+        "close": "20:30",
+        "closed": false
+      },
+      "friday": {
+        "open": "17:30",
+        "close": "20:30",
+        "closed": false
+      },
+      "saturday": {
+        "open": "17:30",
+        "close": "20:30",
+        "closed": false
+      },
+      "sunday": {
+        "open": "12:00",
+        "close": "17:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 860787",
+    "socialMedia": {
+      "website": "https://nextdoorrestaurant.co.uk/"
     }
   },
   {
@@ -5493,11 +6653,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "2-4",
+      "street": "Llewelyn Avenue",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "2-4 Llewelyn Ave, Llandudno LL30 2ER, UK"
     },
     "location": {
       "type": "Point",
@@ -5628,7 +6788,7 @@
       "$date": "2026-05-21T20:07:59.082Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:12.964Z"
+      "$date": "2026-05-22T19:35:29.504Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -5641,6 +6801,44 @@
           "$date": "2026-05-22T07:17:12.960Z"
         }
       }
+    },
+    "description": "Warm B&B set in a Victorian house offering cooked-to-order breakfast, a lounge & a bar.",
+    "openingHours": {
+      "monday": {
+        "open": "11:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "11:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "11:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "11:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "friday": {
+        "closed": true
+      },
+      "saturday": {
+        "closed": true
+      },
+      "sunday": {
+        "open": "11:00",
+        "close": "23:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 877150",
+    "socialMedia": {
+      "website": "http://www.posthouse.wales/"
     }
   },
   {
@@ -5651,11 +6849,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "7",
+      "street": "Church Walks",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "7 Church Walks, Llandudno LL30 2HD, UK"
     },
     "location": {
       "type": "Point",
@@ -5786,7 +6984,7 @@
       "$date": "2026-05-21T20:07:59.493Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:15.924Z"
+      "$date": "2026-05-22T19:35:30.012Z"
     },
     "__v": 1,
     "coverImage": {
@@ -5803,7 +7001,8 @@
           "$date": "2026-05-22T07:17:15.918Z"
         }
       }
-    }
+    },
+    "description": "Market-fresh local seafood at downstairs bistro with church pews and Victorian-style restaurant."
   },
   {
     "_id": {
@@ -5813,11 +7012,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "10",
+      "street": "Lloyd Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "10 Lloyd St, Llandudno LL30 2YA, UK"
     },
     "location": {
       "type": "Point",
@@ -5939,7 +7138,7 @@
     "lastReviewAt": {
       "$date": "2026-03-06T18:31:56.055Z"
     },
-    "visitCount": 0,
+    "visitCount": 1,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -5950,7 +7149,7 @@
       "$date": "2026-05-21T20:07:59.901Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:18.585Z"
+      "$date": "2026-05-22T19:35:30.512Z"
     },
     "__v": 1,
     "coverImage": {
@@ -5967,6 +7166,43 @@
           "$date": "2026-05-22T07:17:18.582Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "12:00",
+        "close": "19:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "12:00",
+        "close": "19:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "12:00",
+        "close": "19:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "12:00",
+        "close": "19:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "12:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "12:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "12:00",
+        "close": "18:00",
+        "closed": false
+      }
     }
   },
   {
@@ -5977,11 +7213,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "151",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "151 Mostyn St, Llandudno LL30 2PE, UK"
     },
     "location": {
       "type": "Point",
@@ -6112,7 +7348,7 @@
       "$date": "2026-05-21T20:08:00.410Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:21.762Z"
+      "$date": "2026-05-22T19:35:31.040Z"
     },
     "__v": 1,
     "coverImage": {
@@ -6129,6 +7365,10 @@
           "$date": "2026-05-22T07:17:21.755Z"
         }
       }
+    },
+    "phone": "01492 871464",
+    "socialMedia": {
+      "website": "https://merrymoonrestaurant.co.uk/"
     }
   },
   {
@@ -6139,11 +7379,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "25",
+      "street": "Lloyd Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "25 Lloyd St, Llandudno LL30 2UU, UK"
     },
     "location": {
       "type": "Point",
@@ -6263,7 +7503,7 @@
       ]
     },
     "lastReviewAt": null,
-    "visitCount": 0,
+    "visitCount": 1,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -6274,7 +7514,7 @@
       "$date": "2026-05-21T20:08:00.819Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:24.728Z"
+      "$date": "2026-05-22T19:35:31.554Z"
     },
     "__v": 1,
     "coverImage": {
@@ -6291,6 +7531,48 @@
           "$date": "2026-05-22T07:17:24.724Z"
         }
       }
+    },
+    "description": "Unfussy outlet with outdoor seating whipping up Greek-style small plates, entrees & desserts.",
+    "openingHours": {
+      "monday": {
+        "open": "11:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "11:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "11:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "11:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "11:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "11:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "11:00",
+        "close": "22:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 701038",
+    "socialMedia": {
+      "website": "https://www.facebook.com/White-Tower-104164158197538"
     }
   },
   {
@@ -6301,11 +7583,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "91",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "91 Mostyn St, Llandudno LL30 2PD, UK"
     },
     "location": {
       "type": "Point",
@@ -6438,7 +7720,7 @@
       "$date": "2026-05-21T20:08:01.232Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:27.495Z"
+      "$date": "2026-05-22T19:35:32.068Z"
     },
     "__v": 1,
     "coverImage": {
@@ -6455,6 +7737,48 @@
           "$date": "2026-05-22T07:17:27.489Z"
         }
       }
+    },
+    "description": "Stylish, modern restaurant chain serving European & international favourites, plus a kids' menu.",
+    "openingHours": {
+      "monday": {
+        "open": "11:30",
+        "close": "21:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "11:30",
+        "close": "21:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "11:30",
+        "close": "21:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "11:30",
+        "close": "21:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "11:30",
+        "close": "22:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "11:30",
+        "close": "22:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "11:30",
+        "close": "21:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 550959",
+    "socialMedia": {
+      "website": "https://wildwoodrestaurants.co.uk/restaurant/llandudno/"
     }
   },
   {
@@ -6465,11 +7789,11 @@
     "importedBy": null,
     "category": "take-away",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "106",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "106 Mostyn St, Llandudno LL30 2SW, UK"
     },
     "location": {
       "type": "Point",
@@ -6600,7 +7924,7 @@
       "$date": "2026-05-21T20:08:01.749Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:30.122Z"
+      "$date": "2026-05-22T19:35:32.570Z"
     },
     "__v": 1,
     "coverImage": {
@@ -6617,6 +7941,45 @@
           "$date": "2026-05-22T07:17:30.119Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "closed": true
+      },
+      "tuesday": {
+        "open": "12:00",
+        "close": "19:30",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "12:00",
+        "close": "19:30",
+        "closed": false
+      },
+      "thursday": {
+        "open": "12:00",
+        "close": "19:30",
+        "closed": false
+      },
+      "friday": {
+        "open": "12:00",
+        "close": "20:30",
+        "closed": false
+      },
+      "saturday": {
+        "open": "12:00",
+        "close": "20:30",
+        "closed": false
+      },
+      "sunday": {
+        "open": "12:00",
+        "close": "18:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 873296",
+    "socialMedia": {
+      "website": "https://www.facebook.com/p/Wok-n-Roll-Thai-Noodle-Bar-Llandudno-100083539352065/"
     }
   },
   {
@@ -6627,11 +7990,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "95",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "95 Mostyn St, Llandudno LL30 2PD, UK"
     },
     "location": {
       "type": "Point",
@@ -6762,7 +8125,7 @@
       "$date": "2026-05-21T20:08:02.161Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:32.916Z"
+      "$date": "2026-05-22T19:35:33.080Z"
     },
     "__v": 1,
     "coverImage": {
@@ -6779,6 +8142,47 @@
           "$date": "2026-05-22T07:17:32.909Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "11:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "11:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "11:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "11:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "11:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "11:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "11:00",
+        "close": "23:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 463263",
+    "socialMedia": {
+      "website": "https://www.littledessertshop.co.uk/"
     }
   },
   {
@@ -6789,11 +8193,11 @@
     "importedBy": null,
     "category": "caf",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "18B",
+      "street": "Augusta Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "18B Augusta St, Llandudno LL30 2AD, UK"
     },
     "location": {
       "type": "Point",
@@ -6924,7 +8328,7 @@
       "$date": "2026-05-21T20:08:02.575Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:35.684Z"
+      "$date": "2026-05-22T19:35:33.587Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -6937,6 +8341,47 @@
           "$date": "2026-05-22T07:17:35.681Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "07:00",
+        "close": "14:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "07:00",
+        "close": "14:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "07:00",
+        "close": "14:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "07:00",
+        "close": "14:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "07:00",
+        "close": "14:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "07:00",
+        "close": "14:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "08:00",
+        "close": "14:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 860001",
+    "socialMedia": {
+      "website": "https://www.facebook.com/mollscafe/"
     }
   },
   {
@@ -6947,11 +8392,11 @@
     "importedBy": null,
     "category": "caf",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "64",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "64 Mostyn St, Llandudno LL30 2SB, UK"
     },
     "location": {
       "type": "Point",
@@ -7082,7 +8527,7 @@
       "$date": "2026-05-21T20:08:03.071Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:39.373Z"
+      "$date": "2026-05-22T19:35:34.116Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -7095,6 +8540,43 @@
           "$date": "2026-05-22T07:17:39.368Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "10:30",
+        "close": "23:30",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "10:30",
+        "close": "23:30",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "10:30",
+        "close": "23:30",
+        "closed": false
+      },
+      "thursday": {
+        "open": "10:30",
+        "close": "23:30",
+        "closed": false
+      },
+      "friday": {
+        "closed": true
+      },
+      "saturday": {
+        "closed": true
+      },
+      "sunday": {
+        "open": "12:00",
+        "close": "23:30",
+        "closed": false
+      }
+    },
+    "phone": "0870 160 6066",
+    "socialMedia": {
+      "website": "https://bandbinllandudno.co.uk/business/town-house-cafe-bar/"
     }
   },
   {
@@ -7105,11 +8587,11 @@
     "importedBy": null,
     "category": "caf",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "15",
+      "street": "Clonmel Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "15 Clonmel St, Llandudno LL30 2LE, UK"
     },
     "location": {
       "type": "Point",
@@ -7240,7 +8722,7 @@
       "$date": "2026-05-21T20:08:03.483Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:42.240Z"
+      "$date": "2026-05-22T19:35:34.726Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -7253,6 +8735,42 @@
           "$date": "2026-05-22T07:17:42.235Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "10:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "tuesday": {
+        "closed": true
+      },
+      "wednesday": {
+        "closed": true
+      },
+      "thursday": {
+        "open": "10:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "10:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "10:00",
+        "close": "16:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "10:00",
+        "close": "16:00",
+        "closed": false
+      }
+    },
+    "socialMedia": {
+      "website": "https://www.facebook.com/profile.php?id=61551428761936"
     }
   },
   {
@@ -7263,11 +8781,11 @@
     "importedBy": null,
     "category": "caf",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "112",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "112 Mostyn St, Llandudno LL30 2SW, UK"
     },
     "location": {
       "type": "Point",
@@ -7398,7 +8916,7 @@
       "$date": "2026-05-21T20:08:03.991Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:45.107Z"
+      "$date": "2026-05-22T19:35:35.229Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -7411,6 +8929,47 @@
           "$date": "2026-05-22T07:17:45.103Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "08:00",
+        "close": "16:30",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "08:00",
+        "close": "16:30",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "08:00",
+        "close": "16:30",
+        "closed": false
+      },
+      "thursday": {
+        "open": "08:00",
+        "close": "16:30",
+        "closed": false
+      },
+      "friday": {
+        "open": "08:00",
+        "close": "16:30",
+        "closed": false
+      },
+      "saturday": {
+        "open": "08:30",
+        "close": "17:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "08:30",
+        "close": "17:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 338220",
+    "socialMedia": {
+      "website": "https://providero.co.uk/"
     }
   },
   {
@@ -7421,11 +8980,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "3",
+      "street": "Saint George's Place",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "3 St George's Pl, Llandudno LL30 2NR, UK"
     },
     "location": {
       "type": "Point",
@@ -7556,7 +9115,7 @@
       "$date": "2026-05-21T20:08:04.504Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:47.769Z"
+      "$date": "2026-05-22T19:35:35.726Z"
     },
     "__v": 1,
     "coverImage": {
@@ -7573,6 +9132,47 @@
           "$date": "2026-05-22T07:17:47.764Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 875627",
+    "socialMedia": {
+      "website": "https://baradd.com/st-george-s-plaice-lheu864"
     }
   },
   {
@@ -7583,11 +9183,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "50",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "50 Mostyn St, Llandudno LL30 2RP, UK"
     },
     "location": {
       "type": "Point",
@@ -7707,7 +9307,7 @@
       ]
     },
     "lastReviewAt": null,
-    "visitCount": 0,
+    "visitCount": 1,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -7718,7 +9318,7 @@
       "$date": "2026-05-21T20:08:04.915Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:50.535Z"
+      "$date": "2026-05-22T19:35:36.256Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -7731,6 +9331,9 @@
           "$date": "2026-05-22T07:17:50.531Z"
         }
       }
+    },
+    "socialMedia": {
+      "website": "https://bandbinllandudno.co.uk/business/the-continental/"
     }
   },
   {
@@ -7741,11 +9344,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "3",
+      "street": "Lloyd Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "3 Lloyd St, Llandudno LL30 2UP, UK"
     },
     "location": {
       "type": "Point",
@@ -7865,7 +9468,7 @@
       ]
     },
     "lastReviewAt": null,
-    "visitCount": 0,
+    "visitCount": 1,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -7876,7 +9479,7 @@
       "$date": "2026-05-21T20:08:05.324Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:53.298Z"
+      "$date": "2026-05-22T19:35:36.746Z"
     },
     "__v": 1,
     "coverImage": {
@@ -7893,6 +9496,45 @@
           "$date": "2026-05-22T07:17:53.293Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "08:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "08:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "08:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "08:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "08:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "sunday": {
+        "closed": true
+      }
+    },
+    "phone": "01492 860084",
+    "socialMedia": {
+      "website": "https://www.thehambone.co.uk/"
     }
   },
   {
@@ -7903,11 +9545,11 @@
     "importedBy": null,
     "category": "caf",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "5",
+      "street": "Saint George's Place",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "5 St George's Pl, Llandudno LL30 2NR, UK"
     },
     "location": {
       "type": "Point",
@@ -8038,7 +9680,7 @@
       "$date": "2026-05-21T20:08:05.734Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:56.165Z"
+      "$date": "2026-05-22T19:35:37.290Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -8051,6 +9693,45 @@
           "$date": "2026-05-22T07:17:56.161Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "09:00",
+        "close": "17:00",
+        "closed": false
+      },
+      "sunday": {
+        "closed": true
+      }
+    },
+    "phone": "01492 471568",
+    "socialMedia": {
+      "website": "https://www.facebook.com/p/The-Lemon-Tree-Tea-Rooms-100063578470839/"
     }
   },
   {
@@ -8061,11 +9742,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
-      "city": "Llandudno",
+      "buildingNumber": "71a",
+      "street": "Conway Road",
+      "city": "Llandudno Junction",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "71a Conway Rd, Llandudno Junction LL31 9LT, UK"
     },
     "location": {
       "type": "Point",
@@ -8196,7 +9877,7 @@
       "$date": "2026-05-21T20:08:06.145Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:17:58.762Z"
+      "$date": "2026-05-22T19:35:37.804Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -8209,6 +9890,47 @@
           "$date": "2026-05-22T07:17:58.757Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "15:30",
+        "close": "23:30",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "15:30",
+        "close": "23:30",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "15:30",
+        "close": "23:30",
+        "closed": false
+      },
+      "thursday": {
+        "open": "15:30",
+        "close": "23:30",
+        "closed": false
+      },
+      "friday": {
+        "open": "15:30",
+        "close": "23:30",
+        "closed": false
+      },
+      "saturday": {
+        "open": "13:00",
+        "close": "23:30",
+        "closed": false
+      },
+      "sunday": {
+        "open": "13:00",
+        "close": "23:30",
+        "closed": false
+      }
+    },
+    "phone": "01492 709388",
+    "socialMedia": {
+      "website": "http://brgrnshakes.co.uk/"
     }
   },
   {
@@ -8219,11 +9941,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "29",
+      "street": "Queen's Road",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "29 Queen's Rd, Llandudno LL30 1TE, UK"
     },
     "location": {
       "type": "Point",
@@ -8354,7 +10076,7 @@
       "$date": "2026-05-21T20:08:06.650Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:01.366Z"
+      "$date": "2026-05-22T19:35:38.420Z"
     },
     "__v": 1,
     "coverImage": {
@@ -8371,6 +10093,43 @@
           "$date": "2026-05-22T07:18:01.361Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "14:00",
+        "close": "23:30",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "14:00",
+        "close": "23:30",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "14:00",
+        "close": "23:30",
+        "closed": false
+      },
+      "thursday": {
+        "open": "14:00",
+        "close": "23:30",
+        "closed": false
+      },
+      "friday": {
+        "closed": true
+      },
+      "saturday": {
+        "closed": true
+      },
+      "sunday": {
+        "open": "14:00",
+        "close": "23:30",
+        "closed": false
+      }
+    },
+    "phone": "01492 874875",
+    "socialMedia": {
+      "website": "https://baygrill2.co.uk/"
     }
   },
   {
@@ -8382,10 +10141,10 @@
     "category": "hotel",
     "address": {
       "buildingNumber": "",
-      "street": "Mostyn Street",
+      "street": "Saint George's Place",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "St George's Pl, Llandudno LL30 2LG, UK"
     },
     "location": {
       "type": "Point",
@@ -8516,7 +10275,7 @@
       "$date": "2026-05-21T20:08:07.058Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:04.258Z"
+      "$date": "2026-05-22T19:35:39.021Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -8529,6 +10288,48 @@
           "$date": "2026-05-22T07:18:04.252Z"
         }
       }
+    },
+    "description": "Plush rooms, some with views, in a refined Victorian venue featuring a restaurant with sea views.",
+    "openingHours": {
+      "monday": {
+        "open": "07:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "07:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "07:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "07:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "07:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "07:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "07:00",
+        "close": "23:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 877544",
+    "socialMedia": {
+      "website": "https://www.stgeorgeswales.co.uk/"
     }
   },
   {
@@ -8540,10 +10341,10 @@
     "category": "hotel",
     "address": {
       "buildingNumber": "",
-      "street": "Mostyn Street",
+      "street": "Saint George's Place",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "St George's Pl, Llandudno LL30 2NR, UK"
     },
     "location": {
       "type": "Point",
@@ -8674,7 +10475,7 @@
       "$date": "2026-05-21T20:08:07.471Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:06.814Z"
+      "$date": "2026-05-22T19:35:39.506Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -8687,6 +10488,10 @@
           "$date": "2026-05-22T07:18:06.810Z"
         }
       }
+    },
+    "phone": "01492 876421",
+    "socialMedia": {
+      "website": "https://whiteheatherhotelllandudno.co.uk/"
     }
   },
   {
@@ -8701,11 +10506,11 @@
     "ownerName": "Theresa Curbishly",
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "6",
+      "street": "North Parade",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "6 N Parade, Llandudno LL30 2LP, UK"
     },
     "location": {
       "type": "Point",
@@ -8838,7 +10643,7 @@
       "$date": "2026-05-21T20:08:08.087Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T10:58:00.028Z"
+      "$date": "2026-05-22T19:45:54.117Z"
     },
     "__v": 1,
     "coverImage": {
@@ -8857,7 +10662,8 @@
       }
     },
     "email": "manager@baytreehotel.co.uk",
-    "phone": "+4401492875858"
+    "phone": "+4401492875858",
+    "description": "Victorian property with bright rooms, breakfast and a lounge/bar, plus a restaurant."
   },
   {
     "_id": {
@@ -8953,11 +10759,11 @@
     "importedBy": null,
     "category": "hotel",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "6",
+      "street": "Arvon Avenue",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "6 Arvon Ave, Llandudno LL30 2DY, UK"
     },
     "location": {
       "type": "Point",
@@ -9088,7 +10894,7 @@
       "$date": "2026-05-21T20:08:08.911Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:12.447Z"
+      "$date": "2026-05-22T19:35:40.010Z"
     },
     "__v": 1,
     "coverImage": {
@@ -9105,6 +10911,10 @@
           "$date": "2026-05-22T07:18:12.442Z"
         }
       }
+    },
+    "phone": "01492 876857",
+    "socialMedia": {
+      "website": "https://sophias-tip-is.eu/audley-guest-house-clwyd-uk"
     }
   },
   {
@@ -9115,11 +10925,11 @@
     "importedBy": null,
     "category": "hotel",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "12",
+      "street": "South Parade",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "12 S Parade, Llandudno LL30 2LN, UK"
     },
     "location": {
       "type": "Point",
@@ -9250,7 +11060,7 @@
       "$date": "2026-05-21T20:08:09.321Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:15.104Z"
+      "$date": "2026-05-22T19:35:40.507Z"
     },
     "__v": 1,
     "coverImage": {
@@ -9267,6 +11077,10 @@
           "$date": "2026-05-22T07:18:15.100Z"
         }
       }
+    },
+    "phone": "01492 877369",
+    "socialMedia": {
+      "website": "https://www.beachsidellandudno.co.uk/"
     }
   },
   {
@@ -9277,11 +11091,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "21",
+      "street": "North Parade",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "21 N Parade, Llandudno LL30 2LP, UK"
     },
     "location": {
       "type": "Point",
@@ -9414,7 +11228,7 @@
       "$date": "2026-05-21T20:08:09.731Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:17.875Z"
+      "$date": "2026-05-22T19:35:41.075Z"
     },
     "__v": 1,
     "coverImage": {
@@ -9431,6 +11245,48 @@
           "$date": "2026-05-22T07:18:17.869Z"
         }
       }
+    },
+    "description": "Informal rooms, some with balconies, in a relaxed hotel offering sea views & dining.",
+    "openingHours": {
+      "monday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "thursday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "friday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "saturday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "sunday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      }
+    },
+    "phone": "01492 499600",
+    "socialMedia": {
+      "website": "https://www.everbrightgrouphotels.com/belmonthotel"
     }
   },
   {
@@ -9442,10 +11298,10 @@
     "category": "restaurant",
     "address": {
       "buildingNumber": "",
-      "street": "Mostyn Street",
+      "street": "Bodysgallen Lane",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "The Royal Welsh Way, Bodysgallen Ln, Llandudno LL30 1RS, UK"
     },
     "location": {
       "type": "Point",
@@ -9576,7 +11432,7 @@
       "$date": "2026-05-21T20:08:10.139Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:20.626Z"
+      "$date": "2026-05-22T19:35:41.574Z"
     },
     "__v": 1,
     "coverImage": {
@@ -9593,6 +11449,48 @@
           "$date": "2026-05-22T07:18:20.623Z"
         }
       }
+    },
+    "description": "Luxe parkland hotel with refined rooms, suites and cottages, plus a spa and upscale dining.",
+    "openingHours": {
+      "monday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "thursday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "friday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "saturday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "sunday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      }
+    },
+    "phone": "01492 584466",
+    "socialMedia": {
+      "website": "https://www.bodysgallen.com/"
     }
   },
   {
@@ -9603,11 +11501,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "14",
+      "street": "Llewelyn Avenue",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "14 Llewelyn Ave, Llandudno LL30 2ER, UK"
     },
     "location": {
       "type": "Point",
@@ -9738,7 +11636,7 @@
       "$date": "2026-05-21T20:08:10.556Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:23.404Z"
+      "$date": "2026-05-22T19:35:42.093Z"
     },
     "__v": 1,
     "coverImage": {
@@ -9755,6 +11653,11 @@
           "$date": "2026-05-22T07:18:23.398Z"
         }
       }
+    },
+    "description": "Victorian-era guesthouse offering low-key rooms with bathrooms, plus free WiFi and hot breakfast.",
+    "phone": "01492 876448",
+    "socialMedia": {
+      "website": "https://branstone.co.uk/"
     }
   },
   {
@@ -9765,11 +11668,11 @@
     "importedBy": null,
     "category": "hotel",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "15",
+      "street": "Craig Y Don Parade",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "15 Craig Y Don Parade, Llandudno LL30 1BG, UK"
     },
     "location": {
       "type": "Point",
@@ -9889,7 +11792,7 @@
       ]
     },
     "lastReviewAt": null,
-    "visitCount": 0,
+    "visitCount": 2,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -9900,7 +11803,7 @@
       "$date": "2026-05-21T20:08:10.965Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:26.169Z"
+      "$date": "2026-05-22T19:46:45.057Z"
     },
     "__v": 1,
     "coverImage": {
@@ -9917,6 +11820,48 @@
           "$date": "2026-05-22T07:18:26.164Z"
         }
       }
+    },
+    "description": "Refined guesthouse offering country-style rooms with free WiFi, plus full breakfast.",
+    "openingHours": {
+      "monday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "thursday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "friday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "saturday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "sunday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      }
+    },
+    "phone": "01492 877185",
+    "socialMedia": {
+      "website": "http://www.thebritanniaguesthouse.co.uk/"
     }
   },
   {
@@ -9927,11 +11872,11 @@
     "importedBy": null,
     "category": "hotel",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "1",
+      "street": "Mostyn Broadway",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "1 Mostyn Broadway, Llandudno LL30 1YL, UK"
     },
     "location": {
       "type": "Point",
@@ -10062,7 +12007,7 @@
       "$date": "2026-05-21T20:08:11.371Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:29.034Z"
+      "$date": "2026-05-22T19:35:43.118Z"
     },
     "__v": 1,
     "coverImage": {
@@ -10079,6 +12024,48 @@
           "$date": "2026-05-22T07:18:29.030Z"
         }
       }
+    },
+    "description": "Classic rooms in a Victorian hotel offering free Wi-Fi access, plus a restaurant and a bar.",
+    "openingHours": {
+      "monday": {
+        "open": "07:00",
+        "close": "10:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "07:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "07:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "07:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "07:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "07:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "07:00",
+        "close": "22:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 876398",
+    "socialMedia": {
+      "website": "http://www.thebroadwayhotel.com/"
     }
   },
   {
@@ -10089,11 +12076,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "34",
+      "street": "Abbey Road",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "Bryn Derwen, 34 Abbey Rd, Llandudno LL30 2EE, UK"
     },
     "location": {
       "type": "Point",
@@ -10224,7 +12211,7 @@
       "$date": "2026-05-21T20:08:11.876Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:31.885Z"
+      "$date": "2026-05-22T19:35:43.626Z"
     },
     "__v": 1,
     "coverImage": {
@@ -10241,6 +12228,11 @@
           "$date": "2026-05-22T07:18:31.879Z"
         }
       }
+    },
+    "description": "Stately guesthouse offering airy, traditional rooms with free Wifi, plus full breakfast & a bar.",
+    "phone": "01492 876804",
+    "socialMedia": {
+      "website": "http://www.bryn-derwen.co.uk/"
     }
   },
   {
@@ -10251,11 +12243,11 @@
     "importedBy": null,
     "category": "hotel",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "25",
+      "street": "North Parade",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "25 N Parade, Llandudno LL30 2LP, UK"
     },
     "location": {
       "type": "Point",
@@ -10386,7 +12378,7 @@
       "$date": "2026-05-21T20:08:12.348Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:34.881Z"
+      "$date": "2026-05-22T19:35:44.140Z"
     },
     "__v": 1,
     "coverImage": {
@@ -10403,6 +12395,11 @@
           "$date": "2026-05-22T07:18:34.876Z"
         }
       }
+    },
+    "description": "Classic rooms with free WiFi at a Victorian hotel offering a lounge, a bar and a beach-view terrace.",
+    "phone": "01492 876790",
+    "socialMedia": {
+      "website": "https://brynymorhotel.com/"
     }
   },
   {
@@ -10413,11 +12410,11 @@
     "importedBy": null,
     "category": "hotel",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "46",
+      "street": "Saint Mary's Road",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "46 St Mary's Rd, Llandudno LL30 2UE, UK"
     },
     "location": {
       "type": "Point",
@@ -10548,7 +12545,7 @@
       "$date": "2026-05-21T20:08:12.756Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:37.841Z"
+      "$date": "2026-05-22T19:35:44.629Z"
     },
     "__v": 1,
     "coverImage": {
@@ -10565,6 +12562,11 @@
           "$date": "2026-05-22T07:18:37.835Z"
         }
       }
+    },
+    "description": "Modern self-catering holiday flats in a 3-storey detached house on residential street with parking.",
+    "phone": "01492 876972",
+    "socialMedia": {
+      "website": "http://www.builehill.com/"
     }
   },
   {
@@ -10575,11 +12577,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "74",
+      "street": "Church Walks",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "74 Church Walks, Llandudno LL30 2HD, UK"
     },
     "location": {
       "type": "Point",
@@ -10710,7 +12712,7 @@
       "$date": "2026-05-21T20:08:13.205Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:40.378Z"
+      "$date": "2026-05-22T19:35:45.168Z"
     },
     "__v": 1,
     "coverImage": {
@@ -10727,6 +12729,11 @@
           "$date": "2026-05-22T07:18:40.373Z"
         }
       }
+    },
+    "description": "Relaxed guesthouse offering subdued rooms with iPod docks and free WiFi, plus full breakfast.",
+    "phone": "01492 875946",
+    "socialMedia": {
+      "website": "http://www.burleighhouse.co.uk/"
     }
   },
   {
@@ -10738,10 +12745,10 @@
     "category": "hotel",
     "address": {
       "buildingNumber": "",
-      "street": "Mostyn Street",
+      "street": "Gloddaeth Crescent",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "16, Gloddaeth Cres, Llandudno LL30 2XT, UK"
     },
     "location": {
       "type": "Point",
@@ -10861,7 +12868,7 @@
       ]
     },
     "lastReviewAt": null,
-    "visitCount": 0,
+    "visitCount": 1,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -10908,7 +12915,7 @@
       "$date": "2026-05-21T20:08:13.713Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:43.268Z"
+      "$date": "2026-05-22T19:35:45.664Z"
     },
     "__v": 1,
     "coverImage": {
@@ -10929,6 +12936,48 @@
           "$date": "2026-05-22T07:18:43.264Z"
         }
       }
+    },
+    "description": "Relaxed, seafront townhouse offering casual quarters, plus a spa, quaint dining & free breakfast.",
+    "openingHours": {
+      "monday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "thursday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "friday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "saturday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      },
+      "sunday": {
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
+      }
+    },
+    "phone": "01492 868800",
+    "socialMedia": {
+      "website": "http://www.irishotel.co.uk/"
     }
   },
   {
@@ -10939,11 +12988,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "7",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "7 Mostyn St, Llandudno LL30 2NL, UK"
     },
     "location": {
       "type": "Point",
@@ -11063,7 +13112,7 @@
       ]
     },
     "lastReviewAt": null,
-    "visitCount": 0,
+    "visitCount": 1,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -11074,7 +13123,7 @@
       "$date": "2026-05-21T20:08:14.129Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:45.924Z"
+      "$date": "2026-05-22T20:53:24.804Z"
     },
     "__v": 1,
     "coverImage": {
@@ -11091,6 +13140,47 @@
           "$date": "2026-05-22T07:18:45.919Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "12:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "12:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "12:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "12:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "12:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "12:00",
+        "close": "20:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "12:00",
+        "close": "20:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 875336",
+    "socialMedia": {
+      "website": "https://www.facebook.com/pages/Barnacles-Chip-Shop/160829683931617"
     }
   },
   {
@@ -11101,11 +13191,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "123a",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "123a Mostyn St, Llandudno LL30 2PE, UK"
     },
     "location": {
       "type": "Point",
@@ -11236,7 +13326,7 @@
       "$date": "2026-05-21T20:08:14.640Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:49.014Z"
+      "$date": "2026-05-22T19:35:46.696Z"
     },
     "__v": 1,
     "coverImage": {
@@ -11253,6 +13343,46 @@
           "$date": "2026-05-22T07:18:49.010Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "13:00",
+        "close": "18:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "13:00",
+        "close": "18:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "13:00",
+        "close": "18:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "13:00",
+        "close": "18:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "13:00",
+        "close": "18:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "12:00",
+        "close": "18:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "12:00",
+        "close": "18:00",
+        "closed": false
+      }
+    },
+    "socialMedia": {
+      "website": "https://www.facebook.com/Dollopicecreamparlour"
     }
   },
   {
@@ -11263,11 +13393,11 @@
     "importedBy": null,
     "category": "take-away",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "22-24",
+      "street": "Old Road",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "22-24 Old Rd, Llandudno LL30 2NB, UK"
     },
     "location": {
       "type": "Point",
@@ -11398,7 +13528,7 @@
       "$date": "2026-05-21T20:08:15.048Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:51.681Z"
+      "$date": "2026-05-22T19:35:47.221Z"
     },
     "__v": 1,
     "coverImage": {
@@ -11415,7 +13545,45 @@
           "$date": "2026-05-22T07:18:51.676Z"
         }
       }
-    }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "12:00",
+        "close": "19:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "16:30",
+        "close": "19:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "16:30",
+        "close": "19:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "16:30",
+        "close": "19:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "16:30",
+        "close": "19:30",
+        "closed": false
+      },
+      "saturday": {
+        "open": "12:00",
+        "close": "19:30",
+        "closed": false
+      },
+      "sunday": {
+        "open": "12:00",
+        "close": "19:30",
+        "closed": false
+      }
+    },
+    "phone": "01492 872673"
   },
   {
     "_id": {
@@ -11425,11 +13593,11 @@
     "importedBy": null,
     "category": "take-away",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "133A",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "133A Mostyn St, Llandudno LL30 2PE, UK"
     },
     "location": {
       "type": "Point",
@@ -11560,7 +13728,7 @@
       "$date": "2026-05-21T20:08:15.562Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:54.378Z"
+      "$date": "2026-05-22T19:35:47.833Z"
     },
     "__v": 1,
     "coverImage": {
@@ -11577,6 +13745,33 @@
           "$date": "2026-05-22T07:18:54.371Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "closed": true
+      },
+      "tuesday": {
+        "closed": true
+      },
+      "wednesday": {
+        "closed": true
+      },
+      "thursday": {
+        "closed": true
+      },
+      "friday": {
+        "closed": true
+      },
+      "saturday": {
+        "closed": true
+      },
+      "sunday": {
+        "closed": true
+      }
+    },
+    "phone": "01492 872800",
+    "socialMedia": {
+      "website": "https://habibikebabhousellandudno.co.uk/?utm_source=GMBwebsite&utm_medium=organic&utm_campaign=Google%20My%20Business"
     }
   },
   {
@@ -11587,11 +13782,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "52",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "Victoria Centre, 52 Mostyn St, Llandudno LL30 2RP, UK"
     },
     "location": {
       "type": "Point",
@@ -11722,7 +13917,7 @@
       "$date": "2026-05-21T20:08:16.071Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:57.092Z"
+      "$date": "2026-05-22T19:35:48.337Z"
     },
     "__v": 1,
     "coverImage": {
@@ -11739,6 +13934,46 @@
           "$date": "2026-05-22T07:18:57.086Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "09:30",
+        "close": "17:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "09:30",
+        "close": "17:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "09:30",
+        "close": "17:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "09:30",
+        "close": "17:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "09:30",
+        "close": "17:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "09:30",
+        "close": "17:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "09:30",
+        "close": "16:30",
+        "closed": false
+      }
+    },
+    "socialMedia": {
+      "website": "https://www.facebook.com/Hambonerapido/"
     }
   },
   {
@@ -11749,11 +13984,11 @@
     "importedBy": null,
     "category": "take-away",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "27",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "27 Mostyn St, Llandudno LL30 2NL, UK"
     },
     "location": {
       "type": "Point",
@@ -11873,7 +14108,7 @@
       ]
     },
     "lastReviewAt": null,
-    "visitCount": 0,
+    "visitCount": 1,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -11884,7 +14119,7 @@
       "$date": "2026-05-21T20:08:16.483Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:18:59.754Z"
+      "$date": "2026-05-22T19:35:48.857Z"
     },
     "__v": 1,
     "coverImage": {
@@ -11901,6 +14136,48 @@
           "$date": "2026-05-22T07:18:59.749Z"
         }
       }
+    },
+    "description": "Restaurant chain known for its buckets of fried chicken, plus combo meals & sides.",
+    "openingHours": {
+      "monday": {
+        "open": "10:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "10:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "10:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "10:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "10:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "10:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "10:00",
+        "close": "21:00",
+        "closed": false
+      }
+    },
+    "phone": "020 3038 1743",
+    "socialMedia": {
+      "website": "https://www.kfc.co.uk/kfc-near-me/llandudno-mostyn-street?utm_term=37-Mostyn-Street&utm_medium=organic&utm_source=uberall"
     }
   },
   {
@@ -11911,11 +14188,11 @@
     "importedBy": null,
     "category": "take-away",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "12",
+      "street": "Madoc Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "12 Madoc St, Llandudno LL30 2TL, UK"
     },
     "location": {
       "type": "Point",
@@ -12046,7 +14323,7 @@
       "$date": "2026-05-21T20:08:17.097Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:19:02.272Z"
+      "$date": "2026-05-22T19:35:49.355Z"
     },
     "__v": 1,
     "coverImage": {
@@ -12063,6 +14340,47 @@
           "$date": "2026-05-22T07:19:02.266Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "17:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "17:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "17:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "17:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "16:30",
+        "close": "22:30",
+        "closed": false
+      },
+      "saturday": {
+        "open": "16:30",
+        "close": "22:30",
+        "closed": false
+      },
+      "sunday": {
+        "open": "17:00",
+        "close": "22:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 872888",
+    "socialMedia": {
+      "website": "https://kingstakeawaytakeaway.com/"
     }
   },
   {
@@ -12073,11 +14391,11 @@
     "importedBy": null,
     "category": "take-away",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "19",
+      "street": "Augusta Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "19 Augusta St, Llandudno LL30 2AD, UK"
     },
     "location": {
       "type": "Point",
@@ -12208,7 +14526,7 @@
       "$date": "2026-05-21T20:08:17.548Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:19:05.129Z"
+      "$date": "2026-05-22T19:35:49.862Z"
     },
     "__v": 1,
     "coverImage": {
@@ -12225,6 +14543,45 @@
           "$date": "2026-05-22T07:19:05.123Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "17:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "tuesday": {
+        "closed": true
+      },
+      "wednesday": {
+        "open": "17:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "17:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "17:00",
+        "close": "22:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 873338",
+    "socialMedia": {
+      "website": "http://www.hkpcl.com/newhongkong"
     }
   },
   {
@@ -12235,11 +14592,11 @@
     "importedBy": null,
     "category": "take-away",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "16",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "16 Mostyn St, Llandudno LL30 2PS, UK"
     },
     "location": {
       "type": "Point",
@@ -12370,7 +14727,7 @@
       "$date": "2026-05-21T20:08:18.020Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:19:07.741Z"
+      "$date": "2026-05-22T19:35:50.391Z"
     },
     "__v": 1,
     "coverImage": {
@@ -12387,6 +14744,48 @@
           "$date": "2026-05-22T07:19:07.736Z"
         }
       }
+    },
+    "description": "Casual counter-serve chain for build-your-own sandwiches & salads, with health-conscious options.",
+    "openingHours": {
+      "monday": {
+        "open": "09:00",
+        "close": "19:30",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "09:00",
+        "close": "19:30",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "09:00",
+        "close": "19:30",
+        "closed": false
+      },
+      "thursday": {
+        "open": "09:00",
+        "close": "19:30",
+        "closed": false
+      },
+      "friday": {
+        "open": "09:00",
+        "close": "20:30",
+        "closed": false
+      },
+      "saturday": {
+        "open": "09:00",
+        "close": "20:30",
+        "closed": false
+      },
+      "sunday": {
+        "open": "09:00",
+        "close": "19:30",
+        "closed": false
+      }
+    },
+    "phone": "01492 860807",
+    "socialMedia": {
+      "website": "https://restaurants.subway.com/united-kingdom/wa/llandudno/16-mostyn-street?utm_source=yxt-goog&utm_medium=local&utm_term=acq&utm_content=33492&utm_campaign=evergreen-2020&y_source=1_MTQ5MjcyNzMtNzE1LWxvY2F0aW9uLndlYnNpdGU%3D"
     }
   },
   {
@@ -12397,11 +14796,11 @@
     "importedBy": null,
     "category": "take-away",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "147",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "147 Mostyn St, Llandudno LL30 2PE, UK"
     },
     "location": {
       "type": "Point",
@@ -12532,7 +14931,7 @@
       "$date": "2026-05-21T20:08:18.476Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:19:10.184Z"
+      "$date": "2026-05-22T19:35:50.933Z"
     },
     "__v": 1,
     "coverImage": {
@@ -12549,6 +14948,47 @@
           "$date": "2026-05-22T07:19:10.180Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "13:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "13:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "13:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "13:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "13:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "13:00",
+        "close": "22:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "13:00",
+        "close": "22:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 203516",
+    "socialMedia": {
+      "website": "https://burgersburritogrill.co.uk/"
     }
   },
   {
@@ -12559,11 +14999,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "20",
+      "street": "Augusta Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "20 Augusta St, Llandudno LL30 2AD, UK"
     },
     "location": {
       "type": "Point",
@@ -12694,7 +15134,7 @@
       "$date": "2026-05-21T20:08:18.886Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:19:13.068Z"
+      "$date": "2026-05-22T19:35:51.438Z"
     },
     "__v": 1,
     "coverImage": {
@@ -12711,6 +15151,47 @@
           "$date": "2026-05-22T07:19:13.062Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "17:00",
+        "close": "23:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 874219",
+    "socialMedia": {
+      "website": "https://www.facebook.com/pages/Godfather-Llandudno/286894698011482"
     }
   },
   {
@@ -12721,11 +15202,11 @@
     "importedBy": null,
     "category": "restaurant",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "133",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "133 Mostyn St, Llandudno LL30 2PE, UK"
     },
     "location": {
       "type": "Point",
@@ -12856,7 +15337,7 @@
       "$date": "2026-05-21T20:08:19.347Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:19:16.137Z"
+      "$date": "2026-05-22T19:35:51.927Z"
     },
     "__v": 1,
     "coverImage": {
@@ -12873,6 +15354,45 @@
           "$date": "2026-05-22T07:19:16.132Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "thursday": {
+        "closed": true
+      },
+      "friday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "12:00",
+        "close": "21:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 701118",
+    "socialMedia": {
+      "website": "https://bandbinllandudno.co.uk/business/the-orme-traditional-fish-chips/"
     }
   },
   {
@@ -12883,11 +15403,11 @@
     "importedBy": null,
     "category": "take-away",
     "address": {
-      "buildingNumber": "",
+      "buildingNumber": "155",
       "street": "Mostyn Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "155 Mostyn St, Llandudno LL30 2PE, UK"
     },
     "location": {
       "type": "Point",
@@ -13018,7 +15538,7 @@
       "$date": "2026-05-21T20:08:19.753Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:19:18.718Z"
+      "$date": "2026-05-22T19:35:52.433Z"
     },
     "__v": 1,
     "coverImage": {
@@ -13035,6 +15555,33 @@
           "$date": "2026-05-22T07:19:18.713Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "closed": true
+      },
+      "tuesday": {
+        "closed": true
+      },
+      "wednesday": {
+        "closed": true
+      },
+      "thursday": {
+        "closed": true
+      },
+      "friday": {
+        "closed": true
+      },
+      "saturday": {
+        "closed": true
+      },
+      "sunday": {
+        "closed": true
+      }
+    },
+    "phone": "01492 868333",
+    "socialMedia": {
+      "website": "https://topolinosbenspizzeria.co.uk/?utm_source=Google&utm_medium=GMB_seo&utm_campaign=Topolino%27S+Ben%27S+Pizzeria_889196"
     }
   },
   {
@@ -13050,10 +15597,10 @@
     "category": "restaurant",
     "address": {
       "buildingNumber": "",
-      "street": "Mostyn Street",
+      "street": "Colwyn Road",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "Colwyn Rd, Llandudno LL30 3AL, UK"
     },
     "location": {
       "type": "Point",
@@ -13173,7 +15720,7 @@
       ]
     },
     "lastReviewAt": null,
-    "visitCount": 0,
+    "visitCount": 6,
     "claimRequest": {
       "status": "none",
       "agreedToTerms": false,
@@ -13184,7 +15731,7 @@
       "$date": "2026-05-21T20:08:20.367Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T10:58:00.521Z"
+      "$date": "2026-05-22T19:46:30.432Z"
     },
     "__v": 1,
     "coverImage": {
@@ -13217,11 +15764,11 @@
     "importedBy": null,
     "category": "caf",
     "address": {
-      "buildingNumber": "",
-      "street": "Mostyn Street",
+      "buildingNumber": "10",
+      "street": "Clonmel Street",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "10 Clonmel St, Llandudno LL30 2LE, UK"
     },
     "location": {
       "type": "Point",
@@ -13354,7 +15901,7 @@
       "$date": "2026-05-21T20:08:20.784Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:19:24.533Z"
+      "$date": "2026-05-22T19:35:52.929Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -13367,6 +15914,47 @@
           "$date": "2026-05-22T07:19:24.528Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "09:30",
+        "close": "15:00",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "09:30",
+        "close": "15:00",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "09:30",
+        "close": "15:00",
+        "closed": false
+      },
+      "thursday": {
+        "open": "09:30",
+        "close": "15:00",
+        "closed": false
+      },
+      "friday": {
+        "open": "09:30",
+        "close": "15:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "09:30",
+        "close": "15:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "09:30",
+        "close": "15:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 878719",
+    "socialMedia": {
+      "website": "http://cafeindulgence.wales/"
     }
   },
   {
@@ -13381,8 +15969,11 @@
     "ownerName": "Akash Talukdar",
     "category": "hotel",
     "address": {
-      "fullAddress": "Covent Garden, London, United Kingdom",
-      "country": "United Kingdom"
+      "buildingNumber": "51",
+      "street": "Bedford Street",
+      "city": "London",
+      "country": "United Kingdom",
+      "fullAddress": "51 Bedford St, London WC2R 0PZ, UK"
     },
     "location": {
       "type": "Point",
@@ -13513,7 +16104,7 @@
       "$date": "2026-05-21T20:08:21.979Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T10:58:00.890Z"
+      "$date": "2026-05-22T19:45:51.974Z"
     },
     "__v": 1,
     "coverImage": {
@@ -13534,43 +16125,43 @@
         }
       }
     },
-    "description": "",
+    "description": "Snug rooms with kitchenettes in an upmarket hotel featuring complimentary Wi-Fi.",
     "email": "akashtalukdar290@gmail.com",
     "openingHours": {
       "monday": {
-        "open": "09:00",
-        "close": "17:00",
+        "open": "00:00",
+        "close": "23:59",
         "closed": false
       },
       "tuesday": {
-        "open": "09:00",
-        "close": "17:00",
+        "open": "00:00",
+        "close": "23:59",
         "closed": false
       },
       "wednesday": {
-        "open": "09:00",
-        "close": "17:00",
+        "open": "00:00",
+        "close": "23:59",
         "closed": false
       },
       "thursday": {
-        "open": "09:00",
-        "close": "17:00",
+        "open": "00:00",
+        "close": "23:59",
         "closed": false
       },
       "friday": {
-        "open": "09:00",
-        "close": "17:00",
+        "open": "00:00",
+        "close": "23:59",
         "closed": false
       },
       "saturday": {
-        "open": "09:00",
-        "close": "17:00",
-        "closed": true
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
       },
       "sunday": {
-        "open": "09:00",
-        "close": "17:00",
-        "closed": true
+        "open": "00:00",
+        "close": "23:59",
+        "closed": false
       }
     },
     "phone": "+447394539955",
@@ -13587,10 +16178,10 @@
     "category": "restaurant",
     "address": {
       "buildingNumber": "",
-      "street": "Mostyn Street",
+      "street": "Glan Y Mor Parade",
       "city": "Llandudno",
       "country": "United Kingdom",
-      "fullAddress": "Mostyn Street, Llandudno, United Kingdom"
+      "fullAddress": "Glan Y Mor Parade, Llandudno LL30 2LL, UK"
     },
     "location": {
       "type": "Point",
@@ -13721,7 +16312,7 @@
       "$date": "2026-05-21T20:08:22.424Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T07:19:30.245Z"
+      "$date": "2026-05-22T19:35:53.454Z"
     },
     "__v": 1,
     "externalProfiles": {
@@ -13734,6 +16325,47 @@
           "$date": "2026-05-22T07:19:30.239Z"
         }
       }
+    },
+    "openingHours": {
+      "monday": {
+        "open": "08:00",
+        "close": "20:30",
+        "closed": false
+      },
+      "tuesday": {
+        "open": "08:00",
+        "close": "20:30",
+        "closed": false
+      },
+      "wednesday": {
+        "open": "08:00",
+        "close": "20:30",
+        "closed": false
+      },
+      "thursday": {
+        "open": "08:00",
+        "close": "20:30",
+        "closed": false
+      },
+      "friday": {
+        "open": "08:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "saturday": {
+        "open": "08:00",
+        "close": "21:00",
+        "closed": false
+      },
+      "sunday": {
+        "open": "08:00",
+        "close": "20:00",
+        "closed": false
+      }
+    },
+    "phone": "01492 353189",
+    "socialMedia": {
+      "website": "https://www.thegoat-llandudno.co.uk/"
     }
   }
 ]

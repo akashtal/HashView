@@ -32,7 +32,7 @@
     "authProvider": "email",
     "avatar": null,
     "lastLogin": {
-      "$date": "2026-05-22T06:34:56.752Z"
+      "$date": "2026-05-22T20:34:29.532Z"
     },
     "settings": {
       "twoFactorAuth": false,
@@ -47,7 +47,7 @@
       "$date": "2026-05-21T18:44:47.989Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T06:34:56.753Z"
+      "$date": "2026-05-22T20:34:29.533Z"
     },
     "__v": 0
   },
@@ -222,9 +222,9 @@
     "status": "active",
     "emailVerified": true,
     "phoneVerified": false,
-    "pushToken": null,
+    "pushToken": "ExponentPushToken[QlHBdLG9_7ovy5_y98T72q]",
     "pushTokenUpdatedAt": {
-      "$date": "2026-05-22T02:07:32.715Z"
+      "$date": "2026-05-22T19:46:27.095Z"
     },
     "businesses": [],
     "favoritePlaces": [],
@@ -239,7 +239,24 @@
       "pushNotifications": true,
       "emailNotifications": true
     },
-    "pushTokens": [],
+    "pushTokens": [
+      {
+        "token": "ExponentPushToken[QlHBdLG9_7ovy5_y98T72q]",
+        "platform": "android",
+        "deviceId": "a0a44ab8-1932-4c57-8544-a9d62eb6d42e",
+        "installationId": null,
+        "appVersion": "1.1.14",
+        "lastRegisteredAt": {
+          "$date": "2026-05-22T19:46:27.095Z"
+        },
+        "disabledAt": null,
+        "lastError": null,
+        "lastErrorAt": null,
+        "_id": {
+          "$oid": "6a107f45268977124087c80c"
+        }
+      }
+    ],
     "name": "Dibyajyoti Talukdar",
     "email": "djtalukdar290@gmail.com",
     "firebaseUid": "9GtTyXMu1Qarm9dkj50VNbofz243",
@@ -248,9 +265,9 @@
       "$date": "2026-05-21T20:29:09.179Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T02:07:49.828Z"
+      "$date": "2026-05-22T19:46:27.097Z"
     },
-    "__v": 5
+    "__v": 44
   },
   {
     "_id": {
@@ -902,7 +919,7 @@
     "_id": {
       "$oid": "6a0f6b1f68ed048af88f9682"
     },
-    "name": "Apple User",
+    "name": "ss",
     "email": "drqqvh9zqc@privaterelay.appleid.com",
     "passwordHash": "$2a$10$0IfOKHdPipwPNRvtKmChKu5GiieDKUOM47Jg9406gO.tdvw1OQx0C",
     "role": "customer",
@@ -944,7 +961,7 @@
       "$date": "2026-05-21T20:29:19.342Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T10:58:02.461Z"
+      "$date": "2026-05-22T15:22:47.668Z"
     },
     "__v": 0
   },
@@ -1002,7 +1019,7 @@
     "_id": {
       "$oid": "6a0f6b2068ed048af88f9688"
     },
-    "name": "Apple User",
+    "name": "ss",
     "email": "sxxjjk457q@privaterelay.appleid.com",
     "passwordHash": "$2a$10$q7P.OtsM2D.mDKfgf1saQeu4weP8miIORqEpQDLuOGvR7kGcBO7/i",
     "role": "customer",
@@ -1044,7 +1061,7 @@
       "$date": "2026-05-21T20:29:20.366Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T10:58:02.644Z"
+      "$date": "2026-05-22T15:20:47.568Z"
     },
     "__v": 0
   },
@@ -1823,8 +1840,10 @@
     "status": "active",
     "emailVerified": true,
     "phoneVerified": false,
-    "pushToken": null,
-    "pushTokenUpdatedAt": null,
+    "pushToken": "ExponentPushToken[bBVfZTNyLa_BSpk7KkqZsm]",
+    "pushTokenUpdatedAt": {
+      "$date": "2026-05-22T20:53:24.704Z"
+    },
     "businesses": [],
     "favoritePlaces": [],
     "firebaseUid": "Sw6xHwLzdpbvVfVJ5ogzxjbkWYv2",
@@ -1839,14 +1858,31 @@
       "pushNotifications": true,
       "emailNotifications": true
     },
-    "pushTokens": [],
+    "pushTokens": [
+      {
+        "token": "ExponentPushToken[bBVfZTNyLa_BSpk7KkqZsm]",
+        "platform": "ios",
+        "deviceId": "26D9AE79-FE7F-4AE3-9822-2551040B6974",
+        "installationId": null,
+        "appVersion": "1.1.14",
+        "lastRegisteredAt": {
+          "$date": "2026-05-22T20:53:24.704Z"
+        },
+        "disabledAt": null,
+        "lastError": null,
+        "lastErrorAt": null,
+        "_id": {
+          "$oid": "6a10b832268977124087d0a4"
+        }
+      }
+    ],
     "createdAt": {
       "$date": "2026-05-21T20:29:28.224Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T10:58:03.378Z"
+      "$date": "2026-05-22T20:53:24.706Z"
     },
-    "__v": 0
+    "__v": 2
   },
   {
     "_id": {
@@ -2523,8 +2559,10 @@
     "status": "active",
     "emailVerified": true,
     "phoneVerified": false,
-    "pushToken": null,
-    "pushTokenUpdatedAt": null,
+    "pushToken": "ExponentPushToken[20omNiOjzP6FQlfSkKFT__]",
+    "pushTokenUpdatedAt": {
+      "$date": "2026-05-22T16:54:27.499Z"
+    },
     "businesses": [],
     "favoritePlaces": [],
     "firebaseUid": "wss7N6B0CQZG8hbVkDJmFYtYpjI3",
@@ -2539,14 +2577,31 @@
       "pushNotifications": true,
       "emailNotifications": true
     },
-    "pushTokens": [],
+    "pushTokens": [
+      {
+        "token": "ExponentPushToken[20omNiOjzP6FQlfSkKFT__]",
+        "platform": "ios",
+        "deviceId": "8184A95D-7FD2-4833-9A4E-473FE4E3226F",
+        "installationId": null,
+        "appVersion": "1.1.14",
+        "lastRegisteredAt": {
+          "$date": "2026-05-22T16:54:27.499Z"
+        },
+        "disabledAt": null,
+        "lastError": null,
+        "lastErrorAt": null,
+        "_id": {
+          "$oid": "6a107a63268977124087c390"
+        }
+      }
+    ],
     "createdAt": {
       "$date": "2026-05-21T20:29:35.316Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T10:58:04.801Z"
+      "$date": "2026-05-22T16:54:27.501Z"
     },
-    "__v": 0
+    "__v": 7
   },
   {
     "_id": {

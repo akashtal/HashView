@@ -114,6 +114,10 @@ export const adminApi = {
   // Update only custom permissions
   updateUserPermissions: (userId, permissions) =>
     api.put(`/admin/rbac/users/${userId}/permissions`, { permissions }),
+
+  // ── System / Backups ──────────────────────────────────────────────────────────
+  getBackupStatus: () => api.get('/admin/backup-status'),
+  triggerBackup: () => api.post('/admin/backup'),
 };
 
 export default adminApi;

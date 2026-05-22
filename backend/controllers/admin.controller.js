@@ -1752,3 +1752,112 @@ exports.promoteUserToBusiness = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get database backup status
+// @route   GET /api/admin/backup-status
+// @access  Private (Admin)
+exports.getBackupStatus = async (req, res, next) => {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Natively ignored by nodemon because it's a hidden folder
+    const backupsDir = path.join(__dirname, '../.backups');
+    let lastBackupDate = null;
+    
+    if (fs.existsSync(backupsDir)) {
+      const files = fs.readdirSync(backupsDir);
+      // Find directories matching backup-YYYY-MM-DD-HHMMSS
+      const backupDirs = files.filter(f => f.startsWith('backup-') && fs.statSync(path.join(backupsDir, f)).isDirectory());
+      
+      if (backupDirs.length > 0) {
+        // Sort alphabetically, the newest timestamp will be last
+        backupDirs.sort();
+        
+        // Find the latest valid backup (must contain backup_info.json to ensure it didn't fail midway)
+        let latestValidBackupDir = null;
+        for (let i = backupDirs.length - 1; i >= 0; i--) {
+          const infoPath = path.join(backupsDir, backupDirs[i], 'backup_info.json');
+          if (fs.existsSync(infoPath)) {
+            latestValidBackupDir = backupDirs[i];
+            break;
+          }
+        }
+        
+        if (latestValidBackupDir) {
+          // Extract timestamp from folder name: backup-2026-05-22-201826
+          const timePart = latestValidBackupDir.replace('backup-', '');
+          if (timePart.length === 17) { // 10 (date) + 1 (-) + 6 (time)
+            const year = timePart.substring(0, 4);
+            const month = timePart.substring(5, 7);
+            const day = timePart.substring(8, 10);
+            const hour = timePart.substring(11, 13);
+            const min = timePart.substring(13, 15);
+            const sec = timePart.substring(15, 17);
+            
+            lastBackupDate = new Date(`${year}-${month}-${day}T${hour}:${min}:${sec}Z`);
+          } else {
+            // Fallback to directory stats
+            const stats = fs.statSync(path.join(backupsDir, latestValidBackupDir));
+            lastBackupDate = stats.birthtime;
+          }
+        }
+      }
+    }
+
+    let needsBackup = true;
+    let daysSinceLastBackup = null;
+
+    if (lastBackupDate) {
+      const now = new Date();
+      const diffTime = Math.abs(now - lastBackupDate);
+      daysSinceLastBackup = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (daysSinceLastBackup <= 15) {
+        needsBackup = false;
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      needsBackup,
+      daysSinceLastBackup,
+      lastBackupDate
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Trigger a manual database backup
+// @route   POST /api/admin/backup
+// @access  Private (Admin)
+exports.triggerBackup = async (req, res, next) => {
+  try {
+    const { exec } = require('child_process');
+    const path = require('path');
+    
+    const scriptPath = path.join(__dirname, '../scripts/backup_db.js');
+    
+    exec(`node "${scriptPath}"`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Backup exec error: ${error}`);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to execute backup script',
+          error: error.message
+        });
+      }
+      
+      console.log(`Backup stdout: ${stdout}`);
+      
+      res.status(200).json({
+        success: true,
+        message: 'Database backup completed successfully',
+        output: stdout
+      });
+    });
+  } catch (error) {
+    next(error);
+  }
+};

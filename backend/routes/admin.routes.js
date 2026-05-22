@@ -27,7 +27,9 @@ const {
   getBusinessOwners,
   setOwnerNotificationLimit,
   setOwnerFreeTrialLimit,
-  promoteUserToBusiness
+  promoteUserToBusiness,
+  getBackupStatus,
+  triggerBackup
 } = require('../controllers/admin.controller');
 const { protect, requireAdminTier, checkPermission } = require('../middleware/auth.middleware');
 const { PERMISSIONS } = require('../constants/rbac');
@@ -78,5 +80,9 @@ router.delete('/coupons/:id', checkPermission(PERMISSIONS.MANAGE_COUPONS), delet
 router.get('/business-owners', checkPermission(PERMISSIONS.VIEW_BUSINESS), getBusinessOwners);
 router.put('/business-owners/:ownerId/notification-limit', checkPermission(PERMISSIONS.MANAGE_SUBSCRIPTIONS), setOwnerNotificationLimit);
 router.put('/business-owners/:ownerId/free-trial-limit', checkPermission(PERMISSIONS.MANAGE_SUBSCRIPTIONS), setOwnerFreeTrialLimit);
+
+// ── System / Backups ──────────────────────────────────────────────────────────
+router.get('/backup-status', checkPermission(PERMISSIONS.VIEW_DASHBOARD), getBackupStatus);
+router.post('/backup', checkPermission(PERMISSIONS.VIEW_DASHBOARD), triggerBackup);
 
 module.exports = router;

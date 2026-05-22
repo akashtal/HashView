@@ -19,8 +19,8 @@ const firebaseUserMappings = {
   'hannahkayfaulkner2003@gmail.com': 'Hannah Kay Faulkner',
   'jenisjchristian@gmail.com': 'Jenis Christian',
   // Apple private relays fallbacks
-  'drqqvh9zqc@privaterelay.appleid.com': 'Apple User',
-  'sxxjjk457q@privaterelay.appleid.com': 'Apple User',
+  'drqqvh9zqc@privaterelay.appleid.com': 'ss',
+  'sxxjjk457q@privaterelay.appleid.com': 'ss',
   'gpc8rw75xp@privaterelay.appleid.com': 'Apple User',
   'zfp6mf8bcm@privaterelay.appleid.com': 'Apple User',
   'fx4r2k888c@privaterelay.appleid.com': 'Apple User',

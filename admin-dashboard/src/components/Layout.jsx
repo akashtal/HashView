@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -15,8 +15,11 @@ import {
   ShieldCheck,
   ChevronRight,
   BarChart3,
+  AlertTriangle,
+  Loader2
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import adminApi from '../api/adminApi';
 
 const ROLE_BADGE = {
   admin:            { label: 'Admin',            className: 'bg-primary-100 text-primary-700 border border-primary-200' },
@@ -26,8 +29,37 @@ const ROLE_BADGE = {
 
 const Layout = ({ children, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [backupStatus, setBackupStatus] = useState(null);
+  const [isBackingUp, setIsBackingUp] = useState(false);
+  
   const location = useLocation();
   const { user, hasPermission } = useAuth();
+
+  useEffect(() => {
+    if (hasPermission('VIEW_DASHBOARD')) {
+      adminApi.getBackupStatus().then(res => {
+        if (res.data?.success) {
+          setBackupStatus(res.data);
+        }
+      }).catch(err => console.error("Failed to load backup status", err));
+    }
+  }, [hasPermission]);
+
+  const handleBackup = async () => {
+    setIsBackingUp(true);
+    try {
+      const res = await adminApi.triggerBackup();
+      if (res.data?.success) {
+        setBackupStatus(prev => ({ ...prev, needsBackup: false }));
+        alert('Database backup completed successfully!');
+      }
+    } catch (err) {
+      alert('Failed to trigger backup');
+      console.error(err);
+    } finally {
+      setIsBackingUp(false);
+    }
+  };
 
   const effectiveRole = user?.adminRole || user?.role || 'admin';
   const badge = ROLE_BADGE[effectiveRole] || ROLE_BADGE.admin;
@@ -154,6 +186,38 @@ const Layout = ({ children, onLogout }) => {
             </div>
           </div>
         </div>
+
+        {/* Backup Warning Banner */}
+        {backupStatus?.needsBackup && (
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mx-6 mt-6 rounded shadow-sm">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <AlertTriangle className="h-5 w-5 text-yellow-400" />
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-sm text-yellow-700">
+                  <strong>Warning:</strong> It has been {backupStatus.daysSinceLastBackup !== null ? `${backupStatus.daysSinceLastBackup} days` : 'more than 15 days'} since your last database backup. Regular backups are critical to prevent data loss.
+                </p>
+                <div className="mt-2">
+                  <button
+                    onClick={handleBackup}
+                    disabled={isBackingUp}
+                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-yellow-700 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
+                  >
+                    {isBackingUp ? (
+                      <>
+                        <Loader2 className="animate-spin -ml-0.5 mr-2 h-4 w-4" />
+                        Backing up...
+                      </>
+                    ) : (
+                      'Backup Now'
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Page Content */}
         <main className="p-6 min-h-[calc(100vh-4rem)]">{children}</main>

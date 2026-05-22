@@ -28,7 +28,7 @@
         "$oid": "6927430d293b5919a61e990d"
       }
     ],
-    "pushToken": "ExponentPushToken[QlHBdLG9_7ovy5_y98T72q]",
+    "pushToken": "ExponentPushToken[R-PU1EJ0lUPu2O_R0yOnry]",
     "lastLogin": {
       "$date": "2026-03-13T22:02:49.509Z"
     },
@@ -44,9 +44,9 @@
       "$date": "2025-11-26T18:07:26.769Z"
     },
     "updatedAt": {
-      "$date": "2026-05-22T11:06:50.750Z"
+      "$date": "2026-05-22T16:07:33.412Z"
     },
-    "__v": 79,
+    "__v": 84,
     "authProvider": "google",
     "avatar": "https://lh3.googleusercontent.com/a/ACg8ocK4oq3WUCn4u85jCHDZpZD854dHb5Xffevdz9DP6VIjDEyLBN50=s96-c",
     "firebaseUid": "rjmpSg9MJnfl8lDVx3XxLKG6obv2",
@@ -90,39 +90,23 @@
       "updatesUsed": 0
     },
     "pushTokenUpdatedAt": {
-      "$date": "2026-05-22T11:06:50.749Z"
+      "$date": "2026-05-22T16:07:10.122Z"
     },
     "pushTokens": [
       {
         "token": "ExponentPushToken[R-PU1EJ0lUPu2O_R0yOnry]",
         "platform": "ios",
-        "deviceId": "C4C209BF-F514-4AEF-BDEF-78C70530F932",
+        "deviceId": "E52AE0A8-736E-40A4-8E6C-5AF672BC2C03",
         "installationId": null,
         "appVersion": "1.1.14",
         "lastRegisteredAt": {
-          "$date": "2026-05-22T10:10:19.766Z"
+          "$date": "2026-05-22T16:07:10.122Z"
         },
         "disabledAt": null,
         "lastError": null,
         "lastErrorAt": null,
         "_id": {
           "$oid": "69ea18e415b30c77e05a25ee"
-        }
-      },
-      {
-        "token": "ExponentPushToken[QlHBdLG9_7ovy5_y98T72q]",
-        "platform": "android",
-        "deviceId": "9119ac6f-a17b-479e-8f75-2ace54e69f35",
-        "installationId": null,
-        "appVersion": "1.1.14",
-        "lastRegisteredAt": {
-          "$date": "2026-05-22T11:06:50.749Z"
-        },
-        "disabledAt": null,
-        "lastError": null,
-        "lastErrorAt": null,
-        "_id": {
-          "$oid": "6a0fbac826897712408799c3"
         }
       }
     ]
