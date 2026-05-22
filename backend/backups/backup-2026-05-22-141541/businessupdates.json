@@ -1,0 +1,449 @@
+[
+  {
+    "_id": {
+      "$oid": "69136f889702c5d4c1464acf"
+    },
+    "business": {
+      "$oid": "6912f3326c46b98f358733da"
+    },
+    "type": "offer",
+    "title": "New offer",
+    "description": "Thik se you have to get the java edition of the day happy returns namaste namaste namaste I will be in office now ",
+    "image": null,
+    "discountType": "percentage",
+    "discountValue": 25,
+    "validUntil": {
+      "$date": "2025-11-11T17:16:08.642Z"
+    },
+    "isActive": false,
+    "viewCount": 0,
+    "createdBy": {
+      "$oid": "6912dc799805791470266606"
+    },
+    "validFrom": {
+      "$date": "2025-11-11T17:16:56.510Z"
+    },
+    "createdAt": {
+      "$date": "2025-11-11T17:16:56.522Z"
+    },
+    "updatedAt": {
+      "$date": "2025-11-11T17:17:00.909Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69136fb79702c5d4c1464ae0"
+    },
+    "business": {
+      "$oid": "6912f3326c46b98f358733da"
+    },
+    "type": "update",
+    "title": "New Zealand",
+    "description": "The day happy returns namaste namaste namaste I am working as an example for ",
+    "image": null,
+    "discountType": "percentage",
+    "discountValue": 0,
+    "validUntil": {
+      "$date": "2025-11-11T17:17:28.807Z"
+    },
+    "isActive": true,
+    "viewCount": 0,
+    "createdBy": {
+      "$oid": "6912dc799805791470266606"
+    },
+    "validFrom": {
+      "$date": "2025-11-11T17:17:43.718Z"
+    },
+    "createdAt": {
+      "$date": "2025-11-11T17:17:43.719Z"
+    },
+    "updatedAt": {
+      "$date": "2025-11-11T17:17:43.719Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "697403d78be917cea21650a8"
+    },
+    "business": {
+      "$oid": "696f9ed21b55fa092693b4be"
+    },
+    "type": "announcement",
+    "title": "Pop in for a FREE Drink",
+    "description": "Only valid for today**",
+    "image": null,
+    "discountType": "percentage",
+    "discountValue": 0,
+    "validUntil": {
+      "$date": "2026-01-23T23:26:01.331Z"
+    },
+    "isActive": true,
+    "viewCount": 0,
+    "createdBy": {
+      "$oid": "696f99f01b55fa092693b4ae"
+    },
+    "validFrom": {
+      "$date": "2026-01-23T23:27:19.961Z"
+    },
+    "createdAt": {
+      "$date": "2026-01-23T23:27:19.962Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-23T23:27:19.962Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69825619ae85ee0991cc9b95"
+    },
+    "business": {
+      "$oid": "692aa3632244b386cd8409f1"
+    },
+    "type": "offer",
+    "title": "29%off",
+    "description": "new Offer ",
+    "image": null,
+    "discountType": "percentage",
+    "discountValue": 1999,
+    "validUntil": {
+      "$date": "2026-02-19T20:09:00Z"
+    },
+    "isActive": true,
+    "viewCount": 0,
+    "createdBy": {
+      "$oid": "6929f1d92c453fd7af5d13cc"
+    },
+    "validFrom": {
+      "$date": "2026-02-03T20:10:01.356Z"
+    },
+    "createdAt": {
+      "$date": "2026-02-03T20:10:01.357Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-03T20:10:35.302Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69e3438f697f5492e7c0e2de"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "announcement",
+    "title": "Saturday Starvings that you cannot resist",
+    "description": "Pop into Thai Restaurant Today ",
+    "image": null,
+    "discountType": "percentage",
+    "discountValue": 0,
+    "validUntil": {
+      "$date": "2026-04-18T08:40:12.466Z"
+    },
+    "isActive": false,
+    "viewCount": 0,
+    "createdBy": {
+      "$oid": "692741de293b5919a61e9900"
+    },
+    "notifiedUsers": [
+      {
+        "$oid": "69496a20f294829e51cdc5d2"
+      }
+    ],
+    "notificationSentAt": {
+      "$date": "2026-04-18T08:40:49.024Z"
+    },
+    "validFrom": {
+      "$date": "2026-04-18T08:40:47.895Z"
+    },
+    "createdAt": {
+      "$date": "2026-04-18T08:40:47.895Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-18T08:57:41.925Z"
+    },
+    "__v": 1
+  },
+  {
+    "_id": {
+      "$oid": "69ea0610bf8c1a51f1c9a8b0"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "announcement",
+    "title": "Testing",
+    "description": "Test",
+    "image": null,
+    "discountType": "percentage",
+    "discountValue": 0,
+    "validUntil": {
+      "$date": "2026-04-23T11:44:07.159Z"
+    },
+    "isActive": true,
+    "viewCount": 0,
+    "createdBy": {
+      "$oid": "696c9f9175a542eb2d3ca070"
+    },
+    "notifiedUsers": [
+      {
+        "$oid": "69496a20f294829e51cdc5d2"
+      },
+      {
+        "$oid": "69692849356dfda59d66059c"
+      },
+      {
+        "$oid": "698de5d7a2788eda0c30a41c"
+      },
+      {
+        "$oid": "69e20b50115e75fa6b3d9742"
+      }
+    ],
+    "notificationSentAt": {
+      "$date": "2026-04-23T11:44:17.900Z"
+    },
+    "validFrom": {
+      "$date": "2026-04-23T11:44:16.753Z"
+    },
+    "createdAt": {
+      "$date": "2026-04-23T11:44:16.757Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-23T11:44:17.901Z"
+    },
+    "__v": 1
+  },
+  {
+    "_id": {
+      "$oid": "69ea0674bf8c1a51f1c9a94d"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "update",
+    "title": "Test",
+    "description": "Test",
+    "image": null,
+    "discountType": "percentage",
+    "discountValue": 0,
+    "validUntil": {
+      "$date": "2026-04-23T11:45:48.857Z"
+    },
+    "isActive": true,
+    "viewCount": 0,
+    "createdBy": {
+      "$oid": "696c9f9175a542eb2d3ca070"
+    },
+    "notifiedUsers": [
+      {
+        "$oid": "69496a20f294829e51cdc5d2"
+      },
+      {
+        "$oid": "69692849356dfda59d66059c"
+      },
+      {
+        "$oid": "698de5d7a2788eda0c30a41c"
+      },
+      {
+        "$oid": "69e20b50115e75fa6b3d9742"
+      }
+    ],
+    "notificationSentAt": {
+      "$date": "2026-04-23T11:45:57.837Z"
+    },
+    "validFrom": {
+      "$date": "2026-04-23T11:45:56.749Z"
+    },
+    "createdAt": {
+      "$date": "2026-04-23T11:45:56.749Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-23T11:45:57.838Z"
+    },
+    "__v": 1
+  },
+  {
+    "_id": {
+      "$oid": "69ea161915b30c77e05a23e4"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "update",
+    "title": "Test",
+    "description": "test",
+    "image": null,
+    "discountType": "percentage",
+    "discountValue": 0,
+    "validUntil": {
+      "$date": "2026-04-23T12:52:34.017Z"
+    },
+    "isActive": true,
+    "viewCount": 0,
+    "createdBy": {
+      "$oid": "696c9f9175a542eb2d3ca070"
+    },
+    "notifiedUsers": [
+      {
+        "$oid": "69496a20f294829e51cdc5d2"
+      },
+      {
+        "$oid": "69692849356dfda59d66059c"
+      },
+      {
+        "$oid": "698de5d7a2788eda0c30a41c"
+      }
+    ],
+    "notificationSentAt": {
+      "$date": "2026-04-23T12:52:43.037Z"
+    },
+    "validFrom": {
+      "$date": "2026-04-23T12:52:41.934Z"
+    },
+    "createdAt": {
+      "$date": "2026-04-23T12:52:41.935Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-23T12:52:43.038Z"
+    },
+    "__v": 1
+  },
+  {
+    "_id": {
+      "$oid": "69ea16aa15b30c77e05a248f"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "announcement",
+    "title": "Test",
+    "description": "Testing ",
+    "image": null,
+    "discountType": "percentage",
+    "discountValue": 0,
+    "validUntil": {
+      "$date": "2026-04-23T12:54:56.820Z"
+    },
+    "isActive": true,
+    "viewCount": 0,
+    "createdBy": {
+      "$oid": "696c9f9175a542eb2d3ca070"
+    },
+    "notifiedUsers": [
+      {
+        "$oid": "69692849356dfda59d66059c"
+      },
+      {
+        "$oid": "698de5d7a2788eda0c30a41c"
+      },
+      {
+        "$oid": "699475c2a2788eda0c30b108"
+      }
+    ],
+    "notificationSentAt": {
+      "$date": "2026-04-23T12:55:07.596Z"
+    },
+    "validFrom": {
+      "$date": "2026-04-23T12:55:06.524Z"
+    },
+    "createdAt": {
+      "$date": "2026-04-23T12:55:06.525Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-23T12:55:07.597Z"
+    },
+    "__v": 1
+  },
+  {
+    "_id": {
+      "$oid": "69ea16bd15b30c77e05a24c7"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "update",
+    "title": "Tes",
+    "description": "Testing ",
+    "image": null,
+    "discountType": "percentage",
+    "discountValue": 0,
+    "validUntil": {
+      "$date": "2026-04-23T12:55:15.959Z"
+    },
+    "isActive": true,
+    "viewCount": 0,
+    "createdBy": {
+      "$oid": "696c9f9175a542eb2d3ca070"
+    },
+    "notifiedUsers": [
+      {
+        "$oid": "69692849356dfda59d66059c"
+      },
+      {
+        "$oid": "698de5d7a2788eda0c30a41c"
+      },
+      {
+        "$oid": "699475c2a2788eda0c30b108"
+      }
+    ],
+    "notificationSentAt": {
+      "$date": "2026-04-23T12:55:26.185Z"
+    },
+    "validFrom": {
+      "$date": "2026-04-23T12:55:25.208Z"
+    },
+    "createdAt": {
+      "$date": "2026-04-23T12:55:25.209Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-23T12:55:26.186Z"
+    },
+    "__v": 1
+  },
+  {
+    "_id": {
+      "$oid": "69eb5b911ba220fc659207f8"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "offer",
+    "title": "New update",
+    "description": "Get free coffee ",
+    "image": null,
+    "discountType": "percentage",
+    "discountValue": 200,
+    "validUntil": {
+      "$date": "2026-04-24T11:55:21.779Z"
+    },
+    "isActive": true,
+    "viewCount": 0,
+    "createdBy": {
+      "$oid": "696c9f9175a542eb2d3ca070"
+    },
+    "notifiedUsers": [
+      {
+        "$oid": "698de5d7a2788eda0c30a41c"
+      },
+      {
+        "$oid": "69e20b50115e75fa6b3d9742"
+      }
+    ],
+    "notificationSentAt": {
+      "$date": "2026-04-24T12:01:23.324Z"
+    },
+    "validFrom": {
+      "$date": "2026-04-24T12:01:21.267Z"
+    },
+    "createdAt": {
+      "$date": "2026-04-24T12:01:21.268Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-24T12:01:23.325Z"
+    },
+    "__v": 1
+  }
+]

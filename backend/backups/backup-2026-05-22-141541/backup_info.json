@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-05-22T14:15:41.456Z",
+  "database": "hashview",
+  "collections": {
+    "users": 55,
+    "notifications": 264,
+    "chats": 0,
+    "categories": 4,
+    "suspendedaccounts": 0,
+    "businesses": 85,
+    "businessowners": 12,
+    "supporttickets": 8,
+    "reviews": 33,
+    "coupons": 40,
+    "businessupdates": 11
+  }
+}

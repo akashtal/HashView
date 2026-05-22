@@ -1,0 +1,2750 @@
+[
+  {
+    "_id": {
+      "$oid": "6a0f529fc26aca56eafd6830"
+    },
+    "name": "System Admin",
+    "email": "hashview01@gmail.com",
+    "phone": "+449989675789",
+    "passwordHash": "$2a$10$Dm/1wGibMqPhl3syV0aG4uszk0Kr.zrn0EcZNEBhSdgJh.pKZAA5u",
+    "role": "admin",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": true,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "email",
+    "avatar": null,
+    "lastLogin": {
+      "$date": "2026-05-22T06:34:56.752Z"
+    },
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T18:44:47.989Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T06:34:56.753Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69184cfab3b38c47d4501ccb"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLceWD87DheoebyKo20iPIDKd1G0EK3BTbZiFN9Q59rObRV0IMe=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "Dibyajyoti Talukdar",
+    "email": "akashtalukdar290@gmail.com",
+    "firebaseUid": "OnvmNofxw3gIwsXoafT2XnNeOAX2",
+    "passwordHash": "$2a$10$2Yqm0ImRBkk0FBur1oHd.uGrqYjbvygoXh873YWuI/EEBG6eZB9Ca",
+    "createdAt": {
+      "$date": "2026-05-21T20:28:46.084Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:07.787Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "email",
+    "avatar": null,
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "Ankit",
+    "email": "ankit.b920aa@hashview.com",
+    "passwordHash": "$2a$10$1GDfcaWgFsvXhL36sUwcIOqupiEzXpeZfVTNpc//WlkzOrckjBpi2",
+    "createdAt": {
+      "$date": "2026-05-21T20:29:08.241Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:08.241Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "699475c2a2788eda0c30b108"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJ8WDZfxeQS5BLigvyQQ6__ePBlyPlYnaTqqfAFAmmEiB7q=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "Sakshi Mahajan",
+    "email": "sakshimahajan.uk@gmail.com",
+    "firebaseUid": "6RLd5s9W2AOdz904QiKHzh7NHc93",
+    "passwordHash": "$2a$10$1LXnFJ3d4Zf24eJR9s0jPOVauct6oD9Rn4EG0PUMW9zWTMkBrTBaC",
+    "createdAt": {
+      "$date": "2026-05-21T20:29:08.698Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:08.698Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69692849356dfda59d66059c"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": {
+      "$date": "2026-05-22T02:07:32.715Z"
+    },
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKIl91yNTRydZYKJCHkuQBTUwU_jcTZHYGx2AH2YnOLT0ewEapk=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "Dibyajyoti Talukdar",
+    "email": "djtalukdar290@gmail.com",
+    "firebaseUid": "9GtTyXMu1Qarm9dkj50VNbofz243",
+    "passwordHash": "$2a$10$jyKQ9FfCVVDTUMu.5OTiSeyl6v9s6EPpxrpvv9JPnQpUlcs.lTfKK",
+    "createdAt": {
+      "$date": "2026-05-21T20:29:09.179Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T02:07:49.828Z"
+    },
+    "__v": 5
+  },
+  {
+    "_id": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "email",
+    "avatar": null,
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "Tester",
+    "email": "tester.cdc5d2@hashview.com",
+    "passwordHash": "$2a$10$D36vGmJOv8zuZae1yqqug.NEGWMCe6RXtcnO2dkKB45kvnnsFg12O",
+    "createdAt": {
+      "$date": "2026-05-21T20:29:09.690Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:09.690Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69a1c9b4c51f52ae560038d1"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "email",
+    "avatar": null,
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "Hannah faulkner",
+    "email": "hannahfaulkner.0038d1@hashview.com",
+    "passwordHash": "$2a$10$nCZivHYqI5wrexaPX6HQCuwJGbs3LWa7d9G34PGAvBLkPAoVF1iOe",
+    "createdAt": {
+      "$date": "2026-05-21T20:29:10.230Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:10.230Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69a488a6e69c197737e0a4c1"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "email",
+    "avatar": null,
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "Ravneet Singh",
+    "email": "ravneetsingh.e0a4c1@hashview.com",
+    "passwordHash": "$2a$10$yeYzVrwcsidmB3eg0HpJfefJbspDIJqHs/de8NPewKDoL5eXrMGUO",
+    "createdAt": {
+      "$date": "2026-05-21T20:29:10.712Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:10.712Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69b471870cf5632ef55f56fa"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKjU3eTMu7yFk61f1Dfvl0VtzESFSLL76G_yR5F_M2tyKlE6Q=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "Joannu Varughese",
+    "email": "joannuvarughese@gmail.com",
+    "firebaseUid": "EAkRftNFqUhoZoAjb8z8geI1WAN2",
+    "passwordHash": "$2a$10$nZO8IrJCK1q.s4RQfS36SOsoU9tMaYbb3vVeGJDtxUqZIFUQte2ha",
+    "createdAt": {
+      "$date": "2026-05-21T20:29:11.254Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:11.254Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69b5a6570cf5632ef55f5b10"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLuLyZVqkZrM31uMia0Q6Nw9Mvg-qZNcB5l2SEMRKbLLttrkKg=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "n n",
+    "email": "mineimagination@gmail.com",
+    "firebaseUid": "RURSrMHsHFgGvcHbGbUVBCPFmFu1",
+    "passwordHash": "$2a$10$/Tg1viIdXq4DUYojWAKwhOJRjWVQIf3.rS7F6d4IGIuPeYg5LFKbK",
+    "createdAt": {
+      "$date": "2026-05-21T20:29:11.766Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:11.766Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69b716730cf5632ef55f5fbe"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "email",
+    "avatar": null,
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "Crishen Enguerra",
+    "email": "crishenenguerra.5f5fbe@hashview.com",
+    "passwordHash": "$2a$10$S4mv2cTHRklJ9RHRrQcGZ.F.Q3T/ca6DcEJaN6yzSL9ITGMXpjl0u",
+    "createdAt": {
+      "$date": "2026-05-21T20:29:12.224Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:12.224Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69b716130cf5632ef55f5faa"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLT8DKMAFeiHL7l8xlNnXJUUkxhxdHj9x3jL5_7XmNz2Du9YDHV=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "Teta Enguerra",
+    "email": "cenguerra2@gmail.com",
+    "firebaseUid": "00j3HWCUvTdLob11DpPQKKXrue33",
+    "passwordHash": "$2a$10$8CeiX/wn14baYVJf3Ai2luuSL0qSKLKiB3jfMoU4o7d0HjH5/Iagm",
+    "createdAt": {
+      "$date": "2026-05-21T20:29:12.788Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:12.788Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69bc4c170cf5632ef55f6a4a"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocISQqazAUPo7S8OONRFWLtAwi7cOtKK0QtPF5NoFV7jSMpdiRo=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "Sarah Edwards",
+    "email": "jonbeo233@gmail.com",
+    "firebaseUid": "QrC382iT4mfVWS7Na8mp9tnLRi12",
+    "passwordHash": "$2a$10$sL7wfu.BYASH3Ovk/1Pf9OUzm2d3uM1x0hZTnS1CwXOhTBZPwb/3S",
+    "createdAt": {
+      "$date": "2026-05-21T20:29:13.273Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:13.273Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69d6846853133c9316f201f8"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLCBQ7GCVYhwCjINhrxK6bxSblwt4fTgDhPsye1V9tB-vjnPQ=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "Chaluay Saensri",
+    "email": "charliesaensri@gmail.com",
+    "firebaseUid": "Kx9BDWJ1sdMVrfYAB8dD2UCwgMz2",
+    "passwordHash": "$2a$10$J4MbxPmBRGipdEtG3vMnvu5omO/GrtRNDMXOcY35Jn1UcjTFrO.Wu",
+    "createdAt": {
+      "$date": "2026-05-21T20:29:14.325Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:14.325Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69d6a72753133c9316f20290"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKMP_xFiyPoCDWbvhWnyhW_dzkM2O0lbkrHJYR8-a3Z26ZjxlMb=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "Turbo Power",
+    "email": "boyracer10000@gmail.com",
+    "firebaseUid": "a4u6vYcB5DTPdSnn3PxXwEAWoxh2",
+    "passwordHash": "$2a$10$U3dL/lzw3ED64lVUpmPZjuyDrzIAqVed8uOwJa0iIE2w9pmU8NxUe",
+    "createdAt": {
+      "$date": "2026-05-21T20:29:14.837Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:14.837Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "698de5d7a2788eda0c30a41c"
+    },
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJaxl1hLILWmq6L9V9Ew-cvEDj_iLyVasEFezEeqAqcmuHrSRks=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "name": "Roonie Dutta",
+    "email": "rooniedutta8486@gmail.com",
+    "firebaseUid": "R4d1dZLaLXZ2UnqFFhdf8PdjCyj2",
+    "passwordHash": "$2a$10$AM6T8wapVQDJ4ILCet9frOTjQExfC9FG2CX9p2DJHookSgWls8N0y",
+    "createdAt": {
+      "$date": "2026-05-21T20:29:15.349Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:15.349Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b1e68ed048af88f967c"
+    },
+    "name": "esther Roldan",
+    "email": "estherroldancarmona55@gmail.com",
+    "passwordHash": "$2a$10$SeursXYwEMOQstWOJRFlLOKPlwAf8rgDw2BDScHUkoh7aRRU6QbLK",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "2MRklcmKIEVNdM0isYdyn1b4mKZ2",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLzIjfr1U0OBhPRuyOmZWZQ0w9iW9UCERE3cJrEqrGsYLWs1Q=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:18.293Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:18.293Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b1e68ed048af88f967f"
+    },
+    "name": "Tracey Jones",
+    "email": "09traceyljones@gmail.com",
+    "passwordHash": "$2a$10$kuib88KjQndfQvwCPTV4rusxtz4Ktld9JoIA3xYkHz6X6g1d/Q2Ay",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "3klOs1lxGLbVYMo3SrAx0yDqT9G2",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIYJjucBsLgtNInIMGc9NK3uzf6zXj2nXoV1gMuA8tO910kXQ=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:18.744Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:18.744Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b1f68ed048af88f9682"
+    },
+    "name": "Apple User",
+    "email": "drqqvh9zqc@privaterelay.appleid.com",
+    "passwordHash": "$2a$10$0IfOKHdPipwPNRvtKmChKu5GiieDKUOM47Jg9406gO.tdvw1OQx0C",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "4CT23fffsRd70gFtc1QFYlCqDWA2",
+    "authProvider": "apple",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:19.342Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T10:58:02.461Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b1f68ed048af88f9685"
+    },
+    "name": "Misty Morales",
+    "email": "mistymorales.02849@gmail.com",
+    "passwordHash": "$2a$10$vpao5FTWsoHQqAAloBJbV.TjV7mc/ST4LdyMH3DRTSSw5ESjagLgu",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "4JzKAQ9LGCVLIfdPr54GPhe7CfE2",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKEDbeXZ6rqnsUC3K288T8plZF20LyZbLiI98C6CGVaxnc3mw=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:19.854Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:19.854Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2068ed048af88f9688"
+    },
+    "name": "Apple User",
+    "email": "sxxjjk457q@privaterelay.appleid.com",
+    "passwordHash": "$2a$10$q7P.OtsM2D.mDKfgf1saQeu4weP8miIORqEpQDLuOGvR7kGcBO7/i",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "5aZVnT6YG8QaxG7fKf5ZKPTmDMP2",
+    "authProvider": "apple",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:20.366Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T10:58:02.644Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2068ed048af88f968b"
+    },
+    "name": "christopher roberts",
+    "email": "chris82roberts@gmail.com",
+    "passwordHash": "$2a$10$93cR6x55TM.Lx4Bn5EZ4xe7c2yhIpGq/kBGOirezKXM8lKv0./nC2",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "6ANjSYPrUteNgIhxzQVEIj4kmLs2",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocK5RxRpuQu6mBsT03B57PEjVmEQ7t-HzN6bobqnLSzhpGqIMA=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:20.851Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:20.851Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2168ed048af88f968e"
+    },
+    "name": "Nikhil Mehra",
+    "email": "mehranikhil1228@gmail.com",
+    "passwordHash": "$2a$10$ZXuu53naKuifdfJJVg4WYe5LTlcRwjivpNFesbz3TkYyWiqGCotVi",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "6vSvCqMW26RXIAMZiNXOud2IZjs2",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLuzR4sY_3F6g5dUzyyl76vcn-q3qjPa_7oK4GsfjxHzF2DeA=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:21.391Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:21.391Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2168ed048af88f9691"
+    },
+    "name": "Aks",
+    "email": "stories.nw.uk@gmail.com",
+    "passwordHash": "$2a$10$xqGV3U1TOoj/Eo77gryJd.Y/117AR0YE/w7jt1m8Fe2y5jEJ5pP42",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "7SYRCZYYnEY220MZt2vhtVqEESp1",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIufAUs5Ye13ZLtoxSvep3Yh9hA-oU2bGkFrgwinWKCEZtMFA=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:21.875Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:21.875Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2268ed048af88f9694"
+    },
+    "name": "Paul Beales",
+    "email": "bealesp@gmail.com",
+    "passwordHash": "$2a$10$PNoRQiYJ3RowlNSCdUNOru/7G.3fKXsZaPoVhYuLdDJuaaG5w8qeq",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "7wRlmvHCRuYmuHEZnEs4p7X3h152",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKQYS7o0V7uhjWLVme4diCTNbjxWyB8BObbZ0NPPUJtQ5Fsd0Xt7g=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:22.415Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:22.415Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2268ed048af88f9697"
+    },
+    "name": "Apple User",
+    "email": "gpc8rw75xp@privaterelay.appleid.com",
+    "passwordHash": "$2a$10$nSvgiOChbr6arUPbbctVcOg4.noYH7LDlEzU7GWjCSnbCV7KfL5Sm",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "8fzOIzfPzwUBjK5skIYMWqNFiQm2",
+    "authProvider": "apple",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:22.900Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T10:58:02.827Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2368ed048af88f969a"
+    },
+    "name": "Prakshi Mahajan",
+    "email": "mprakshi2002@gmail.com",
+    "passwordHash": "$2a$10$QDOaZpbmIblw898vwI.8Cem54VdHDkIz9Izq7VqcLY7f904Q8gkUG",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "8s8uKii0iheJUe8Cve10m8QEc7D3",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKgGuzxeAmsyaAVe3NmNZYkYtk4pBjCf-f4Q-eYiJydqauRQO3fqg=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:23.438Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:23.438Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2368ed048af88f969d"
+    },
+    "name": "Alfredo Wade",
+    "email": "alfredowade.71286@gmail.com",
+    "passwordHash": "$2a$10$3bAyKkvIWP6jV4k7gYqV2uBYZCnYjBz12LTskDRWLavU7Q5bLobEC",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "92lLJBhk3aXMMUxAgnXkRlHdBcF3",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJegm7OHMXDHp0q3lVUDYVLOfV0sNWyyW4mw-zS1vn6EbzqDA=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:23.950Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:23.950Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2468ed048af88f96a0"
+    },
+    "name": "sakshi mahajan",
+    "email": "the.hashtag8@gmail.com",
+    "passwordHash": "$2a$10$htLPJW5YnaIK1NpD/Nj//.6hnQH8cOfyyliCwpPlkSyhRWMMzd3gO",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "94JLMdpN0paf1DUt702PSGqE8Vm2",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKVlhnPsqECCn9UBk2di6UY80rF-fQtHHljvZsTF2amEc9dg9E=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:24.463Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:24.463Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2468ed048af88f96a3"
+    },
+    "name": "Neha Singh",
+    "email": "iwannahitmyself9@gmail.com",
+    "passwordHash": "$2a$10$WI/KX.PtF6hw.dzf3zY0jeWl9WjkP1vQxkegpDtNLNoDz9O96ueEq",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "FyZnQ0chXRSmTmtbIZkqCd2k6uy1",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJpNsRUsHfWAVJ_GnCy9uG3viccrOQikopKnTZHiPrMCrvKEw=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:24.974Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:24.974Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2568ed048af88f96a6"
+    },
+    "name": "Ann Jennings",
+    "email": "jenningsannb@gmail.com",
+    "passwordHash": "$2a$10$.lE4TqgUfelh6q.Zmv/av.9b4rKh9NMNHu2hke67O9XciGHtZYwHy",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "J3zO2sQ9SYNyggYUmHZCcTRz4MI3",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIfgVE3eC80Ra3Z9nHZErAerB9nmAbn4V0falEvsFd-07UcPw=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:25.485Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:25.485Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2568ed048af88f96a9"
+    },
+    "name": "Priyank Contractor",
+    "email": "priyankakshaycontractor@gmail.com",
+    "passwordHash": "$2a$10$1ceYK50wOLnZmIyu5IOx6OosrZ/P80IKggj/Go.IcVOp6oO2FTuNa",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "Jy7nRYeW1VcIcDmXOWg4u6vnm1s1",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJPw3l4hrszw0NgH1F2d83Tn1CZ6FGmGqJOOU0GMGBjVT3zvA=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:25.940Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:25.940Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2668ed048af88f96ac"
+    },
+    "name": "Apple User",
+    "email": "zfp6mf8bcm@privaterelay.appleid.com",
+    "passwordHash": "$2a$10$vQzAy6NvTk6fAV7URWJvOexMW8zRCgpTQg51o6pibMIc040VSliTS",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "Nt69Xf1Ywtf4O0dtOfcEORWbX5F2",
+    "authProvider": "apple",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:26.390Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T10:58:03.011Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2668ed048af88f96af"
+    },
+    "name": "Mona Bakshi",
+    "email": "monabakshi450@gmail.com",
+    "passwordHash": "$2a$10$gEv9ZNBR1aJyn8qRG3UASuozwymAD9aFLCV4NSMhXHiHulaXWAeqG",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "PJTcE2DLkGMCrPj7drzPRFzxw0Y2",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKB3ibSrq8vfOvMem2O0ONlD-6hZPaBwRmaYr9wQNln8Bcd3q4=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:26.837Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:26.837Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2768ed048af88f96b2"
+    },
+    "name": "Jay Dave",
+    "email": "jaydave170679@gmail.com",
+    "passwordHash": "$2a$10$Sy7AQ.TCeFPoisWX4RST1.iwn/nQL8PbRS53VJhCtMg5ZvRb8VIlK",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "RciQEET8iPcV34j1rQnnmEi4p153",
+    "authProvider": "apple",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:27.283Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T10:58:03.195Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2768ed048af88f96b5"
+    },
+    "name": "Hải Yến Nguyễn",
+    "email": "nhyen0210@gmail.com",
+    "passwordHash": "$2a$10$mXV8C0Ghsmp.8Tp.PNbEyuS5QD2EMY70rZuI768CE3bUBqO6foDMq",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "SDhl5lyeXVhprf6MYcqdF4tQqRD2",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLj15exVIYCMQbjkP6siYPcKyVQG2y2MxOYXrvD4lO-oZDcYer9=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:27.739Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:27.739Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2868ed048af88f96b8"
+    },
+    "name": "Funny Vines Bakshi",
+    "email": "mr.bakshi834@gmail.com",
+    "passwordHash": "$2a$10$H/.zn9AHgBiC4evGkSjZ9Oilm0cMEkaxOH9.blc6Pyd1hkF51ivw.",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "Sw6xHwLzdpbvVfVJ5ogzxjbkWYv2",
+    "authProvider": "google",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:28.224Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T10:58:03.378Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2868ed048af88f96bb"
+    },
+    "name": "Apple User",
+    "email": "fx4r2k888c@privaterelay.appleid.com",
+    "passwordHash": "$2a$10$1l3OLw6P0EK5MuFFfpkfb.2IR3fSEMz9Q8dXstFnmHA1LXlTQZU3.",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "SwgZMnKdDrNbLaya9eeNwOdERr22",
+    "authProvider": "apple",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:28.763Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T10:58:03.590Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2968ed048af88f96be"
+    },
+    "name": "Natalie Clare",
+    "email": "nclare97@gmail.com",
+    "passwordHash": "$2a$10$HK09xuQGjflmaF4emNnCvefeJafdAVD2/wwirdTqY4PzDfS7BCvnq",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "TqKEnmbFcMaWzxsUgQp3NkJAMyU2",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLJSAsq3D4KVfmuq4Tb_ENLv6mFSSVEZVhNOaPM1JIy18Ua6Q=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:29.275Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:29.275Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2968ed048af88f96c1"
+    },
+    "name": "Keerthi Belegere",
+    "email": "keerthicbelegere@gmail.com",
+    "passwordHash": "$2a$10$P9hiJ3ikXFKbCXdVnUX7CuXbLuaYBp.x.LwqSuQ4lWO3rmVIG3XnW",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "UKYGMcm31vRFNpULtTUSLmKAJ8n1",
+    "authProvider": "google",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:29.723Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:29.723Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2a68ed048af88f96c4"
+    },
+    "name": "ojas mahajan",
+    "email": "ojasmahajan1228@gmail.com",
+    "passwordHash": "$2a$10$MabP4hVr.JXLME2B3ritjOuzubyst8mIrhSTW.IVJ0Zb4OvAfrt6O",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "ZKiJzu0cqSf6tJSA1bwn7GE6ZB63",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJsiBhAl0Zf1ktukSpR4JZkQYKxlQPCkeEg8MPvHpO54z7ZTg=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:30.170Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:30.170Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2a68ed048af88f96c7"
+    },
+    "name": "Apple User",
+    "email": "r4rxf256yf@privaterelay.appleid.com",
+    "passwordHash": "$2a$10$d72aXko2dwvWaLs0WWlbp.G3CPWuUVHBiyk/O.kGPyqz1WAYDZu.m",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "jQK3mOWXBJNWeKVUTo9wqDnSD2b2",
+    "authProvider": "apple",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:30.679Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T10:58:03.773Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2b68ed048af88f96ca"
+    },
+    "name": "Sakshi Mahajan",
+    "email": "sakshimahajan6@icloud.com",
+    "passwordHash": "$2a$10$iBP1rLi803EY5T3rX4y00eU.LYDpgJI4dI1mYS11Y7NrpUieeMoFC",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "kEZFW9i3hHOhbaaqKUn8AYPdNKJ2",
+    "authProvider": "apple",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:31.221Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T10:58:03.966Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2b68ed048af88f96cd"
+    },
+    "name": "Apple User",
+    "email": "7s7f55czw4@privaterelay.appleid.com",
+    "passwordHash": "$2a$10$.hZdkWM.39xQ8S2ht7Mu9OG8LYWNK8ATSnJGqXeSQJY/nzOA5LSjy",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "kEriJYIYyrROBBmxMq6eyS8fK8l1",
+    "authProvider": "apple",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:31.733Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T10:58:04.150Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2c68ed048af88f96d0"
+    },
+    "name": "Balkrishn Meena",
+    "email": "meenabalkrishn@gmail.com",
+    "passwordHash": "$2a$10$nn1Mam//dtkw9CbUuAYP3eKtKsHxL7BosNM7B35UxmvyX52PcWkCK",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "l15Zfh61PFgWL9HUpSogPFouogI3",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocL04HPf3siQrx-VlB61g4XaGDB2q1rH8MGqemxFs2avxgyOHs0P=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:32.245Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:32.245Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2c68ed048af88f96d3"
+    },
+    "name": "Hughes Cw",
+    "email": "hughescw@hotmail.com",
+    "passwordHash": "$2a$10$9l9goNhIRYGXfU1tYAnbhul3dGtoUsZ4zdvdX/tFZ4tAdFOhICjpS",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "oNMNLnXGPxSN7Z0GjgqutmKZZS03",
+    "authProvider": "apple",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:32.756Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T10:58:04.335Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2d68ed048af88f96d6"
+    },
+    "name": "Thai",
+    "email": "thairestaurantllandudno@gmail.com",
+    "passwordHash": "$2a$10$swPY/U4jD6FBkxDJnh4xEOhcLRbxIrOTaC.xhLob5bsm7xbhqPjfS",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "uBw91i9gH4X24rFCkNXArNflq5I2",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLoE9DT5jRygX5vR_NeL-nYMbTZqSftOIgrenewlJgxGUdIww=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:33.268Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:33.268Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2d68ed048af88f96d9"
+    },
+    "name": "Akash Gaming",
+    "email": "ojasmahajan007@gmail.com",
+    "passwordHash": "$2a$10$oT4pOZkIGaDHHUvcd.u/YOcFjDBYmoWzN9k55Mfh8fOvvYimv8h4m",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "uQK9j1yZOjRQM2tHqwd5CTG2qIU2",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKwIMZ9u04-Pb7Tz1qR9hDVtPKbF9apJNFSYHf-og076k3bVQ=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:33.754Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:33.754Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2e68ed048af88f96dc"
+    },
+    "name": "Vardaan Batra",
+    "email": "batravardaan32@gmail.com",
+    "passwordHash": "$2a$10$47Crs7wA9TPSsokEpAhgsOm0PCYVYEdaoezFYzlZ5ARxuvmfT.Hjq",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "vNA2saEEWqTTMOg189QWFo5Zk3y1",
+    "authProvider": "apple",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:34.291Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T10:58:04.616Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2e68ed048af88f96df"
+    },
+    "name": "Mamma Rosa Llandudno",
+    "email": "mammarosallandudno@gmail.com",
+    "passwordHash": "$2a$10$fefHj1GSagDQukN5DnaiIu0TXAyDZSX2FanjwOhuXWL0ELL7UR65e",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "vqiaTlhNCxXgqdJoy2Ar6vZZzwk1",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKRn3roT0IV4reL8DrshuuvC1y_J_25U7_JZFub2xsw77EgRX4=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:34.804Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:34.804Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2f68ed048af88f96e2"
+    },
+    "name": "Hannah Kay Faulkner",
+    "email": "hannahkayfaulkner2003@gmail.com",
+    "passwordHash": "$2a$10$d4nvqbtLKUc/Fmop6LyUbeiqUjsjfId/EfRbfZwK4nyysOjWCgIPO",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "wss7N6B0CQZG8hbVkDJmFYtYpjI3",
+    "authProvider": "apple",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:35.316Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T10:58:04.801Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b2f68ed048af88f96e5"
+    },
+    "name": "Craig Murray",
+    "email": "murraycraig029@gmail.com",
+    "passwordHash": "$2a$10$b7fPzhwNuUvhvxljKaWldukgJEL5moHOHAEBaMf1bRieot4gJXxFG",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "xB61OVX4IEb9ftr56ae74nBjfCa2",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocK8Psg_TXtqAzg1SJEkF-ghW9FY4qX0iUw8hdi5mu0FeCZhRQ=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:35.762Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:35.762Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b3068ed048af88f96e8"
+    },
+    "name": "Jenis Christian",
+    "email": "jenisjchristian@gmail.com",
+    "passwordHash": "$2a$10$ezmdSfDDtFX6w7NF1XQ.i.bEJiKqkemvh1YIk5Ce14uJ8SfLSk64i",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "xFnx3y0ezLeRSy5U5o2S4OSsnrz1",
+    "authProvider": "apple",
+    "avatar": "",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:36.237Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T10:58:04.985Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a0f6b3068ed048af88f96eb"
+    },
+    "name": "Shivanshu Verma",
+    "email": "shivanshuverma130@gmail.com",
+    "passwordHash": "$2a$10$6clPzBKvX7Oty5vfvie8Ue6EvcDVqdcpbt/W//YEr/i1OmAxog0Na",
+    "role": "customer",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "firebaseUid": "xGBMXmTCAjdFCxM8Lzbp3oNud0t2",
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLpVK0LtPBIHD-5Oqwj4otezkgm7xdtvikA_DOQa9cZYnzpRg=s96-c",
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:29:36.740Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:29:36.740Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6912bed7726cab733bb95bf8"
+    },
+    "name": "System Admin",
+    "email": "admin@hashview.com",
+    "passwordHash": "$2a$10$eS2HZgvKwTgi2rr7XJLX5OwWY1Wdt9YdNauYF52hOcxyYqH9Wc/dW",
+    "role": "admin",
+    "adminRole": null,
+    "permissions": [],
+    "createdBy": null,
+    "address": {
+      "country": "United Kingdom"
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [
+        0,
+        0
+      ]
+    },
+    "profileImage": "https://via.placeholder.com/150",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "businesses": [],
+    "favoritePlaces": [],
+    "authProvider": "email",
+    "avatar": null,
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T20:31:04.539Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:31:04.539Z"
+    },
+    "__v": 0
+  }
+]

@@ -1,0 +1,921 @@
+[
+  {
+    "_id": {
+      "$oid": "692741de293b5919a61e9900"
+    },
+    "name": "Chaulay Saensri",
+    "email": "sakshimahajan911@gmail.com",
+    "phone": "+447394539977",
+    "passwordHash": "$2a$10$foUGp12BbwwvrBgoBtRopec8jaHowuyonb03i62lraInFl9Pkcyba",
+    "role": "business",
+    "address": {
+      "buildingNumber": "107",
+      "street": "Mostyn Street",
+      "city": "Llandudno",
+      "county": "",
+      "state": "",
+      "postcode": "LL30 2PD",
+      "country": "United Kingdom",
+      "landmark": "",
+      "fullAddress": "107, Mostyn Street, Llandudno, LL30 2PD, United Kingdom"
+    },
+    "profileImage": "https://res.cloudinary.com/dkfa395dq/image/upload/v1767903245/hashview/profiles/hevhfr1eqphs5wstlizs.jpg",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "businesses": [
+      {
+        "$oid": "6927430d293b5919a61e990d"
+      }
+    ],
+    "pushToken": "ExponentPushToken[QlHBdLG9_7ovy5_y98T72q]",
+    "lastLogin": {
+      "$date": "2026-03-13T22:02:49.509Z"
+    },
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "createdAt": {
+      "$date": "2025-11-26T18:07:26.769Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T11:06:50.750Z"
+    },
+    "__v": 79,
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocK4oq3WUCn4u85jCHDZpZD854dHb5Xffevdz9DP6VIjDEyLBN50=s96-c",
+    "firebaseUid": "rjmpSg9MJnfl8lDVx3XxLKG6obv2",
+    "subscription": {
+      "cancelAtPeriodEnd": false,
+      "status": "canceled",
+      "stripeCustomerId": "cus_U8muwiBbdH0PS8",
+      "currentPeriodEnd": {
+        "$date": "2026-04-17T11:56:30Z"
+      },
+      "currentPeriodStart": {
+        "$date": "2026-03-17T11:56:30Z"
+      },
+      "plan": "pro_monthly",
+      "stripePriceId": "price_1T9OrfPmV1ZsljjGA906mkMS",
+      "stripeSubscriptionId": "sub_1TBwEcPmV1ZsljjGYga5Y0WV"
+    },
+    "pushNotifications": {
+      "maxReach": 100,
+      "notifiedUserIds": [
+        {
+          "$oid": "69496a20f294829e51cdc5d2"
+        },
+        {
+          "$oid": "6916069c186ec1aaa3b920aa"
+        },
+        {
+          "$oid": "69692849356dfda59d66059c"
+        },
+        {
+          "$oid": "69e20b50115e75fa6b3d9742"
+        },
+        {
+          "$oid": "699475c2a2788eda0c30b108"
+        }
+      ],
+      "totalSent": 13
+    },
+    "freeTrial": {
+      "maxFreeUpdates": 25,
+      "updatesUsed": 0
+    },
+    "pushTokenUpdatedAt": {
+      "$date": "2026-05-22T11:06:50.749Z"
+    },
+    "pushTokens": [
+      {
+        "token": "ExponentPushToken[R-PU1EJ0lUPu2O_R0yOnry]",
+        "platform": "ios",
+        "deviceId": "C4C209BF-F514-4AEF-BDEF-78C70530F932",
+        "installationId": null,
+        "appVersion": "1.1.14",
+        "lastRegisteredAt": {
+          "$date": "2026-05-22T10:10:19.766Z"
+        },
+        "disabledAt": null,
+        "lastError": null,
+        "lastErrorAt": null,
+        "_id": {
+          "$oid": "69ea18e415b30c77e05a25ee"
+        }
+      },
+      {
+        "token": "ExponentPushToken[QlHBdLG9_7ovy5_y98T72q]",
+        "platform": "android",
+        "deviceId": "9119ac6f-a17b-479e-8f75-2ace54e69f35",
+        "installationId": null,
+        "appVersion": "1.1.14",
+        "lastRegisteredAt": {
+          "$date": "2026-05-22T11:06:50.749Z"
+        },
+        "disabledAt": null,
+        "lastError": null,
+        "lastErrorAt": null,
+        "_id": {
+          "$oid": "6a0fbac826897712408799c3"
+        }
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "6929f1d92c453fd7af5d13cc"
+    },
+    "name": "Akash Talukdar",
+    "email": "akashtalukdar290@gmail.com",
+    "phone": "+447394539955",
+    "passwordHash": "$2a$10$2lPu4t.NkkbfnWmkVWuvr.al2YPyVEofSvGsPObus0JxGFVVu.FI.",
+    "role": "business",
+    "address": {
+      "buildingNumber": "11",
+      "street": "51 Bedford St",
+      "city": "United Kingdom",
+      "county": "",
+      "state": "",
+      "postcode": "WC2R 0PZ",
+      "country": "United Kingdom",
+      "landmark": "",
+      "fullAddress": "11, 51 Bedford St, United Kingdom, WC2R 0PZ, United Kingdom"
+    },
+    "profileImage": null,
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "businesses": [
+      {
+        "$oid": "692aa3632244b386cd8409f1"
+      }
+    ],
+    "pushToken": null,
+    "lastLogin": {
+      "$date": "2026-03-01T05:36:18.998Z"
+    },
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "createdAt": {
+      "$date": "2025-11-28T19:02:49.483Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:37:03.361Z"
+    },
+    "__v": 6,
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLceWD87DheoebyKo20iPIDKd1G0EK3BTbZiFN9Q59rObRV0IMe=s96-c",
+    "firebaseUid": "OnvmNofxw3gIwsXoafT2XnNeOAX2",
+    "subscription": {
+      "cancelAtPeriodEnd": false,
+      "status": "inactive"
+    },
+    "pushNotifications": {
+      "maxReach": 100,
+      "notifiedUserIds": [],
+      "totalSent": 0
+    },
+    "freeTrial": {
+      "maxFreeUpdates": 25,
+      "updatesUsed": 0
+    },
+    "pushTokens": [],
+    "pushTokenUpdatedAt": {
+      "$date": "2026-05-21T20:13:16.456Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69344ff805bdca9502ed09c9"
+    },
+    "name": "Theresa",
+    "email": "sakshimahajan.uk@gmail.com",
+    "phone": "+447384190676",
+    "passwordHash": "$2a$10$gtlVRdFG5GUnQ2wFVwj32OYVM8iSboKZ/UlVnkuXP5oo1dCn/r2OS",
+    "role": "business",
+    "address": {
+      "buildingNumber": "1",
+      "street": "Central Promenade",
+      "city": "Llandudno",
+      "county": "",
+      "state": "",
+      "postcode": "LL30 2XS",
+      "country": "United Kingdom",
+      "landmark": "",
+      "fullAddress": "1, Central Promenade, Llandudno, LL30 2XS, United Kingdom"
+    },
+    "profileImage": null,
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "businesses": [],
+    "pushToken": null,
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "createdAt": {
+      "$date": "2025-12-06T15:47:04.452Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-13T16:59:33.631Z"
+    },
+    "__v": 1,
+    "authProvider": "email",
+    "freeTrial": {
+      "maxFreeUpdates": 25,
+      "updatesUsed": 0
+    },
+    "pushNotifications": {
+      "maxReach": 100,
+      "notifiedUserIds": [],
+      "totalSent": 0
+    },
+    "pushTokens": [],
+    "subscription": {
+      "cancelAtPeriodEnd": false,
+      "status": "inactive"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "696a149af0bede9d4f9e0eaa"
+    },
+    "name": "Theresa Curbishly",
+    "email": "reservations@chatsworth-hotel.co.uk",
+    "phone": "",
+    "passwordHash": "$2a$10$l64NpeJupRqeY.8OhUL7cOzEdl7f1Jy3MgrjysikX06O.rlPEnO3i",
+    "role": "business",
+    "address": {
+      "buildingNumber": "",
+      "street": "",
+      "city": "",
+      "county": "",
+      "state": "",
+      "postcode": "",
+      "country": "United Kingdom",
+      "landmark": "",
+      "fullAddress": "United Kingdom"
+    },
+    "profileImage": null,
+    "status": "active",
+    "emailVerified": false,
+    "phoneVerified": false,
+    "businesses": [
+      {
+        "$oid": "696a284ff0bede9d4f9e0ed4"
+      }
+    ],
+    "pushToken": null,
+    "lastLogin": {
+      "$date": "2026-01-19T11:35:54.661Z"
+    },
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "createdAt": {
+      "$date": "2026-01-16T10:36:10.841Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:08:24.608Z"
+    },
+    "__v": 1,
+    "authProvider": "email",
+    "freeTrial": {
+      "maxFreeUpdates": 25,
+      "updatesUsed": 0
+    },
+    "pushNotifications": {
+      "maxReach": 100,
+      "notifiedUserIds": [],
+      "totalSent": 0
+    },
+    "pushTokens": [],
+    "subscription": {
+      "cancelAtPeriodEnd": false,
+      "status": "inactive"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "696a79b81c93b5cc73671a9e"
+    },
+    "name": "Akint Sushant",
+    "email": "ankitsudan62@gmail.com",
+    "phone": null,
+    "passwordHash": "$2a$10$OJH6DYJFNFRkRiC72TX0.OFQbXZG1chojhA5JeVDlomFpbe6MaYi.",
+    "role": "business",
+    "address": {
+      "buildingNumber": "",
+      "street": "",
+      "city": "",
+      "county": "",
+      "state": "",
+      "postcode": "",
+      "country": "United Kingdom",
+      "landmark": "",
+      "fullAddress": "United Kingdom"
+    },
+    "profileImage": null,
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "businesses": [],
+    "pushToken": null,
+    "lastLogin": {
+      "$date": "2026-01-19T12:39:10.547Z"
+    },
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "createdAt": {
+      "$date": "2026-01-16T17:47:36.189Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-19T12:39:10.548Z"
+    },
+    "__v": 1,
+    "authProvider": "email",
+    "freeTrial": {
+      "maxFreeUpdates": 25,
+      "updatesUsed": 0
+    },
+    "pushNotifications": {
+      "maxReach": 100,
+      "notifiedUserIds": [],
+      "totalSent": 0
+    },
+    "pushTokens": [],
+    "subscription": {
+      "cancelAtPeriodEnd": false,
+      "status": "inactive"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "696c9f9175a542eb2d3ca070"
+    },
+    "name": "Dibyajyoti Talukdar",
+    "email": "djtalukdar290@gmail.com",
+    "phone": "447788669989",
+    "passwordHash": "$2a$10$nl.D8AwnUFlP9e3r0MeQhOTYZiq72v1D0taUPtAsHgdZi9gCMSiGq",
+    "role": "business",
+    "address": {
+      "buildingNumber": "",
+      "street": "",
+      "city": "",
+      "county": "",
+      "state": "",
+      "postcode": "",
+      "country": "United Kingdom",
+      "landmark": "",
+      "fullAddress": "United Kingdom"
+    },
+    "profileImage": "/uploads/selfie-1769123068041-434592558.jpg",
+    "status": "active",
+    "emailVerified": true,
+    "phoneVerified": false,
+    "businesses": [],
+    "pushToken": null,
+    "lastLogin": {
+      "$date": "2026-04-09T20:56:21.786Z"
+    },
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "createdAt": {
+      "$date": "2026-01-18T08:53:37.323Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T02:09:12.832Z"
+    },
+    "__v": 24,
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKIl91yNTRydZYKJCHkuQBTUwU_jcTZHYGx2AH2YnOLT0ewEapk=s96-c",
+    "firebaseUid": "9GtTyXMu1Qarm9dkj50VNbofz243",
+    "subscription": {
+      "cancelAtPeriodEnd": false,
+      "status": "active",
+      "stripeCustomerId": "cus_U7e54MLrBJFY0O",
+      "currentPeriodEnd": {
+        "$date": "2027-03-05T17:50:00Z"
+      },
+      "currentPeriodStart": {
+        "$date": "2026-03-05T16:33:07Z"
+      },
+      "plan": "pro_monthly",
+      "stripePriceId": "price_1T6P1tBH7RcRF5ArsKRqYmzL",
+      "stripeSubscriptionId": null
+    },
+    "pushNotifications": {
+      "maxReach": 100,
+      "notifiedUserIds": [
+        {
+          "$oid": "69692849356dfda59d66059c"
+        },
+        {
+          "$oid": "69496a20f294829e51cdc5d2"
+        },
+        {
+          "$oid": "698de5d7a2788eda0c30a41c"
+        },
+        {
+          "$oid": "69e20b50115e75fa6b3d9742"
+        },
+        {
+          "$oid": "699475c2a2788eda0c30b108"
+        }
+      ],
+      "totalSent": 18
+    },
+    "freeTrial": {
+      "maxFreeUpdates": 25,
+      "updatesUsed": 0
+    },
+    "pushTokens": [
+      {
+        "token": "ExponentPushToken[ZryrU-OLbiWsTYfTfJ16Y6]",
+        "platform": "android",
+        "deviceId": "a8b1b818-cd6e-49f4-9246-c6678521daa3",
+        "installationId": null,
+        "appVersion": "1.1.13",
+        "lastRegisteredAt": {
+          "$date": "2026-04-24T12:03:11.287Z"
+        },
+        "disabledAt": null,
+        "lastError": null,
+        "lastErrorAt": null,
+        "_id": {
+          "$oid": "69eb5a191ba220fc65920771"
+        }
+      },
+      {
+        "token": "ExponentPushToken[CY7t0zFXOUC21JriQz2DFX]",
+        "platform": "android",
+        "deviceId": "bd587a7d-e791-4263-9b89-7adce887fa4b",
+        "installationId": null,
+        "appVersion": "1.1.14",
+        "lastRegisteredAt": {
+          "$date": "2026-05-21T18:40:41.228Z"
+        },
+        "disabledAt": null,
+        "lastError": null,
+        "lastErrorAt": null,
+        "_id": {
+          "$oid": "6a0f5199387e10b711c3ca49"
+        }
+      },
+      {
+        "token": "ExponentPushToken[CY7t0zFXOUC21JriQz2DFX]",
+        "platform": "android",
+        "deviceId": "bd587a7d-e791-4263-9b89-7adce887fa4b",
+        "installationId": null,
+        "appVersion": "1.1.14",
+        "lastRegisteredAt": {
+          "$date": "2026-05-21T18:40:26.677Z"
+        },
+        "disabledAt": null,
+        "lastError": null,
+        "lastErrorAt": null,
+        "_id": {
+          "$oid": "6a0f519a387e10b711c3ca4b"
+        }
+      },
+      {
+        "token": "ExponentPushToken[xc9f2iFV551PaXBKZZk1Vg]",
+        "platform": "android",
+        "deviceId": "f23c1d4b-1b6a-4c6e-aceb-66a905252bad",
+        "installationId": null,
+        "appVersion": "1.1.14",
+        "lastRegisteredAt": {
+          "$date": "2026-05-21T21:04:53.425Z"
+        },
+        "disabledAt": null,
+        "lastError": null,
+        "lastErrorAt": null,
+        "_id": {
+          "$oid": "6a0f7375b4256e3086b01968"
+        }
+      }
+    ],
+    "pushTokenUpdatedAt": {
+      "$date": "2026-05-22T02:07:50.425Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "696f99f01b55fa092693b4ae"
+    },
+    "name": "Theresa curbishly",
+    "email": "reservations@lorettahotel.co.uk",
+    "phone": "+4401492879587",
+    "passwordHash": "$2a$10$cLzgaKTuI7a3Tgxkhf.vpe59UOZAeAbYmNMJAgrpvdJqp6AuWFz/q",
+    "role": "business",
+    "address": {
+      "buildingNumber": "",
+      "street": "",
+      "city": "",
+      "county": "",
+      "state": "",
+      "postcode": "",
+      "country": "United Kingdom",
+      "landmark": "Near palladium",
+      "fullAddress": "United Kingdom"
+    },
+    "profileImage": null,
+    "status": "active",
+    "emailVerified": false,
+    "phoneVerified": false,
+    "businesses": [
+      {
+        "$oid": "696f9ed21b55fa092693b4be"
+      }
+    ],
+    "pushToken": null,
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "createdAt": {
+      "$date": "2026-01-20T15:06:24.259Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:08:25.890Z"
+    },
+    "__v": 1,
+    "authProvider": "email",
+    "freeTrial": {
+      "maxFreeUpdates": 25,
+      "updatesUsed": 0
+    },
+    "pushNotifications": {
+      "maxReach": 100,
+      "notifiedUserIds": [],
+      "totalSent": 0
+    },
+    "pushTokens": [],
+    "subscription": {
+      "cancelAtPeriodEnd": false,
+      "status": "inactive"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69710c321b55fa092693b7e8"
+    },
+    "name": "ShauWn",
+    "email": "be96ltd@gmail.com",
+    "phone": "+4401492870178",
+    "passwordHash": "$2a$10$AaIRIilgnC26Smaac6i7fe1l/0YBppKugKd6fUNVyVrIP4Pyg2Nwq",
+    "role": "business",
+    "address": {
+      "buildingNumber": "",
+      "street": "",
+      "city": "",
+      "county": "",
+      "state": "",
+      "postcode": "",
+      "country": "United Kingdom",
+      "landmark": "",
+      "fullAddress": "United Kingdom"
+    },
+    "profileImage": null,
+    "status": "active",
+    "emailVerified": false,
+    "phoneVerified": false,
+    "businesses": [
+      {
+        "$oid": "69710ee81b55fa092693b7f6"
+      }
+    ],
+    "pushToken": null,
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "createdAt": {
+      "$date": "2026-01-21T17:26:10.961Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:08:26.296Z"
+    },
+    "__v": 1,
+    "authProvider": "email",
+    "freeTrial": {
+      "maxFreeUpdates": 25,
+      "updatesUsed": 0
+    },
+    "pushNotifications": {
+      "maxReach": 100,
+      "notifiedUserIds": [],
+      "totalSent": 0
+    },
+    "pushTokens": [],
+    "subscription": {
+      "cancelAtPeriodEnd": false,
+      "status": "inactive"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "697b41a265a7d4aef4d9e600"
+    },
+    "name": "Tanish Kaler",
+    "email": "deepnv260@gmail.com",
+    "phone": "+919023310786",
+    "passwordHash": "$2a$10$l1Jf68jfRqsTEUw9DTYeau/vq2FtpvJpiz1NETUzpf/13F9j/wcdO",
+    "role": "business",
+    "address": {
+      "buildingNumber": "",
+      "street": "",
+      "city": "",
+      "county": "",
+      "state": "",
+      "postcode": "",
+      "country": "United Kingdom",
+      "landmark": "",
+      "fullAddress": "United Kingdom"
+    },
+    "profileImage": null,
+    "status": "active",
+    "emailVerified": false,
+    "phoneVerified": false,
+    "businesses": [],
+    "pushToken": null,
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "createdAt": {
+      "$date": "2026-01-29T11:16:50.481Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-29T11:16:50.481Z"
+    },
+    "__v": 1,
+    "authProvider": "email",
+    "freeTrial": {
+      "maxFreeUpdates": 25,
+      "updatesUsed": 0
+    },
+    "pushNotifications": {
+      "maxReach": 100,
+      "notifiedUserIds": [],
+      "totalSent": 0
+    },
+    "pushTokens": [],
+    "subscription": {
+      "cancelAtPeriodEnd": false,
+      "status": "inactive"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "699dc85ec51f52ae56002ab9"
+    },
+    "name": "Theresa Curbishly",
+    "email": "manager@baytreehotel.co.uk",
+    "phone": "+4401492875858",
+    "passwordHash": "$2a$10$4cb67YuDkUl/SV.g7I5gguVB6wUt7pgU/Ff23cQ4agjqha2K8BMRW",
+    "role": "business",
+    "address": {
+      "buildingNumber": "6-9",
+      "street": "North Parade",
+      "city": "Llandudno",
+      "county": "",
+      "state": "",
+      "postcode": "LL30 2LP",
+      "country": "United Kingdom",
+      "landmark": "",
+      "fullAddress": "6-9, North Parade, Llandudno, LL30 2LP, United Kingdom"
+    },
+    "profileImage": null,
+    "status": "active",
+    "emailVerified": false,
+    "phoneVerified": false,
+    "businesses": [
+      {
+        "$oid": "699dc8f1c51f52ae56002ac0"
+      }
+    ],
+    "pushToken": null,
+    "authProvider": "email",
+    "avatar": null,
+    "lastLogin": {
+      "$date": "2026-02-24T16:41:14.296Z"
+    },
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "createdAt": {
+      "$date": "2026-02-24T15:48:46.935Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:08:27.129Z"
+    },
+    "__v": 1,
+    "freeTrial": {
+      "maxFreeUpdates": 25,
+      "updatesUsed": 0
+    },
+    "pushNotifications": {
+      "maxReach": 100,
+      "notifiedUserIds": [],
+      "totalSent": 0
+    },
+    "pushTokens": [],
+    "subscription": {
+      "cancelAtPeriodEnd": false,
+      "status": "inactive"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69d17b5a53133c9316f1faa4"
+    },
+    "name": "Chris Roberts",
+    "email": "chris@dcb-group.co.uk",
+    "phone": "+4407341377795",
+    "passwordHash": "$2a$10$Qfh26GTYfdLKJt1sh/iRNuvX/6SxQVYRncFfPzW000Kzse2qRfiUi",
+    "role": "business",
+    "address": {
+      "buildingNumber": "Waterside in",
+      "street": "Canal Street",
+      "city": "Leigh",
+      "county": "",
+      "state": "",
+      "postcode": "WN74DB",
+      "country": "United Kingdom",
+      "landmark": "",
+      "fullAddress": "Waterside in, Canal Street, Leigh, WN74DB, United Kingdom"
+    },
+    "profileImage": "/uploads/selfie-1775403887920-987718412.jpg",
+    "status": "active",
+    "emailVerified": false,
+    "phoneVerified": false,
+    "businesses": [
+      {
+        "$oid": "69d1855553133c9316f1fac8"
+      }
+    ],
+    "pushToken": null,
+    "authProvider": "email",
+    "avatar": null,
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "subscription": {
+      "status": "inactive",
+      "plan": null,
+      "stripeCustomerId": null,
+      "stripeSubscriptionId": null,
+      "stripePriceId": null,
+      "currentPeriodStart": null,
+      "currentPeriodEnd": null,
+      "cancelAtPeriodEnd": false,
+      "trialEnd": null
+    },
+    "pushNotifications": {
+      "maxReach": 100,
+      "notifiedUserIds": [],
+      "totalSent": 0
+    },
+    "createdAt": {
+      "$date": "2026-04-04T20:58:02.182Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T20:08:27.538Z"
+    },
+    "__v": 1,
+    "freeTrial": {
+      "maxFreeUpdates": 25,
+      "updatesUsed": 0
+    },
+    "pushTokens": []
+  },
+  {
+    "_id": {
+      "$oid": "6a0f11c1bb8b927685f76fc6"
+    },
+    "name": "Business Owner",
+    "email": "owner@example.com",
+    "phone": "9876543210",
+    "passwordHash": "$2a$10$pPgiYMwBGxMEGHSfIMqRzeX4pOda39d6A946w5K6EN4W61kSmB2Rq",
+    "role": "business",
+    "address": {
+      "buildingNumber": "",
+      "street": "",
+      "city": "",
+      "county": "",
+      "state": "",
+      "postcode": "",
+      "country": "United Kingdom",
+      "landmark": "",
+      "fullAddress": "United Kingdom"
+    },
+    "profileImage": null,
+    "status": "active",
+    "emailVerified": false,
+    "phoneVerified": false,
+    "businesses": [],
+    "pushToken": null,
+    "pushTokenUpdatedAt": null,
+    "authProvider": "email",
+    "avatar": null,
+    "lastLogin": null,
+    "settings": {
+      "twoFactorAuth": false,
+      "loginAlerts": true,
+      "dataSharing": false,
+      "marketingEmails": true,
+      "pushNotifications": true,
+      "emailNotifications": true
+    },
+    "subscription": {
+      "status": "inactive",
+      "plan": null,
+      "stripeCustomerId": null,
+      "stripeSubscriptionId": null,
+      "stripePriceId": null,
+      "currentPeriodStart": null,
+      "currentPeriodEnd": null,
+      "cancelAtPeriodEnd": false,
+      "trialEnd": null
+    },
+    "pushNotifications": {
+      "maxReach": 100,
+      "notifiedUserIds": [],
+      "totalSent": 0
+    },
+    "freeTrial": {
+      "updatesUsed": 0,
+      "maxFreeUpdates": 25
+    },
+    "pushTokens": [],
+    "createdAt": {
+      "$date": "2026-05-21T14:08:01.637Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-21T14:08:01.637Z"
+    },
+    "__v": 0
+  }
+]

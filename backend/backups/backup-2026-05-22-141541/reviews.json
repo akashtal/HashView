@@ -1,0 +1,2245 @@
+[
+  {
+    "_id": {
+      "$oid": "692131bf36a4cbec46bf74d1"
+    },
+    "user": {
+      "$oid": "69184cfab3b38c47d4501ccb"
+    },
+    "business": {
+      "$oid": "697f5f7da4fe1958c1f6a085"
+    },
+    "rating": 5,
+    "comment": "Outstanding service and amazing experience! Highly recommended to everyone!",
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.8321941,
+        53.32332539999999
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 10,
+      "verificationTime": 25,
+      "motionDetected": true,
+      "isMockLocation": false,
+      "locationHistoryCount": 15,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "akash-phone-789",
+        "deviceName": "Akash Device",
+        "manufacturer": "Samsung",
+        "modelName": "Galaxy S21",
+        "osName": "Android",
+        "osVersion": "13",
+        "platform": "android",
+        "isDevice": true
+      },
+      "devicePlatform": "android",
+      "actualDistance": 0,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2025-11-22T03:45:03.095Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2025-11-22T03:45:03.107Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T01:50:00.950Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "692131c036a4cbec46bf74d6"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6928bb34d43ac158386f6742"
+    },
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "rating": 5,
+    "comment": "Amazing chef and staff and. Food \n",
+    "emotion": "happy",
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.8310995,
+        53.3251412
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 5.4629998207092285,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 4,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "32dd9d59-0bbf-47bc-b585-f20dce6fbc47",
+        "deviceName": "AC2001",
+        "manufacturer": "Android",
+        "modelName": "unknown",
+        "osName": "android",
+        "osVersion": "31",
+        "platform": "android",
+        "platformVersion": 31,
+        "isDevice": false
+      },
+      "devicePlatform": "android",
+      "actualDistance": 13.207621956669675,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2025-11-27T20:57:24.156Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2025-11-27T20:57:24.162Z"
+    },
+    "updatedAt": {
+      "$date": "2025-11-27T20:57:24.916Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "6928bb34d43ac158386f6749"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "696ff6541b55fa092693b653"
+    },
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "business": {
+      "$oid": "696f9ed21b55fa092693b4be"
+    },
+    "rating": 5,
+    "comment": "They have lovely,amazing staff.",
+    "emotion": "happy",
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.8339646976697317,
+        53.32353747437905
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 17.93716875320302,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 4,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "4B83EB67-B5C1-4AAE-A9A3-54C5C9C546ED",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.2",
+        "platform": "ios",
+        "platformVersion": "26.2",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 17.007410382642423,
+      "businessRadius": 30,
+      "submittedAt": {
+        "$date": "2026-01-20T21:40:36.871Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-01-20T21:40:36.881Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-20T21:40:37.629Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "696ff6551b55fa092693b65a"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6996e9a27f23992c437fd915"
+    },
+    "user": {
+      "$oid": "699475c2a2788eda0c30b108"
+    },
+    "business": {
+      "$oid": "697f7feba4fe1958c1f6a353"
+    },
+    "rating": 5,
+    "comment": "Its amazing food and lovely fish and chips ",
+    "emotion": "happy",
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.83189904339628,
+        53.32345716686608
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 5.10753037360555,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 3,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "FA8E955F-7A9D-4C23-96EC-62E97835803A",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.2.1",
+        "platform": "ios",
+        "platformVersion": "26.2.1",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 13.071444479753502,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-02-19T10:44:50.369Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-02-19T10:44:50.376Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-19T10:44:51.144Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "6996e9a27f23992c437fd91a"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "699dd747c51f52ae56002ca6"
+    },
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "business": {
+      "$oid": "699dc8f1c51f52ae56002ac0"
+    },
+    "rating": 5,
+    "comment": "Good atmosphere 🥰",
+    "emotion": "happy",
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.8308617546992623,
+        53.32638492347156
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 6.577070682713141,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 3,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "E05EE75F-B207-4EAA-9F64-F2403AE30EF0",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.2.1",
+        "platform": "ios",
+        "platformVersion": "26.2.1",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 2.8226930408740167,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-02-24T16:52:23.337Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-02-24T16:52:23.342Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-24T16:52:24.108Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "699dd747c51f52ae56002cab"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "699de79dc51f52ae56002e86"
+    },
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "rating": 5,
+    "comment": "Lovely food",
+    "emotion": "loved",
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.831210233098257,
+        53.32507616003047
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 20.57462547111609,
+      "verificationTime": 30,
+      "motionDetected": true,
+      "isMockLocation": false,
+      "locationHistoryCount": 3,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "E05EE75F-B207-4EAA-9F64-F2403AE30EF0",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.2.1",
+        "platform": "ios",
+        "platformVersion": "26.2.1",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 23.49842231470681,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-02-24T18:02:05.368Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-02-24T18:02:05.371Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-24T18:02:06.116Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "699de79dc51f52ae56002e8b"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69a05c92c942e8e151ef10d1"
+    },
+    "user": {
+      "$oid": "69692849356dfda59d66059c"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "rating": 5,
+    "comment": "Kya kar rahe ho tumhen ",
+    "emotion": "loved",
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        91.7738266,
+        26.1769168
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 10,
+      "verificationTime": 30,
+      "motionDetected": true,
+      "isMockLocation": false,
+      "locationHistoryCount": 5,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "platform": "android",
+        "platformVersion": 36
+      },
+      "devicePlatform": "android",
+      "actualDistance": 0,
+      "businessRadius": 500,
+      "submittedAt": {
+        "$date": "2026-02-26T14:45:38.325Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-02-26T14:45:38.334Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T01:50:00.950Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "69a05c93c942e8e151ef10d7"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69a09d888df274dd4933cadb"
+    },
+    "user": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "rating": 4,
+    "comment": "Yes 🙂‍↕️ hai to kiya karna hai to ",
+    "emotion": "lovely",
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        91.7722748,
+        26.1773231
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": false,
+    "securityMetadata": {
+      "locationAccuracy": 4.031000137329102,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 5,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "5b1a014a-f03e-4c2e-b7d0-f4d8a545fda3",
+        "deviceName": "motorola edge 50 pro",
+        "manufacturer": "Android",
+        "modelName": "unknown",
+        "osName": "android",
+        "osVersion": "36",
+        "platform": "android",
+        "platformVersion": 36,
+        "isDevice": false
+      },
+      "devicePlatform": "android",
+      "actualDistance": 161.31019812305303,
+      "businessRadius": 500,
+      "submittedAt": {
+        "$date": "2026-02-26T19:22:48.204Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-02-26T19:22:48.217Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T01:50:00.950Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69a29149c51f52ae56003b20"
+    },
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "business": {
+      "$oid": "697f7feba4fe1958c1f6a353"
+    },
+    "rating": 5,
+    "comment": "Best chips ",
+    "emotion": "happy",
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.831907830103623,
+        53.32341975218292
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 18.586418381305624,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 5,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "8A22BBF4-3B89-41E0-A665-E5A180CC8108",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.3",
+        "platform": "ios",
+        "platformVersion": "26.3",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 17.230477396748455,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-02-28T06:55:05.738Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-02-28T06:55:05.741Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-28T06:55:06.544Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "69a2914ac51f52ae56003b25"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69a2cbe76c042e7464722c50"
+    },
+    "user": {
+      "$oid": "699475c2a2788eda0c30b108"
+    },
+    "business": {
+      "$oid": "696a284ff0bede9d4f9e0ed4"
+    },
+    "rating": 5,
+    "comment": "Amazing victorian hotel, staff seems very hardworking and pool was great. ",
+    "emotion": "lovely",
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.825778971460767,
+        53.32381332688984
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": false,
+    "securityMetadata": {
+      "locationAccuracy": 6.908025807527971,
+      "verificationTime": 30,
+      "motionDetected": true,
+      "isMockLocation": false,
+      "locationHistoryCount": 10,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "0A662DAE-EAAA-4055-AAC0-950D753E1195",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.2.1",
+        "platform": "ios",
+        "platformVersion": "26.2.1",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 8.455305873398274,
+      "businessRadius": 100,
+      "submittedAt": {
+        "$date": "2026-02-28T11:05:11.316Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-02-28T11:05:11.330Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-28T11:05:11.330Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69a3076f7dea6c9d5fb73aa2"
+    },
+    "user": {
+      "$oid": "69a1c9b4c51f52ae560038d1"
+    },
+    "business": {
+      "$oid": "696a284ff0bede9d4f9e0ed4"
+    },
+    "rating": 5,
+    "comment": "Such a lovely hotel Hannah on reception was amazing!!\n",
+    "emotion": "grateful",
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.8258710736419563,
+        53.32368520703549
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": false,
+    "securityMetadata": {
+      "locationAccuracy": 5.973963674070759,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 6,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "32A5021C-9612-4379-A6FC-AA9C67C9A7A2",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "18.6.2",
+        "platform": "ios",
+        "platformVersion": "18.6.2",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 23.04116264720195,
+      "businessRadius": 70,
+      "submittedAt": {
+        "$date": "2026-02-28T15:19:11.459Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-02-28T15:19:11.464Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-28T15:19:11.464Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69a3f6d4a19d437b36b46efc"
+    },
+    "user": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "rating": 4,
+    "comment": "Thik hai me dekhta hu me check with you too hi correct hai na ",
+    "emotion": "Relaxed",
+    "categoryRatings": {
+      "staff": 6,
+      "facilities": 7,
+      "cleanliness": 5,
+      "comfort": 7,
+      "valueForMoney": 4,
+      "location": 6
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        91.7722307,
+        26.1774307
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": false,
+    "securityMetadata": {
+      "locationAccuracy": 13.199999809265137,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 4,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "16d8a199-837f-401a-9d61-156ee6f95644",
+        "deviceName": "motorola edge 50 pro",
+        "manufacturer": "Android",
+        "modelName": "unknown",
+        "osName": "android",
+        "osVersion": "36",
+        "platform": "android",
+        "platformVersion": 36,
+        "isDevice": false
+      },
+      "devicePlatform": "android",
+      "actualDistance": 169.196652255634,
+      "businessRadius": 500,
+      "submittedAt": {
+        "$date": "2026-03-01T08:20:36.810Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-03-01T08:20:36.821Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T01:50:00.950Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69a488e5e69c197737e0a4d8"
+    },
+    "user": {
+      "$oid": "69a488a6e69c197737e0a4c1"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "rating": 5,
+    "comment": "Good food nd very helpful staff",
+    "emotion": "happy",
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.8313223029844212,
+        53.3250935734631
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": false,
+    "securityMetadata": {
+      "locationAccuracy": 6.855952890732368,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 5,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "6C44DD23-99E8-47F2-B82C-30D7DA355BBF",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.3",
+        "platform": "ios",
+        "platformVersion": "26.3",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 28.50292950125019,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-03-01T18:43:49.819Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-03-01T18:43:49.824Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-01T18:43:49.824Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69a4b9c8e69c197737e0a64a"
+    },
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "business": {
+      "$oid": "697f7feba4fe1958c1f6a353"
+    },
+    "rating": 5,
+    "comment": "Lovely fish and chips.",
+    "emotion": "lovely",
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.831907832920796,
+        53.32341975215726
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": false,
+    "securityMetadata": {
+      "locationAccuracy": 6.3944708065991005,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 2,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "38691F6E-7E65-4E3A-A95F-7A840946DF03",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.3",
+        "platform": "ios",
+        "platformVersion": "26.3",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 17.23052871330424,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-03-01T22:12:24.360Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-03-01T22:12:24.364Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-01T22:12:24.364Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69a97054f949c2e2ef151abf"
+    },
+    "user": {
+      "$oid": "699475c2a2788eda0c30b108"
+    },
+    "business": {
+      "$oid": "697f7feba4fe1958c1f6a353"
+    },
+    "rating": 5,
+    "comment": "Welcoming staff and food served hot , will visit again\n",
+    "emotion": "Relaxed",
+    "categoryRatings": {
+      "staff": null,
+      "facilities": null,
+      "cleanliness": null,
+      "comfort": null,
+      "valueForMoney": 10,
+      "location": null
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.831878963163645,
+        53.32344889032349
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": false,
+    "securityMetadata": {
+      "locationAccuracy": 5.068418015748528,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 2,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "F666B1D8-1F31-4754-81C6-9104A1ADF170",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.2.1",
+        "platform": "ios",
+        "platformVersion": "26.2.1",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 13.641393481600337,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-03-05T12:00:20.465Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-03-05T12:00:20.482Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-05T12:00:20.482Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69ab1d9cf949c2e2ef151de2"
+    },
+    "user": {
+      "$oid": "699475c2a2788eda0c30b108"
+    },
+    "business": {
+      "$oid": "697f7feba4fe1958c1f6a353"
+    },
+    "rating": 5,
+    "comment": "Fantastic restaurant ",
+    "emotion": "Delighted",
+    "categoryRatings": {
+      "staff": null,
+      "facilities": null,
+      "cleanliness": 10,
+      "comfort": null,
+      "valueForMoney": null,
+      "location": 10
+    },
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/dkfa395dq/image/upload/v1772821914/hashview/reviews/photos/z7s8fisd8o5dixuo4iin.jpg",
+        "publicId": "hashview/reviews/photos/z7s8fisd8o5dixuo4iin",
+        "_id": {
+          "$oid": "69ab1d9cf949c2e2ef151de3"
+        }
+      }
+    ],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.831889044732587,
+        53.323452872924854
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": false,
+    "securityMetadata": {
+      "locationAccuracy": 6.911882192084314,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 3,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "2897E9A4-BF08-4B3A-A402-3260340060F5",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.2.1",
+        "platform": "ios",
+        "platformVersion": "26.2.1",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 13.352331444682207,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-03-06T18:31:56.048Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-03-06T18:31:56.055Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-06T18:31:56.055Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69b0482af949c2e2ef152716"
+    },
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "business": {
+      "$oid": "699dc8f1c51f52ae56002ac0"
+    },
+    "rating": 5,
+    "comment": "Lovely bar and food.",
+    "emotion": "Delighted",
+    "categoryRatings": {
+      "staff": 10,
+      "facilities": 10,
+      "cleanliness": 10,
+      "comfort": 10,
+      "valueForMoney": 10,
+      "location": 10
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.83086298424704,
+        53.32638798900793
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": false,
+    "securityMetadata": {
+      "locationAccuracy": 9.962200691726112,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 4,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "2F625F73-743B-48BE-BD41-4F2E46378E43",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.3.1",
+        "platform": "ios",
+        "platformVersion": "26.3.1",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 3.0441454678533035,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-03-10T16:34:50.047Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-03-10T16:34:50.052Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-10T16:34:50.052Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69b471b40cf5632ef55f570d"
+    },
+    "user": {
+      "$oid": "69b471870cf5632ef55f56fa"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "rating": 5,
+    "comment": "great food. recommend drunken noodles and green curry. ",
+    "emotion": "Delighted",
+    "categoryRatings": {
+      "staff": 10,
+      "facilities": 8,
+      "cleanliness": 8,
+      "comfort": 8,
+      "valueForMoney": 8,
+      "location": 8
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.831363600135858,
+        53.32512071572692
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 2.488180467642113,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 3,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "DE50516E-DF0D-482A-8C5C-5CF23C97961E",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.0.1",
+        "platform": "ios",
+        "platformVersion": "26.0.1",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 29.727750464156873,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-03-13T20:21:08.276Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-03-13T20:21:08.282Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-13T20:21:09.194Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "69b471b40cf5632ef55f5712"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69b5a7a40cf5632ef55f5b8d"
+    },
+    "user": {
+      "$oid": "69b5a6570cf5632ef55f5b10"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "rating": 5,
+    "comment": "Food is fantastic and staff are very friendly come check it out!",
+    "emotion": "Delighted",
+    "categoryRatings": {
+      "staff": 10,
+      "facilities": 10,
+      "cleanliness": 10,
+      "comfort": 10,
+      "valueForMoney": 10,
+      "location": 10
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.831295329722359,
+        53.32507602079173
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 11.641193120953876,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 6,
+      "suspiciousActivitiesCount": 2,
+      "deviceFingerprint": {
+        "deviceId": "41439E8A-4F79-4A74-900B-35415972A3DD",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.3.1",
+        "platform": "ios",
+        "platformVersion": "26.3.1",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 27.98537174590295,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-03-14T18:23:32.362Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-03-14T18:23:32.368Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-14T18:23:33.310Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "69b5a7a40cf5632ef55f5b92"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69b716f60cf5632ef55f603d"
+    },
+    "user": {
+      "$oid": "69b716730cf5632ef55f5fbe"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "rating": 5,
+    "comment": "Lovely experience dinning here for the first time! Food was a good portion and tasted amazinggg. The service was exceptional, the chef came up to us and spoke to us too! ",
+    "emotion": "Valued",
+    "categoryRatings": {
+      "staff": 10,
+      "facilities": 10,
+      "cleanliness": 10,
+      "comfort": 10,
+      "valueForMoney": 10,
+      "location": 10
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.83122103204688,
+        53.325154445342974
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 9.15868158434812,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 7,
+      "suspiciousActivitiesCount": 1,
+      "deviceFingerprint": {
+        "deviceId": "8D495AD3-27B8-4836-A2B5-689C4A6ABBC1",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.2.1",
+        "platform": "ios",
+        "platformVersion": "26.2.1",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 19.544394322127534,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-03-15T20:30:46.602Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-03-15T20:30:46.608Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-15T20:30:47.483Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "69b716f70cf5632ef55f6043"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69b717100cf5632ef55f607f"
+    },
+    "user": {
+      "$oid": "69b716130cf5632ef55f5faa"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "rating": 5,
+    "comment": "Good Food.... Amazing and very accommodated Service....Will definitely comeback again...\nTomYumSoup with Tofu is highly recommended ",
+    "emotion": "Delighted",
+    "categoryRatings": {
+      "staff": 10,
+      "facilities": 10,
+      "cleanliness": 10,
+      "comfort": 10,
+      "valueForMoney": 10,
+      "location": 10
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.8310474,
+        53.3251186
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 7.801000118255615,
+      "verificationTime": 30,
+      "motionDetected": true,
+      "isMockLocation": false,
+      "locationHistoryCount": 9,
+      "suspiciousActivitiesCount": 1,
+      "deviceFingerprint": {
+        "deviceId": "96049b19-dcc6-4e7d-b40d-69d8410d7191",
+        "deviceName": "Pixel 7a",
+        "manufacturer": "Android",
+        "modelName": "unknown",
+        "osName": "android",
+        "osVersion": "36",
+        "platform": "android",
+        "platformVersion": 36,
+        "isDevice": false
+      },
+      "devicePlatform": "android",
+      "actualDistance": 12.811122648169283,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-03-15T20:31:12.470Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-03-15T20:31:12.473Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-15T20:31:13.348Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "69b717100cf5632ef55f6085"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69bac7babef138aafb470786"
+    },
+    "user": {
+      "$oid": "69692849356dfda59d66059c"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "rating": 3,
+    "comment": "Y to the day of the day of the day of the ",
+    "emotion": "Relaxed",
+    "categoryRatings": {
+      "staff": 7,
+      "facilities": 6,
+      "cleanliness": 4,
+      "comfort": 8,
+      "valueForMoney": 4,
+      "location": 6
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        91.7723156,
+        26.1773489
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 3.8570001125335693,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 5,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "fbab2a17-3e21-4be6-82b2-6cc28ba9ae92",
+        "deviceName": "motorola edge 50 pro",
+        "manufacturer": "Android",
+        "modelName": "unknown",
+        "osName": "android",
+        "osVersion": "36",
+        "platform": "android",
+        "platformVersion": 36,
+        "isDevice": false
+      },
+      "devicePlatform": "android",
+      "actualDistance": 158.25308870934316,
+      "businessRadius": 500,
+      "submittedAt": {
+        "$date": "2026-03-18T15:41:46.661Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-03-18T15:41:46.671Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-18T15:41:48.961Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "69bac7bcbef138aafb47078b"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69bc4ca00cf5632ef55f6a62"
+    },
+    "user": {
+      "$oid": "69bc4c170cf5632ef55f6a4a"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "rating": 5,
+    "comment": "Good location, a nice Thai restaurant in Llandudno, friendly staff\n",
+    "emotion": "Relaxed",
+    "categoryRatings": {
+      "staff": 8,
+      "facilities": 8,
+      "cleanliness": 8,
+      "comfort": 8,
+      "valueForMoney": 8,
+      "location": 9
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.8311124046149403,
+        53.32515012889241
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 5.030743209667393,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 5,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "BDFB64BF-BAF2-4772-BF0D-BA0BD4967949",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.3.1",
+        "platform": "ios",
+        "platformVersion": "26.3.1",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 13.305778852232985,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-03-19T19:21:04.505Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-03-19T19:21:04.509Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-19T19:21:05.453Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "69bc4ca10cf5632ef55f6a67"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69cd669c53133c9316f1f570"
+    },
+    "user": {
+      "$oid": "6a0f6b1f68ed048af88f9682"
+    },
+    "business": {
+      "$oid": "69a2fe427dea6c9d5fb73913"
+    },
+    "rating": 5,
+    "comment": "I have visited this hotel twice and it is such a lovely place. The staff are very welcoming and extremely helpful, they do a lot to make you feel comfortable! The balcony view rooms are such great value and you get the whole balcony to yourself whilst enjoying the beautiful views over Llandudno, the sea and more. The room I’m staying in which is the one with the balcony has a mini-fridge which I find very convenient. The breakfast served here is very nice, too.",
+    "emotion": "Relaxed",
+    "categoryRatings": {
+      "staff": 10,
+      "facilities": 10,
+      "cleanliness": 9,
+      "comfort": 10,
+      "valueForMoney": 10,
+      "location": 10
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.831316617546602,
+        53.32760883325276
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": false,
+    "securityMetadata": {
+      "locationAccuracy": 5.007873898107318,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 4,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "7184FC62-5263-4302-B0DF-DF10CEECBC85",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.3.1",
+        "platform": "ios",
+        "platformVersion": "26.3.1",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 12.723648252036838,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-04-01T18:40:28.617Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-04-01T18:40:28.624Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T13:34:15.745Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69d684c953133c9316f2021d"
+    },
+    "user": {
+      "$oid": "69d6846853133c9316f201f8"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "rating": 5,
+    "comment": "Staff is very friendly, told them about my allergies and catered for my allergies brilliantly. ",
+    "emotion": "Relaxed",
+    "categoryRatings": {
+      "staff": 10,
+      "facilities": 10,
+      "cleanliness": 10,
+      "comfort": 10,
+      "valueForMoney": 10,
+      "location": 10
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.8310618,
+        53.3252138
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 14.803999900817871,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 8,
+      "suspiciousActivitiesCount": 1,
+      "deviceFingerprint": {
+        "deviceId": "979833c8-eee6-44a0-88ad-0eb9f2673de8",
+        "deviceName": "M2101K6G",
+        "manufacturer": "Android",
+        "modelName": "unknown",
+        "osName": "android",
+        "osVersion": "33",
+        "platform": "android",
+        "platformVersion": 33,
+        "isDevice": false
+      },
+      "devicePlatform": "android",
+      "actualDistance": 7.7164666115163465,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-04-08T16:39:37.026Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-04-08T16:39:37.031Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-08T16:39:37.997Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "69d684c953133c9316f20222"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69d6a80853133c9316f202a8"
+    },
+    "user": {
+      "$oid": "69d6a72753133c9316f20290"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "rating": 5,
+    "comment": "Excellent food, kind staff.  Really nice place.",
+    "emotion": "Valued",
+    "categoryRatings": {
+      "staff": 10,
+      "facilities": 10,
+      "cleanliness": 10,
+      "comfort": 10,
+      "valueForMoney": 10,
+      "location": 10
+    },
+    "images": [
+      {
+        "url": "https://res.cloudinary.com/dkfa395dq/image/upload/v1775675397/hashview/reviews/photos/xe81ff45budwxhvhib0d.jpg",
+        "publicId": "hashview/reviews/photos/xe81ff45budwxhvhib0d",
+        "_id": {
+          "$oid": "69d6a80853133c9316f202a9"
+        }
+      }
+    ],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.831186,
+        53.3251297
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 3.812000036239624,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 3,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "9c1be44e-27d4-4566-bae8-5a3f8b385307",
+        "deviceName": "SM-S918B",
+        "manufacturer": "Android",
+        "modelName": "unknown",
+        "osName": "android",
+        "osVersion": "36",
+        "platform": "android",
+        "platformVersion": 36,
+        "isDevice": false
+      },
+      "devicePlatform": "android",
+      "actualDistance": 18.650796372021723,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-04-08T19:10:00.038Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-04-08T19:10:00.044Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-08T19:10:01.006Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "69d6a80853133c9316f202af"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69e34059697f5492e7c0e1f1"
+    },
+    "user": {
+      "$oid": "698de5d7a2788eda0c30a41c"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "rating": 3,
+    "comment": "Ha ha ha ha ha ha ha ha ",
+    "emotion": "Delighted",
+    "categoryRatings": {
+      "staff": 6,
+      "facilities": 4,
+      "cleanliness": 6,
+      "comfort": 6,
+      "valueForMoney": 7,
+      "location": 5
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        91.771704,
+        26.1777131
+      ]
+    },
+    "verified": true,
+    "status": "removed",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 10.23799991607666,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 7,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "0d229c20-07f5-4983-a0ca-48730262e2f6",
+        "deviceName": "CPH2591",
+        "manufacturer": "Android",
+        "modelName": "unknown",
+        "osName": "android",
+        "osVersion": "35",
+        "platform": "android",
+        "platformVersion": 35,
+        "isDevice": false
+      },
+      "devicePlatform": "android",
+      "actualDistance": 229.5766050809095,
+      "businessRadius": 500,
+      "submittedAt": {
+        "$date": "2026-04-18T08:27:05.567Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-04-18T08:27:05.576Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T12:54:36.312Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "69e3405a697f5492e7c0e1f6"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69e3f8db08db8f09c619c0c2"
+    },
+    "user": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "rating": 4,
+    "comment": "Nice hotal food is very good ",
+    "emotion": "Relaxed",
+    "categoryRatings": {
+      "staff": 7,
+      "facilities": 8,
+      "cleanliness": 7,
+      "comfort": 6,
+      "valueForMoney": 7,
+      "location": 6
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        91.7722691,
+        26.1772983
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 3,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 3,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "76b41ad7-150f-4ea0-9fcf-2f14f8e82b4c",
+        "deviceName": "motorola edge 50 pro",
+        "manufacturer": "Android",
+        "modelName": "unknown",
+        "osName": "android",
+        "osVersion": "36",
+        "platform": "android",
+        "platformVersion": 36,
+        "isDevice": false
+      },
+      "devicePlatform": "android",
+      "actualDistance": 161.1083650678117,
+      "businessRadius": 500,
+      "submittedAt": {
+        "$date": "2026-04-18T21:34:19.149Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-04-18T21:34:19.160Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-18T21:34:20.043Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "69e3f8db08db8f09c619c0c7"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69f76e69b9775af3df654336"
+    },
+    "user": {
+      "$oid": "6a0f6b2268ed048af88f9694"
+    },
+    "business": {
+      "$oid": "697f830aa4fe1958c1f6a388"
+    },
+    "rating": 5,
+    "comment": "Very attentive service. Good, interesting food at a reasonable price",
+    "emotion": "Relaxed",
+    "categoryRatings": {
+      "staff": 10,
+      "facilities": 10,
+      "cleanliness": 10,
+      "comfort": 10,
+      "valueForMoney": 10,
+      "location": 10
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.8307408,
+        53.324677
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 3.009999990463257,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 3,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "ebfd4f82-90c6-45aa-ab5c-9a10683bfecd",
+        "deviceName": "moto g84 5G",
+        "manufacturer": "Android",
+        "modelName": "unknown",
+        "osName": "android",
+        "osVersion": "35",
+        "platform": "android",
+        "platformVersion": 35,
+        "isDevice": false
+      },
+      "devicePlatform": "android",
+      "actualDistance": 32.52917145415265,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-05-03T15:48:57.907Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-05-03T15:48:57.913Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T12:52:52.957Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "69f76e6bb9775af3df654341"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69f88b34b9775af3df654885"
+    },
+    "user": {
+      "$oid": "6a0f6b2268ed048af88f9694"
+    },
+    "business": {
+      "$oid": "697b83ddf16417f568144673"
+    },
+    "rating": 5,
+    "comment": "A boutique cafe bar. Compact and bijou. Lovely atmosphere and great food. A good place to make friends with the locals. 10/10",
+    "emotion": "Relaxed",
+    "categoryRatings": {
+      "staff": 10,
+      "facilities": 10,
+      "cleanliness": 10,
+      "comfort": 10,
+      "valueForMoney": 10,
+      "location": 10
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.8094024,
+        53.3208481
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": false,
+    "securityMetadata": {
+      "locationAccuracy": 4.294000148773193,
+      "verificationTime": 30,
+      "motionDetected": true,
+      "isMockLocation": false,
+      "locationHistoryCount": 3,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "927328d4-b1a2-4f99-b922-7103e686c27c",
+        "deviceName": "moto g84 5G",
+        "manufacturer": "Android",
+        "modelName": "unknown",
+        "osName": "android",
+        "osVersion": "35",
+        "platform": "android",
+        "platformVersion": 35,
+        "isDevice": false
+      },
+      "devicePlatform": "android",
+      "actualDistance": 39.954030992507334,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-05-04T12:04:04.506Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-05-04T12:04:04.511Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T12:52:52.957Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69fe43d0b9775af3df655984"
+    },
+    "user": {
+      "$oid": "6a0f6b2268ed048af88f9694"
+    },
+    "business": {
+      "$oid": "697f724da4fe1958c1f6a280"
+    },
+    "rating": 4,
+    "comment": "Great New York steak!",
+    "emotion": "Valued",
+    "categoryRatings": {
+      "staff": 10,
+      "facilities": 10,
+      "cleanliness": 10,
+      "comfort": 10,
+      "valueForMoney": 9,
+      "location": 10
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.8307642,
+        53.3247296
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 3,
+      "verificationTime": 30,
+      "motionDetected": true,
+      "isMockLocation": false,
+      "locationHistoryCount": 7,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "9d1bccc4-ee60-433f-a0b5-656d6ef96c82",
+        "deviceName": "moto g84 5G",
+        "manufacturer": "Android",
+        "modelName": "unknown",
+        "osName": "android",
+        "osVersion": "35",
+        "platform": "android",
+        "platformVersion": 35,
+        "isDevice": false
+      },
+      "devicePlatform": "android",
+      "actualDistance": 26.919018298880747,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-05-08T20:13:04.227Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-05-08T20:13:04.232Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T12:52:52.957Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "69fe43d1b9775af3df655990"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a09c49f75232f36efc113fe"
+    },
+    "user": {
+      "$oid": "6a0f6b2268ed048af88f9694"
+    },
+    "business": {
+      "$oid": "697ceb9a7109606a6bca69b4"
+    },
+    "rating": 5,
+    "comment": "Lovely sunny beer garden. Great Sunday roast",
+    "emotion": "Valued",
+    "categoryRatings": {
+      "staff": 10,
+      "facilities": 10,
+      "cleanliness": 10,
+      "comfort": 10,
+      "valueForMoney": 8,
+      "location": 10
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.8320736,
+        53.3246893
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": true,
+    "securityMetadata": {
+      "locationAccuracy": 3.374000072479248,
+      "verificationTime": 30,
+      "motionDetected": true,
+      "isMockLocation": false,
+      "locationHistoryCount": 3,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "63293317-8035-4045-aea6-d9998057581e",
+        "deviceName": "moto g84 5G",
+        "manufacturer": "Android",
+        "modelName": "unknown",
+        "osName": "android",
+        "osVersion": "35",
+        "platform": "android",
+        "platformVersion": 35,
+        "isDevice": false
+      },
+      "devicePlatform": "android",
+      "actualDistance": 20.788728466494803,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-05-17T13:37:35.710Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-05-17T13:37:35.718Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T12:52:52.957Z"
+    },
+    "__v": 0,
+    "coupon": {
+      "$oid": "6a09c4a175232f36efc1140a"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a0d8ed675232f36efc119f0"
+    },
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "business": {
+      "$oid": "697f5f7da4fe1958c1f6a085"
+    },
+    "rating": 5,
+    "comment": "    The staff provided excellent service, and the food was both delicious and affordable",
+    "emotion": "Delighted",
+    "categoryRatings": {
+      "staff": 10,
+      "facilities": 10,
+      "cleanliness": 10,
+      "comfort": 10,
+      "valueForMoney": 10,
+      "location": 10
+    },
+    "images": [],
+    "videos": [],
+    "geolocation": {
+      "type": "Point",
+      "coordinates": [
+        -3.8269377403352203,
+        53.323343087888276
+      ]
+    },
+    "verified": true,
+    "status": "approved",
+    "likes": 0,
+    "dislikes": 0,
+    "helpful": [],
+    "couponAwarded": false,
+    "securityMetadata": {
+      "locationAccuracy": 4.715808258600219,
+      "verificationTime": 30,
+      "motionDetected": false,
+      "isMockLocation": false,
+      "locationHistoryCount": 10,
+      "suspiciousActivitiesCount": 0,
+      "deviceFingerprint": {
+        "deviceId": "B1F7BC5D-9C7F-42B1-9425-021015D04D91",
+        "deviceName": "iPhone",
+        "manufacturer": "Apple",
+        "modelName": "unknown",
+        "osName": "ios",
+        "osVersion": "26.4.2",
+        "platform": "ios",
+        "platformVersion": "26.4.2",
+        "isDevice": false
+      },
+      "devicePlatform": "ios",
+      "actualDistance": 13.378418481916135,
+      "businessRadius": 50,
+      "submittedAt": {
+        "$date": "2026-05-20T10:37:10.798Z"
+      }
+    },
+    "createdAt": {
+      "$date": "2026-05-20T10:37:10.806Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-20T10:37:10.806Z"
+    },
+    "__v": 0
+  }
+]

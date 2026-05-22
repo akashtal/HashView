@@ -1,0 +1,90 @@
+[
+  {
+    "_id": {
+      "$oid": "69133d458c6ed4d316354a2f"
+    },
+    "name": "Restaurant",
+    "icon": "restaurant",
+    "color": "#8B5CF6",
+    "isActive": true,
+    "order": 0,
+    "businessCount": 0,
+    "createdBy": {
+      "$oid": "6912bed7726cab733bb95bf8"
+    },
+    "slug": "restaurant",
+    "createdAt": {
+      "$date": "2025-11-11T13:42:29.031Z"
+    },
+    "updatedAt": {
+      "$date": "2025-11-11T13:42:29.031Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "691496add86431a979a5a989"
+    },
+    "name": "HOTEL",
+    "icon": "home",
+    "color": "#3B82F6",
+    "isActive": true,
+    "order": 2,
+    "businessCount": 0,
+    "createdBy": {
+      "$oid": "6912bed7726cab733bb95bf8"
+    },
+    "slug": "hotel",
+    "createdAt": {
+      "$date": "2025-11-12T14:16:13.927Z"
+    },
+    "updatedAt": {
+      "$date": "2025-11-12T14:16:45.560Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "697f4d4fa4fe1958c1f69fd9"
+    },
+    "name": "Café",
+    "icon": "cafe",
+    "color": "#8B5CF6",
+    "isActive": true,
+    "order": 4,
+    "businessCount": 0,
+    "createdBy": {
+      "$oid": "6912bed7726cab733bb95bf8"
+    },
+    "slug": "caf",
+    "createdAt": {
+      "$date": "2026-02-01T12:55:43.426Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-01T12:55:43.426Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "697fc899a4fe1958c1f6a5b5"
+    },
+    "name": "Take Away",
+    "icon": "cart",
+    "color": "#6B7280",
+    "isActive": true,
+    "order": 0,
+    "businessCount": 0,
+    "createdBy": {
+      "$oid": "6912bed7726cab733bb95bf8"
+    },
+    "slug": "take-away",
+    "createdAt": {
+      "$date": "2026-02-01T21:41:45.702Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-01T21:41:45.702Z"
+    },
+    "__v": 0
+  }
+]

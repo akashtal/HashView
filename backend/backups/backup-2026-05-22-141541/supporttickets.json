@@ -1,0 +1,170 @@
+[
+  {
+    "_id": {
+      "$oid": "696cafcaec64eb831d426c2c"
+    },
+    "user": {
+      "$oid": "696c9f9175a542eb2d3ca070"
+    },
+    "subject": "Error",
+    "message": "Testing",
+    "status": "open",
+    "priority": "medium",
+    "category": "general",
+    "responses": [],
+    "createdAt": {
+      "$date": "2026-01-18T10:02:50.105Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-18T10:02:50.105Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "696d1bcf859a4ca4297ea967"
+    },
+    "user": {
+      "$oid": "696c9f9175a542eb2d3ca070"
+    },
+    "subject": "Hii",
+    "message": "Test",
+    "status": "open",
+    "priority": "medium",
+    "category": "general",
+    "responses": [],
+    "createdAt": {
+      "$date": "2026-01-18T17:43:43.475Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-18T17:43:43.475Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "696d1d75f57df2a88d2d17a7"
+    },
+    "user": {
+      "$oid": "696c9f9175a542eb2d3ca070"
+    },
+    "subject": "Hi",
+    "message": "Test",
+    "status": "open",
+    "priority": "medium",
+    "category": "general",
+    "responses": [],
+    "createdAt": {
+      "$date": "2026-01-18T17:50:45.365Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-18T17:50:45.365Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "696d4b04f0bede9d4f9e133f"
+    },
+    "user": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "subject": "Hi",
+    "message": "Test",
+    "status": "open",
+    "priority": "medium",
+    "category": "general",
+    "responses": [],
+    "createdAt": {
+      "$date": "2026-01-18T21:05:08.194Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-18T21:05:08.194Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "696d4b45f0bede9d4f9e1356"
+    },
+    "user": {
+      "$oid": "696c9f9175a542eb2d3ca070"
+    },
+    "subject": "Hi testing",
+    "message": "test",
+    "status": "open",
+    "priority": "medium",
+    "category": "general",
+    "responses": [],
+    "createdAt": {
+      "$date": "2026-01-18T21:06:13.330Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-18T21:06:13.330Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "696d4c9d1b55fa092693afe1"
+    },
+    "user": {
+      "$oid": "696c9f9175a542eb2d3ca070"
+    },
+    "subject": "Hi",
+    "message": "test",
+    "status": "open",
+    "priority": "medium",
+    "category": "general",
+    "responses": [],
+    "createdAt": {
+      "$date": "2026-01-18T21:11:57.947Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-18T21:11:57.947Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "696d4cd11b55fa092693aff8"
+    },
+    "user": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "subject": "Hi",
+    "message": "hi",
+    "status": "open",
+    "priority": "medium",
+    "category": "general",
+    "responses": [],
+    "createdAt": {
+      "$date": "2026-01-18T21:12:49.455Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-18T21:12:49.455Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6974e2ac8be917cea21651d1"
+    },
+    "user": {
+      "$oid": "696f99f01b55fa092693b4ae"
+    },
+    "subject": "I am not able to add scratch card",
+    "message": "Need help to do it",
+    "status": "open",
+    "priority": "medium",
+    "category": "general",
+    "responses": [],
+    "createdAt": {
+      "$date": "2026-01-24T15:18:04.202Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-24T15:18:04.202Z"
+    },
+    "__v": 0
+  }
+]

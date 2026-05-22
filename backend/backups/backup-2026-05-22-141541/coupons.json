@@ -1,0 +1,1681 @@
+[
+  {
+    "_id": {
+      "$oid": "691cbb1f4755a8c37d678533"
+    },
+    "business": {
+      "$oid": "697f5f7da4fe1958c1f6a085"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69184cfab3b38c47d4501ccb"
+    },
+    "review": {
+      "$oid": "691cbb1f4755a8c37d678530"
+    },
+    "code": "HASH-8SPE75",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2025-11-18T18:29:51.727Z"
+    },
+    "validUntil": {
+      "$date": "2025-11-18T20:29:51.726Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2025-11-18T18:29:51.729Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T01:48:23.002Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"691cbb1f4755a8c37d678533\",\"code\":\"HASH-8SPE75\",\"businessId\":\"69189ffafc7acf915d738402\",\"userId\":\"69184cfab3b38c47d4501ccb\",\"reviewId\":\"691cbb1f4755a8c37d678530\",\"timestamp\":\"2025-11-18T18:29:52.006Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "691e0a2e33def087807474a4"
+    },
+    "business": {
+      "$oid": "697f5f7da4fe1958c1f6a085"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "review": {
+      "$oid": "691e0a2e33def0878074749f"
+    },
+    "code": "HASH-AZPDKS",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2025-11-19T18:19:26.661Z"
+    },
+    "validUntil": {
+      "$date": "2025-11-19T20:19:26.661Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2025-11-19T18:19:26.663Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T01:48:23.002Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"691e0a2e33def087807474a4\",\"code\":\"HASH-AZPDKS\",\"businessId\":\"69189ffafc7acf915d738402\",\"userId\":\"6916069c186ec1aaa3b920aa\",\"reviewId\":\"691e0a2e33def0878074749f\",\"timestamp\":\"2025-11-19T18:19:26.803Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "6920996947ba6a53ce4e93fc"
+    },
+    "business": {
+      "$oid": "697f5f7da4fe1958c1f6a085"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69184cfab3b38c47d4501ccb"
+    },
+    "review": {
+      "$oid": "692098534f421c767b60acbe"
+    },
+    "code": "NTSV8UJC",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2025-11-21T16:55:05.995Z"
+    },
+    "validUntil": {
+      "$date": "2025-11-21T18:55:05.995Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2025-11-21T16:55:06.005Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T01:48:23.002Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"6920996947ba6a53ce4e93fc\",\"code\":\"NTSV8UJC\",\"businessId\":\"69189ffafc7acf915d738402\",\"userId\":\"69184cfab3b38c47d4501ccb\",\"reviewId\":\"692098534f421c767b60acbe\",\"timestamp\":\"2025-11-21T16:55:06.272Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "692131c036a4cbec46bf74d6"
+    },
+    "business": {
+      "$oid": "697f5f7da4fe1958c1f6a085"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69184cfab3b38c47d4501ccb"
+    },
+    "review": {
+      "$oid": "692131bf36a4cbec46bf74d1"
+    },
+    "code": "HASH-5YCLRD",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2025-11-22T03:45:04.020Z"
+    },
+    "validUntil": {
+      "$date": "2025-11-22T05:45:04.020Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2025-11-22T03:45:04.022Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-22T01:48:23.002Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"692131c036a4cbec46bf74d6\",\"code\":\"HASH-5YCLRD\",\"businessId\":\"69189ffafc7acf915d738402\",\"userId\":\"69184cfab3b38c47d4501ccb\",\"reviewId\":\"692131bf36a4cbec46bf74d1\",\"timestamp\":\"2025-11-22T03:45:04.247Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "6928bb34d43ac158386f6749"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "review": {
+      "$oid": "6928bb34d43ac158386f6742"
+    },
+    "code": "HASH-0XDUNC",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2025-11-27T20:57:24.661Z"
+    },
+    "validUntil": {
+      "$date": "2025-11-27T22:57:24.661Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "redeemed",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2025-11-27T20:57:24.663Z"
+    },
+    "updatedAt": {
+      "$date": "2025-11-27T20:58:35.490Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"6928bb34d43ac158386f6749\",\"code\":\"HASH-0XDUNC\",\"businessId\":\"6927430d293b5919a61e990d\",\"userId\":\"6916069c186ec1aaa3b920aa\",\"reviewId\":\"6928bb34d43ac158386f6742\",\"timestamp\":\"2025-11-27T20:57:24.792Z\"}",
+    "redeemedAt": {
+      "$date": "2025-11-27T20:58:35.489Z"
+    },
+    "redeemedBy": {
+      "$oid": "692741de293b5919a61e9900"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "696ff6551b55fa092693b65a"
+    },
+    "business": {
+      "$oid": "696f9ed21b55fa092693b4be"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "review": {
+      "$oid": "696ff6541b55fa092693b653"
+    },
+    "code": "HASH-2XJLCK",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-01-20T21:40:37.377Z"
+    },
+    "validUntil": {
+      "$date": "2026-01-20T23:40:37.376Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2026-01-20T21:40:37.378Z"
+    },
+    "updatedAt": {
+      "$date": "2026-01-20T23:45:00.077Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"696ff6551b55fa092693b65a\",\"code\":\"HASH-2XJLCK\",\"businessId\":\"696f9ed21b55fa092693b4be\",\"userId\":\"6916069c186ec1aaa3b920aa\",\"reviewId\":\"696ff6541b55fa092693b653\",\"timestamp\":\"2026-01-20T21:40:37.506Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "6996e9a27f23992c437fd91a"
+    },
+    "business": {
+      "$oid": "697f7feba4fe1958c1f6a353"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "699475c2a2788eda0c30b108"
+    },
+    "review": {
+      "$oid": "6996e9a27f23992c437fd915"
+    },
+    "code": "HASH-G1P7LZ",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-02-19T10:44:50.882Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-19T12:44:50.881Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2026-02-19T10:44:50.883Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-19T12:45:00.228Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"6996e9a27f23992c437fd91a\",\"code\":\"HASH-G1P7LZ\",\"businessId\":\"697f7feba4fe1958c1f6a353\",\"userId\":\"699475c2a2788eda0c30b108\",\"reviewId\":\"6996e9a27f23992c437fd915\",\"timestamp\":\"2026-02-19T10:44:51.020Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "699dd747c51f52ae56002cab"
+    },
+    "business": {
+      "$oid": "699dc8f1c51f52ae56002ac0"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "review": {
+      "$oid": "699dd747c51f52ae56002ca6"
+    },
+    "code": "HASH-J097U8",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-02-24T16:52:23.844Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-24T18:52:23.844Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2026-02-24T16:52:23.846Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-24T18:55:00.105Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"699dd747c51f52ae56002cab\",\"code\":\"HASH-J097U8\",\"businessId\":\"699dc8f1c51f52ae56002ac0\",\"userId\":\"6916069c186ec1aaa3b920aa\",\"reviewId\":\"699dd747c51f52ae56002ca6\",\"timestamp\":\"2026-02-24T16:52:23.978Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "699de79dc51f52ae56002e8b"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "review": {
+      "$oid": "699de79dc51f52ae56002e86"
+    },
+    "code": "HASH-4BIUPO",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-02-24T18:02:05.867Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-24T20:02:05.866Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2026-02-24T18:02:05.868Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-24T20:05:00.041Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"699de79dc51f52ae56002e8b\",\"code\":\"HASH-4BIUPO\",\"businessId\":\"6927430d293b5919a61e990d\",\"userId\":\"6916069c186ec1aaa3b920aa\",\"reviewId\":\"699de79dc51f52ae56002e86\",\"timestamp\":\"2026-02-24T18:02:05.993Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "699e0632c51f52ae56003192"
+    },
+    "business": {
+      "$oid": "697f7feba4fe1958c1f6a353"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "review": {
+      "$oid": "699e0632c51f52ae5600318d"
+    },
+    "code": "HASH-071YEU",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-02-24T20:12:34.947Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-24T22:12:34.947Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2026-02-24T20:12:34.948Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-24T22:15:00.190Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"699e0632c51f52ae56003192\",\"code\":\"HASH-071YEU\",\"businessId\":\"697f7feba4fe1958c1f6a353\",\"userId\":\"6916069c186ec1aaa3b920aa\",\"reviewId\":\"699e0632c51f52ae5600318d\",\"timestamp\":\"2026-02-24T20:12:35.072Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "699fcad332028706700fcccc"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "review": {
+      "$oid": "699fcad232028706700fccc7"
+    },
+    "code": "HASH-SDIQDE",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-02-26T04:23:47.375Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-26T06:23:47.375Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2026-02-26T04:23:47.378Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-26T06:25:00.100Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"699fcad332028706700fcccc\",\"code\":\"HASH-SDIQDE\",\"businessId\":\"699f5ae11d09466912907e6b\",\"userId\":\"69496a20f294829e51cdc5d2\",\"reviewId\":\"699fcad232028706700fccc7\",\"timestamp\":\"2026-02-26T04:23:47.604Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "699fcc7332028706700fcd12"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "review": {
+      "$oid": "699fcc7232028706700fcd0d"
+    },
+    "code": "HASH-SUW0K1",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-02-26T04:30:43.254Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-26T06:30:43.254Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2026-02-26T04:30:43.256Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-26T06:35:00.224Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"699fcc7332028706700fcd12\",\"code\":\"HASH-SUW0K1\",\"businessId\":\"699f5ae11d09466912907e6b\",\"userId\":\"69496a20f294829e51cdc5d2\",\"reviewId\":\"699fcc7232028706700fcd0d\",\"timestamp\":\"2026-02-26T04:30:43.483Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "699ff39932028706700fcd9f"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "review": {
+      "$oid": "699ff39832028706700fcd9a"
+    },
+    "code": "HASH-EXJ0BW",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-02-26T07:17:45.434Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-26T09:17:45.434Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2026-02-26T07:17:45.436Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-26T09:20:00.140Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"699ff39932028706700fcd9f\",\"code\":\"HASH-EXJ0BW\",\"businessId\":\"699f5ae11d09466912907e6b\",\"userId\":\"69496a20f294829e51cdc5d2\",\"reviewId\":\"699ff39832028706700fcd9a\",\"timestamp\":\"2026-02-26T07:17:45.667Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "699ff72332028706700fce05"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "review": {
+      "$oid": "699ff72232028706700fce00"
+    },
+    "code": "HASH-1PF2IU",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-02-26T07:32:51.741Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-26T09:32:51.741Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2026-02-26T07:32:51.746Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-26T09:35:00.137Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"699ff72332028706700fce05\",\"code\":\"HASH-1PF2IU\",\"businessId\":\"699f5ae11d09466912907e6b\",\"userId\":\"69496a20f294829e51cdc5d2\",\"reviewId\":\"699ff72232028706700fce00\",\"timestamp\":\"2026-02-26T07:32:53.335Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "699ff8f132028706700fce55"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "review": {
+      "$oid": "699ff8f032028706700fce50"
+    },
+    "code": "HASH-XRX3W9",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-02-26T07:40:33.005Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-26T09:40:33.005Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2026-02-26T07:40:33.007Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-26T09:45:00.338Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"699ff8f132028706700fce55\",\"code\":\"HASH-XRX3W9\",\"businessId\":\"699f5ae11d09466912907e6b\",\"userId\":\"69496a20f294829e51cdc5d2\",\"reviewId\":\"699ff8f032028706700fce50\",\"timestamp\":\"2026-02-26T07:40:33.235Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "699ffe9729082b3704ebbe46"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "review": {
+      "$oid": "699ffe9629082b3704ebbe41"
+    },
+    "code": "HASH-W5MTVX",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-02-26T08:04:39.663Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-26T10:04:39.662Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2026-02-26T08:04:39.664Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-26T10:05:00.429Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"699ffe9729082b3704ebbe46\",\"code\":\"HASH-W5MTVX\",\"businessId\":\"699f5ae11d09466912907e6b\",\"userId\":\"69496a20f294829e51cdc5d2\",\"reviewId\":\"699ffe9629082b3704ebbe41\",\"timestamp\":\"2026-02-26T08:04:39.905Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69a0370dbbb8411821659670"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "business",
+    "code": "FREE ITEM",
+    "title": "Free snacks ",
+    "description": "Free ",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Coffee ",
+    "minPurchaseAmount": 300,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-02-26T12:05:33.389Z"
+    },
+    "validUntil": null,
+    "usageLimit": 2,
+    "usageCount": 5,
+    "redemptionLimit": 2,
+    "redemptionCount": 0,
+    "status": "active",
+    "isActive": true,
+    "terms": "Try again later to call karta ",
+    "createdAt": {
+      "$date": "2026-02-26T12:05:33.392Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-18T21:34:19.914Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69a03748bbb84118216596a3"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69692849356dfda59d66059c"
+    },
+    "review": {
+      "$oid": "69a03747bbb841182165969d"
+    },
+    "code": "HASH-CDN221",
+    "description": "This is the work ",
+    "rewardType": "percentage",
+    "rewardValue": 200,
+    "minPurchaseAmount": 300,
+    "maxDiscountAmount": 25,
+    "validFrom": {
+      "$date": "2026-02-26T12:06:32.554Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-26T14:06:32.554Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2026-02-26T12:06:32.557Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-26T14:10:00.709Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69a03748bbb84118216596a3\",\"code\":\"HASH-CDN221\",\"businessId\":\"699f5ae11d09466912907e6b\",\"userId\":\"69692849356dfda59d66059c\",\"reviewId\":\"69a03747bbb841182165969d\",\"timestamp\":\"2026-02-26T12:06:32.840Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69a03826bbb841182165971d"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69692849356dfda59d66059c"
+    },
+    "review": {
+      "$oid": "69a03824bbb8411821659717"
+    },
+    "code": "HASH-6CCW4L",
+    "description": "This is the work ",
+    "rewardType": "percentage",
+    "rewardValue": 200,
+    "minPurchaseAmount": 300,
+    "maxDiscountAmount": 25,
+    "validFrom": {
+      "$date": "2026-02-26T12:10:14.221Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-26T14:10:14.220Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2026-02-26T12:10:14.223Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-26T14:15:00.224Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69a03826bbb841182165971d\",\"code\":\"HASH-6CCW4L\",\"businessId\":\"699f5ae11d09466912907e6b\",\"userId\":\"69692849356dfda59d66059c\",\"reviewId\":\"69a03824bbb8411821659717\",\"timestamp\":\"2026-02-26T12:10:14.478Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69a05c93c942e8e151ef10d7"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69692849356dfda59d66059c"
+    },
+    "review": {
+      "$oid": "69a05c92c942e8e151ef10d1"
+    },
+    "code": "HASH-5OJTSB",
+    "title": "50OFF",
+    "description": "This is the work ",
+    "rewardType": "percentage",
+    "rewardValue": 200,
+    "itemName": "",
+    "minPurchaseAmount": 300,
+    "maxDiscountAmount": 25,
+    "validFrom": {
+      "$date": "2026-02-26T14:45:39.904Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-26T16:45:39.904Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "redeemed",
+    "isActive": true,
+    "terms": "Try",
+    "createdAt": {
+      "$date": "2026-02-26T14:45:39.907Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-26T14:52:55.164Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69a05c93c942e8e151ef10d7\",\"code\":\"HASH-5OJTSB\",\"businessId\":\"699f5ae11d09466912907e6b\",\"userId\":\"69692849356dfda59d66059c\",\"reviewId\":\"69a05c92c942e8e151ef10d1\",\"timestamp\":\"2026-02-26T14:45:40.271Z\"}",
+    "redeemedAt": {
+      "$date": "2026-02-26T14:52:55.163Z"
+    },
+    "redeemedBy": {
+      "$oid": "696c9f9175a542eb2d3ca070"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "69a2914ac51f52ae56003b25"
+    },
+    "business": {
+      "$oid": "697f7feba4fe1958c1f6a353"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "6916069c186ec1aaa3b920aa"
+    },
+    "review": {
+      "$oid": "69a29149c51f52ae56003b20"
+    },
+    "code": "HASH-7TNHS9",
+    "description": "Thank you for your review! Enjoy your reward. Valid for 2 hours.",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "minPurchaseAmount": 0,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-02-28T06:55:06.271Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-28T08:55:06.271Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid for 2 hours from time of issue. Can be used once.",
+    "createdAt": {
+      "$date": "2026-02-28T06:55:06.272Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-28T09:00:00.218Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69a2914ac51f52ae56003b25\",\"code\":\"HASH-7TNHS9\",\"businessId\":\"697f7feba4fe1958c1f6a353\",\"userId\":\"6916069c186ec1aaa3b920aa\",\"reviewId\":\"69a29149c51f52ae56003b20\",\"timestamp\":\"2026-02-28T06:55:06.418Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69a3445db9eea9cbb4c9d287"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "review": {
+      "$oid": "69a3445cb9eea9cbb4c9d280"
+    },
+    "code": "HASH-0AZ0XZ",
+    "title": "Free snacks ",
+    "description": "Free ",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Coffee ",
+    "minPurchaseAmount": 300,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-02-28T19:39:09.443Z"
+    },
+    "validUntil": {
+      "$date": "2026-02-28T21:39:09.443Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Try again later to call karta ",
+    "createdAt": {
+      "$date": "2026-02-28T19:39:09.445Z"
+    },
+    "updatedAt": {
+      "$date": "2026-02-28T21:40:00.699Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69a3445db9eea9cbb4c9d287\",\"code\":\"HASH-0AZ0XZ\",\"businessId\":\"699f5ae11d09466912907e6b\",\"userId\":\"69496a20f294829e51cdc5d2\",\"reviewId\":\"69a3445cb9eea9cbb4c9d280\",\"timestamp\":\"2026-02-28T19:39:09.683Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69a3e48fdbfb81c0e72050d1"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "review": {
+      "$oid": "69a3e48ddbfb81c0e72050cc"
+    },
+    "code": "HASH-A2Z4K8",
+    "title": "Free snacks ",
+    "description": "Free ",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Coffee ",
+    "minPurchaseAmount": 300,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-03-01T07:02:39.950Z"
+    },
+    "validUntil": {
+      "$date": "2026-03-01T09:02:39.950Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Try again later to call karta ",
+    "createdAt": {
+      "$date": "2026-03-01T07:02:39.951Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-01T09:05:00.175Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69a3e48fdbfb81c0e72050d1\",\"code\":\"HASH-A2Z4K8\",\"businessId\":\"699f5ae11d09466912907e6b\",\"userId\":\"69496a20f294829e51cdc5d2\",\"reviewId\":\"69a3e48ddbfb81c0e72050cc\",\"timestamp\":\"2026-03-01T07:02:40.666Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69b466be0cf5632ef55f5677"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "business",
+    "code": "THAI05",
+    "title": "weekend Special",
+    "description": "5% Off ",
+    "rewardType": "percentage",
+    "rewardValue": 5,
+    "itemName": null,
+    "minPurchaseAmount": 25,
+    "maxDiscountAmount": 5,
+    "validFrom": {
+      "$date": "2026-03-13T19:34:22.373Z"
+    },
+    "validUntil": null,
+    "usageLimit": 10,
+    "usageCount": 1,
+    "redemptionLimit": 10,
+    "redemptionCount": 0,
+    "status": "active",
+    "isActive": true,
+    "terms": "Valid on dine in",
+    "createdAt": {
+      "$date": "2026-03-13T19:34:22.375Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-03T15:48:59.674Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69b467120cf5632ef55f5682"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "business",
+    "code": "FREE PEPSI",
+    "title": "Drink special",
+    "description": "Get a free pepsi max",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Pepsi max",
+    "minPurchaseAmount": 10,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-03-13T19:35:46.951Z"
+    },
+    "validUntil": null,
+    "usageLimit": 15,
+    "usageCount": 4,
+    "redemptionLimit": 10,
+    "redemptionCount": 0,
+    "status": "active",
+    "isActive": true,
+    "terms": "Dine in Only",
+    "createdAt": {
+      "$date": "2026-03-13T19:35:46.952Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-17T13:37:37.548Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69b471b40cf5632ef55f5712"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69b471870cf5632ef55f56fa"
+    },
+    "review": {
+      "$oid": "69b471b40cf5632ef55f570d"
+    },
+    "code": "HASH-CG9GOP",
+    "title": "Drink special",
+    "description": "Get a free pepsi max",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Pepsi max",
+    "minPurchaseAmount": 10,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-03-13T20:21:08.797Z"
+    },
+    "validUntil": {
+      "$date": "2026-03-13T22:21:08.797Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Dine in Only",
+    "createdAt": {
+      "$date": "2026-03-13T20:21:08.799Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-13T22:25:00.618Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69b471b40cf5632ef55f5712\",\"code\":\"HASH-CG9GOP\",\"businessId\":\"6927430d293b5919a61e990d\",\"userId\":\"69b471870cf5632ef55f56fa\",\"reviewId\":\"69b471b40cf5632ef55f570d\",\"timestamp\":\"2026-03-13T20:21:08.930Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69b48bd80cf5632ef55f59ba"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "business",
+    "code": "SAVE10",
+    "title": "Special save ",
+    "description": "Get 10% off the bill ",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "itemName": null,
+    "minPurchaseAmount": 100,
+    "maxDiscountAmount": 10,
+    "validFrom": {
+      "$date": "2026-03-13T22:12:40.649Z"
+    },
+    "validUntil": null,
+    "usageLimit": 10,
+    "usageCount": 1,
+    "redemptionLimit": 10,
+    "redemptionCount": 0,
+    "status": "active",
+    "isActive": true,
+    "terms": "\n",
+    "createdAt": {
+      "$date": "2026-03-13T22:12:40.650Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-15T20:31:13.217Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69b5a7a40cf5632ef55f5b92"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69b5a6570cf5632ef55f5b10"
+    },
+    "review": {
+      "$oid": "69b5a7a40cf5632ef55f5b8d"
+    },
+    "code": "HASH-ULV514",
+    "title": "Drink special",
+    "description": "Get a free pepsi max",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Pepsi max",
+    "minPurchaseAmount": 10,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-03-14T18:23:32.908Z"
+    },
+    "validUntil": {
+      "$date": "2026-03-14T20:23:32.908Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Dine in Only",
+    "createdAt": {
+      "$date": "2026-03-14T18:23:32.909Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-14T20:25:00.178Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69b5a7a40cf5632ef55f5b92\",\"code\":\"HASH-ULV514\",\"businessId\":\"6927430d293b5919a61e990d\",\"userId\":\"69b5a6570cf5632ef55f5b10\",\"reviewId\":\"69b5a7a40cf5632ef55f5b8d\",\"timestamp\":\"2026-03-14T18:23:33.044Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69b6faad0cf5632ef55f5f44"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "business",
+    "code": "FREE DRINK",
+    "title": "Drinks special",
+    "description": "Get a soft drink FREE",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Drink",
+    "minPurchaseAmount": 25,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-03-15T18:30:05.438Z"
+    },
+    "validUntil": null,
+    "usageLimit": 1,
+    "usageCount": 4,
+    "redemptionLimit": 20,
+    "redemptionCount": 0,
+    "status": "active",
+    "isActive": true,
+    "terms": "Valid on dine in",
+    "createdAt": {
+      "$date": "2026-03-15T18:30:05.439Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-08T19:10:00.875Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "69b716f70cf5632ef55f6043"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69b716730cf5632ef55f5fbe"
+    },
+    "review": {
+      "$oid": "69b716f60cf5632ef55f603d"
+    },
+    "code": "HASH-L8MOSQ",
+    "title": "Drinks special",
+    "description": "Get a soft drink FREE",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Drink",
+    "minPurchaseAmount": 25,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-03-15T20:30:47.104Z"
+    },
+    "validUntil": {
+      "$date": "2026-03-15T22:30:47.104Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid on dine in",
+    "createdAt": {
+      "$date": "2026-03-15T20:30:47.105Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-15T22:35:00.246Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69b716f70cf5632ef55f6043\",\"code\":\"HASH-L8MOSQ\",\"businessId\":\"6927430d293b5919a61e990d\",\"userId\":\"69b716730cf5632ef55f5fbe\",\"reviewId\":\"69b716f60cf5632ef55f603d\",\"timestamp\":\"2026-03-15T20:30:47.233Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69b717100cf5632ef55f6085"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69b716130cf5632ef55f5faa"
+    },
+    "review": {
+      "$oid": "69b717100cf5632ef55f607f"
+    },
+    "code": "HASH-I9ZWHN",
+    "title": "Special save ",
+    "description": "Get 10% off the bill ",
+    "rewardType": "percentage",
+    "rewardValue": 10,
+    "itemName": "",
+    "minPurchaseAmount": 100,
+    "maxDiscountAmount": 10,
+    "validFrom": {
+      "$date": "2026-03-15T20:31:12.972Z"
+    },
+    "validUntil": {
+      "$date": "2026-03-15T22:31:12.972Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "\n",
+    "createdAt": {
+      "$date": "2026-03-15T20:31:12.973Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-15T22:35:00.246Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69b717100cf5632ef55f6085\",\"code\":\"HASH-I9ZWHN\",\"businessId\":\"6927430d293b5919a61e990d\",\"userId\":\"69b716130cf5632ef55f5faa\",\"reviewId\":\"69b717100cf5632ef55f607f\",\"timestamp\":\"2026-03-15T20:31:13.094Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69bac7bcbef138aafb47078b"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69692849356dfda59d66059c"
+    },
+    "review": {
+      "$oid": "69bac7babef138aafb470786"
+    },
+    "code": "HASH-94IVSK",
+    "title": "Free snacks ",
+    "description": "Free ",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Coffee ",
+    "minPurchaseAmount": 300,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-03-18T15:41:48.031Z"
+    },
+    "validUntil": {
+      "$date": "2026-03-18T17:41:48.031Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Try again later to call karta ",
+    "createdAt": {
+      "$date": "2026-03-18T15:41:48.032Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-18T17:45:00.379Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69bac7bcbef138aafb47078b\",\"code\":\"HASH-94IVSK\",\"businessId\":\"699f5ae11d09466912907e6b\",\"userId\":\"69692849356dfda59d66059c\",\"reviewId\":\"69bac7babef138aafb470786\",\"timestamp\":\"2026-03-18T15:41:48.403Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69bc4ca10cf5632ef55f6a67"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69bc4c170cf5632ef55f6a4a"
+    },
+    "review": {
+      "$oid": "69bc4ca00cf5632ef55f6a62"
+    },
+    "code": "HASH-OI12B3",
+    "title": "Drinks special",
+    "description": "Get a soft drink FREE",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Drink",
+    "minPurchaseAmount": 25,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-03-19T19:21:05.043Z"
+    },
+    "validUntil": {
+      "$date": "2026-03-19T21:21:05.043Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid on dine in",
+    "createdAt": {
+      "$date": "2026-03-19T19:21:05.044Z"
+    },
+    "updatedAt": {
+      "$date": "2026-03-19T21:25:00.200Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69bc4ca10cf5632ef55f6a67\",\"code\":\"HASH-OI12B3\",\"businessId\":\"6927430d293b5919a61e990d\",\"userId\":\"69bc4c170cf5632ef55f6a4a\",\"reviewId\":\"69bc4ca00cf5632ef55f6a62\",\"timestamp\":\"2026-03-19T19:21:05.194Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69d684c953133c9316f20222"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69d6846853133c9316f201f8"
+    },
+    "review": {
+      "$oid": "69d684c953133c9316f2021d"
+    },
+    "code": "HASH-A9RRNU",
+    "title": "Drinks special",
+    "description": "Get a soft drink FREE",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Drink",
+    "minPurchaseAmount": 25,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-04-08T16:39:37.573Z"
+    },
+    "validUntil": {
+      "$date": "2026-04-08T18:39:37.573Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid on dine in",
+    "createdAt": {
+      "$date": "2026-04-08T16:39:37.575Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-08T18:40:00.473Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69d684c953133c9316f20222\",\"code\":\"HASH-A9RRNU\",\"businessId\":\"6927430d293b5919a61e990d\",\"userId\":\"69d6846853133c9316f201f8\",\"reviewId\":\"69d684c953133c9316f2021d\",\"timestamp\":\"2026-04-08T16:39:37.721Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69d6a80853133c9316f202af"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69d6a72753133c9316f20290"
+    },
+    "review": {
+      "$oid": "69d6a80853133c9316f202a8"
+    },
+    "code": "HASH-SVJYVQ",
+    "title": "Drinks special",
+    "description": "Get a soft drink FREE",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Drink",
+    "minPurchaseAmount": 25,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-04-08T19:10:00.606Z"
+    },
+    "validUntil": {
+      "$date": "2026-04-08T21:10:00.606Z"
+    },
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "expired",
+    "isActive": true,
+    "terms": "Valid on dine in",
+    "createdAt": {
+      "$date": "2026-04-08T19:10:00.607Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-08T21:15:00.447Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69d6a80853133c9316f202af\",\"code\":\"HASH-SVJYVQ\",\"businessId\":\"6927430d293b5919a61e990d\",\"userId\":\"69d6a72753133c9316f20290\",\"reviewId\":\"69d6a80853133c9316f202a8\",\"timestamp\":\"2026-04-08T19:10:00.745Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69e3405a697f5492e7c0e1f6"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "698de5d7a2788eda0c30a41c"
+    },
+    "review": {
+      "$oid": "69e34059697f5492e7c0e1f1"
+    },
+    "code": "HASH-J2387K",
+    "title": "Free snacks ",
+    "description": "Free ",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Coffee ",
+    "minPurchaseAmount": 300,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-04-18T08:27:06.070Z"
+    },
+    "validUntil": null,
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "active",
+    "isActive": true,
+    "terms": "Try again later to call karta ",
+    "createdAt": {
+      "$date": "2026-04-18T08:27:06.071Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-18T08:27:06.196Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69e3405a697f5492e7c0e1f6\",\"code\":\"HASH-J2387K\",\"businessId\":\"699f5ae11d09466912907e6b\",\"userId\":\"698de5d7a2788eda0c30a41c\",\"reviewId\":\"69e34059697f5492e7c0e1f1\",\"timestamp\":\"2026-04-18T08:27:06.195Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69e3f8db08db8f09c619c0c7"
+    },
+    "business": {
+      "$oid": "699f5ae11d09466912907e6b"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "69496a20f294829e51cdc5d2"
+    },
+    "review": {
+      "$oid": "69e3f8db08db8f09c619c0c2"
+    },
+    "code": "HASH-W05W8I",
+    "title": "Free snacks ",
+    "description": "Free ",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Coffee ",
+    "minPurchaseAmount": 300,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-04-18T21:34:19.663Z"
+    },
+    "validUntil": null,
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "active",
+    "isActive": true,
+    "terms": "Try again later to call karta ",
+    "createdAt": {
+      "$date": "2026-04-18T21:34:19.665Z"
+    },
+    "updatedAt": {
+      "$date": "2026-04-18T21:34:19.791Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69e3f8db08db8f09c619c0c7\",\"code\":\"HASH-W05W8I\",\"businessId\":\"699f5ae11d09466912907e6b\",\"userId\":\"69496a20f294829e51cdc5d2\",\"reviewId\":\"69e3f8db08db8f09c619c0c2\",\"timestamp\":\"2026-04-18T21:34:19.790Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69f76e6bb9775af3df654341"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "6a0f6b2268ed048af88f9694"
+    },
+    "review": {
+      "$oid": "69f76e69b9775af3df654336"
+    },
+    "code": "HASH-MSBZTV",
+    "title": "weekend Special",
+    "description": "Reward from Thaitastic! 5% Off ",
+    "rewardType": "percentage",
+    "rewardValue": 5,
+    "itemName": "",
+    "minPurchaseAmount": 25,
+    "maxDiscountAmount": 5,
+    "validFrom": {
+      "$date": "2026-05-03T15:48:59.399Z"
+    },
+    "validUntil": null,
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "active",
+    "isActive": true,
+    "terms": "Coupon for use at Thaitastic. Valid on dine in",
+    "createdAt": {
+      "$date": "2026-05-03T15:48:59.400Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-03T15:48:59.550Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69f76e6bb9775af3df654341\",\"code\":\"HASH-MSBZTV\",\"businessId\":\"6927430d293b5919a61e990d\",\"userId\":\"69bd90840cf5632ef55f6c8b\",\"reviewId\":\"69f76e69b9775af3df654336\",\"timestamp\":\"2026-05-03T15:48:59.549Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "69fe43d1b9775af3df655990"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "6a0f6b2268ed048af88f9694"
+    },
+    "review": {
+      "$oid": "69fe43d0b9775af3df655984"
+    },
+    "code": "HASH-8ZNMEW",
+    "title": "Drink special",
+    "description": "Reward from Thaitastic! Get a free pepsi max",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Pepsi max",
+    "minPurchaseAmount": 10,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-05-08T20:13:05.939Z"
+    },
+    "validUntil": null,
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "active",
+    "isActive": true,
+    "terms": "Coupon for use at Thaitastic. Dine in Only",
+    "createdAt": {
+      "$date": "2026-05-08T20:13:05.940Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-08T20:13:06.070Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"69fe43d1b9775af3df655990\",\"code\":\"HASH-8ZNMEW\",\"businessId\":\"6927430d293b5919a61e990d\",\"userId\":\"69bd90840cf5632ef55f6c8b\",\"reviewId\":\"69fe43d0b9775af3df655984\",\"timestamp\":\"2026-05-08T20:13:06.069Z\"}"
+  },
+  {
+    "_id": {
+      "$oid": "6a09c4a175232f36efc1140a"
+    },
+    "business": {
+      "$oid": "6927430d293b5919a61e990d"
+    },
+    "type": "review_reward",
+    "user": {
+      "$oid": "6a0f6b2268ed048af88f9694"
+    },
+    "review": {
+      "$oid": "6a09c49f75232f36efc113fe"
+    },
+    "code": "HASH-QY5L8V",
+    "title": "Drink special",
+    "description": "Reward from Thaitastic! Get a free pepsi max",
+    "rewardType": "free_item",
+    "rewardValue": 0,
+    "itemName": "Pepsi max",
+    "minPurchaseAmount": 10,
+    "maxDiscountAmount": null,
+    "validFrom": {
+      "$date": "2026-05-17T13:37:37.292Z"
+    },
+    "validUntil": null,
+    "usageLimit": null,
+    "usageCount": 0,
+    "redemptionLimit": null,
+    "redemptionCount": 0,
+    "status": "active",
+    "isActive": true,
+    "terms": "Coupon for use at Thaitastic. Dine in Only",
+    "createdAt": {
+      "$date": "2026-05-17T13:37:37.294Z"
+    },
+    "updatedAt": {
+      "$date": "2026-05-17T13:37:37.426Z"
+    },
+    "__v": 0,
+    "qrCodeData": "{\"type\":\"coupon\",\"couponId\":\"6a09c4a175232f36efc1140a\",\"code\":\"HASH-QY5L8V\",\"businessId\":\"6927430d293b5919a61e990d\",\"userId\":\"69bd90840cf5632ef55f6c8b\",\"reviewId\":\"6a09c49f75232f36efc113fe\",\"timestamp\":\"2026-05-17T13:37:37.426Z\"}"
+  }
+]

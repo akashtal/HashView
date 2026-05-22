@@ -8,11 +8,7 @@ describe('Business API Integration Tests', () => {
   let businessOwnerToken;
   let businessOwnerId;
 
-  beforeAll(async () => {
-    if (mongoose.connection.readyState === 0) {
-      await mongoose.connect(process.env.MONGODB_URI);
-    }
-  });
+
 
   beforeEach(async () => {
     // Clear collections
@@ -288,7 +284,7 @@ describe('Business API Integration Tests', () => {
 
     it('should return 404 for non-existent business', async () => {
       const fakeId = new mongoose.Types.ObjectId();
-      
+
       const response = await request(app)
         .get(`/api/business/${fakeId}`)
         .expect(404);

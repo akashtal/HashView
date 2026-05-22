@@ -4,12 +4,7 @@ const { app } = require('../../server');
 const User = require('../../models/User.model');
 
 describe('Auth API Integration Tests', () => {
-  beforeAll(async () => {
-    // Connect to test database
-    if (mongoose.connection.readyState === 0) {
-      await mongoose.connect(process.env.MONGODB_URI);
-    }
-  });
+
 
   beforeEach(async () => {
     // Clear users collection before each test
@@ -110,7 +105,7 @@ describe('Auth API Integration Tests', () => {
         .send(userData);
 
       const user = await User.findOne({ email: userData.email }).select('+passwordHash');
-      
+
       expect(user.passwordHash).toBeDefined();
       expect(user.passwordHash).not.toBe(userData.password);
       expect(user.passwordHash.length).toBeGreaterThan(50); // bcrypt hash length
@@ -178,7 +173,7 @@ describe('Auth API Integration Tests', () => {
         });
 
       const token = response.body.data.token;
-      
+
       expect(token).toBeDefined();
       expect(token.split('.')).toHaveLength(3); // JWT has 3 parts
     });
