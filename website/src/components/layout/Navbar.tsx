@@ -80,7 +80,6 @@ export const Navbar = () => {
 
           {/* Theme Toggle & CTA Button */}
           <div className="hidden md:flex items-center gap-3">
-            <ThemeToggle />
             <Button variant="default" asChild>
               <Link href="/login">Log In</Link>
             </Button>
@@ -142,10 +141,6 @@ export const Navbar = () => {
                   transition={{ delay: 0.4 }}
                   className="flex flex-col gap-4"
                 >
-                  <div className="flex items-center justify-center gap-3">
-                    <ThemeToggle />
-                    <span className="text-sm text-muted-foreground">Dark/Light</span>
-                  </div>
                   <Button variant="default" className="w-full" asChild>
                     <Link href="/login" onClick={() => setIsOpen(false)}>Log In</Link>
                   </Button>
