@@ -18,9 +18,17 @@ const menuImageUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 8 * 1024 * 1024 }, // 8MB
   fileFilter: (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|webp/;
-    if (allowed.test(file.mimetype)) cb(null, true);
-    else cb(new Error('Only JPEG, PNG, or WebP images are allowed for menu items.'), false);
+    const allowedMime = /jpeg|jpg|png|webp/i;
+    const allowedExt = /\.(jpeg|jpg|png|webp)$/i;
+    
+    const isMimeAllowed = allowedMime.test(file.mimetype);
+    const isExtAllowed = allowedExt.test(file.originalname);
+    
+    if (isMimeAllowed || isExtAllowed) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPEG, PNG, or WebP images are allowed for menu items.'), false);
+    }
   }
 });
 

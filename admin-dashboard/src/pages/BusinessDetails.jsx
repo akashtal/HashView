@@ -8,6 +8,7 @@ import {
 import { adminApi } from '../api/adminApi';
 import { format } from 'date-fns';
 import ImageCropperModal from '../components/ImageCropperModal';
+import BusinessMenuManagement from '../components/BusinessMenuManagement';
 
 const BusinessDetails = () => {
   const { id } = useParams();
@@ -315,6 +316,21 @@ const BusinessDetails = () => {
     setCropImageSrc(null);
   };
 
+  const handleRemoveGalleryImage = (indexToRemove) => {
+    const preview = galleryPreviews[indexToRemove];
+    setGalleryPreviews(prev => prev.filter((_, idx) => idx !== indexToRemove));
+
+    if (preview.startsWith('blob:') || preview.startsWith('data:')) {
+      let fileIndex = 0;
+      for (let i = 0; i < indexToRemove; i++) {
+        if (galleryPreviews[i].startsWith('blob:') || galleryPreviews[i].startsWith('data:')) {
+          fileIndex++;
+        }
+      }
+      setGalleryFiles(prev => prev.filter((_, idx) => idx !== fileIndex));
+    }
+  };
+
   const handleUpdateBusiness = async () => {
     setUpdateLoading(true);
     try {
@@ -364,30 +380,24 @@ const BusinessDetails = () => {
         }
       }
 
-      // Update business with new image URLs if any were uploaded
-      // Note: For gallery, we might want to append or replace. 
-      // Current logic in simpler CRUD usually replaces or appends.
-      // Ideally we should merge with existing images that weren't deleted.
-      // For this implementation, we'll fetch the latest business images first or just append.
-      if (logoUrl || coverUrl || newGalleryUrls.length > 0) {
-        const imageUpdate = {};
-        if (logoUrl) imageUpdate.logo = { url: logoUrl };
-        if (coverUrl) imageUpdate.coverImage = { url: coverUrl };
+      // Sync remaining existing images + newly uploaded ones
+      const remainingExistingUrls = galleryPreviews.filter(
+        url => !url.startsWith('blob:') && !url.startsWith('data:')
+      );
+      const finalGallery = [
+        ...remainingExistingUrls,
+        ...newGalleryUrls
+      ].map(url => ({ url }));
 
-        // Handle gallery: merge existing (that are still in previews) + new uploads
-        // Since we don't track deleted existing images properly in state (just visual),
-        // we will simple append new ones to the backend.
-        // A better approach would be to send the full list of desired image URLs.
-        if (newGalleryUrls.length > 0) {
-          // We are taking a shortcut: Backend usually appends fast/easy updates.
-          // But business controller just accepts 'images' array.
-          // We should construct the final images array.
-          // Existing images (from business.images) + New URLs
-          const existingUrls = business.images?.map(img => img.url) || [];
-          const finalGallery = [...existingUrls, ...newGalleryUrls].map(url => ({ url }));
-          imageUpdate.images = finalGallery;
-        }
+      const imageUpdate = {};
+      if (logoUrl) imageUpdate.logo = { url: logoUrl };
+      if (coverUrl) imageUpdate.coverImage = { url: coverUrl };
+      imageUpdate.images = finalGallery;
 
+      // Check if any images (logo, cover, added gallery, or deleted gallery) changed
+      const galleryChanged = remainingExistingUrls.length !== (business.images?.length || 0) || galleryFiles.length > 0;
+      
+      if (logoUrl || coverUrl || galleryChanged) {
         await adminApi.updateBusiness(businessId, imageUpdate);
       }
 
@@ -1660,13 +1670,15 @@ const BusinessDetails = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Gallery Images</label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
                     {galleryPreviews.map((preview, index) => (
-                      <div key={index} className="relative aspect-square">
-                        <img src={preview} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
-                        {/* 
-                         Note: Removing generic gallery images in edit mode is complex to sync 
-                         without robust state management (distinguishing existing vs new).
-                         For now, we disable removing to allow Append-Only for Gallery in this quick edit.
-                        */}
+                      <div key={index} className="relative aspect-square group">
+                        <img src={preview} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover rounded-lg border border-gray-200" />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveGalleryImage(index)}
+                          className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow transition opacity-90 hover:opacity-100"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     ))}
                     <label className="border-2 border-dashed border-gray-300 rounded-lg aspect-square flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 transition">
@@ -1777,6 +1789,11 @@ const BusinessDetails = () => {
               </div>
             </div>
           )}
+
+          {/* Menu & Services Catalog Management */}
+          <div className="mt-6">
+            <BusinessMenuManagement businessId={id} />
+          </div>
         </div>
 
         {/* Sidebar */}

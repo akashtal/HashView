@@ -118,6 +118,18 @@ export const adminApi = {
   // ── System / Backups ──────────────────────────────────────────────────────────
   getBackupStatus: () => api.get('/admin/backup-status'),
   triggerBackup: () => api.post('/admin/backup'),
+
+  // ── Menu & Services ────────────────────────────────────────────────────────────
+  getMenuItems: (businessId) => api.get(`/menu-items/business/${businessId}?status=all`),
+  getMenuStats: (businessId) => api.get(`/menu-items/business/${businessId}/stats`),
+  createMenuItem: (formData) => api.post('/menu-items', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  updateMenuItem: (id, formData) => api.put(`/menu-items/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  deleteMenuItem: (id) => api.delete(`/menu-items/${id}`),
+  toggleMenuItemAvailability: (id) => api.patch(`/menu-items/${id}/toggle`),
 };
 
 export default adminApi;
