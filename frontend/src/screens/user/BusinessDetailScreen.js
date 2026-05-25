@@ -143,6 +143,8 @@ export default function BusinessDetailScreen({ navigation, route }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [updates, setUpdates] = useState([]);
   const [loadingUpdates, setLoadingUpdates] = useState(false);
+  const [menuItems, setMenuItems] = useState({});           // Phase 1: grouped menu data
+  const [loadingMenu, setLoadingMenu] = useState(false);   // Phase 1: menu loading state
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
@@ -155,9 +157,11 @@ export default function BusinessDetailScreen({ navigation, route }) {
     if (fromQR && business) {
       setQrBusiness(business);
       fetchBusinessUpdates(business._id);
+      fetchMenuItems(business._id);
     } else if (businessId) {
       dispatch(getBusiness(businessId));
       fetchBusinessUpdates(businessId);
+      fetchMenuItems(businessId);
     }
     // Clean up old reviews when leaving screen
     return () => { dispatch(clearOldReviews()); };
@@ -206,6 +210,20 @@ export default function BusinessDetailScreen({ navigation, route }) {
       setUpdates([]);
     } finally {
       setLoadingUpdates(false);
+    }
+  };
+
+  // Phase 1: Fetch menu items for this business (grouped by category)
+  const fetchMenuItems = async (busId) => {
+    try {
+      setLoadingMenu(true);
+      const res = await ApiService.getMenuItems(busId);
+      setMenuItems(res.data || {});
+    } catch (e) {
+      // Menu is optional — don't show an error if not available
+      setMenuItems({});
+    } finally {
+      setLoadingMenu(false);
     }
   };
 
@@ -667,6 +685,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-5">
             {[
               { key: 'reviews', label: 'Reviews', icon: 'star-outline' },
+              { key: 'menu', label: 'Menu', icon: 'restaurant-outline' },
               { key: 'updates', label: 'Updates & Offers', icon: 'megaphone-outline', badge: updates.length },
               { key: 'gallery', label: 'Gallery', icon: 'images-outline' },
               { key: 'about', label: 'About', icon: 'information-circle-outline' }
@@ -704,6 +723,98 @@ export default function BusinessDetailScreen({ navigation, route }) {
 
         {/* Tab Content */}
         <View className="px-5 py-5 pb-24">
+
+          {/* ── Menu Tab (Phase 1) ── */}
+          {activeTab === 'menu' && (
+            <View>
+              {loadingMenu ? (
+                <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+                  <ActivityIndicator size="large" color="#6366F1" />
+                  <Text style={{ color: '#9CA3AF', marginTop: 10 }}>Loading menu...</Text>
+                </View>
+              ) : Object.keys(menuItems).length === 0 ? (
+                <View style={{ alignItems: 'center', paddingVertical: 48 }}>
+                  <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                    <Icon name="restaurant-outline" size={32} color="#6366F1" />
+                  </View>
+                  <Text style={{ fontSize: 17, fontWeight: '700', color: '#111827', marginBottom: 6 }}>No menu available</Text>
+                  <Text style={{ fontSize: 13, color: '#9CA3AF', textAlign: 'center', paddingHorizontal: 32 }}>
+                    This business hasn't added their menu or services yet.
+                  </Text>
+                </View>
+              ) : (
+                Object.entries(menuItems).map(([category, items]) => (
+                  <View key={category} style={{ marginBottom: 24 }}>
+                    {/* Category heading */}
+                    <Text style={{ fontSize: 15, fontWeight: '700', color: '#374151', marginBottom: 10, borderLeftWidth: 3, borderLeftColor: '#6366F1', paddingLeft: 10 }}>
+                      {category}
+                    </Text>
+                    {items.map(item => (
+                      <View
+                        key={item._id}
+                        style={{
+                          backgroundColor: '#FFF', borderRadius: 14, marginBottom: 10,
+                          flexDirection: 'row', overflow: 'hidden',
+                          shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6,
+                          shadowOffset: { width: 0, height: 2 }, elevation: 2,
+                          opacity: item.isAvailable ? 1 : 0.5
+                        }}
+                      >
+                        {/* Image */}
+                        {item.image?.url ? (
+                          <TouchableOpacity activeOpacity={0.85} onPress={() => handleImagePress(item.image.url)}>
+                            <Image source={{ uri: item.image.url }} style={{ width: 76, height: 76 }} resizeMode="cover" />
+                            <View style={{ position: 'absolute', bottom: 4, right: 4, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 4, padding: 2 }}>
+                              <Icon name="expand-outline" size={10} color="#FFF" />
+                            </View>
+                          </TouchableOpacity>
+                        ) : (
+                          <View style={{ width: 76, height: 76, backgroundColor: '#F3F4F6', alignItems: 'center', justifyContent: 'center' }}>
+                            <Icon name="image-outline" size={22} color="#D1D5DB" />
+                          </View>
+                        )}
+                        {/* Info */}
+                        <View style={{ flex: 1, padding: 10 }}>
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <Text style={{ fontWeight: '700', fontSize: 14, color: '#111827', flex: 1, marginRight: 8 }} numberOfLines={1}>
+                              {item.name}
+                              {item.isPopular && <Text style={{ color: '#F59E0B' }}> ⭐</Text>}
+                            </Text>
+                            <Text style={{ fontWeight: '700', fontSize: 14, color: '#6366F1' }}>
+                              {item.currency === 'GBP' ? '£' : item.currency === 'USD' ? '$' : '€'}{item.price.toFixed(2)}
+                            </Text>
+                          </View>
+                          {item.description ? (
+                            <Text style={{ fontSize: 12, color: '#6B7280', marginTop: 3, lineHeight: 17 }} numberOfLines={2}>
+                              {item.description}
+                            </Text>
+                          ) : null}
+                          {/* Duration for services */}
+                          {item.duration ? (
+                            <Text style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>⏱ {item.duration} min</Text>
+                          ) : null}
+                          {/* Dietary badges */}
+                          {item.dietary?.length > 0 && (
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+                              {item.dietary.slice(0, 3).map(d => (
+                                <View key={d} style={{ backgroundColor: '#DCFCE7', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
+                                  <Text style={{ fontSize: 10, fontWeight: '600', color: '#166534' }}>{d}</Text>
+                                </View>
+                              ))}
+                            </View>
+                          )}
+                          {!item.isAvailable && (
+                            <Text style={{ fontSize: 11, color: '#EF4444', marginTop: 4, fontWeight: '600' }}>Currently unavailable</Text>
+                          )}
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                ))
+              )}
+            </View>
+          )}
+
           {/* Reviews Tab — Exact Booking.com layout */}
           {activeTab === 'reviews' && (
             <View>

@@ -315,6 +315,17 @@ export default function BusinessDashboardScreen({ navigation }) {
 
           {/* Quick Actions */}
           <View className="flex-row flex-wrap justify-between mb-4">
+            {/* ── AI: Menu & Services card (Phase 1) ── */}
+            <TouchableOpacity
+              onPress={() => navigation.navigate('MenuManagement', { businessId: business._id })}
+              className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
+            >
+              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#EEF2FF' }}>
+                <Icon name="restaurant-outline" size={24} color="#6366F1" />
+              </View>
+              <Text className="text-sm font-semibold text-gray-900">Menu & Services</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity
               onPress={() => navigation.navigate('ManageCouponsNew', { businessId: business._id })}
               className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"

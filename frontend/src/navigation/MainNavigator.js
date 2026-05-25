@@ -43,6 +43,7 @@ import BusinessAnalyticsScreen from '../screens/business/BusinessAnalyticsScreen
 import CouponManagementScreen from '../screens/business/CouponManagementScreen';
 import ManageCouponsNew from '../screens/business/ManageCouponsNew';
 import CouponQRScannerScreen from '../screens/business/CouponQRScannerScreen';
+import MenuManagementScreen from '../screens/business/MenuManagementScreen'; // Phase 1: AI Menu
 
 
 const Tab = createBottomTabNavigator();
@@ -139,6 +140,7 @@ function BusinessStack() {
       <Stack.Screen name="CouponManagement" component={CouponManagementScreen} />
       <Stack.Screen name="ManageCouponsNew" component={ManageCouponsNew} />
       <Stack.Screen name="CouponQRScanner" component={CouponQRScannerScreen} />
+      <Stack.Screen name="MenuManagement" component={MenuManagementScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
       <Stack.Screen name="Favorites" component={FavoritesScreen} />

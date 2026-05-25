@@ -371,6 +371,42 @@ const ApiService = {
     const base = (apiClient.defaults.baseURL || '').replace(/\/api\/?$/, '');
     return `${base}/api/subscription/pricing?token=${encodeURIComponent(token)}`;
   },
+
+  // ─── Phase 1: Menu & Services APIs ─────────────────────────────────────────
+
+  // Get all active items for a business, grouped by category (user-facing)
+  getMenuItems: (businessId, params) =>
+    apiClient.get(`/menu-items/business/${businessId}`, { params }),
+
+  // Get flat array of all active items (used by AI search display)
+  getMenuItemsFlat: (businessId) =>
+    apiClient.get(`/menu-items/business/${businessId}/flat`),
+
+  // Get menu stats for dashboard header
+  getMenuStats: (businessId) =>
+    apiClient.get(`/menu-items/business/${businessId}/stats`),
+
+  // Create a new menu/service item (supports image upload via FormData)
+  createMenuItem: (formData) =>
+    apiClient.post('/menu-items', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+
+  // Update an existing item (supports image replacement via FormData)
+  updateMenuItem: (id, formData) =>
+    apiClient.put(`/menu-items/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+
+  // Delete a menu item
+  deleteMenuItem: (id) => apiClient.delete(`/menu-items/${id}`),
+
+  // Toggle isAvailable on/off quickly
+  toggleMenuItemAvailability: (id) => apiClient.patch(`/menu-items/${id}/toggle`),
+
+  // Batch reorder (drag-to-reorder in management UI)
+  reorderMenuItems: (businessId, items) =>
+    apiClient.put('/menu-items/reorder/batch', { businessId, items }),
 };
 
 

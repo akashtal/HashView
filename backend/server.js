@@ -29,6 +29,7 @@ const uploadRoutes = require('./routes/upload.routes');
 const externalReviewsRoutes = require('./routes/externalReviews.routes');
 const subscriptionRoutes = require('./routes/subscription.routes');
 const { handleWebhook } = require('./controllers/subscription.controller');
+const menuItemRoutes = require('./routes/menuItem.routes');
 
 
 // Import middleware
@@ -124,6 +125,7 @@ app.use('/api/external-reviews', externalReviewsRoutes);
 app.use('/api/verification', require('./routes/verification.routes'));
 app.use('/api/support', supportRoutes);
 app.use('/api/subscription', subscriptionRoutes);
+app.use('/api/menu-items', menuItemRoutes); // Phase 1: Menu & Services system
 
 
 // Socket.IO for real-time chat
