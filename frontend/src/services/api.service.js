@@ -407,6 +407,17 @@ const ApiService = {
   // Batch reorder (drag-to-reorder in management UI)
   reorderMenuItems: (businessId, items) =>
     apiClient.put('/menu-items/reorder/batch', { businessId, items }),
+
+  // AI Menu Scanner: upload a menu image and get back structured draft items
+  extractMenuFromImage: (formData) =>
+    apiClient.post('/menu-items/extract-ai', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 90000, // 90s — vision AI can be slow on large menus
+    }),
+
+  // Batch create: save AI-reviewed menu items to the database in one request
+  createMenuItemsBatch: (businessId, items, skipDuplicates = true) =>
+    apiClient.post('/menu-items/batch', { businessId, items, skipDuplicates }),
 };
 
 

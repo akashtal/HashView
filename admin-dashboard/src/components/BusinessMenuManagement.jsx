@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Plus, Trash2, Edit2, Sparkles, Clock, Utensils, ChevronDown, Check, X,
-  Search, Image as ImageIcon, DollarSign, AlertCircle, Eye, EyeOff, RotateCw
+  Search, Image as ImageIcon, DollarSign, AlertCircle, Eye, EyeOff, RotateCw,
+  ScanLine, CheckSquare, Square
 } from 'lucide-react';
 import { adminApi } from '../api/adminApi';
 
@@ -44,6 +45,13 @@ export default function BusinessMenuManagement({ businessId }) {
   const [filePreview, setFilePreview] = useState('');
   const [saving, setSaving] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState(null);
+
+  // ─── AI Menu Scanner state ─────────────────────────────────────────────────────────────
+  const [aiScanning, setAiScanning] = useState(false);
+  const [reviewItems, setReviewItems] = useState([]);
+  const [reviewPanelOpen, setReviewPanelOpen] = useState(false);
+  const [savingBatch, setSavingBatch] = useState(false);
+  const scanFileRef = useRef(null);
 
   useEffect(() => {
     if (businessId) {
@@ -92,6 +100,68 @@ export default function BusinessMenuManagement({ businessId }) {
     setSelectedFile(null);
     setFilePreview('');
     setModalOpen(true);
+  };
+
+  // ─── AI Menu Scanner handlers ──────────────────────────────────────────────────────
+  const handleAIScan = () => {
+    scanFileRef.current?.click();
+  };
+
+  const handleScanFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+
+    try {
+      setAiScanning(true);
+      const formData = new FormData();
+      formData.append('businessId', businessId);
+      formData.append('currency', 'GBP');
+      formData.append('menuImage', file);
+
+      const res = await adminApi.extractMenuFromImage(formData);
+      if (!res.data?.success || !res.data?.data?.length) {
+        alert('AI could not extract any items from this image. Please try a clearer photo.');
+        return;
+      }
+
+      const drafts = res.data.data.map((item, idx) => ({
+        ...item,
+        _localId: `draft_${idx}`,
+        _selected: true,
+      }));
+
+      setReviewItems(drafts);
+      setReviewPanelOpen(true);
+    } catch (err) {
+      console.error('AI scan error:', err);
+      alert(err.response?.data?.message || 'AI scan failed. Please try again.');
+    } finally {
+      setAiScanning(false);
+    }
+  };
+
+  const handleBatchSave = async () => {
+    const selected = reviewItems.filter(i => i._selected);
+    if (selected.length === 0) {
+      alert('Please select at least one item to save.');
+      return;
+    }
+    try {
+      setSavingBatch(true);
+      const items = selected.map(({ _localId, _selected, ...rest }) => rest);
+      const res = await adminApi.createMenuItemsBatch(businessId, items, true);
+      setReviewPanelOpen(false);
+      setReviewItems([]);
+      await loadMenuData();
+      alert(res.data.message || 'Items saved successfully!');
+    } catch (err) {
+      console.error('Batch save error:', err);
+      alert(err.response?.data?.message || 'Failed to save items.');
+    } finally {
+      setSavingBatch(false);
+    }
   };
 
   const openEditModal = (item) => {
@@ -232,13 +302,43 @@ export default function BusinessMenuManagement({ businessId }) {
             Admin can manage catalog items — fully visible to users & searchable by AI.
           </p>
         </div>
-        <button
-          onClick={openAddModal}
-          className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition flex items-center shadow-sm"
-        >
-          <Plus size={18} className="mr-1.5" />
-          Add Menu Item
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Hidden file input for AI scan */}
+          <input
+            ref={scanFileRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            className="hidden"
+            onChange={handleScanFileChange}
+          />
+          {/* AI Scan Button */}
+          <button
+            onClick={handleAIScan}
+            disabled={aiScanning}
+            className="px-4 py-2 bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
+          >
+            {aiScanning ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Scanning...
+              </>
+            ) : (
+              <>
+                <ScanLine size={16} />
+                <Sparkles size={14} className="text-yellow-300" />
+                AI Scan Menu
+              </>
+            )}
+          </button>
+          {/* Manual Add Button */}
+          <button
+            onClick={openAddModal}
+            className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition flex items-center shadow-sm"
+          >
+            <Plus size={18} className="mr-1.5" />
+            Add Menu Item
+          </button>
+        </div>
       </div>
 
       {/* Stats Banner */}
@@ -687,6 +787,162 @@ export default function BusinessMenuManagement({ businessId }) {
                   </>
                 ) : (
                   editingItem ? 'Save Changes' : 'Add Item'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* \u2500\u2500\u2500 AI Review Panel (slide-over) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */}
+      {reviewPanelOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          {/* Backdrop */}
+          <div
+            className="flex-1 bg-black/40 backdrop-blur-sm"
+            onClick={() => !savingBatch && setReviewPanelOpen(false)}
+          />
+
+          {/* Panel */}
+          <div className="w-full max-w-xl bg-white shadow-2xl flex flex-col h-full overflow-hidden">
+
+            {/* Panel Header */}
+            <div className="bg-gradient-to-r from-violet-700 to-indigo-600 p-5 text-white flex-shrink-0">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={20} className="text-yellow-300" />
+                  <h3 className="text-lg font-bold">AI Scan Results</h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const allSel = reviewItems.every(i => i._selected);
+                      setReviewItems(prev => prev.map(i => ({ ...i, _selected: !allSel })));
+                    }}
+                    className="text-xs bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-lg font-semibold transition"
+                  >
+                    {reviewItems.every(i => i._selected) ? 'Deselect All' : 'Select All'}
+                  </button>
+                  <button
+                    onClick={() => setReviewPanelOpen(false)}
+                    disabled={savingBatch}
+                    className="text-white/80 hover:text-white"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+              <p className="text-sm text-white/80">
+                {reviewItems.filter(i => i._selected).length} of {reviewItems.length} items selected
+              </p>
+              <div className="mt-3 bg-white/10 rounded-lg p-3 text-xs text-white/80 leading-relaxed">
+                Review the AI-extracted items below. Click any field to edit it. Uncheck items you don't want. Then click &quot;Save to Menu&quot;.
+              </div>
+            </div>
+
+            {/* Scrollable Items List */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-32">
+              {reviewItems.map((item) => (
+                <div
+                  key={item._localId}
+                  className={`border rounded-xl p-4 bg-white shadow-sm transition-opacity ${!item._selected ? 'opacity-40' : ''}`}
+                >
+                  {/* Checkbox + Name row */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <button
+                      onClick={() => setReviewItems(prev =>
+                        prev.map(i => i._localId === item._localId ? { ...i, _selected: !i._selected } : i)
+                      )}
+                      className="flex-shrink-0"
+                    >
+                      {item._selected
+                        ? <CheckSquare size={20} className="text-indigo-600" />
+                        : <Square size={20} className="text-gray-400" />
+                      }
+                    </button>
+                    <input
+                      type="text"
+                      value={item.name}
+                      onChange={e => setReviewItems(prev =>
+                        prev.map(i => i._localId === item._localId ? { ...i, name: e.target.value } : i)
+                      )}
+                      className="flex-1 font-bold text-gray-900 border-b border-gray-200 focus:border-indigo-500 outline-none text-sm pb-0.5 bg-transparent"
+                      placeholder="Item name"
+                    />
+                    {item.isPopular && (
+                      <span className="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">⭐ Popular</span>
+                    )}
+                  </div>
+
+                  {/* Category + Price row */}
+                  <div className="grid grid-cols-3 gap-3 mb-2">
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Category</label>
+                      <input
+                        type="text"
+                        value={item.menuCategory}
+                        onChange={e => setReviewItems(prev =>
+                          prev.map(i => i._localId === item._localId ? { ...i, menuCategory: e.target.value } : i)
+                        )}
+                        className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 focus:border-indigo-400 outline-none mt-1"
+                        placeholder="e.g. Mains"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Price (£)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={item.price}
+                        onChange={e => setReviewItems(prev =>
+                          prev.map(i => i._localId === item._localId ? { ...i, price: e.target.value } : i)
+                        )}
+                        className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 focus:border-indigo-400 outline-none mt-1"
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  {item.description && (
+                    <p className="text-xs text-gray-500 mb-2 line-clamp-2">{item.description}</p>
+                  )}
+
+                  {/* Dietary badges */}
+                  {item.dietary?.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {item.dietary.map(d => (
+                        <span key={d} className="text-[10px] font-bold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                          {d}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Sticky Footer */}
+            <div className="absolute bottom-0 left-0 right-0 bg-white border-t p-4 shadow-lg">
+              <p className="text-xs text-gray-500 text-center mb-3">
+                {reviewItems.filter(i => i._selected).length} item{reviewItems.filter(i => i._selected).length !== 1 ? 's' : ''} will be added to this business&apos;s menu
+              </p>
+              <button
+                onClick={handleBatchSave}
+                disabled={savingBatch || reviewItems.filter(i => i._selected).length === 0}
+                className="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-md"
+              >
+                {savingBatch ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Check size={18} />
+                    Save {reviewItems.filter(i => i._selected).length} Item{reviewItems.filter(i => i._selected).length !== 1 ? 's' : ''} to Menu
+                  </>
                 )}
               </button>
             </div>

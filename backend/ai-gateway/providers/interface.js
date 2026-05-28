@@ -17,6 +17,12 @@
  *   Input:  { query, intent, businesses: [...], resultCount }
  *   Output: "Found 4 restaurants near you with chicken dishes under £15 🍗"
  *
+ * extractMenuFromImage(imageBase64, options) → Promise<MenuItemDraft[]>
+ *   Analyses a base64-encoded menu image and returns an array of structured
+ *   menu item objects ready for bulk insertion.
+ *   Input:  { imageBase64: "...", mimeType: "image/jpeg", currency: "GBP" }
+ *   Output: [{ name, menuCategory, price, currency, description, type, dietary, tags, isPopular, isAvailable }, ...]
+ *
  * healthCheck()                 → Promise<HealthStatus>
  *   Returns whether the provider is reachable and responsive.
  *   Output: { healthy: true, latencyMs: 120, model: "qwen2.5:7b" }
@@ -62,6 +68,18 @@ class AIProviderInterface {
   }
 
   /**
+   * Extract structured menu items from a base64-encoded menu image.
+   * @param {string} imageBase64 - Base64-encoded image data
+   * @param {Object} [options]
+   * @param {string} [options.mimeType]  - MIME type of the image (default: 'image/jpeg')
+   * @param {string} [options.currency]  - Currency code to apply (default: 'GBP')
+   * @returns {Promise<Array>} - Array of MenuItemDraft objects
+   */
+  async extractMenuFromImage(imageBase64, options = {}) {
+    throw new Error(`${this.constructor.name} must implement extractMenuFromImage()`);
+  }
+
+  /**
    * Check if this provider is reachable and healthy.
    * @returns {Promise<HealthStatus>}
    */
@@ -77,7 +95,7 @@ class AIProviderInterface {
     return {
       provider: this.providerName,
       model: this.modelName,
-      capabilities: ['extractIntent', 'generateResponse', 'healthCheck'],
+      capabilities: ['extractIntent', 'generateResponse', 'extractMenuFromImage', 'healthCheck'],
     };
   }
 }

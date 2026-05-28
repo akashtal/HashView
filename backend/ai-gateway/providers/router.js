@@ -137,6 +137,34 @@ class ProviderRouter {
   }
 
   /**
+   * Extract structured menu items from a menu image with automatic failover.
+   * @param {string} imageBase64 - Base64-encoded image data
+   * @param {Object} options - { mimeType, currency }
+   * @returns {Promise<Array>} - Array of MenuItemDraft objects
+   */
+  async extractMenuFromImage(imageBase64, options = {}) {
+    // 1. Try primary
+    try {
+      return await this.primaryProvider.extractMenuFromImage(imageBase64, options);
+    } catch (primaryErr) {
+      console.warn(`[AI Router] extractMenuFromImage primary (${this.primaryProvider.providerName}) failed: ${primaryErr.message}`);
+    }
+
+    // 2. Try fallback
+    if (this.fallbackProvider.providerName !== this.primaryProvider.providerName) {
+      try {
+        return await this.fallbackProvider.extractMenuFromImage(imageBase64, options);
+      } catch (fallbackErr) {
+        console.warn(`[AI Router] extractMenuFromImage fallback (${this.fallbackProvider.providerName}) failed: ${fallbackErr.message}`);
+      }
+    }
+
+    // 3. Mock returns sample items (never fails)
+    console.warn('[AI Router] extractMenuFromImage: all providers failed. Returning mock sample items.');
+    return await this.mockAdapter.extractMenuFromImage(imageBase64, options);
+  }
+
+  /**
    * Health check for all configured providers.
    */
   async healthCheck() {

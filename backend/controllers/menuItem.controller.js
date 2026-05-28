@@ -395,3 +395,134 @@ exports.getMenuStats = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+// ─── POST /api/menu-items/extract-ai ────────────────────────────────────────────────────
+// Protected (business owner or admin).
+// Accepts a menu image upload, sends it to the AI router for vision extraction,
+// and returns an array of structured draft items for user review.
+// The items are NOT saved to the DB at this stage — they are returned to the
+// frontend for the user to review/edit before calling /batch.
+exports.extractMenuAI = async (req, res) => {
+  try {
+    const { businessId, currency } = req.body;
+
+    if (!businessId) {
+      return res.status(400).json({ success: false, message: 'businessId is required' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Menu image is required' });
+    }
+
+    // Verify ownership before doing any AI work
+    const { error, status } = await verifyBusinessOwnership(businessId, req.user);
+    if (error) return res.status(status).json({ success: false, message: error });
+
+    // Convert uploaded buffer to base64 for the vision API
+    const imageBase64 = req.file.buffer.toString('base64');
+    const mimeType = req.file.mimetype || 'image/jpeg';
+    const resolvedCurrency = (currency || 'GBP').toUpperCase();
+
+    // Call the AI router — handles provider failover automatically
+    const { getRouter } = require('../ai-gateway/providers/router');
+    const router = getRouter();
+
+    const items = await router.extractMenuFromImage(imageBase64, {
+      mimeType,
+      currency: resolvedCurrency,
+    });
+
+    if (!items || items.length === 0) {
+      return res.status(422).json({
+        success: false,
+        message: 'No menu items could be extracted from this image. Please ensure the image is clear and contains menu text.'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: items.length,
+      message: `Extracted ${items.length} item${items.length !== 1 ? 's' : ''} from your menu image. Review and save below.`,
+      data: items,
+    });
+  } catch (error) {
+    console.error('extractMenuAI error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to extract menu from image. Please try again.'
+    });
+  }
+};
+
+// ─── POST /api/menu-items/batch ──────────────────────────────────────────────────────────
+// Protected (business owner or admin).
+// Accepts a pre-reviewed array of menu item drafts and bulk-inserts them.
+// Body: { businessId: "...", items: [{...}, ...], skipDuplicates: true }
+exports.createMenuItemsBatch = async (req, res) => {
+  try {
+    const { businessId, items, skipDuplicates } = req.body;
+
+    if (!businessId) {
+      return res.status(400).json({ success: false, message: 'businessId is required' });
+    }
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, message: 'items array is required and must not be empty' });
+    }
+    if (items.length > 100) {
+      return res.status(400).json({ success: false, message: 'Maximum 100 items per batch' });
+    }
+
+    // Verify ownership
+    const { error, status } = await verifyBusinessOwnership(businessId, req.user);
+    if (error) return res.status(status).json({ success: false, message: error });
+
+    const ALLOWED_TYPES   = ['food', 'drink', 'service', 'product', 'room', 'package'];
+    const ALLOWED_DIETARY = ['vegetarian', 'vegan', 'halal', 'gluten-free', 'dairy-free', 'nut-free', 'kosher', 'organic'];
+
+    // Validate and sanitise each item
+    const docs = items.map((item, idx) => {
+      if (!item.name || typeof item.name !== 'string' || !item.name.trim()) {
+        throw new Error(`Item at index ${idx} is missing a valid name`);
+      }
+      return {
+        business:     businessId,
+        name:         item.name.trim(),
+        description:  (item.description || '').trim(),
+        price:        Math.max(0, parseFloat(item.price) || 0),
+        currency:     (item.currency || 'GBP').toUpperCase(),
+        menuCategory: (item.menuCategory || 'General').trim(),
+        type:         ALLOWED_TYPES.includes(item.type) ? item.type : 'food',
+        dietary:      Array.isArray(item.dietary) ? item.dietary.filter(d => ALLOWED_DIETARY.includes(d)) : [],
+        tags:         Array.isArray(item.tags) ? item.tags.slice(0, 5).map(t => String(t).toLowerCase().trim()) : [],
+        isPopular:    Boolean(item.isPopular),
+        isAvailable:  item.isAvailable !== false,
+        status:       'active',
+      };
+    });
+
+    let created;
+    if (skipDuplicates) {
+      // Insert and ignore duplicate name+business collisions
+      created = await MenuItem.insertMany(docs, { ordered: false }).catch(err => {
+        // MongoDB bulk write errors — some may succeed even if others fail
+        if (err.insertedDocs) return err.insertedDocs;
+        throw err;
+      });
+    } else {
+      created = await MenuItem.insertMany(docs, { ordered: true });
+    }
+
+    res.status(201).json({
+      success: true,
+      count: created.length,
+      message: `Successfully added ${created.length} item${created.length !== 1 ? 's' : ''} to your menu.`,
+      data: created,
+    });
+  } catch (error) {
+    console.error('createMenuItemsBatch error:', error);
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(e => e.message);
+      return res.status(400).json({ success: false, message: messages.join('. ') });
+    }
+    res.status(500).json({ success: false, message: error.message || 'Server error during batch creation' });
+  }
+};

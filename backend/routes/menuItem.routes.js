@@ -9,7 +9,9 @@ const {
   deleteMenuItem,
   toggleAvailability,
   reorderMenuItems,
-  getMenuStats
+  getMenuStats,
+  extractMenuAI,
+  createMenuItemsBatch,
 } = require('../controllers/menuItem.controller');
 const { protect, authorize } = require('../middleware/auth.middleware');
 
@@ -71,5 +73,19 @@ router.patch('/:id/toggle', protect, authorize('business', 'admin'), toggleAvail
 
 // Batch reorder (drag-to-reorder in management UI)
 router.put('/reorder/batch', protect, authorize('business', 'admin'), reorderMenuItems);
+
+// ─── AI-Powered Routes ────────────────────────────────────────────────────────────
+
+// AI image scan: upload menu photo → returns draft items for review (NOT saved yet)
+router.post(
+  '/extract-ai',
+  protect,
+  authorize('business', 'admin'),
+  menuImageUpload.single('menuImage'), // different field name to distinguish from item images
+  extractMenuAI
+);
+
+// Batch create: save the reviewed AI-extracted items to the database
+router.post('/batch', protect, authorize('business', 'admin'), createMenuItemsBatch);
 
 module.exports = router;

@@ -130,6 +130,16 @@ export const adminApi = {
   }),
   deleteMenuItem: (id) => api.delete(`/menu-items/${id}`),
   toggleMenuItemAvailability: (id) => api.patch(`/menu-items/${id}/toggle`),
+
+  // AI Menu Scanner: upload menu image → returns extracted draft items for review
+  extractMenuFromImage: (formData) => api.post('/menu-items/extract-ai', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 90000, // 90s — vision AI can be slow
+  }),
+
+  // Batch create: save AI-reviewed items in one request
+  createMenuItemsBatch: (businessId, items, skipDuplicates = true) =>
+    api.post('/menu-items/batch', { businessId, items, skipDuplicates }),
 };
 
 export default adminApi;

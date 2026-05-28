@@ -20,6 +20,7 @@
 
 const AIProviderInterface = require('./interface');
 const { INTENT_EXTRACTION_SYSTEM_PROMPT, INTENT_EXTRACTION_VERSION } = require('../prompts/intent_extraction_v1');
+const { MENU_EXTRACTION_SYSTEM_PROMPT, MENU_EXTRACTION_VERSION } = require('../prompts/menu_extraction_v1');
 
 class OpenAIAdapter extends AIProviderInterface {
   constructor(config = {}) {
@@ -159,6 +160,104 @@ class OpenAIAdapter extends AIProviderInterface {
   }
 
   // ─── Private Helpers ──────────────────────────────────────────────────────────
+
+  /**
+   * Analyse a base64-encoded menu image and extract all visible items.
+   * Uses OpenAI vision (or any OpenRouter vision-capable model).
+   */
+  async extractMenuFromImage(imageBase64, options = {}) {
+    const mimeType = options.mimeType || 'image/jpeg';
+    const currency = options.currency || 'GBP';
+    const startTime = Date.now();
+
+    const body = {
+      model: this.modelName,
+      messages: [
+        { role: 'system', content: MENU_EXTRACTION_SYSTEM_PROMPT },
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `Please extract all menu items from this image. Use currency code: ${currency}.`,
+            },
+            {
+              type: 'image_url',
+              image_url: { url: `data:${mimeType};base64,${imageBase64}`, detail: 'high' },
+            },
+          ],
+        },
+      ],
+      temperature: 0.1,
+      max_tokens: 4096,
+    };
+
+    const response = await this._fetchWithTimeout(
+      `${this.baseUrl}/chat/completions`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`,
+          // OpenRouter-specific headers (ignored by native OpenAI)
+          'HTTP-Referer': 'https://hashview.app',
+          'X-Title': 'HashView Menu Scanner',
+        },
+        body: JSON.stringify(body),
+      },
+      60000 // 60s timeout — vision can be slow
+    );
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Menu extraction API error ${response.status}: ${text}`);
+    }
+
+    const data = await response.json();
+    const content = data?.choices?.[0]?.message?.content || '[]';
+    const latencyMs = Date.now() - startTime;
+
+    const items = this._parseMenuJSON(content, currency);
+
+    console.log(`[OpenAI Adapter] extractMenuFromImage: extracted ${items.length} items in ${latencyMs}ms`);
+    return items;
+  }
+
+  _parseMenuJSON(content, currency) {
+    try {
+      // Strip any markdown code fences the model might add despite instructions
+      const clean = content
+        .replace(/```json?\n?/gi, '')
+        .replace(/```/g, '')
+        .trim();
+      const parsed = JSON.parse(clean);
+      const arr = Array.isArray(parsed) ? parsed : (parsed.items || parsed.menu || []);
+
+      const ALLOWED_TYPES    = ['food', 'drink', 'service', 'product', 'room', 'package'];
+      const ALLOWED_DIETARY  = ['vegetarian', 'vegan', 'halal', 'gluten-free', 'dairy-free', 'nut-free', 'kosher', 'organic'];
+
+      return arr
+        .filter(item => item && typeof item.name === 'string' && item.name.trim())
+        .map(item => ({
+          name:         item.name.trim(),
+          menuCategory: (item.menuCategory || item.category || 'General').trim(),
+          price:        Math.max(0, parseFloat(item.price) || 0),
+          currency:     currency,
+          description:  (item.description || '').trim(),
+          type:         ALLOWED_TYPES.includes(item.type) ? item.type : 'food',
+          dietary:      Array.isArray(item.dietary)
+                          ? item.dietary.filter(d => ALLOWED_DIETARY.includes(d))
+                          : [],
+          tags:         Array.isArray(item.tags)
+                          ? item.tags.slice(0, 5).map(t => String(t).toLowerCase().trim())
+                          : [],
+          isPopular:    Boolean(item.isPopular),
+          isAvailable:  item.isAvailable !== false, // default to true
+        }));
+    } catch (err) {
+      throw new Error(`Failed to parse menu extraction JSON: ${err.message}. Raw: ${content.slice(0, 300)}`);
+    }
+  }
 
   async _fetchWithTimeout(url, options, timeout = this.timeout) {
     const controller = new AbortController();

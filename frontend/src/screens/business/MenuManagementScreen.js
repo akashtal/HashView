@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator,
-  Alert, Modal, StatusBar, KeyboardAvoidingView, Platform, Switch, Image
+  Alert, Modal, StatusBar, KeyboardAvoidingView, Platform, Switch, Image, FlatList
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -119,6 +119,13 @@ export default function MenuManagementScreen({ route, navigation }) {
   const [pickedImage, setPickedImage] = useState(null); // { uri, type, name }
   const [saving, setSaving] = useState(false);
 
+  // ─── AI Menu Scanner state ─────────────────────────────────────────────────────────────
+  const [aiScanning, setAiScanning] = useState(false);      // true while uploading/AI processing
+  const [aiScanPickerVisible, setAiScanPickerVisible] = useState(false); // custom source picker
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [reviewItems, setReviewItems] = useState([]);          // extracted drafts from AI
+  const [savingBatch, setSavingBatch] = useState(false);
+
   // Refresh whenever screen comes into focus
   useFocusEffect(
     useCallback(() => {
@@ -139,6 +146,93 @@ export default function MenuManagementScreen({ route, navigation }) {
       ToastService.showError('Error', 'Could not load menu items');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ─── AI Menu Scanner ─────────────────────────────────────────────────────────────
+  const handleAIScan = () => {
+    setAiScanPickerVisible(true);
+  };
+
+  const launchAIScan = async (source) => {
+    setAiScanPickerVisible(false); // close the custom picker first
+    try {
+      let result;
+      if (source === 'camera') {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+          return Alert.alert('Permission needed', 'Camera access is required to take a photo of your menu.');
+        }
+        result = await ImagePicker.launchCameraAsync({ quality: 0.9, allowsEditing: false });
+      } else {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          return Alert.alert('Permission needed', 'Photo library access is required to upload your menu.');
+        }
+        result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          quality: 0.9,
+          allowsEditing: false,
+        });
+      }
+
+      if (result.canceled || !result.assets?.[0]) return;
+
+      const asset = result.assets[0];
+      setAiScanning(true);
+
+      const formData = new FormData();
+      formData.append('businessId', businessId);
+      formData.append('currency', 'GBP');
+      formData.append('menuImage', {
+        uri: asset.uri,
+        type: asset.mimeType || 'image/jpeg',
+        name: `menu-scan-${Date.now()}.jpg`,
+      });
+
+      const res = await ApiService.extractMenuFromImage(formData);
+      // NOTE: mobile apiClient interceptor already unwraps response.data,
+      // so `res` here IS the JSON body { success, count, data, message }
+      if (!res?.success || !res?.data?.length) {
+        ToastService.showError('No items found', 'AI could not extract any items. Try a clearer image.');
+        return;
+      }
+
+      // Tag each item with a local ID and selected=true for the review modal
+      const drafts = res.data.map((item, idx) => ({
+        ...item,
+        _localId: `draft_${idx}`,
+        _selected: true,
+      }));
+
+      setReviewItems(drafts);
+      setReviewModalVisible(true);
+      ToastService.showSuccess('Scan complete', res.message);
+    } catch (err) {
+      ToastService.showError('Scan failed', err.response?.data?.message || err.message || 'Something went wrong');
+    } finally {
+      setAiScanning(false);
+    }
+  };
+
+  const handleBatchSave = async () => {
+    const selected = reviewItems.filter(i => i._selected);
+    if (selected.length === 0) {
+      return Alert.alert('Nothing selected', 'Please select at least one item to save.');
+    }
+
+    try {
+      setSavingBatch(true);
+      const items = selected.map(({ _localId, _selected, ...rest }) => rest);
+      const res = await ApiService.createMenuItemsBatch(businessId, items, true);
+      setReviewModalVisible(false);
+      setReviewItems([]);
+      loadData();
+      ToastService.showSuccess('Menu updated!', res.message);
+    } catch (err) {
+      ToastService.showError('Save failed', err.response?.data?.message || err.message);
+    } finally {
+      setSavingBatch(false);
     }
   };
 
@@ -335,6 +429,36 @@ export default function MenuManagementScreen({ route, navigation }) {
               Manage your offerings — visible to users & AI search
             </Text>
           </View>
+          {/* ✨ AI Scan Button */}
+          <TouchableOpacity
+            onPress={handleAIScan}
+            disabled={aiScanning}
+            activeOpacity={0.8}
+            style={{
+              backgroundColor: 'rgba(253,230,138,0.18)',
+              borderRadius: 12,
+              paddingHorizontal: 11,
+              paddingVertical: 8,
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginRight: 8,
+              borderWidth: 1,
+              borderColor: 'rgba(253,230,138,0.45)',
+            }}
+          >
+            {aiScanning ? (
+              <ActivityIndicator size="small" color="#FDE68A" />
+            ) : (
+              <>
+                <Icon name="sparkles" size={14} color="#FDE68A" />
+                <Text style={{ color: '#FDE68A', fontWeight: '700', marginLeft: 4, fontSize: 12 }}>
+                  AI Scan
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+
+          {/* Manual Add Button */}
           <TouchableOpacity
             onPress={openAdd}
             style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8, flexDirection: 'row', alignItems: 'center' }}
@@ -389,11 +513,30 @@ export default function MenuManagementScreen({ route, navigation }) {
           <TouchableOpacity
             onPress={openAdd}
             activeOpacity={0.85}
-            style={{ borderRadius: 14, overflow: 'hidden' }}
+            style={{ borderRadius: 14, overflow: 'hidden', marginBottom: 12 }}
           >
             <LinearGradient colors={['#4F46E5', '#6366F1']} style={{ paddingHorizontal: 32, paddingVertical: 14, flexDirection: 'row', alignItems: 'center' }}>
               <Icon name="add-circle-outline" size={20} color="#FFF" />
               <Text style={{ color: '#FFF', fontWeight: '700', marginLeft: 8, fontSize: 15 }}>Add First Item</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          {/* AI Scan option on empty state */}
+          <TouchableOpacity
+            onPress={handleAIScan}
+            disabled={aiScanning}
+            activeOpacity={0.85}
+            style={{ borderRadius: 14, overflow: 'hidden' }}
+          >
+            <LinearGradient colors={['#7C3AED', '#6366F1']} style={{ paddingHorizontal: 28, paddingVertical: 13, flexDirection: 'row', alignItems: 'center' }}>
+              {aiScanning ? (
+                <ActivityIndicator size="small" color="#FDE68A" />
+              ) : (
+                <Icon name="sparkles" size={18} color="#FDE68A" />
+              )}
+              <Text style={{ color: '#FFF', fontWeight: '700', marginLeft: 8, fontSize: 14 }}>
+                {aiScanning ? 'Scanning...' : '✨ Scan Menu with AI'}
+              </Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -625,6 +768,335 @@ export default function MenuManagementScreen({ route, navigation }) {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* ── AI Review Modal ─────────────────────────────────────────────────────────── */}
+      <Modal
+        visible={reviewModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => !savingBatch && setReviewModalVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
+
+          {/* Header */}
+          <LinearGradient
+            colors={['#7C3AED', '#6366F1']}
+            style={{ paddingTop: Platform.OS === 'ios' ? 56 : 24, paddingBottom: 18, paddingHorizontal: 20 }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableOpacity
+                onPress={() => setReviewModalVisible(false)}
+                disabled={savingBatch}
+                style={{ marginRight: 14 }}
+              >
+                <Icon name="close" size={24} color="#FFF" />
+              </TouchableOpacity>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Icon name="sparkles" size={18} color="#FDE68A" />
+                  <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '700', marginLeft: 6 }}>AI Scan Results</Text>
+                </View>
+                <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, marginTop: 3 }}>
+                  {reviewItems.filter(i => i._selected).length} of {reviewItems.length} items selected
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  const allSelected = reviewItems.every(i => i._selected);
+                  setReviewItems(prev => prev.map(i => ({ ...i, _selected: !allSelected })));
+                }}
+                style={{ backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 7 }}
+              >
+                <Text style={{ color: '#FFF', fontWeight: '600', fontSize: 12 }}>
+                  {reviewItems.every(i => i._selected) ? 'Deselect All' : 'Select All'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Info banner */}
+            <View style={{ marginTop: 14, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 10, padding: 10, flexDirection: 'row', alignItems: 'flex-start' }}>
+              <Icon name="information-circle-outline" size={16} color="rgba(255,255,255,0.8)" />
+              <Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11, marginLeft: 8, flex: 1, lineHeight: 16 }}>
+                Review each item the AI found. Tap any field to edit it. Uncheck items you don't want to save. Then tap "Save to Menu".
+              </Text>
+            </View>
+          </LinearGradient>
+
+          {/* Items List */}
+          <FlatList
+            data={reviewItems}
+            keyExtractor={item => item._localId}
+            contentContainerStyle={{ padding: 14, paddingBottom: 120 }}
+            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+            renderItem={({ item, index }) => (
+              <View style={[
+                reviewItemStyles.card,
+                !item._selected && reviewItemStyles.cardDimmed,
+              ]}>
+                {/* Selection toggle + category badge row */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                  <TouchableOpacity
+                    onPress={() => setReviewItems(prev =>
+                      prev.map(i => i._localId === item._localId ? { ...i, _selected: !i._selected } : i)
+                    )}
+                    style={{ marginRight: 10 }}
+                  >
+                    <View style={[
+                      reviewItemStyles.checkbox,
+                      item._selected && reviewItemStyles.checkboxChecked,
+                    ]}>
+                      {item._selected && <Icon name="checkmark" size={13} color="#FFF" />}
+                    </View>
+                  </TouchableOpacity>
+                  <View style={{ flex: 1 }}>
+                    {/* Editable name */}
+                    <TextInput
+                      style={reviewItemStyles.nameInput}
+                      value={item.name}
+                      onChangeText={val => setReviewItems(prev =>
+                        prev.map(i => i._localId === item._localId ? { ...i, name: val } : i)
+                      )}
+                      placeholder="Item name"
+                      placeholderTextColor="#9CA3AF"
+                    />
+                  </View>
+                  {/* Popularity badge */}
+                  {item.isPopular && (
+                    <View style={{ backgroundColor: '#FEF3C7', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginLeft: 6 }}>
+                      <Text style={{ fontSize: 10, fontWeight: '700', color: '#92400E' }}>⭐ Popular</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Category + Price row */}
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={reviewItemStyles.fieldLabel}>Category</Text>
+                    <TextInput
+                      style={reviewItemStyles.fieldInput}
+                      value={item.menuCategory}
+                      onChangeText={val => setReviewItems(prev =>
+                        prev.map(i => i._localId === item._localId ? { ...i, menuCategory: val } : i)
+                      )}
+                      placeholder="e.g. Mains"
+                      placeholderTextColor="#9CA3AF"
+                    />
+                  </View>
+                  <View style={{ width: 90 }}>
+                    <Text style={reviewItemStyles.fieldLabel}>Price (£)</Text>
+                    <TextInput
+                      style={reviewItemStyles.fieldInput}
+                      value={item.price?.toString()}
+                      onChangeText={val => setReviewItems(prev =>
+                        prev.map(i => i._localId === item._localId ? { ...i, price: val } : i)
+                      )}
+                      keyboardType="decimal-pad"
+                      placeholder="0.00"
+                      placeholderTextColor="#9CA3AF"
+                    />
+                  </View>
+                </View>
+
+                {/* Description */}
+                {item.description ? (
+                  <Text style={{ fontSize: 12, color: '#6B7280', marginBottom: 8, lineHeight: 17 }} numberOfLines={2}>
+                    {item.description}
+                  </Text>
+                ) : null}
+
+                {/* Dietary tags */}
+                {item.dietary?.length > 0 && (
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
+                    {item.dietary.map(d => (
+                      <View key={d} style={{ backgroundColor: '#DCFCE7', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
+                        <Text style={{ fontSize: 10, fontWeight: '600', color: '#166534' }}>{d}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            )}
+          />
+
+          {/* Footer Save Button */}
+          <View style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0,
+            backgroundColor: '#FFF', borderTopWidth: 1, borderTopColor: '#F3F4F6',
+            paddingHorizontal: 20, paddingBottom: Platform.OS === 'ios' ? 36 : 20, paddingTop: 14,
+          }}>
+            <Text style={{ textAlign: 'center', fontSize: 12, color: '#6B7280', marginBottom: 10 }}>
+              {reviewItems.filter(i => i._selected).length} item{reviewItems.filter(i => i._selected).length !== 1 ? 's' : ''} will be added to your menu
+            </Text>
+            <TouchableOpacity
+              onPress={handleBatchSave}
+              disabled={savingBatch || reviewItems.filter(i => i._selected).length === 0}
+              activeOpacity={0.85}
+              style={{ borderRadius: 14, overflow: 'hidden' }}
+            >
+              <LinearGradient
+                colors={savingBatch ? ['#A5B4FC', '#C4B5FD'] : ['#7C3AED', '#6366F1']}
+                style={{
+                  paddingVertical: 16, flexDirection: 'row',
+                  alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                {savingBatch ? (
+                  <ActivityIndicator size="small" color="#FFF" />
+                ) : (
+                  <>
+                    <Icon name="checkmark-circle" size={20} color="#FFF" />
+                    <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 15, marginLeft: 8 }}>
+                      Save {reviewItems.filter(i => i._selected).length} Item{reviewItems.filter(i => i._selected).length !== 1 ? 's' : ''} to Menu
+                    </Text>
+                  </>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── AI Scan Source Picker (custom bottom sheet) ───────────────────────── */}
+      <Modal
+        visible={aiScanPickerVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setAiScanPickerVisible(false)}
+      >
+        {/* Backdrop — tap to dismiss */}
+        <TouchableOpacity
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' }}
+          activeOpacity={1}
+          onPress={() => setAiScanPickerVisible(false)}
+        />
+
+        {/* Sheet */}
+        <View style={{
+          backgroundColor: '#FFF',
+          borderTopLeftRadius: 28,
+          borderTopRightRadius: 28,
+          overflow: 'hidden',
+          paddingBottom: Platform.OS === 'ios' ? 36 : 24,
+        }}>
+
+          {/* Gradient header */}
+          <LinearGradient
+            colors={['#7C3AED', '#4F46E5']}
+            style={{ paddingTop: 24, paddingBottom: 22, paddingHorizontal: 24, alignItems: 'center' }}
+          >
+            {/* Drag handle */}
+            <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.35)', marginBottom: 18 }} />
+
+            {/* Icon ring */}
+            <View style={{
+              width: 64, height: 64, borderRadius: 32,
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              alignItems: 'center', justifyContent: 'center', marginBottom: 14,
+              borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.25)',
+            }}>
+              <Icon name="sparkles" size={30} color="#FDE68A" />
+            </View>
+
+            <Text style={{ color: '#FFF', fontSize: 20, fontWeight: '800', letterSpacing: -0.3, marginBottom: 6 }}>
+              AI Menu Scanner
+            </Text>
+            <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, textAlign: 'center', lineHeight: 19, maxWidth: 260 }}>
+              Photograph your printed menu and AI will extract every item in seconds
+            </Text>
+          </LinearGradient>
+
+          {/* Options */}
+          <View style={{ padding: 20, gap: 12 }}>
+
+            {/* Camera option */}
+            <TouchableOpacity
+              onPress={() => launchAIScan('camera')}
+              activeOpacity={0.85}
+              style={{
+                flexDirection: 'row', alignItems: 'center',
+                backgroundColor: '#F5F3FF',
+                borderRadius: 18, padding: 18,
+                borderWidth: 1.5, borderColor: '#DDD6FE',
+              }}
+            >
+              <View style={{
+                width: 52, height: 52, borderRadius: 16,
+                backgroundColor: '#7C3AED',
+                alignItems: 'center', justifyContent: 'center',
+                marginRight: 16,
+              }}>
+                <Icon name="camera" size={24} color="#FFF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 16, fontWeight: '700', color: '#1F1235', marginBottom: 3 }}>
+                  Take a Photo
+                </Text>
+                <Text style={{ fontSize: 13, color: '#6B7280', lineHeight: 18 }}>
+                  Use your camera to photograph the menu now
+                </Text>
+              </View>
+              <Icon name="chevron-forward" size={18} color="#A78BFA" />
+            </TouchableOpacity>
+
+            {/* Gallery option */}
+            <TouchableOpacity
+              onPress={() => launchAIScan('gallery')}
+              activeOpacity={0.85}
+              style={{
+                flexDirection: 'row', alignItems: 'center',
+                backgroundColor: '#EFF6FF',
+                borderRadius: 18, padding: 18,
+                borderWidth: 1.5, borderColor: '#BFDBFE',
+              }}
+            >
+              <View style={{
+                width: 52, height: 52, borderRadius: 16,
+                backgroundColor: '#3B82F6',
+                alignItems: 'center', justifyContent: 'center',
+                marginRight: 16,
+              }}>
+                <Icon name="images" size={24} color="#FFF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 16, fontWeight: '700', color: '#1F2937', marginBottom: 3 }}>
+                  Choose from Gallery
+                </Text>
+                <Text style={{ fontSize: 13, color: '#6B7280', lineHeight: 18 }}>
+                  Upload an existing photo of your menu
+                </Text>
+              </View>
+              <Icon name="chevron-forward" size={18} color="#60A5FA" />
+            </TouchableOpacity>
+
+            {/* Tip strip */}
+            <View style={{
+              flexDirection: 'row', alignItems: 'flex-start',
+              backgroundColor: '#FFFBEB', borderRadius: 12, padding: 12,
+              borderWidth: 1, borderColor: '#FDE68A', marginTop: 4,
+            }}>
+              <Icon name="bulb-outline" size={16} color="#D97706" style={{ marginRight: 8, marginTop: 1 }} />
+              <Text style={{ flex: 1, fontSize: 12, color: '#92400E', lineHeight: 17 }}>
+                <Text style={{ fontWeight: '700' }}>Tip: </Text>
+                Ensure the menu is flat, well-lit and all text is visible for the best results.
+              </Text>
+            </View>
+
+            {/* Cancel */}
+            <TouchableOpacity
+              onPress={() => setAiScanPickerVisible(false)}
+              activeOpacity={0.7}
+              style={{
+                alignItems: 'center', paddingVertical: 14,
+                borderRadius: 14, backgroundColor: '#F3F4F6',
+                marginTop: 2,
+              }}
+            >
+              <Text style={{ fontSize: 15, fontWeight: '700', color: '#6B7280' }}>Cancel</Text>
+            </TouchableOpacity>
+
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -664,4 +1136,63 @@ const styles = {
   },
   toggleLabel: { fontSize: 14, fontWeight: '600', color: '#111827' },
   toggleHint: { fontSize: 12, color: '#6B7280', marginTop: 2 },
+};
+
+// ─── Review Modal Styles ───────────────────────────────────────────────────────
+const reviewItemStyles = {
+  card: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 14,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+  },
+  cardDimmed: {
+    opacity: 0.45,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#D1D5DB',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFF',
+  },
+  checkboxChecked: {
+    backgroundColor: '#6366F1',
+    borderColor: '#6366F1',
+  },
+  nameInput: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#111827',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    paddingBottom: 3,
+  },
+  fieldLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#9CA3AF',
+    marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  fieldInput: {
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 13,
+    color: '#111827',
+  },
 };
