@@ -665,6 +665,55 @@ export default function UserHomeScreen({ navigation }) {
           </View>
         </View>
 
+        {/* ── AI Search Button ─────────────────────────────────────────────── */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate('AISearch')}
+          activeOpacity={0.85}
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.12)',
+            borderRadius: 18,
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.25)',
+            paddingHorizontal: 16,
+            paddingVertical: 13,
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: activeFiltersCount > 0 ? 12 : 0,
+          }}
+        >
+          {/* Sparkles icon */}
+          <View style={{
+            width: 34, height: 34, borderRadius: 17,
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            alignItems: 'center', justifyContent: 'center',
+            marginRight: 12,
+          }}>
+            <Icon name="sparkles" size={17} color="#fff" />
+          </View>
+
+          {/* Placeholder text */}
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: 'rgba(255,255,255,0.95)', fontSize: 14, fontWeight: '600' }}>
+              AI Smart Search
+            </Text>
+            <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, marginTop: 1 }}>
+              "chicken under £15 near me" · "halal pizza"
+            </Text>
+          </View>
+
+          {/* AI badge */}
+          <View style={{
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            borderRadius: 10,
+            paddingHorizontal: 8,
+            paddingVertical: 4,
+          }}>
+            <Text style={{ fontSize: 10, color: '#E9D5FF', fontWeight: '800', letterSpacing: 0.5 }}>
+              AI ✦
+            </Text>
+          </View>
+        </TouchableOpacity>
+
         {/* Active Filters Indicator */}
         {activeFiltersCount > 0 && (
           <View className="flex-row items-center bg-white/20 rounded-xl px-3 py-2 mb-3">
@@ -682,6 +731,7 @@ export default function UserHomeScreen({ navigation }) {
           </View>
         )}
       </LinearGradient>
+
 
       {/* Search Bar Temporarily Disabled */}
       {false && (

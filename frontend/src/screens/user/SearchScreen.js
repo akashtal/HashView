@@ -584,5 +584,3 @@ export default function SearchScreen({ navigation }) {
     </View>
   );
 }
-
-

@@ -9,6 +9,7 @@ import { COLORS } from '../config/colors';
 // User Screens
 import UserHomeScreen from '../screens/user/UserHomeScreen';
 import SearchScreen from '../screens/user/SearchScreen';
+import AISearchScreen from '../screens/user/AISearchScreen'; // Phase 2: AI-powered search
 import HistoryScreen from '../screens/user/HistoryScreen';
 import ProfileScreen from '../screens/user/ProfileScreen';
 import BusinessDetailScreen from '../screens/user/BusinessDetailScreen';
@@ -73,6 +74,7 @@ function UserStack() {
       <Stack.Screen name="Favorites" component={FavoritesScreen} />
       <Stack.Screen name="ClaimBusiness" component={ClaimBusinessScreen} />
       <Stack.Screen name="TermsAndConditions" component={TermsAndConditionsScreen} />
+      <Stack.Screen name="AISearch" component={AISearchScreen} />
     </Stack.Navigator>
   );
 }

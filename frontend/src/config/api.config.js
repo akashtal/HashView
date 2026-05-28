@@ -2,12 +2,12 @@
 export const API_CONFIG = {
 
   // Local development server (ACTIVE - connecting to local backend)
-  //BASE_URL: 'http://192.168.1.4:5001/api',
-  //SOCKET_URL: 'http://192.168.1.4:5001',
+  BASE_URL: 'http://192.168.1.4:5001/api',
+  SOCKET_URL: 'http://192.168.1.4:5001',
 
   // Production URLs (commented out for now)
-  BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://api.hashview.co.uk/api',
-  SOCKET_URL: process.env.EXPO_PUBLIC_SOCKET_URL || 'https://api.hashview.co.uk',
+  //BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://api.hashview.co.uk/api',
+  // SOCKET_URL: process.env.EXPO_PUBLIC_SOCKET_URL || 'https://api.hashview.co.uk',
 
   //SECONDARY_BASE_URL: 'https://hashview-backend.onrender.com/api',
   //SECONDARY_SOCKET_URL: 'https://hashview-backend.onrender.com',
