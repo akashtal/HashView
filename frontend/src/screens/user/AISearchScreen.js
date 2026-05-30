@@ -305,20 +305,13 @@ export default function AISearchScreen({ navigation }) {
     }));
   }, [currentLocation, sessionId, dispatch]);
 
-  const debouncedSearch = useMemo(
-    () => debounce((text) => { if (text.trim().length >= 2) runSearch(text); }, 600),
-    [runSearch]
-  );
-
   const handleTextChange = useCallback((text) => {
     setSearchQuery(text);
     if (text.length === 0) {
       dispatch(clearSearch());
       setHasSearched(false);
-    } else if (text.trim().length >= 2) {
-      debouncedSearch(text);
     }
-  }, [debouncedSearch, dispatch]);
+  }, [dispatch]);
 
   const handleLoadMore = useCallback(() => {
     if (!loading && !loadingMore && pagination.hasMore && searchQuery.trim()) {

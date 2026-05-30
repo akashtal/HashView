@@ -48,8 +48,9 @@ function rankResults(businesses, intent, location) {
 
     const menuMatchScore = computeMenuMatchScore(biz._menuItems, intent);
 
-    const lastReviewDate = biz.lastReviewAt ? new Date(biz.lastReviewAt) : null;
-    const daysSinceReview = lastReviewDate
+    const rawDate = biz.lastReviewAt?.$date || biz.lastReviewAt;
+    const lastReviewDate = rawDate ? new Date(rawDate) : null;
+    const daysSinceReview = (lastReviewDate && !isNaN(lastReviewDate.getTime()))
       ? Math.max(0, (Date.now() - lastReviewDate.getTime()) / (1000 * 60 * 60 * 24))
       : DAYS_RECENCY_WINDOW;
     const recencyScore = Math.max(0, 1 - daysSinceReview / DAYS_RECENCY_WINDOW);

@@ -128,16 +128,29 @@ router.post('/', async (req, res) => {
     }
 
     // ─── Layer 3: Query Builder ───────────────────────────────────────────────
-    const pipeline = buildQuery(intent, location, options);
+    let pipeline = buildQuery(intent, location, options);
 
     // ─── Layer 4: Retrieval ───────────────────────────────────────────────────
     const queryStart = Date.now();
-    const { businesses, totalCount, queryMs } = await executeQuery(pipeline);
+    let { businesses, totalCount, queryMs } = await executeQuery(pipeline);
+
+    // Fallback: If no results were found and location was specified, run the query again without location constraints.
+    // This ensures businesses (e.g., seeding/demo data in the UK) are still found and displayed
+    // when a user or developer searches from a different region (like India).
+    let locationFallbackUsed = false;
+    if (totalCount === 0 && location) {
+      console.log(`[AI Search] 0 results found for query "${query}" with location (${location.latitude}, ${location.longitude}). Trying fallback query without location restriction...`);
+      const fallbackPipeline = buildQuery(intent, null, options);
+      const fallbackResult = await executeQuery(fallbackPipeline);
+      businesses = fallbackResult.businesses;
+      totalCount = fallbackResult.totalCount;
+      locationFallbackUsed = true;
+    }
     const dbMs = Date.now() - queryStart;
 
     // ─── Layer 5: Ranking ─────────────────────────────────────────────────────
     const rankStart = Date.now();
-    const rankedBusinesses = rankResults(businesses, intent, location);
+    const rankedBusinesses = rankResults(businesses, intent, locationFallbackUsed ? null : location);
     const rankMs = Date.now() - rankStart;
 
     // ─── Layer 6: Composition ─────────────────────────────────────────────────

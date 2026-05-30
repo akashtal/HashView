@@ -9,7 +9,7 @@
  *  - provider metadata (which AI was used)
  */
 
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import AISearchService from '../../services/aiSearch.service';
 
 // ─── Async Thunk ──────────────────────────────────────────────────────────────
@@ -161,11 +161,19 @@ export const selectAIFilters = (state) => state.aiSearch.appliedFilters;
 export const selectAILoading = (state) => state.aiSearch.loading;
 export const selectAILoadingMore = (state) => state.aiSearch.loadingMore;
 export const selectAIError = (state) => state.aiSearch.error;
-export const selectAIPagination = (state) => ({
-  total: state.aiSearch.totalCount,
-  page: state.aiSearch.currentPage,
-  pages: state.aiSearch.totalPages,
-  hasMore: state.aiSearch.hasMore,
-});
+export const selectAIPagination = createSelector(
+  [
+    (state) => state.aiSearch.totalCount,
+    (state) => state.aiSearch.currentPage,
+    (state) => state.aiSearch.totalPages,
+    (state) => state.aiSearch.hasMore,
+  ],
+  (totalCount, currentPage, totalPages, hasMore) => ({
+    total: totalCount,
+    page: currentPage,
+    pages: totalPages,
+    hasMore,
+  })
+);
 
 export default aiSearchSlice.reducer;
