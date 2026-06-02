@@ -43,7 +43,7 @@ class OpenAIAdapter extends AIProviderInterface {
       model: this.modelName,
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user',   content: query },
+        { role: 'user', content: query },
       ],
       response_format: { type: 'json_object' },  // OpenAI JSON mode
       temperature: 0.1,
@@ -189,7 +189,7 @@ class OpenAIAdapter extends AIProviderInterface {
         },
       ],
       temperature: 0.1,
-      max_tokens: 4096,
+      max_tokens: 2000, // Reduced from 4096 to prevent 402 Payment Required errors for users with low OpenRouter credit balances
     };
 
     const response = await this._fetchWithTimeout(
@@ -233,26 +233,26 @@ class OpenAIAdapter extends AIProviderInterface {
       const parsed = JSON.parse(clean);
       const arr = Array.isArray(parsed) ? parsed : (parsed.items || parsed.menu || []);
 
-      const ALLOWED_TYPES    = ['food', 'drink', 'service', 'product', 'room', 'package'];
-      const ALLOWED_DIETARY  = ['vegetarian', 'vegan', 'halal', 'gluten-free', 'dairy-free', 'nut-free', 'kosher', 'organic'];
+      const ALLOWED_TYPES = ['food', 'drink', 'service', 'product', 'room', 'package'];
+      const ALLOWED_DIETARY = ['vegetarian', 'vegan', 'halal', 'gluten-free', 'dairy-free', 'nut-free', 'kosher', 'organic'];
 
       return arr
         .filter(item => item && typeof item.name === 'string' && item.name.trim())
         .map(item => ({
-          name:         item.name.trim(),
+          name: item.name.trim(),
           menuCategory: (item.menuCategory || item.category || 'General').trim(),
-          price:        Math.max(0, parseFloat(item.price) || 0),
-          currency:     currency,
-          description:  (item.description || '').trim(),
-          type:         ALLOWED_TYPES.includes(item.type) ? item.type : 'food',
-          dietary:      Array.isArray(item.dietary)
-                          ? item.dietary.filter(d => ALLOWED_DIETARY.includes(d))
-                          : [],
-          tags:         Array.isArray(item.tags)
-                          ? item.tags.slice(0, 5).map(t => String(t).toLowerCase().trim())
-                          : [],
-          isPopular:    Boolean(item.isPopular),
-          isAvailable:  item.isAvailable !== false, // default to true
+          price: Math.max(0, parseFloat(item.price) || 0),
+          currency: currency,
+          description: (item.description || '').trim(),
+          type: ALLOWED_TYPES.includes(item.type) ? item.type : 'food',
+          dietary: Array.isArray(item.dietary)
+            ? item.dietary.filter(d => ALLOWED_DIETARY.includes(d))
+            : [],
+          tags: Array.isArray(item.tags)
+            ? item.tags.slice(0, 5).map(t => String(t).toLowerCase().trim())
+            : [],
+          isPopular: Boolean(item.isPopular),
+          isAvailable: item.isAvailable !== false, // default to true
         }));
     } catch (err) {
       throw new Error(`Failed to parse menu extraction JSON: ${err.message}. Raw: ${content.slice(0, 300)}`);
@@ -274,18 +274,18 @@ class OpenAIAdapter extends AIProviderInterface {
       const clean = content.replace(/```json?\n?/gi, '').replace(/```/g, '').trim();
       const parsed = JSON.parse(clean);
       return {
-        category:     parsed.category     || null,
+        category: parsed.category || null,
         menu_keyword: parsed.menu_keyword || null,
-        price_max:    parsed.price_max    !== undefined ? Number(parsed.price_max) || null : null,
-        price_min:    parsed.price_min    !== undefined ? Number(parsed.price_min) || null : null,
-        near_me:      Boolean(parsed.near_me ?? true),
-        city:         parsed.city         || null,
-        area:         parsed.area         || null,
-        min_rating:   parsed.min_rating   !== undefined ? Number(parsed.min_rating) || null : null,
-        sort_by:      parsed.sort_by      || 'distance',
-        has_coupons:  Boolean(parsed.has_coupons),
-        is_open_now:  Boolean(parsed.is_open_now),
-        dietary:      Array.isArray(parsed.dietary) && parsed.dietary.length > 0 ? parsed.dietary : null,
+        price_max: parsed.price_max !== undefined ? Number(parsed.price_max) || null : null,
+        price_min: parsed.price_min !== undefined ? Number(parsed.price_min) || null : null,
+        near_me: Boolean(parsed.near_me ?? true),
+        city: parsed.city || null,
+        area: parsed.area || null,
+        min_rating: parsed.min_rating !== undefined ? Number(parsed.min_rating) || null : null,
+        sort_by: parsed.sort_by || 'distance',
+        has_coupons: Boolean(parsed.has_coupons),
+        is_open_now: Boolean(parsed.is_open_now),
+        dietary: Array.isArray(parsed.dietary) && parsed.dietary.length > 0 ? parsed.dietary : null,
         is_off_topic: Boolean(parsed.is_off_topic),
       };
     } catch (err) {

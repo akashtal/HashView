@@ -19,7 +19,6 @@ import {
   selectAILoading,
   selectAILoadingMore,
   selectAIError,
-  selectAIPagination,
   selectAISearchState,
 } from '../../store/slices/aiSearchSlice';
 
@@ -258,8 +257,16 @@ export default function AISearchScreen({ navigation }) {
   const loading        = useSelector(selectAILoading);
   const loadingMore    = useSelector(selectAILoadingMore);
   const error          = useSelector(selectAIError);
-  const pagination     = useSelector(selectAIPagination);
-  const { provider, fallbackUsed } = useSelector(selectAISearchState);
+  
+  // Destructured directly from stable slice state to resolve the react-redux memoization warning
+  const { 
+    totalCount, 
+    currentPage, 
+    totalPages, 
+    hasMore, 
+    provider, 
+    fallbackUsed 
+  } = useSelector(selectAISearchState);
 
   const [searchQuery, setSearchQuery]     = useState('');
   const [currentLocation, setCurrentLocation] = useState(null);
@@ -314,10 +321,10 @@ export default function AISearchScreen({ navigation }) {
   }, [dispatch]);
 
   const handleLoadMore = useCallback(() => {
-    if (!loading && !loadingMore && pagination.hasMore && searchQuery.trim()) {
+    if (!loading && !loadingMore && hasMore && searchQuery.trim()) {
       dispatch(performAISearch({
         query: searchQuery.trim(),
-        page: pagination.page + 1,
+        page: currentPage + 1,
         limit: 10,
         sessionId,
         ...(currentLocation ? {
@@ -327,7 +334,7 @@ export default function AISearchScreen({ navigation }) {
         } : {}),
       }));
     }
-  }, [loading, loadingMore, pagination, searchQuery, currentLocation, sessionId, dispatch]);
+  }, [loading, loadingMore, hasMore, currentPage, searchQuery, currentLocation, sessionId, dispatch]);
 
   const handleSuggestion = useCallback((query) => {
     setSearchQuery(query);
@@ -357,11 +364,11 @@ export default function AISearchScreen({ navigation }) {
       )}
       {hasSearched && !loading && businesses.length > 0 && (
         <Text style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 12 }}>
-          {pagination.total} result{pagination.total !== 1 ? 's' : ''} found
+          {totalCount} result{totalCount !== 1 ? 's' : ''} found
         </Text>
       )}
     </View>
-  ), [message, appliedFilters, businesses.length, hasSearched, loading, pagination.total, provider, fallbackUsed]);
+  ), [message, appliedFilters, businesses.length, hasSearched, loading, totalCount, provider, fallbackUsed]);
 
   const ListEmpty = useCallback(() => {
     if (loading) return null;
@@ -442,12 +449,12 @@ export default function AISearchScreen({ navigation }) {
         <ActivityIndicator size="small" color="#5e399e" />
         <Text style={{ fontSize: 12, color: '#9CA3AF', marginTop: 6 }}>Loading more...</Text>
       </View>
-    ) : (!pagination.hasMore && businesses.length > 0 ? (
+    ) : (!hasMore && businesses.length > 0 ? (
       <View style={{ paddingVertical: 20, alignItems: 'center' }}>
         <Text style={{ fontSize: 12, color: '#D1D5DB' }}>— End of results —</Text>
       </View>
     ) : null)
-  ), [loadingMore, pagination.hasMore, businesses.length]);
+  ), [loadingMore, hasMore, businesses.length]);
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 

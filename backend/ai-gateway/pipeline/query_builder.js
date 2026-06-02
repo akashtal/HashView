@@ -29,18 +29,23 @@ function buildQuery(intent, location, options = {}) {
 
   // ─── Stage 1: Geospatial (if location provided and near_me requested) ─────────
   if (location && (intent.near_me || !intent.city)) {
-    pipeline.push({
-      $geoNear: {
-        near: {
-          type: 'Point',
-          coordinates: [location.longitude, location.latitude],
-        },
-        distanceField: '_distance',      // metres from user
-        maxDistance: radius,
-        spherical: true,
-        query: { status: 'active' },     // Pre-filter: only active businesses
+    const isDev = process.env.NODE_ENV === 'development';
+    const geoNearStage = {
+      near: {
+        type: 'Point',
+        coordinates: [location.longitude, location.latitude],
       },
-    });
+      distanceField: '_distance',      // metres from user
+      spherical: true,
+      query: { status: 'active' },     // Pre-filter: only active businesses
+    };
+
+    // Only restrict search radius in production to allow global discovery/testing in dev
+    if (!isDev) {
+      geoNearStage.maxDistance = radius;
+    }
+
+    pipeline.push({ $geoNear: geoNearStage });
   } else {
     // No geospatial: filter active businesses only
     pipeline.push({ $match: { status: 'active' } });
