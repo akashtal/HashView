@@ -27,6 +27,10 @@ const settings = {
   openai: {
     apiKey: process.env.AI_OPENAI_API_KEY || '',
     model:  process.env.AI_OPENAI_MODEL   || 'gpt-4o-mini',
+    // visionModel is used exclusively for image-to-menu extraction.
+    // Set AI_OPENAI_VISION_MODEL to any vision-capable model (e.g. on OpenRouter).
+    // If not set, falls back to AI_OPENAI_MODEL.
+    visionModel: process.env.AI_OPENAI_VISION_MODEL || process.env.AI_OPENAI_MODEL || 'gpt-4o-mini',
     baseUrl: process.env.AI_OPENAI_BASE_URL || 'https://api.openai.com/v1',
   },
 
@@ -35,6 +39,35 @@ const settings = {
     apiKey: process.env.AI_ANTHROPIC_API_KEY || '',
     model:  process.env.AI_ANTHROPIC_MODEL   || 'claude-3-haiku-20240307',
     baseUrl: process.env.AI_ANTHROPIC_BASE_URL || 'https://api.anthropic.com',
+  },
+
+  // ─── Groq Config ───────────────────────────────────────────────────────────────────
+  // 100% free — 14,400 req/day, no billing. Sign up at https://console.groq.com
+  groq: {
+    apiKey:      process.env.AI_GROQ_API_KEY       || '',
+    model:       process.env.AI_GROQ_MODEL         || 'llama-3.3-70b-versatile',
+    visionModel: process.env.AI_GROQ_VISION_MODEL  || 'meta-llama/llama-4-scout-17b-16e-instruct',
+    baseUrl:     process.env.AI_GROQ_BASE_URL      || 'https://api.groq.com/openai/v1',
+  },
+
+  // ─── Google Gemini Config ─────────────────────────────────────────────────────
+  // Free tier: 1,500 req/day · 15 RPM · 1M TPM (Google AI Studio key, no billing)
+  // Get a key at: https://aistudio.google.com/apikey
+  gemini: {
+    apiKey:      process.env.AI_GEMINI_API_KEY      || '',
+    model:       process.env.AI_GEMINI_MODEL        || 'gemini-2.0-flash',
+    visionModel: process.env.AI_GEMINI_VISION_MODEL || process.env.AI_GEMINI_MODEL || 'gemini-2.0-flash',
+    baseUrl:     process.env.AI_GEMINI_BASE_URL     || 'https://generativelanguage.googleapis.com/v1beta/openai',
+  },
+
+  // ─── HuggingFace Config ──────────────────────────────────────────────────────
+  // Free tier — just needs a free HF account token (no billing)
+  // Token: https://huggingface.co/settings/tokens
+  huggingface: {
+    apiKey:      process.env.AI_HF_API_KEY       || '',
+    model:       process.env.AI_HF_MODEL         || 'meta-llama/Meta-Llama-3.1-8B-Instruct',
+    visionModel: process.env.AI_HF_VISION_MODEL  || 'Qwen/Qwen2.5-VL-7B-Instruct',
+    baseUrl:     process.env.AI_HF_BASE_URL      || 'https://router.huggingface.co/hf-inference/v1',
   },
 
   // ─── Search Pipeline Config ───────────────────────────────────────────────────

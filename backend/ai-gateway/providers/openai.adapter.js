@@ -27,6 +27,9 @@ class OpenAIAdapter extends AIProviderInterface {
     super(config);
     this.providerName = 'openai';
     this.modelName = config.model || 'gpt-4o-mini';
+    // Vision model may be different from the text model (e.g. a free vision model on OpenRouter)
+    // Falls back to the primary model if not configured separately.
+    this.visionModelName = config.visionModel || this.modelName;
     this.apiKey = config.apiKey || '';
     this.baseUrl = config.baseUrl || 'https://api.openai.com/v1';
     this.timeout = config.timeout || 20000;
@@ -163,73 +166,126 @@ class OpenAIAdapter extends AIProviderInterface {
 
   /**
    * Analyse a base64-encoded menu image and extract all visible items.
-   * Uses OpenAI vision (or any OpenRouter vision-capable model).
+   * Tries a prioritised list of confirmed vision-capable models with automatic
+   * fallover when a model is rate-limited (429) or unavailable (502/503).
    */
   async extractMenuFromImage(imageBase64, options = {}) {
     const mimeType = options.mimeType || 'image/jpeg';
     const currency = options.currency || 'GBP';
     const startTime = Date.now();
 
-    const body = {
-      model: this.modelName,
-      messages: [
-        { role: 'system', content: MENU_EXTRACTION_SYSTEM_PROMPT },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: `Please extract all menu items from this image. Use currency code: ${currency}.`,
-            },
-            {
-              type: 'image_url',
-              image_url: { url: `data:${mimeType};base64,${imageBase64}`, detail: 'high' },
-            },
-          ],
-        },
-      ],
-      temperature: 0.1,
-      max_tokens: 2000, // Reduced from 4096 to prevent 402 Payment Required errors for users with low OpenRouter credit balances
-    };
+    // Priority-ordered list of confirmed-working free vision models on OpenRouter.
+    // The env-configured AI_OPENAI_VISION_MODEL is always tried first.
+    const candidates = [
+      this.visionModelName,
+      'google/gemma-4-31b-it:free',
+      'google/gemma-4-26b-a4b-it:free',
+      'nvidia/nemotron-nano-12b-v2-vl:free',
+    ].filter((m, i, arr) => arr.indexOf(m) === i); // deduplicate
 
-    const response = await this._fetchWithTimeout(
-      `${this.baseUrl}/chat/completions`,
+    const buildMessages = () => ([
+      { role: 'system', content: MENU_EXTRACTION_SYSTEM_PROMPT },
       {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
-          // OpenRouter-specific headers (ignored by native OpenAI)
-          'HTTP-Referer': 'https://hashview.app',
-          'X-Title': 'HashView Menu Scanner',
-        },
-        body: JSON.stringify(body),
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: `Please extract all menu items from this image. Use currency code: ${currency}.`,
+          },
+          {
+            type: 'image_url',
+            image_url: { url: `data:${mimeType};base64,${imageBase64}`, detail: 'high' },
+          },
+        ],
       },
-      60000 // 60s timeout — vision can be slow
-    );
+    ]);
 
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Menu extraction API error ${response.status}: ${text}`);
+    let lastError = null;
+
+    for (const model of candidates) {
+      try {
+        console.log(`[OpenAI Adapter] Trying vision model: ${model}`);
+
+        const response = await this._fetchWithTimeout(
+          `${this.baseUrl}/chat/completions`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.apiKey}`,
+              'HTTP-Referer': 'https://hashview.app',
+              'X-Title': 'HashView Menu Scanner',
+            },
+            body: JSON.stringify({ model, messages: buildMessages(), temperature: 0.1, max_tokens: 4000 }),
+          },
+          60000
+        );
+
+        // Rate-limited or temporary backend error — try the next candidate
+        if (response.status === 429 || response.status === 502 || response.status === 503) {
+          const errText = await response.text();
+          console.warn(`[OpenAI Adapter] ${model} returned ${response.status} — skipping. ${errText.slice(0, 120)}`);
+          lastError = new Error(`${model} HTTP ${response.status}`);
+          continue;
+        }
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`Menu extraction API error ${response.status}: ${text}`);
+        }
+
+        const data = await response.json();
+        const message = data?.choices?.[0]?.message || {};
+        const rawContent = (message.content || '').trim();
+        const rawReasoning = (message.reasoning || '').trim();
+
+        console.log(`[OpenAI Adapter] ${model} → content(${rawContent.length}): ${rawContent.slice(0, 300)}`);
+
+        // If content is empty/[], fall back to the reasoning field (some models put answer there)
+        const contentToUse = (rawContent && rawContent !== '[]') ? rawContent : (rawReasoning || '[]');
+
+        const items = this._parseMenuJSON(contentToUse, currency);
+        const latencyMs = Date.now() - startTime;
+
+        console.log(`[OpenAI Adapter] extractMenuFromImage: ${items.length} items in ${latencyMs}ms via ${model}`);
+        return items;
+
+      } catch (err) {
+        console.warn(`[OpenAI Adapter] ${model} threw: ${err.message.slice(0, 200)}`);
+        lastError = err;
+      }
     }
 
-    const data = await response.json();
-    const content = data?.choices?.[0]?.message?.content || '[]';
-    const latencyMs = Date.now() - startTime;
-
-    const items = this._parseMenuJSON(content, currency);
-
-    console.log(`[OpenAI Adapter] extractMenuFromImage: extracted ${items.length} items in ${latencyMs}ms`);
-    return items;
+    throw lastError || new Error('All vision model candidates exhausted');
   }
 
   _parseMenuJSON(content, currency) {
     try {
-      // Strip any markdown code fences the model might add despite instructions
-      const clean = content
+      // 1. Strip <think>...</think> blocks (NVIDIA Nemotron, DeepSeek and other reasoning models
+      //    emit chain-of-thought reasoning inside these tags before the actual JSON output)
+      let clean = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
+      // 2. Strip markdown code fences the model might add despite instructions
+      clean = clean
         .replace(/```json?\n?/gi, '')
         .replace(/```/g, '')
         .trim();
+
+      // 3. If the model wrapped the array in an object, extract the array portion.
+      //    Also handles cases where there is trailing text after the closing bracket.
+      if (!clean.startsWith('[')) {
+        // Try to find a JSON array anywhere in the content
+        const arrayStart = clean.indexOf('[');
+        const arrayEnd = clean.lastIndexOf(']');
+        if (arrayStart !== -1 && arrayEnd !== -1 && arrayEnd > arrayStart) {
+          clean = clean.slice(arrayStart, arrayEnd + 1);
+        }
+      } else {
+        // Trim any trailing text after the last ]
+        const arrayEnd = clean.lastIndexOf(']');
+        if (arrayEnd !== -1) clean = clean.slice(0, arrayEnd + 1);
+      }
+
       const parsed = JSON.parse(clean);
       const arr = Array.isArray(parsed) ? parsed : (parsed.items || parsed.menu || []);
 

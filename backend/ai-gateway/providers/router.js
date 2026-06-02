@@ -24,10 +24,13 @@
 
 const settings = require('../config/settings');
 
-const MockAdapter     = require('./mock.adapter');
-const OllamaAdapter   = require('./ollama.adapter');
-const OpenAIAdapter   = require('./openai.adapter');
-const AnthropicAdapter = require('./anthropic.adapter');
+const MockAdapter        = require('./mock.adapter');
+const OllamaAdapter      = require('./ollama.adapter');
+const OpenAIAdapter      = require('./openai.adapter');
+const AnthropicAdapter   = require('./anthropic.adapter');
+const GeminiAdapter      = require('./gemini.adapter');
+const HuggingFaceAdapter = require('./huggingface.adapter');
+const GroqAdapter        = require('./groq.adapter');
 
 // ─── Adapter Factory ──────────────────────────────────────────────────────────
 
@@ -49,6 +52,27 @@ function createAdapter(providerName) {
         return new MockAdapter();
       }
       return new AnthropicAdapter(settings.anthropic);
+
+    case 'groq':
+      if (!settings.groq.apiKey) {
+        console.warn('[AI Router] Groq selected but AI_GROQ_API_KEY is not set. Falling back to mock.');
+        return new MockAdapter();
+      }
+      return new GroqAdapter(settings.groq);
+
+    case 'gemini':
+      if (!settings.gemini.apiKey) {
+        console.warn('[AI Router] Gemini selected but AI_GEMINI_API_KEY is not set. Falling back to mock.');
+        return new MockAdapter();
+      }
+      return new GeminiAdapter(settings.gemini);
+
+    case 'huggingface':
+      if (!settings.huggingface.apiKey) {
+        console.warn('[AI Router] HuggingFace selected but AI_HF_API_KEY is not set. Falling back to mock.');
+        return new MockAdapter();
+      }
+      return new HuggingFaceAdapter(settings.huggingface);
 
     case 'mock':
     default:
