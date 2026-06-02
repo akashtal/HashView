@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config(); // Nodemon force reload for .env changes
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
