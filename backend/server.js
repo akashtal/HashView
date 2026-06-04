@@ -38,6 +38,7 @@ const errorHandler = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
 const { initializeRedis, closeRedis } = require('./config/redis');
 const { checkNotificationReceipts } = require('./utils/notification');
+const { metricsMiddleware, renderMetrics } = require('./middleware/metrics.middleware');
 
 // Import models
 const User = require('./models/User.model');
@@ -90,6 +91,26 @@ app.use(morgan('combined', { stream: { write: message => logger.info(message.tri
 // Static files
 app.use('/uploads', express.static('uploads'));
 app.use('/public', express.static('public'));
+
+// ── Metrics collection middleware (must be early, before routes) ───────────────────
+// Tracks request count, latency, errors, and active users for Grafana Cloud.
+app.use(metricsMiddleware);
+
+// ── Prometheus /metrics endpoint (scraped by Grafana Cloud) ───────────────────
+// Protected by a bearer token to prevent public access.
+// Set GRAFANA_METRICS_TOKEN in .env — the same value must be configured
+// as a header in your Grafana Cloud scrape job.
+app.get('/metrics', (req, res) => {
+  const token = process.env.GRAFANA_METRICS_TOKEN;
+  if (token) {
+    const authHeader = req.headers['authorization'] || '';
+    if (authHeader !== `Bearer ${token}`) {
+      return res.status(401).send('Unauthorized');
+    }
+  }
+  res.set('Content-Type', 'text/plain; version=0.0.4');
+  res.send(renderMetrics());
+});
 
 // Smart QR redirect route - serves landing page with business ID
 app.get('/business/:id', (req, res) => {

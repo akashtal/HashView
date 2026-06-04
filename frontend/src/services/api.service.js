@@ -2,6 +2,7 @@ import ToastService from '../utils/ToastService';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_CONFIG } from '../config/api.config';
+import Monitoring from './monitoring.service';
 
 // Create axios instance
 const apiClient = axios.create({
@@ -35,46 +36,38 @@ apiClient.interceptors.response.use(
   (response) => response.data,
   async (error) => {
     const originalRequest = error.config;
+    const endpoint = originalRequest?.url || 'unknown';
 
     // Check if network error or connection refused (Primary Down)
     if (!originalRequest._retry && (error.code === 'ERR_NETWORK' || error.message.includes('Network Error'))) {
-      console.log('🔍 Primary server error details:', {
-        code: error.code,
-        message: error.message,
-        config: {
-          url: originalRequest.url,
-          baseURL: originalRequest.baseURL,
-          timeout: originalRequest.timeout
-        }
-      });
       console.warn('⚠️ Primary server unreachable. Switching to Failover Server (Render)...');
 
+      // Track network failure in Sentry + PostHog
+      Monitoring.Events.networkError(endpoint);
+
       ToastService.showInfo('Connection Issue', 'Switching to backup server...');
-
-      originalRequest._retry = true; // Mark as retried
-
-      // Update Base URL to Secondary Request
+      originalRequest._retry = true;
       originalRequest.baseURL = API_CONFIG.SECONDARY_BASE_URL;
-
-      // Retry the request
       return apiClient(originalRequest);
     }
 
     if (error.response?.status === 401) {
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('user');
-      // Token expired or invalid, let auth handling mechanism redirect to login
-      // Preventing multiple toasts for session expiry as it might be annoying
     }
 
     const data = error.response?.data;
     let errorMessage = data?.message || error.message || 'Something went wrong';
-
     if (data?.reason) {
       errorMessage = `${errorMessage} ${data.reason}`;
     }
 
-    // Show toast for visible errors (excluding 401 which are handled by redirect typically)
+    // Track API errors in monitoring platforms
+    if (error.response?.status && error.code !== 'ERR_CANCELED') {
+      Monitoring.Events.apiError(endpoint, error.response.status, errorMessage);
+    }
+
+    // Show toast for visible errors
     if (error.response?.status !== 401 && error.code !== 'ERR_CANCELED') {
       ToastService.showError('Error', errorMessage);
     }

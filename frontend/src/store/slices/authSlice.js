@@ -3,6 +3,7 @@ import { AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ApiService from '../../services/api.service';
 import NotificationService from '../../services/notification.service';
+import Monitoring from '../../services/monitoring.service';
 
 // ─── Helper to extract subscription + freeTrial safely from API response ─────
 const extractSubscription = (user) => ({
@@ -18,10 +19,10 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
+      Monitoring.Events.loginStarted(credentials.method || 'email');
       const response = await ApiService.login(credentials);
 
       // Validate Role match
-      // If the user requested a specific role (and it's not admin), ensure the response matches
       if (
         credentials.role &&
         response.user.role !== 'admin' &&
@@ -45,8 +46,10 @@ export const login = createAsyncThunk(
         console.log('⚠️ Could not register push token:', error);
       }
 
+      Monitoring.Events.loginSuccess(response.user, credentials.method || 'email');
       return response;
     } catch (error) {
+      Monitoring.Events.loginFailed(credentials.method || 'email', error.message);
       return rejectWithValue(error.message);
     }
   }
@@ -92,8 +95,10 @@ export const register = createAsyncThunk(
         console.log('⚠️ Could not register push token:', error);
       }
 
+      Monitoring.Events.registerSuccess(response.user, userData.method || 'email');
       return response;
     } catch (error) {
+      Monitoring.captureError(error, { feature: 'register' });
       return rejectWithValue(error.message);
     }
   }
@@ -127,6 +132,7 @@ export const loginWithPhone = createAsyncThunk(
 export const logout = createAsyncThunk(
   'auth/logout',
   async () => {
+    Monitoring.Events.logout();
     await AsyncStorage.removeItem('token');
     await AsyncStorage.removeItem('user');
   }
@@ -141,6 +147,8 @@ export const loadUser = createAsyncThunk(
         throw new Error('No token found');
       }
       const response = await ApiService.getMe();
+      // Re-identify user on session restore (app re-open)
+      Monitoring.identifyUser(response.user);
       return { user: response.user, token };
     } catch (error) {
       return rejectWithValue(error.message);
@@ -215,9 +223,10 @@ const authSlice = createSlice({
         state.freeTrial = sub.freeTrial;
         state.subscription = sub.subscription;
       }
-      // Store in AsyncStorage
+      // Store in AsyncStorage + identify in monitoring
       AsyncStorage.setItem('token', action.payload.token);
       AsyncStorage.setItem('user', JSON.stringify(action.payload.user));
+      Monitoring.Events.loginSuccess(action.payload.user, 'oauth');
     },
   },
   extraReducers: (builder) => {

@@ -9,6 +9,7 @@ import store from './src/store';
 import AppNavigator from './src/navigation/AppNavigator';
 import AnimatedSplashScreen from './src/components/AnimatedSplashScreen';
 import * as Sentry from '@sentry/react-native';
+import Monitoring from './src/services/monitoring.service';
 import * as Font from 'expo-font';
 import { 
   Ionicons, 
@@ -21,20 +22,41 @@ import {
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN || 'https://8fc528bac0775906eb4f09200b90fe2d@o4510752747028480.ingest.de.sentry.io/4510752828293200',
 
-  // Adds more context data to events (IP address, cookies, user, etc.)
-  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  // Environment tagging — shows prod vs dev errors separately in the dashboard
+  environment: __DEV__ ? 'development' : 'production',
+
+  // Attach PII (user email, IP) to errors so you know exactly who was affected
   sendDefaultPii: true,
 
-  // Enable Logs
+  // Structured logging forwarded to Sentry
   enableLogs: true,
 
-  // Configure Session Replay
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1,
-  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+  // ─── Performance Tracing ─────────────────────────────────────────────────
+  // tracesSampleRate: 0.2 means 20% of user sessions are traced end-to-end
+  // (frontend button click → API route → database query on the same trace)
+  tracesSampleRate: __DEV__ ? 1.0 : 0.2,
 
-  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
-  // spotlight: __DEV__,
+  // Distributed tracing: attach Sentry headers to all requests to your API
+  // so frontend errors and backend errors are linked on the same trace.
+  tracePropagationTargets: [
+    'localhost',
+    '192.168.',            // LAN dev
+    'api.hashview.co.uk',  // Production API
+  ],
+
+  // ─── Session Replay ──────────────────────────────────────────────────────
+  // replaysSessionSampleRate: record 10% of all sessions as video replays
+  // replaysOnErrorSampleRate: record 100% of sessions where an error occurs
+  replaysSessionSampleRate: __DEV__ ? 0 : 0.1,
+  replaysOnErrorSampleRate: 1.0,
+
+  integrations: [
+    Sentry.mobileReplayIntegration({
+      maskAllText: false,     // keep text visible for debugging
+      maskAllImages: false,
+    }),
+    Sentry.feedbackIntegration(), // shake-to-report bug widget
+  ],
 });
 
 LogBox.ignoreLogs([
@@ -97,6 +119,8 @@ export default Sentry.wrap(function App() {
   }, []);
 
   useEffect(() => {
+    // ─── Initialize Monitoring (PostHog + Firebase) ───────────────────────
+    Monitoring.init();
     console.log('🚀 App mounted - Starting initialization');
 
     // Load fonts

@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User.model');
 const BusinessOwner = require('../models/BusinessOwner.model');
 const { getEffectivePermissions } = require('../constants/rbac');
+const { Sentry } = require('../config/sentry');
 
 // Protect routes - Verify JWT token
 exports.protect = async (req, res, next) => {
@@ -51,6 +52,24 @@ exports.protect = async (req, res, next) => {
           message: 'Account is not active'
         });
       }
+
+      // ── Sentry: tag this request with the authenticated user's identity ──
+      // Every error that occurs downstream will now show:
+      //   • User ID, email, and role in the Sentry dashboard
+      //   • The exact API route that was being called
+      //   • The request trace linked to the frontend click
+      if (Sentry) {
+        Sentry.setUser({
+          id: req.user._id?.toString(),
+          email: req.user.email,
+          username: req.user.name,
+          role: req.user.role,
+        });
+        Sentry.setTag('user_role', req.user.role);
+      }
+
+      // Attach user ID to request headers for logging
+      req.userId = req.user._id?.toString();
 
       next();
     } catch (error) {
