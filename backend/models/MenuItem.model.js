@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { classifyMealTime } = require('../ai-gateway/utils/meal_classifier');
 
 const menuItemSchema = new mongoose.Schema({
   // ─── Relationship ────────────────────────────────────────────────────────────
@@ -112,6 +113,17 @@ const menuItemSchema = new mongoose.Schema({
     type: String,
     enum: ['active', 'inactive'],
     default: 'active'
+  },
+
+  // ─── AI Meal-Time Classification ──────────────────────────────────────────────
+  // System-assigned based on food name, description, and category.
+  // Values: 'breakfast' | 'lunch' | 'dinner' | 'all-day'
+  // Automatically set on save — business owners do NOT need to set this manually.
+  // An item can belong to multiple meal times (e.g. soup = ['lunch', 'dinner']).
+  suggestedMealTimes: {
+    type: [String],
+    enum: ['breakfast', 'lunch', 'dinner', 'all-day'],
+    default: []
   }
 
 }, {
@@ -142,7 +154,47 @@ menuItemSchema.index({ price: 1 });
 // Tags index: direct tag lookups (e.g. ["halal", "chicken"])
 menuItemSchema.index({ tags: 1 });
 
+// Meal-time index: AI meal-time filtering (e.g. "dinner near me")
+menuItemSchema.index({ business: 1, suggestedMealTimes: 1, status: 1 });
+
 // Display order index: sort within a menu category
 menuItemSchema.index({ business: 1, menuCategory: 1, sortOrder: 1 });
+
+// ─── Pre-Save Hook: Auto-classify meal time ───────────────────────────────────
+
+menuItemSchema.pre('save', function (next) {
+  // Only classify food/drink types — skip services, rooms, products
+  if (!['food', 'drink'].includes(this.type)) {
+    this.suggestedMealTimes = ['all-day'];
+    return next();
+  }
+
+  // Re-classify whenever the name, description, category, or time slots change
+  const changed = this.isNew ||
+    this.isModified('name') ||
+    this.isModified('description') ||
+    this.isModified('menuCategory') ||
+    this.isModified('availableTimeSlots') ||
+    this.suggestedMealTimes.length === 0;
+
+  if (changed) {
+    try {
+      const classified = classifyMealTime({
+        name:               this.name,
+        description:        this.description,
+        tags:               this.tags,
+        menuCategory:       this.menuCategory,
+        type:               this.type,
+        availableTimeSlots: this.availableTimeSlots,
+      });
+      this.suggestedMealTimes = classified;
+    } catch {
+      // Non-fatal: default to all-day if classifier throws
+      this.suggestedMealTimes = ['all-day'];
+    }
+  }
+
+  next();
+});
 
 module.exports = mongoose.model('MenuItem', menuItemSchema);

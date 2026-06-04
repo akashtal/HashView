@@ -23,6 +23,8 @@
   "author": "HashView Team",
   "license": "MIT",
   "dependencies": {
+    "@langchain/core": "^1.1.48",
+    "@langchain/groq": "^1.2.1",
     "@sendgrid/mail": "^8.1.0",
     "@sentry/node": "^7.99.0",
     "@sentry/profiling-node": "^1.3.3",
@@ -41,6 +43,7 @@
     "helmet": "^7.1.0",
     "joi": "^17.11.0",
     "jsonwebtoken": "^9.0.2",
+    "langchain": "^1.4.4",
     "mongoose": "^7.6.3",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",

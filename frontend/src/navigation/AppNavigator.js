@@ -159,6 +159,33 @@ export default function AppNavigator() {
     }
   }, [isAuthenticated, token]);
 
+  // ── Navigate directly to Login after guest logout ─────────────────────────
+  // When a guest user taps "Login" on the search wall, we:
+  //   1. Set a flag in AsyncStorage
+  //   2. dispatch(logout()) — this causes isAuthenticated to become false
+  //   3. AppNavigator switches to AuthNavigator (initial: RoleSelection)
+  //   4. This effect detects the flag and navigates directly to Login,
+  //      bypassing the RoleSelection screen entirely.
+  const prevIsAuthenticated = React.useRef(isAuthenticated);
+  useEffect(() => {
+    // Only fire when transitioning FROM authenticated TO unauthenticated
+    if (prevIsAuthenticated.current && !isAuthenticated && isReady) {
+      (async () => {
+        try {
+          const flag = await AsyncStorage.getItem('directLoginAfterGuest');
+          if (flag === '1') {
+            await AsyncStorage.removeItem('directLoginAfterGuest');
+            // Small delay to let AuthNavigator fully mount before navigating
+            setTimeout(() => {
+              navigationRef.current?.navigate('Login');
+            }, 150);
+          }
+        } catch { /* non-fatal */ }
+      })();
+    }
+    prevIsAuthenticated.current = isAuthenticated;
+  }, [isAuthenticated, isReady]);
+
   // ── Cleanup notification listeners on unmount ────────────────────────────
   // Listeners are SET UP inside NavigationContainer.onReady (below) to guarantee
   // the navigator is fully mounted before any navigation attempt is made.

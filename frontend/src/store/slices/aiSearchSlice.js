@@ -46,10 +46,13 @@ const initialState = {
 
   // AI metadata
   message: '',              // AI-generated summary, e.g. "Found 4 restaurants near you 🍗"
-  intent: null,             // Extracted intent filters
+  intent: null,             // Extracted intent filters (also passed to chat for context)
   appliedFilters: [],       // Filter chips for UI
   provider: null,           // Which AI provider was used
   fallbackUsed: false,      // Whether AI fallback (regex) was used
+  searchAccuracy: 'exact',  // 'exact' | 'partial' | 'related' | 'none'
+  matchNote: null,          // Shown when fuzzy matching was used
+  correctedQuery: null,     // Set when the AI corrected a spelling mistake
 
   // UI state
   loading: false,
@@ -77,6 +80,9 @@ const aiSearchSlice = createSlice({
       state.intent = null;
       state.appliedFilters = [];
       state.error = null;
+      state.searchAccuracy = 'exact';
+      state.matchNote = null;
+      state.correctedQuery = null;
     },
     setSessionId(state, action) {
       state.sessionId = action.payload;
@@ -121,10 +127,14 @@ const aiSearchSlice = createSlice({
           state.businesses = businesses || [];
           state.loading = false;
           state.message = message || '';
-          state.intent = intent || null;
+          state.intent = intent || null;           // store intent for chat context
           state.appliedFilters = appliedFilters || [];
           state.provider = meta?.provider || null;
           state.fallbackUsed = meta?.fallbackUsed || false;
+          state.sessionId = action.payload.sessionId || state.sessionId;
+          state.searchAccuracy = action.payload.searchAccuracy || 'exact';
+          state.matchNote = action.payload.matchNote || null;
+          state.correctedQuery = intent?.corrected_query || null;
           state.isAIAvailable = true;
           state.lastSearchAt = Date.now();
         }

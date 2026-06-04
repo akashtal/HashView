@@ -116,8 +116,11 @@ function rankResults(businesses, intent, location) {
 /**
  * Score how well the business's menu items match the intent.
  *
- * 1.0 = exact name match
+ * 1.0 = exact full phrase match
+ * 0.9 = phrase contained in name
+ * 0.8 = all individual keywords match (partial match)
  * 0.7 = tag match
+ * 0.5 = any individual keyword matches
  * 0.4 = description match
  * 0.0 = no match (or no menu filter)
  */
@@ -126,22 +129,43 @@ function computeMenuMatchScore(menuItems, intent) {
     return menuItems && menuItems.length > 0 ? 0.3 : 0.0; // Having any menu = small bonus
   }
 
-  const keyword = intent.menu_keyword.toLowerCase();
-  let bestScore = 0;
+  const keyword  = intent.menu_keyword.toLowerCase();
+  const keywords = intent.menu_keywords || null; // individual words for multi-word queries
+  let bestScore  = 0;
 
   for (const item of menuItems) {
     const itemName = (item.name || '').toLowerCase();
     const itemTags = (item.tags || []).map(t => t.toLowerCase());
     const itemDesc = (item.description || '').toLowerCase();
 
+    // Level 1: Exact full phrase
     if (itemName === keyword) { bestScore = 1.0; break; }
     if (itemName.includes(keyword)) { bestScore = Math.max(bestScore, 0.9); continue; }
+
+    // Level 2: All individual keywords present (multi-word partial match)
+    if (keywords && keywords.length > 1) {
+      const allWordsMatch = keywords.every(kw =>
+        itemName.includes(kw) || itemDesc.includes(kw) || itemTags.some(t => t.includes(kw))
+      );
+      if (allWordsMatch) { bestScore = Math.max(bestScore, 0.8); continue; }
+
+      // Level 3: Any individual keyword matches
+      const anyWordMatch = keywords.some(kw =>
+        itemName.includes(kw) || itemTags.some(t => t.includes(kw))
+      );
+      if (anyWordMatch) { bestScore = Math.max(bestScore, 0.5); continue; }
+    }
+
+    // Level 4: Tag matches
     if (itemTags.some(t => t === keyword)) { bestScore = Math.max(bestScore, 0.7); continue; }
     if (itemTags.some(t => t.includes(keyword))) { bestScore = Math.max(bestScore, 0.6); continue; }
+
+    // Level 5: Description match
     if (itemDesc.includes(keyword)) { bestScore = Math.max(bestScore, 0.4); }
   }
 
   return bestScore;
 }
+
 
 module.exports = { rankResults };

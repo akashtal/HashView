@@ -72,6 +72,9 @@ class MockAdapter extends AIProviderInterface {
     const intent = {
       category: null,
       menu_keyword: null,
+      menu_keywords: null,
+      meal_time: null,
+      corrected_query: null,
       price_max: null,
       price_min: null,
       near_me: true,  // Default: local discovery
@@ -141,11 +144,20 @@ class MockAdapter extends AIProviderInterface {
     if (dietary.length > 0) intent.dietary = dietary;
 
     // Menu keyword: extract nouns that look like food/service items
-    // If we found a category keyword, try to extract what the user actually wants
     const menuKeywordMatch = q.match(
-      /\b(pizza|chicken|burger|curry|sushi|steak|pasta|fish|chips|kebab|naan|biryani|massage|facial|manicure|pedicure|waxing|haircut|colour|color|highlights|blow dry|shave|trim)\b/i
+      /\b(pizza|chicken|burger|curry|sushi|steak|pasta|fish|chips|kebab|naan|biryani|chowmein|noodles|fried rice|egg fried rice|massage|facial|manicure|pedicure|waxing|haircut|colour|color|highlights|blow dry|shave|trim)\b/i
     );
-    if (menuKeywordMatch) intent.menu_keyword = menuKeywordMatch[1].toLowerCase();
+    if (menuKeywordMatch) {
+      intent.menu_keyword = menuKeywordMatch[1].toLowerCase();
+      // Auto-split multi-word keywords
+      const words = intent.menu_keyword.split(/\s+/).filter(w => w.length > 1);
+      if (words.length > 1) intent.menu_keywords = words;
+    }
+
+    // Meal time
+    if (/\b(dinner|evening meal|supper)\b/i.test(q)) intent.meal_time = 'dinner';
+    else if (/\b(lunch|midday|midday meal)\b/i.test(q)) intent.meal_time = 'lunch';
+    else if (/\b(breakfast|brunch|morning meal)\b/i.test(q)) intent.meal_time = 'breakfast';
 
     return intent;
   }

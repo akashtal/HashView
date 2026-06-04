@@ -7,6 +7,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
 import COLORS from '../../config/colors';
 import { debounce, optimizeImageUri } from '../../utils/performanceHelpers';
@@ -21,6 +22,12 @@ import {
   selectAIError,
   selectAISearchState,
 } from '../../store/slices/aiSearchSlice';
+import {
+  openChat, closeChat, clearChat,
+  selectChatIsOpen,
+} from '../../store/slices/aiChatSlice';
+import { logout } from '../../store/slices/authSlice';
+import ChatPanel from '../../components/ai/ChatPanel';
 
 // ─── Quick Suggestion Chips ───────────────────────────────────────────────────
 
@@ -213,7 +220,7 @@ const BusinessCard = React.memo(({ item, onPress }) => {
           </Text>
         </View>
 
-        {/* Matching menu items */}
+        {/* Matching menu items — label changes based on search accuracy */}
         {item.matchingMenuItems && item.matchingMenuItems.length > 0 && (
           <View style={{
             marginTop: 10, paddingTop: 10,
@@ -221,7 +228,7 @@ const BusinessCard = React.memo(({ item, onPress }) => {
             flexDirection: 'row', flexWrap: 'wrap',
           }}>
             <Text style={{ fontSize: 11, color: '#9CA3AF', marginRight: 6, alignSelf: 'center' }}>
-              Matching:
+              {item._matchType === 'related' ? 'Similar:' : item._matchType === 'partial' ? 'Related:' : 'Matching:'}
             </Text>
             {item.matchingMenuItems.slice(0, 3).map((menuItem, idx) => (
               <View key={idx} style={{
@@ -257,6 +264,8 @@ export default function AISearchScreen({ navigation }) {
   const loading        = useSelector(selectAILoading);
   const loadingMore    = useSelector(selectAILoadingMore);
   const error          = useSelector(selectAIError);
+  const isChatOpen     = useSelector(selectChatIsOpen);
+  const isGuest        = useSelector(state => state.auth.user?.isGuest === true);
   
   // Destructured directly from stable slice state to resolve the react-redux memoization warning
   const { 
@@ -265,12 +274,18 @@ export default function AISearchScreen({ navigation }) {
     totalPages, 
     hasMore, 
     provider, 
-    fallbackUsed 
+    fallbackUsed,
+    sessionId: searchSessionId,
+    intent: searchIntent,
+    searchAccuracy,
+    matchNote,
+    correctedQuery,
   } = useSelector(selectAISearchState);
 
   const [searchQuery, setSearchQuery]     = useState('');
   const [currentLocation, setCurrentLocation] = useState(null);
   const [hasSearched, setHasSearched]     = useState(false);
+  const [guestWallShown, setGuestWallShown] = useState(false);
   const [sessionId]                       = useState(() => `s_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`);
 
   const inputRef = useRef(null);
@@ -297,6 +312,15 @@ export default function AISearchScreen({ navigation }) {
 
   const runSearch = useCallback(async (query, page = 1) => {
     if (!query.trim()) return;
+
+    // Guest users cannot use AI search — show login wall instead
+    if (isGuest) {
+      Keyboard.dismiss();
+      setHasSearched(true);
+      setGuestWallShown(true);
+      return;
+    }
+
     setHasSearched(true);
     Keyboard.dismiss();
     dispatch(performAISearch({
@@ -310,13 +334,14 @@ export default function AISearchScreen({ navigation }) {
         radius: 10000,
       } : {}),
     }));
-  }, [currentLocation, sessionId, dispatch]);
+  }, [isGuest, currentLocation, sessionId, dispatch]);
 
   const handleTextChange = useCallback((text) => {
     setSearchQuery(text);
     if (text.length === 0) {
       dispatch(clearSearch());
       setHasSearched(false);
+      setGuestWallShown(false);
     }
   }, [dispatch]);
 
@@ -341,6 +366,16 @@ export default function AISearchScreen({ navigation }) {
     runSearch(query);
   }, [runSearch]);
 
+  // ─── Guest Login Handler ─────────────────────────────────────────────────────
+  // Store a flag so AppNavigator can navigate directly to the Login screen
+  // after the guest session is cleared (avoids RoleSelection detour).
+  const handleGuestLogin = useCallback(async () => {
+    try {
+      await AsyncStorage.setItem('directLoginAfterGuest', '1');
+    } catch { /* non-fatal */ }
+    dispatch(logout());
+  }, [dispatch]);
+
   const keyExtractor = useCallback((item) => item._id, []);
 
   const renderBusiness = useCallback(({ item }) => (
@@ -357,6 +392,38 @@ export default function AISearchScreen({ navigation }) {
       {message && hasSearched && (
         <AIMessageBanner message={message} provider={provider} fallbackUsed={fallbackUsed} />
       )}
+
+      {/* Spell-correction chip */}
+      {correctedQuery && hasSearched && !loading && (
+        <View style={{
+          flexDirection: 'row', alignItems: 'center',
+          backgroundColor: '#FFFBEB', borderRadius: 12,
+          paddingHorizontal: 12, paddingVertical: 8,
+          marginBottom: 10, borderWidth: 1, borderColor: '#FDE68A',
+        }}>
+          <Icon name="create-outline" size={14} color="#92400E" style={{ marginRight: 6 }} />
+          <Text style={{ fontSize: 12, color: '#92400E', flex: 1 }}>
+            Showing results for: <Text style={{ fontWeight: '700' }}>{correctedQuery}</Text>
+          </Text>
+        </View>
+      )}
+
+      {/* Fuzzy match note — shown when partial or related results are returned */}
+      {matchNote && hasSearched && !loading && (searchAccuracy === 'partial' || searchAccuracy === 'related') && (
+        <View style={{
+          flexDirection: 'row', alignItems: 'flex-start',
+          backgroundColor: '#FFFBEB', borderRadius: 14,
+          paddingHorizontal: 14, paddingVertical: 10,
+          marginBottom: 10, borderWidth: 1, borderColor: '#FCD34D',
+          borderLeftWidth: 4, borderLeftColor: '#F59E0B',
+        }}>
+          <Icon name="information-circle-outline" size={18} color="#92400E" style={{ marginRight: 8, marginTop: 1 }} />
+          <Text style={{ fontSize: 13, color: '#78350F', flex: 1, lineHeight: 19 }}>
+            {matchNote}
+          </Text>
+        </View>
+      )}
+
       {appliedFilters.length > 0 && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }}>
           {appliedFilters.map((f, i) => <FilterChip key={i} filter={f} />)}
@@ -365,13 +432,88 @@ export default function AISearchScreen({ navigation }) {
       {hasSearched && !loading && businesses.length > 0 && (
         <Text style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 12 }}>
           {totalCount} result{totalCount !== 1 ? 's' : ''} found
+          {searchAccuracy === 'partial' ? ' (similar matches)' : ''}
+          {searchAccuracy === 'related' ? ' (related options)' : ''}
         </Text>
       )}
     </View>
-  ), [message, appliedFilters, businesses.length, hasSearched, loading, totalCount, provider, fallbackUsed]);
+  ), [message, appliedFilters, businesses.length, hasSearched, loading, totalCount, provider, fallbackUsed, matchNote, searchAccuracy, correctedQuery]);
 
   const ListEmpty = useCallback(() => {
     if (loading) return null;
+
+    // ─── Guest Wall ───────────────────────────────────────────────────────────────
+    // Shown when a guest user has typed a query and tried to search.
+    if (isGuest && guestWallShown) {
+      return (
+        <View style={{ alignItems: 'center', paddingVertical: 32, paddingHorizontal: 16 }}>
+          {/* Icon container with gradient glow */}
+          <LinearGradient
+            colors={['#EDE9FE', '#DDD6FE']}
+            style={{
+              width: 88, height: 88, borderRadius: 44,
+              alignItems: 'center', justifyContent: 'center',
+              marginBottom: 20,
+              shadowColor: '#5e399e', shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.2, shadowRadius: 12, elevation: 6,
+            }}
+          >
+            <Icon name="lock-closed" size={38} color="#5e399e" />
+          </LinearGradient>
+
+          {/* Heading */}
+          <Text style={{
+            fontSize: 20, fontWeight: '800', color: '#1F1235',
+            textAlign: 'center', marginBottom: 10, letterSpacing: -0.3,
+          }}>
+            Login Required
+          </Text>
+
+          {/* Sub-text */}
+          <Text style={{
+            fontSize: 14, color: '#6B7280', textAlign: 'center',
+            lineHeight: 21, marginBottom: 8, paddingHorizontal: 8,
+          }}>
+            AI-powered smart search is available to{'\n'}registered users only.
+          </Text>
+          <Text style={{
+            fontSize: 13, color: '#9CA3AF', textAlign: 'center',
+            lineHeight: 19, marginBottom: 28, paddingHorizontal: 16,
+          }}>
+            Sign in to search restaurants, hotels, salons and more — with smart filters, deals, and personalised results.
+          </Text>
+
+          {/* Login button */}
+          <TouchableOpacity
+            onPress={handleGuestLogin}
+            activeOpacity={0.85}
+            style={{ width: '100%', borderRadius: 16, overflow: 'hidden', marginBottom: 14 }}
+          >
+            <LinearGradient
+              colors={['#5e399e', '#7C5CC4']}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+              style={{
+                paddingVertical: 16, alignItems: 'center',
+                flexDirection: 'row', justifyContent: 'center',
+              }}
+            >
+              <Icon name="log-in-outline" size={19} color="#fff" style={{ marginRight: 8 }} />
+              <Text style={{ fontSize: 16, fontWeight: '800', color: '#fff', letterSpacing: 0.2 }}>
+                Login to Search
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          {/* Create account link */}
+          <TouchableOpacity onPress={handleGuestLogin} activeOpacity={0.7}>
+            <Text style={{ fontSize: 13, color: '#5e399e', fontWeight: '600' }}>
+              Don't have an account?{' '}
+              <Text style={{ textDecorationLine: 'underline' }}>Sign up free</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
 
     if (!hasSearched) {
       return (
@@ -441,22 +583,23 @@ export default function AISearchScreen({ navigation }) {
         </Text>
       </View>
     );
-  }, [loading, hasSearched, error, searchQuery, runSearch, handleSuggestion]);
+  }, [loading, hasSearched, error, searchQuery, runSearch, handleSuggestion, isGuest, guestWallShown, handleGuestLogin]);
 
   const ListFooter = useCallback(() => (
-    loadingMore ? (
-      <View style={{ paddingVertical: 20, alignItems: 'center' }}>
-        <ActivityIndicator size="small" color="#5e399e" />
-        <Text style={{ fontSize: 12, color: '#9CA3AF', marginTop: 6 }}>Loading more...</Text>
-      </View>
-    ) : (!hasMore && businesses.length > 0 ? (
-      <View style={{ paddingVertical: 20, alignItems: 'center' }}>
-        <Text style={{ fontSize: 12, color: '#D1D5DB' }}>— End of results —</Text>
-      </View>
-    ) : null)
+    <View>
+      {/* Load more / end of results indicators */}
+      {loadingMore ? (
+        <View style={{ paddingVertical: 20, alignItems: 'center' }}>
+          <ActivityIndicator size="small" color="#5e399e" />
+          <Text style={{ fontSize: 12, color: '#9CA3AF', marginTop: 6 }}>Loading more...</Text>
+        </View>
+      ) : (!hasMore && businesses.length > 0 ? (
+        <View style={{ paddingVertical: 20, alignItems: 'center' }}>
+          <Text style={{ fontSize: 12, color: '#D1D5DB' }}>— End of results —</Text>
+        </View>
+      ) : null)}
+    </View>
   ), [loadingMore, hasMore, businesses.length]);
-
-  // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
     <View style={{ flex: 1, backgroundColor: '#F5F3FF' }}>
@@ -593,7 +736,7 @@ export default function AISearchScreen({ navigation }) {
           ListFooterComponent={ListFooter}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.4}
-          contentContainerStyle={{ padding: 18, paddingBottom: 50 }}
+          contentContainerStyle={{ padding: 18, paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           removeClippedSubviews
@@ -602,6 +745,63 @@ export default function AISearchScreen({ navigation }) {
           windowSize={5}
         />
       )}
+
+      {/* Sticky Bottom Button Container */}
+      {hasSearched && !loading && businesses.length > 0 && (
+        <View style={{
+          position: 'absolute',
+          bottom: Platform.OS === 'ios' ? 24 : 16,
+          left: 18,
+          right: 18,
+          backgroundColor: 'transparent',
+        }}>
+          <TouchableOpacity
+            onPress={() => {
+              dispatch(clearChat()); // fresh chat for this search
+              dispatch(openChat());
+            }}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#EDE9FF',
+              borderRadius: 24,
+              paddingVertical: 14,
+              paddingHorizontal: 20,
+              borderWidth: 1.5,
+              borderColor: '#DDD6FE',
+              shadowColor: '#5e399e',
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.15,
+              shadowRadius: 12,
+              elevation: 6,
+              gap: 8,
+            }}
+          >
+            <Icon name="sparkles" size={16} color="#5e399e" />
+            <Text style={{ fontSize: 14, color: '#5e399e', fontWeight: '700' }}>
+              Ask about these results
+            </Text>
+            <Icon name="chevron-up" size={14} color="#5e399e" />
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* ─── AI Chat Panel ─────────────────────────────────────────────────── */}
+      <ChatPanel
+        visible={isChatOpen}
+        onClose={() => dispatch(closeChat())}
+        onBusinessPress={(bizId) => {
+          dispatch(closeChat());
+          navigation.navigate('BusinessDetail', { businessId: bizId });
+        }}
+        searchSessionId={searchSessionId}
+        searchBusinessIds={businesses.map(b => b._id)}
+        searchQuery={searchQuery}
+        searchIntent={searchIntent}
+        latitude={currentLocation?.latitude}
+        longitude={currentLocation?.longitude}
+      />
     </View>
   );
 }

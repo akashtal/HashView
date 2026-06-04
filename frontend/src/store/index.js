@@ -5,6 +5,7 @@ import reviewReducer from './slices/reviewSlice';
 import couponReducer from './slices/couponSlice';
 import notificationReducer from './slices/notificationSlice';
 import aiSearchReducer from './slices/aiSearchSlice';
+import aiChatReducer from './slices/aiChatSlice';
 import { initForegroundSubscriptionSync } from './slices/authSlice';
 
 export const store = configureStore({
@@ -15,6 +16,7 @@ export const store = configureStore({
     coupon: couponReducer,
     notification: notificationReducer,
     aiSearch: aiSearchReducer,
+    aiChat: aiChatReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

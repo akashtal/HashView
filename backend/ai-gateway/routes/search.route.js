@@ -128,19 +128,51 @@ router.post('/', async (req, res) => {
     }
 
     // ─── Layer 3: Query Builder ───────────────────────────────────────────────
-    let pipeline = buildQuery(intent, location, options);
+    let pipeline = buildQuery(intent, location, options, 'exact');
 
-    // ─── Layer 4: Retrieval ───────────────────────────────────────────────────
+    // ─── Layer 4: Retrieval (with fuzzy fallback cascade) ─────────────────────
     const queryStart = Date.now();
     let { businesses, totalCount, queryMs } = await executeQuery(pipeline);
-
-    // Fallback: If no results were found and location was specified, run the query again without location constraints.
-    // This ensures businesses (e.g., seeding/demo data in the UK) are still found and displayed
-    // when a user or developer searches from a different region (like India).
+    let searchAccuracy = 'exact';   // 'exact' | 'partial' | 'related' | 'none'
+    let matchNote = null;           // Human-readable note shown to user
     let locationFallbackUsed = false;
+
+    // ─── Fuzzy Fallback (Tier 2 — word-split) ─────────────────────────────────
+    // Only try fuzzy when a menu keyword was the filtering criterion and 0 results found
+    if (totalCount === 0 && intent.menu_keyword && intent.menu_keywords?.length > 1) {
+      console.log(`[AI Search] Tier 1 (exact) returned 0. Trying Tier 2 (word-split) for "${intent.menu_keyword}"...`);
+      const tier2Pipeline = buildQuery(intent, location, options, 'partial');
+      const tier2Result = await executeQuery(tier2Pipeline);
+      if (tier2Result.totalCount > 0) {
+        businesses = tier2Result.businesses;
+        totalCount = tier2Result.totalCount;
+        searchAccuracy = 'partial';
+        matchNote = `No exact "${intent.menu_keyword}" found. Showing restaurants with related dishes you might enjoy.`;
+      }
+    }
+
+    // ─── Fuzzy Fallback (Tier 3 — any word + synonyms) ────────────────────────
+    if (totalCount === 0 && intent.menu_keyword) {
+      const keywords = intent.menu_keywords || [intent.menu_keyword];
+      console.log(`[AI Search] Tier 2 returned 0. Trying Tier 3 (related/synonyms) for "${intent.menu_keyword}"...`);
+      const tier3Pipeline = buildQuery(intent, location, options, 'related');
+      const tier3Result = await executeQuery(tier3Pipeline);
+      if (tier3Result.totalCount > 0) {
+        businesses = tier3Result.businesses;
+        totalCount = tier3Result.totalCount;
+        searchAccuracy = 'related';
+        matchNote = `"${intent.menu_keyword}" isn't listed exactly, but here are similar options you might like.`;
+      } else {
+        searchAccuracy = 'none';
+      }
+    }
+
+    // ─── Location Fallback (geo-independent retry) ─────────────────────────────
+    // If still 0 results and location was specified, retry without distance filter.
     if (totalCount === 0 && location) {
-      console.log(`[AI Search] 0 results found for query "${query}" with location (${location.latitude}, ${location.longitude}). Trying fallback query without location restriction...`);
-      const fallbackPipeline = buildQuery(intent, null, options);
+      console.log(`[AI Search] 0 results with location. Trying without location restriction...`);
+      const tier = searchAccuracy === 'none' ? 'related' : searchAccuracy === 'partial' ? 'partial' : 'exact';
+      const fallbackPipeline = buildQuery(intent, null, options, tier);
       const fallbackResult = await executeQuery(fallbackPipeline);
       businesses = fallbackResult.businesses;
       totalCount = fallbackResult.totalCount;
@@ -161,7 +193,8 @@ router.post('/', async (req, res) => {
       totalCount,
       options,
       intentMeta.provider,
-      intentMeta.fallbackUsed
+      intentMeta.fallbackUsed,
+      { searchAccuracy, matchNote }
     );
 
     const totalMs = Date.now() - requestStart;
@@ -191,7 +224,13 @@ router.post('/', async (req, res) => {
       ]);
     });
 
-    return res.json(response);
+    // Include sessionId and intent in response so the chat feature
+    // can immediately pick up context when the user opens chat after a search.
+    return res.json({
+      ...response,
+      sessionId,
+      intent,  // expose the extracted intent for the chat to use as context
+    });
 
   } catch (err) {
     // Log the failed search

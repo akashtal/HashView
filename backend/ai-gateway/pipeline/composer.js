@@ -21,8 +21,9 @@ const { getRouter } = require('../providers/router');
  * @param {boolean}  fallbackUsed     - Whether AI fallback was used
  * @returns {Promise<Object>} - Final response payload
  */
-async function composeResponse(rankedBusinesses, intent, query, totalCount, options, aiProvider, fallbackUsed) {
+async function composeResponse(rankedBusinesses, intent, query, totalCount, options, aiProvider, fallbackUsed, searchMeta = {}) {
   const { limit = 10, page = 1 } = options;
+  const { searchAccuracy = 'exact', matchNote = null } = searchMeta;
 
   // ─── Clean businesses for client consumption ──────────────────────────────────
   const cleanedBusinesses = rankedBusinesses.map(cleanBusiness);
@@ -63,6 +64,8 @@ async function composeResponse(rankedBusinesses, intent, query, totalCount, opti
       limit,
       hasMore: page < totalPages,
     },
+    searchAccuracy,              // 'exact' | 'partial' | 'related' | 'none'
+    matchNote,                   // Human-readable fuzzy-match note (null when exact)
     meta: {
       provider: aiProvider,
       fallbackUsed,
@@ -97,11 +100,13 @@ function cleanBusiness(biz) {
     distanceKm: _distance ? Math.round(_distance / 100) / 10 : null, // e.g. 1230m → 1.2km
     relevanceScore: _score,
     matchingMenuItems: (_menuItems || []).slice(0, 3).map(item => ({
-      _id: item._id,
-      name: item.name,
-      price: item.price,
-      currency: item.currency || 'GBP',
-      image: item.image?.url || null,
+      _id:          item._id,
+      name:         item.name,
+      price:        item.price,
+      currency:     item.currency || 'GBP',
+      image:        item.image?.url || null,
+      dietary:      item.dietary || [],
+      menuCategory: item.menuCategory || null,
     })),
     hasActiveDeals: (_coupons || []).length > 0,
     activeDealsCount: (_coupons || []).length,

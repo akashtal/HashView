@@ -54,6 +54,12 @@ app.use('/health', require('./routes/health.route'));
 // AI Search — requires authentication
 app.use('/search', requireAuth, require('./routes/search.route'));
 
+// AI Chat — requires authentication (streaming SSE responses)
+app.use('/chat', requireAuth, require('./routes/chat.route'));
+
+// AI Admin — batch operations, protected by admin secret header
+app.use('/admin', require('./routes/admin.route'));
+
 // ─── 404 for unknown AI routes ────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({
