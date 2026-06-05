@@ -2,58 +2,88 @@
  * HashView Monitoring Service
  * ─────────────────────────────────────────────────────────────────────────────
  * Single import point for all observability tools:
- *   • Sentry       → crash reporting, error tracking, session replay
- *   • PostHog      → product analytics, funnel tracking, rage-tap detection
- *   • Firebase     → analytics events, Crashlytics native crash reporting
- *
- * Usage:
- *   import Monitoring from '../services/monitoring.service';
- *
- *   Monitoring.identifyUser(user);          // call after login
- *   Monitoring.clearUser();                 // call after logout
- *   Monitoring.track('review_submitted', { businessId, rating });
- *   Monitoring.captureError(error, { feature: 'review', screen: 'ReviewPage' });
- *   Monitoring.breadcrumb('Submit button tapped', 'ui.click');
+ *   • Sentry          → crash reporting, error tracking, session replay
+ *   • PostHog         → product analytics, funnel tracking (via PostHogProvider)
+ *   • Firebase        → analytics events
+ *   • Crashlytics     → native Android/iOS crash reporting
  */
 
 import * as Sentry from '@sentry/react-native';
 
-// ─── PostHog — lazy import so it doesn't crash if not installed yet ───────────
-let PostHog = null;
 try {
-  PostHog = require('posthog-react-native').PostHog;
+  require('@react-native-firebase/app');
 } catch (e) {
-  // PostHog not yet installed — run: npm install posthog-react-native
+  // Firebase app not available
 }
 
-// ─── Firebase Analytics — lazy import ─────────────────────────────────────────
-let analytics = null;
+// ─── Firebase Analytics — namespaced API ────────────────────────────────────
+let firebaseAnalytics = null;
 try {
-  analytics = require('@react-native-firebase/analytics').default;
+  firebaseAnalytics = require('@react-native-firebase/analytics').default;
 } catch (e) {
   // Firebase Analytics not available
 }
 
-// ─── Firebase Crashlytics — lazy import ──────────────────────────────────────
-let crashlytics = null;
+// ─── Firebase Crashlytics — namespaced API ───────────────────────────────────
+let firebaseCrashlytics = null;
 try {
-  crashlytics = require('@react-native-firebase/crashlytics').default;
+  firebaseCrashlytics = require('@react-native-firebase/crashlytics').default;
 } catch (e) {
-  // Crashlytics not yet installed — run: npm install @react-native-firebase/crashlytics
+  // Crashlytics not available
 }
 
-// ─── PostHog singleton instance ───────────────────────────────────────────────
+// ─── PostHog client ref — set by App.js via Monitoring.setPostHogClient() ─────
+// PostHogProvider in App.js owns the real client; we store a reference here
+// so the service layer can call posthog.capture() outside of React components.
 let posthogClient = null;
+export const setPostHogClient = (client) => {
+  posthogClient = client;
+};
 
-export const initPostHog = () => {
-  if (!PostHog) return;
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT — called once from App.js useEffect at app startup
+// ─────────────────────────────────────────────────────────────────────────────
+const init = () => {
+
+  // ── 1. Firebase Crashlytics ────────────────────────────────────────────────
+  if (firebaseCrashlytics) {
+    try {
+      firebaseCrashlytics().setCrashlyticsCollectionEnabled(true);
+      firebaseCrashlytics().setAttribute('app_name', 'HashView');
+      firebaseCrashlytics().setAttribute('platform', 'react-native');
+      firebaseCrashlytics().log('HashView app initialized');
+      console.log('[Monitoring] Firebase Crashlytics enabled ✅');
+    } catch (e) {
+      console.warn('[Monitoring] Crashlytics init error:', e.message);
+    }
+  }
+
+  // ── 2. Firebase Analytics ──────────────────────────────────────────────────
+  if (firebaseAnalytics) {
+    try {
+      firebaseAnalytics().setAnalyticsCollectionEnabled(true);
+      console.log('[Monitoring] Firebase Analytics enabled ✅');
+    } catch (e) {
+      console.warn('[Monitoring] Firebase Analytics init error:', e.message);
+    }
+  }
+
+  // ── 3. Sentry — send startup breadcrumb + dev verification event ───────────
+  // This activates the Sentry react-native project dashboard.
+  // In dev mode it also sends one explicit message so you can confirm
+  // the connection in sentry.io → react-native project → Issues immediately.
   try {
-    posthogClient = new PostHog(
-      process.env.EXPO_PUBLIC_POSTHOG_API_KEY || '',
-      { host: 'https://eu.posthog.com' } // EU data residency (GDPR-friendly)
-    );
+    Sentry.addBreadcrumb({
+      message: 'HashView app started',
+      category: 'app.lifecycle',
+      level: 'info',
+    });
+    if (__DEV__) {
+      Sentry.captureMessage('[DEV] HashView frontend SDK connected and working', 'debug');
+      console.log('[Monitoring] Sentry frontend — test event sent ✅');
+    }
   } catch (e) {
-    console.warn('[Monitoring] PostHog init failed:', e.message);
+    console.warn('[Monitoring] Sentry breadcrumb error:', e.message);
   }
 };
 
@@ -99,19 +129,19 @@ const identifyUser = (user) => {
   }
 
   // ── Firebase Crashlytics: attach user to native crash reports ────────────
-  if (crashlytics) {
+  if (firebaseCrashlytics) {
     try {
-      crashlytics().setUserId(userId);
-      crashlytics().setAttribute('role', userRole);
-      crashlytics().setAttribute('email', userEmail);
+      firebaseCrashlytics().setUserId(userId);
+      firebaseCrashlytics().setAttribute('role', userRole);
+      firebaseCrashlytics().setAttribute('email', userEmail);
     } catch (e) { /* silent */ }
   }
 
   // ── Firebase Analytics: set user properties ──────────────────────────────
-  if (analytics) {
+  if (firebaseAnalytics) {
     try {
-      analytics().setUserId(userId);
-      analytics().setUserProperties({ role: userRole });
+      firebaseAnalytics().setUserId(userId);
+      firebaseAnalytics().setUserProperties({ role: userRole });
     } catch (e) { /* silent */ }
   }
 };
@@ -126,8 +156,10 @@ const clearUser = () => {
     try { posthogClient.reset(); } catch (e) { /* silent */ }
   }
 
-  if (crashlytics) {
-    try { crashlytics().setUserId(''); } catch (e) { /* silent */ }
+  if (firebaseCrashlytics) {
+    try {
+      firebaseCrashlytics().setUserId('');
+    } catch (e) { /* silent */ }
   }
 };
 
@@ -154,11 +186,11 @@ const captureError = (error, context = {}) => {
   });
 
   // Firebase Crashlytics (non-fatal)
-  if (crashlytics) {
+  if (firebaseCrashlytics) {
     try {
-      crashlytics().recordError(error);
-      if (feature) crashlytics().setAttribute('last_feature', feature);
-      if (screen) crashlytics().setAttribute('last_screen', screen);
+      firebaseCrashlytics().recordError(error);
+      if (feature) firebaseCrashlytics().setAttribute('last_feature', feature);
+      if (screen) firebaseCrashlytics().setAttribute('last_screen', screen);
     } catch (e) { /* silent */ }
   }
 
@@ -186,8 +218,10 @@ const captureMessage = (message, context = {}) => {
     Sentry.captureMessage(message, level);
   });
 
-  if (crashlytics) {
-    try { crashlytics().log(message); } catch (e) { /* silent */ }
+  if (firebaseCrashlytics) {
+    try {
+      firebaseCrashlytics().log(message);
+    } catch (e) { /* silent */ }
   }
 };
 
@@ -231,20 +265,18 @@ const track = (eventName, properties = {}) => {
   }
 
   // Firebase Analytics
-  if (analytics) {
+  if (firebaseAnalytics) {
     try {
-      // Firebase event names must be snake_case ≤40 chars and match [a-zA-Z0-9_]
       const safeEventName = eventName
         .replace(/[^a-zA-Z0-9_]/g, '_')
         .slice(0, 40);
-      // Firebase only accepts string/number/boolean property values
       const safeProps = {};
       Object.entries(properties).forEach(([k, v]) => {
         if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
           safeProps[k.slice(0, 24)] = typeof v === 'string' ? v.slice(0, 100) : v;
         }
       });
-      analytics().logEvent(safeEventName, safeProps);
+      firebaseAnalytics().logEvent(safeEventName, safeProps);
     } catch (e) { /* silent */ }
   }
 };
@@ -260,9 +292,9 @@ const trackScreen = (screenName, screenClass = '') => {
   breadcrumb(`Navigated to ${screenName}`, 'navigation', { screenName });
 
   // Firebase Analytics
-  if (analytics) {
+  if (firebaseAnalytics) {
     try {
-      analytics().logScreenView({
+      firebaseAnalytics().logScreenView({
         screen_name: screenName,
         screen_class: screenClass || screenName,
       });
@@ -277,9 +309,9 @@ const trackScreen = (screenName, screenClass = '') => {
   }
 
   // Crashlytics: track last screen user was on before a crash
-  if (crashlytics) {
+  if (firebaseCrashlytics) {
     try {
-      crashlytics().setAttribute('last_screen', screenName);
+      firebaseCrashlytics().setAttribute('last_screen', screenName);
     } catch (e) { /* silent */ }
   }
 };
@@ -299,7 +331,7 @@ const Events = {
     breadcrumb(`Login succeeded via ${method}`, 'auth');
     identifyUser(user);
     track('login_success', { method, role: user?.role });
-    if (analytics) { try { analytics().logLogin({ method }); } catch (e) {} }
+    if (firebaseAnalytics) { try { firebaseAnalytics().logEvent('login', { method }); } catch (e) {} }
   },
   loginFailed: (method, reason) => {
     track('login_failed', { method, reason });
@@ -308,7 +340,7 @@ const Events = {
   registerSuccess: (user, method) => {
     identifyUser(user);
     track('register_success', { method, role: user?.role });
-    if (analytics) { try { analytics().logSignUp({ method }); } catch (e) {} }
+    if (firebaseAnalytics) { try { firebaseAnalytics().logEvent('sign_up', { method }); } catch (e) {} }
   },
   logout: () => {
     track('logout');
@@ -402,10 +434,11 @@ const Events = {
   businessViewed: (businessId, businessName) => {
     breadcrumb(`Viewed business: ${businessName}`, 'navigation', { businessId });
     track('business_viewed', { business_id: businessId });
-    if (analytics) {
+    if (firebaseAnalytics) {
       try {
-        analytics().logViewItem({
-          items: [{ item_id: businessId, item_name: businessName?.slice(0, 50) }],
+        firebaseAnalytics().logEvent('view_item', {
+          item_id: businessId,
+          item_name: businessName?.slice(0, 50),
         });
       } catch (e) {}
     }
@@ -459,10 +492,22 @@ const Events = {
   },
 };
 
+// Force a native crash (Java/Objective-C) to verify and activate Firebase Crashlytics
+const triggerNativeCrash = () => {
+  console.log('💥 triggerNativeCrash called');
+  if (firebaseCrashlytics) {
+    console.log('💥 Calling firebaseCrashlytics().crash()...');
+    firebaseCrashlytics().crash();
+  } else {
+    throw new Error('Firebase Crashlytics is not loaded or available.');
+  }
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 const Monitoring = {
-  init: initPostHog,
+  init,                   // call once in App.js on mount
+  setPostHogClient,       // call from App.js after PostHogProvider is ready
   identifyUser,
   clearUser,
   captureError,
@@ -470,6 +515,7 @@ const Monitoring = {
   breadcrumb,
   track,
   trackScreen,
+  triggerNativeCrash,     // Call this to test/activate Crashlytics
   Events,
 };
 

@@ -1,0 +1,108 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Grafana Alloy Configuration for HashView Backend (EC2)
+// ─────────────────────────────────────────────────────────────────────────────
+// File location on EC2: /etc/alloy/config.alloy
+//
+// This config tells Alloy to:
+//   1. Scrape the HashView /metrics endpoint every 15 seconds
+//   2. Collect PM2 / Node.js logs from the system journal
+//   3. Push metrics  → Grafana Cloud Prometheus
+//   4. Push logs     → Grafana Cloud Loki
+//
+// After deploying, verify in Grafana Cloud:
+//   Explore → Prometheus → metric: http_requests_total
+//   Explore → Loki       → label: {job="hashview-backend"}
+
+// ─── 1. PROMETHEUS METRICS SCRAPE ────────────────────────────────────────────
+
+prometheus.scrape "hashview_backend" {
+  // Scrape the HashView /metrics endpoint every 15 seconds
+  targets = [{
+    __address__ = "localhost:5001",
+  }]
+
+  // Path to the Prometheus metrics endpoint
+  metrics_path = "/metrics"
+
+  // How often to scrape
+  scrape_interval = "15s"
+  scrape_timeout  = "10s"
+
+  // Bearer token to authenticate with the /metrics endpoint
+  // Must match GRAFANA_METRICS_TOKEN in backend .env
+  bearer_token = "hashview-metrics-secret-2025"
+
+  // Labels that appear on every metric in Grafana dashboards
+  // Makes it easy to filter by service or environment
+  extra_labels = {
+    job         = "hashview-backend",
+    environment = "production",
+    service     = "hashview-api",
+    host        = "ec2-hashview",
+  }
+
+  // Forward scraped metrics to the remote_write block below
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+// ─── 2. PROMETHEUS REMOTE WRITE → GRAFANA CLOUD ──────────────────────────────
+
+prometheus.remote_write "grafana_cloud" {
+  endpoint {
+    url = "https://prometheus-prod-55-prod-gb-south-1.grafana.net/api/prom/push"
+
+    basic_auth {
+      username = "3283306"
+      password = "glc_eyJvIjoiMTgwMDQ4NCIsIm4iOiJzdGFjay0xNjc5NTQxLWFsbG95LWhhc2h2aWV3IiwiayI6IjhqTUh1OGRISjI4VUlRM0Y5MjgyWVF6MyIsIm0iOnsiciI6InByb2QtZ2Itc291dGgtMSJ9fQ=="
+    }
+  }
+}
+
+// ─── 3. LOG COLLECTION (PM2 / systemd journal) ───────────────────────────────
+
+loki.source.journal "hashview_logs" {
+  // Collect logs from systemd journal for the hashview PM2 process
+  // Labels identify where logs came from in Grafana Loki
+  labels = {
+    job         = "hashview-backend",
+    environment = "production",
+    service     = "hashview-api",
+  }
+
+  // Forward collected logs to the Loki write block below
+  forward_to = [loki.write.grafana_cloud.receiver]
+}
+
+// ─── 4. LOKI REMOTE WRITE → GRAFANA CLOUD ────────────────────────────────────
+
+loki.write "grafana_cloud" {
+  endpoint {
+    url = "https://logs-prod-035.grafana.net/loki/api/v1/push"
+
+    basic_auth {
+      username = "1637328"
+      password = "glc_eyJvIjoiMTgwMDQ4NCIsIm4iOiJzdGFjay0xNjc5NTQxLWFsbG95LWhhc2h2aWV3IiwiayI6IjhqTUh1OGRISjI4VUlRM0Y5MjgyWVF6MyIsIm0iOnsiciI6InByb2QtZ2Itc291dGgtMSJ9fQ=="
+    }
+  }
+}
+
+// ─── 5. NODE EXPORTER (System metrics: CPU, RAM, Disk) ───────────────────────
+// Collects EC2 host-level metrics: CPU usage, memory, disk I/O, network
+
+prometheus.exporter.unix "ec2_system" {
+  // Enabled collectors
+  enable_collectors = ["cpu", "diskstats", "filesystem", "loadavg", "meminfo", "netdev", "uname"]
+}
+
+prometheus.scrape "ec2_system" {
+  targets    = prometheus.exporter.unix.ec2_system.targets
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+
+  extra_labels = {
+    job         = "ec2-system",
+    environment = "production",
+    host        = "ec2-hashview",
+  }
+
+  scrape_interval = "30s"
+}

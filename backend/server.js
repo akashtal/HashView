@@ -1,4 +1,7 @@
-require('dotenv').config(); // Nodemon force reload for .env changes
+// IMPORTANT: instrument.js must be the very first require — before dotenv, express, mongoose.
+// This lets Sentry patch Node's built-in http, mongoose, and redis modules from startup.
+const Sentry = require('./instrument');
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
@@ -9,7 +12,6 @@ const morgan = require('morgan');
 const http = require('http');
 const socketIO = require('socket.io');
 const cron = require('node-cron');
-const { initializeSentry, Sentry } = require('./config/sentry');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -46,11 +48,9 @@ const User = require('./models/User.model');
 // Initialize Express
 const app = express();
 
-// Initialize Sentry BEFORE other middleware
-initializeSentry(app);
-
-// Sentry request handler must be the first middleware on the app
-if (process.env.SENTRY_DSN && process.env.NODE_ENV === 'production') {
+// Sentry Express request/tracing handlers — must be first middleware
+// Works in all environments where SENTRY_DSN is set (not just production)
+if (process.env.SENTRY_DSN) {
   app.use(Sentry.Handlers.requestHandler());
   app.use(Sentry.Handlers.tracingHandler());
 }
@@ -126,6 +126,11 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Sentry debug route to trigger an intentional 500 error
+app.get('/debug-sentry', (req, res) => {
+  throw new Error('Sentry Backend Test Error - ' + new Date().toISOString());
+});
+
 // API Routes
 const supportRoutes = require('./routes/support.routes');
 
@@ -165,8 +170,9 @@ if (process.env.ENABLE_AUTO_SYNC !== 'false') {
   initializeSyncJobs();
 }
 
-// Sentry error handler must be before other error handlers
-if (process.env.SENTRY_DSN && process.env.NODE_ENV === 'production') {
+// Sentry error handler — catches all unhandled errors and sends to dashboard
+// Must be AFTER all routes, BEFORE the custom error handler
+if (process.env.SENTRY_DSN) {
   app.use(Sentry.Handlers.errorHandler());
 }
 

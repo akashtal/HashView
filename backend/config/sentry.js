@@ -63,32 +63,7 @@ const initializeSentry = (app) => {
 
     // ─── Error Filtering ──────────────────────────────────────────────────────
     beforeSend(event, hint) {
-      const error = hint.originalException;
-
-      if (!error) return event;
-
-      // Don't flood Sentry with user-caused validation errors
-      if (
-        error.message?.toLowerCase().includes('validation') ||
-        error.message?.toLowerCase().includes('invalid input') ||
-        error.message?.toLowerCase().includes('required field')
-      ) {
-        return null;
-      }
-
-      // Don't report 404 not-found errors
-      if (error.statusCode === 404 || error.status === 404) {
-        return null;
-      }
-
-      // Don't report JWT auth failures (they happen on every expired token)
-      if (
-        error.name === 'JsonWebTokenError' ||
-        error.name === 'TokenExpiredError'
-      ) {
-        return null;
-      }
-
+      // Allow all errors to pass through to Sentry as requested by the user
       return event;
     },
   });

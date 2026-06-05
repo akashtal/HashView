@@ -10,8 +10,6 @@ export default {
     assetBundlePatterns: ["**/*"],
 
     // ─── OTA Updates (EAS Update) ─────────────────────────────────────────────
-    // Lets you push JS/UI changes to all users instantly — no store review needed.
-    // Only change runtimeVersion when you add NEW native modules (requires store update).
     updates: {
       url: "https://u.expo.dev/d4838e65-984b-45e4-b2d8-a03d28a6fb43",
       enabled: true,
@@ -132,6 +130,7 @@ export default {
       ],
       "expo-font",
       "expo-asset",
+      "expo-localization",
       "expo-secure-store",
       [
         "expo-splash-screen",
@@ -143,13 +142,14 @@ export default {
       ],
       "expo-updates",
       "@react-native-firebase/app",
+      "@react-native-firebase/crashlytics",
       "expo-apple-authentication",
       [
         "@sentry/react-native/expo",
         {
           "url": "https://sentry.io/",
           "project": "react-native",
-          "organization": "hashview"
+          "organization": "hashview-qr"
         }
       ]
     ],

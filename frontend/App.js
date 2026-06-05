@@ -9,18 +9,34 @@ import store from './src/store';
 import AppNavigator from './src/navigation/AppNavigator';
 import AnimatedSplashScreen from './src/components/AnimatedSplashScreen';
 import * as Sentry from '@sentry/react-native';
-import Monitoring from './src/services/monitoring.service';
+import Monitoring, { setPostHogClient } from './src/services/monitoring.service';
+import { PostHogProvider, usePostHog } from 'posthog-react-native';
 import * as Font from 'expo-font';
-import { 
-  Ionicons, 
-  MaterialIcons, 
-  MaterialCommunityIcons, 
-  FontAwesome, 
-  Feather 
+import {
+  Ionicons,
+  MaterialIcons,
+  MaterialCommunityIcons,
+  FontAwesome,
+  Feather
 } from '@expo/vector-icons';
 
+// ─── MonitoringBridge ────────────────────────────────────────────────────────
+// Must be a CHILD of PostHogProvider to access the PostHog context.
+// Wires the PostHogProvider client into the monitoring service so
+// Monitoring.track() works outside React components (authSlice, api.service.js).
+function MonitoringBridge() {
+  const posthog = usePostHog();
+  useEffect(() => {
+    if (posthog) {
+      setPostHogClient(posthog);
+      console.log('[Monitoring] PostHog client wired ✅');
+    }
+  }, [posthog]);
+  return null;
+}
+
 Sentry.init({
-  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN || 'https://8fc528bac0775906eb4f09200b90fe2d@o4510752747028480.ingest.de.sentry.io/4510752828293200',
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN || 'https://60f954a3bddd424291b0f4429a0a20db@o4511507769982976.ingest.de.sentry.io/4511507772932176',
 
   // Environment tagging — shows prod vs dev errors separately in the dashboard
   environment: __DEV__ ? 'development' : 'production',
@@ -45,9 +61,9 @@ Sentry.init({
   ],
 
   // ─── Session Replay ──────────────────────────────────────────────────────
-  // replaysSessionSampleRate: record 10% of all sessions as video replays
+  // replaysSessionSampleRate: record 100% of sessions as video replays in dev, 10% in prod
   // replaysOnErrorSampleRate: record 100% of sessions where an error occurs
-  replaysSessionSampleRate: __DEV__ ? 0 : 0.1,
+  replaysSessionSampleRate: __DEV__ ? 1.0 : 0.1,
   replaysOnErrorSampleRate: 1.0,
 
   integrations: [
@@ -123,6 +139,17 @@ export default Sentry.wrap(function App() {
     Monitoring.init();
     console.log('🚀 App mounted - Starting initialization');
 
+    // 💥 Firebase Crashlytics Activation Trigger:
+    // To activate Crashlytics on Firebase console, change this flag to 'true',
+    // save, and let the app launch. It will native crash. Restart the app
+    // to upload the crash report. Then change this back to 'false'.
+    const TRIGGER_FIREBASE_CRASH = false;
+    if (TRIGGER_FIREBASE_CRASH) {
+      setTimeout(() => {
+        Monitoring.triggerNativeCrash();
+      }, 2000);
+    }
+
     // Load fonts
 
     // Initialize Notifications
@@ -171,22 +198,38 @@ export default Sentry.wrap(function App() {
   }, [isSplashComplete]);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Provider store={store}>
-        <ExpoStatusBar style="light" />
-        {!isSplashComplete && (
-          <AnimatedSplashScreen
-            onAnimationComplete={() => setIsSplashComplete(true)}
-            isReady={fontsLoaded}
-          />
-        )}
-        {isSplashComplete && (
-          <>
-            <AppNavigator />
-            <Toast />
-          </>
-        )}
-      </Provider>
-    </GestureHandlerRootView>
+    <PostHogProvider
+      apiKey={process.env.EXPO_PUBLIC_POSTHOG_API_KEY || 'phc_AHGyhoy6uMZyqMwxy6ZHiV3BouskvJUXGnPGHfG4YKeu'}
+      options={{
+        host: process.env.EXPO_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
+        // Automatically capture app open, app backgrounded, and screen views
+        captureNativeAppLifecycleEvents: true,
+        // Record session replays — pairs with Sentry replays for full coverage
+        enableSessionReplay: true,
+        sessionReplayConfig: {
+          maskAllTextInputs: false,  // keep text visible for debugging
+          maskAllImages: false,
+        },
+      }}
+    >
+      <MonitoringBridge />
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Provider store={store}>
+          <ExpoStatusBar style="light" />
+          {!isSplashComplete && (
+            <AnimatedSplashScreen
+              onAnimationComplete={() => setIsSplashComplete(true)}
+              isReady={fontsLoaded}
+            />
+          )}
+          {isSplashComplete && (
+            <>
+              <AppNavigator />
+              <Toast />
+            </>
+          )}
+        </Provider>
+      </GestureHandlerRootView>
+    </PostHogProvider>
   );
 });

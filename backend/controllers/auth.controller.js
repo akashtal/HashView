@@ -396,7 +396,7 @@ exports.login = async (req, res, next) => {
     }
 
     if (!user) {
-      console.log(`❌ Login failed: No account found for ${normalizedEmail}`);
+      logger.error(`Login failed: No account found for ${normalizedEmail}`);
       return res.status(401).json({
         success: false,
         message: 'No account found with this email. Please sign up first.'
@@ -405,7 +405,7 @@ exports.login = async (req, res, next) => {
 
     // Check for role mismatch (except for admins who can login from anywhere)
     if (role && userType !== 'admin' && userType !== role) {
-      console.log(`❌ Login blocked: Role mismatch. Requested: ${role}, Found: ${userType}`);
+      logger.error(`Login blocked: Role mismatch. Requested: ${role}, Found: ${userType}`);
       return res.status(401).json({
         success: false,
         message: `This email is registered as a ${userType} account. Please use the correct login section.`,
@@ -420,7 +420,7 @@ exports.login = async (req, res, next) => {
     });
 
     if (suspendedAccount) {
-      console.log(`❌ Login blocked: Account is suspended`);
+      logger.error(`Login blocked: Account is suspended for ${normalizedEmail}`);
       return res.status(403).json({
         success: false,
         message: 'This account has been suspended. Please contact support for assistance.',
@@ -432,7 +432,7 @@ exports.login = async (req, res, next) => {
     const isPasswordMatch = await user.comparePassword(password);
 
     if (!isPasswordMatch) {
-      console.log(`❌ Login failed: Password mismatch for ${normalizedEmail}`);
+      logger.error(`Login failed: Password mismatch for ${normalizedEmail}`);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'

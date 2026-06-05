@@ -1,4 +1,8 @@
+globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
+
 console.log("🔥 JS ENTRY POINT HIT - index.js is running");
+globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
+import '@react-native-firebase/app'; // Initialize Firebase Native App
 import { registerRootComponent } from 'expo';
 import App from './App';
 

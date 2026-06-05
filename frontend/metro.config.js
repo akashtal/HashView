@@ -14,7 +14,6 @@ config.resolver = {
   ...config.resolver,
   assetExts: config.resolver.assetExts.filter((ext) => ext !== 'svg'),
   sourceExts: [...config.resolver.sourceExts, 'svg'], // SVG support only
-  sourceExts: [...config.resolver.sourceExts, 'svg'], // SVG support only
   // unstable_enablePackageExports: false, // Removed to fix expo-notifications resolution
 
   // Force axios to use browser build since we disabled package exports
