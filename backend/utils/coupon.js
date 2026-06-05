@@ -10,7 +10,8 @@ exports.generateCouponCode = (length = 6) => {
   return `HASH-${code}`;
 };
 
-// Calculate coupon expiry (2 hours from now)
+// Calculate coupon expiry (kept for backwards compatibility but no longer used in review flow)
+// Review rewards now inherit the template's validUntil directly (null = no expiry)
 exports.calculateCouponExpiry = (hours = 2) => {
   const now = new Date();
   return new Date(now.getTime() + hours * 60 * 60 * 1000);
@@ -19,7 +20,8 @@ exports.calculateCouponExpiry = (hours = 2) => {
 // Validate coupon
 exports.isCouponValid = (coupon) => {
   if (coupon.status !== 'active') return false;
-  if (new Date() > new Date(coupon.validUntil)) return false;
+  // null validUntil means no expiry — coupon is valid indefinitely
+  if (coupon.validUntil && new Date() > new Date(coupon.validUntil)) return false;
   return true;
 };
 

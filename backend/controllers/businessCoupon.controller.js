@@ -183,12 +183,44 @@ exports.updateCoupon = async (req, res, next) => {
           message: 'Coupon code already exists. Please choose a different code.'
         });
       }
-      req.body.code = req.body.code.toUpperCase();
     }
+
+    // Build an explicit update payload — never pass raw req.body to Mongoose.
+    // Passing req.body directly allows the client to overwrite any field on the
+    // document (including internal fields like usageCount, redemptionCount, type,
+    // business, user). It also meant that date fields sent as empty strings or
+    // the literal string "null" were stored in MongoDB, which later caused
+    // "Cast to date failed for value" errors when review.controller.js tried
+    // to call new Date(template.validUntil) on those corrupted values.
+    const sanitizeDate = (value) => {
+      if (!value && value !== 0) return null; // null / undefined / '' / false → no expiry
+      const parsed = new Date(value);
+      return isNaN(parsed.getTime()) ? null : parsed; // reject invalid date strings
+    };
+
+    const updatePayload = {
+      ...(req.body.code       !== undefined && { code: req.body.code.toUpperCase() }),
+      ...(req.body.title      !== undefined && { title: req.body.title }),
+      ...(req.body.description !== undefined && { description: req.body.description }),
+      ...(req.body.discountType !== undefined && { rewardType: req.body.discountType }),
+      ...(req.body.rewardType  !== undefined && { rewardType: req.body.rewardType }),
+      ...(req.body.discountValue !== undefined && { rewardValue: req.body.discountValue }),
+      ...(req.body.rewardValue  !== undefined && { rewardValue: req.body.rewardValue }),
+      ...(req.body.itemName    !== undefined && { itemName: req.body.itemName }),
+      ...(req.body.minPurchaseAmount !== undefined && { minPurchaseAmount: req.body.minPurchaseAmount }),
+      ...(req.body.maxDiscountAmount !== undefined && { maxDiscountAmount: req.body.maxDiscountAmount }),
+      ...(req.body.usageLimit  !== undefined && { usageLimit: req.body.usageLimit }),
+      ...(req.body.redemptionLimit !== undefined && { redemptionLimit: req.body.redemptionLimit }),
+      ...(req.body.terms       !== undefined && { terms: req.body.terms }),
+      ...(req.body.isActive    !== undefined && { isActive: req.body.isActive }),
+      // Date fields: always sanitize — reject empty strings, "null", Invalid Date
+      ...('validFrom' in req.body && { validFrom: sanitizeDate(req.body.validFrom) }),
+      ...('validUntil' in req.body && { validUntil: sanitizeDate(req.body.validUntil) }),
+    };
 
     coupon = await Coupon.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updatePayload,
       { new: true, runValidators: true }
     );
 

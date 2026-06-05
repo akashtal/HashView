@@ -269,7 +269,9 @@ exports.register = async (req, res, next) => {
       const businessOwnerData = {
         name,
         email: email.toLowerCase(),
-        phone: normalizedPhone, // Use normalized phone (null if empty)
+        // Only include phone if provided — sparse index skips absent fields,
+        // but still indexes explicit null values (causing E11000 on second no-phone user)
+        ...(normalizedPhone && { phone: normalizedPhone }),
         passwordHash: password,
         role: 'business'
       };
@@ -292,7 +294,9 @@ exports.register = async (req, res, next) => {
       const userCreatePayload = {
         name,
         email: email.toLowerCase(),
-        phone: normalizedPhone, // Use normalized phone (null if empty)
+        // Only include phone if provided — sparse index skips absent fields,
+        // but still indexes explicit null values (causing E11000 on second no-phone user)
+        ...(normalizedPhone && { phone: normalizedPhone }),
         passwordHash: password,
         role: userRole
       };
@@ -343,6 +347,42 @@ exports.register = async (req, res, next) => {
         success: false,
         message: 'Validation failed',
         errors: errors
+      });
+    }
+    // Handle MongoDB duplicate key errors (E11000)
+    if (error.code === 11000) {
+      const keyPattern = error.keyPattern || {};
+      const keyValue  = error.keyValue  || {};
+      if (keyPattern.phone !== undefined) {
+        // phone: null duplicate → sparse index is missing — treat as "no phone conflict"
+        // This should not happen once the index is rebuilt as sparse, but guard anyway.
+        const dupPhone = keyValue.phone;
+        if (!dupPhone) {
+          // A second user with no phone hit a non-sparse unique index.
+          // Return a helpful internal message; this is a DB config issue, not a user error.
+          console.error('⚠️  phone_1 index is NOT sparse — run the fix-phone-index script to rebuild it.');
+          return res.status(500).json({
+            success: false,
+            message: 'Account creation is temporarily unavailable. Please try again later or contact support.'
+          });
+        }
+        return res.status(400).json({
+          success: false,
+          message: 'This phone number is already registered. Please login or use a different number.',
+          field: 'phone'
+        });
+      }
+      if (keyPattern.email !== undefined) {
+        return res.status(400).json({
+          success: false,
+          message: 'This email is already registered. Please login or use a different email.',
+          field: 'email'
+        });
+      }
+      // Generic duplicate key fallback
+      return res.status(400).json({
+        success: false,
+        message: 'An account with these details already exists.'
       });
     }
     next(error);

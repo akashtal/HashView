@@ -771,7 +771,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
       return false;
     }
     if (!formData.postcode || !formData.postcode.trim()) {
-      showErrorMessage('Please enter postcode');
+      showErrorMessage(formData.country === 'India' ? 'Please enter PIN code' : 'Please enter postcode');
       return false;
     }
 
@@ -1285,37 +1285,59 @@ export default function BusinessRegistrationScreen({ navigation }) {
             </View>
 
             <View className="flex-1 ml-2">
-              <Text className="text-gray-700 font-semibold mb-2 text-sm">Postcode *</Text>
-              <View className="bg-white rounded-xl border border-gray-300 flex-row items-center px-3 py-3 shadow-sm">
+              <Text className="text-gray-700 font-semibold mb-2 text-sm">{formData.country === 'India' ? 'PIN Code *' : 'Postcode *'}</Text>
+              <View
+                className="bg-white rounded-xl border flex-row items-center px-3 py-3 shadow-sm"
+                style={{ borderColor: '#E5E7EB' }}
+              >
                 <Icon name="mail" size={18} color="#6B7280" />
                 <TextInput
                   className="flex-1 ml-2 text-gray-900"
-                  placeholder="SW1A 1AA"
+                  placeholder={formData.country === 'India' ? '400001' : 'SW1A 1AA'}
                   placeholderTextColor="#9CA3AF"
                   value={formData.postcode || ''}
                   onChangeText={(value) => {
-                    const formatted = value.toUpperCase();
+                    const formatted = formData.country === 'India'
+                      ? value.replace(/\D/g, '')
+                      : value.toUpperCase();
                     const updated = { ...formData, postcode: formatted };
                     setFormData(updated);
                     updateFullAddress(updated);
                     setManualAddressDirty(true);
                   }}
-                  autoCapitalize="characters"
-                  maxLength={8}
+                  autoCapitalize={formData.country === 'India' ? 'none' : 'characters'}
+                  keyboardType={formData.country === 'India' ? 'numeric' : 'default'}
+                  maxLength={formData.country === 'India' ? 6 : 8}
                   style={{ fontSize: 15, fontWeight: '600' }}
                 />
               </View>
             </View>
           </View>
 
-          {/* Country (Read-only) */}
+          {/* Country Selector */}
           <View className="mb-3">
             <Text className="text-gray-700 font-semibold mb-2 text-sm">Country</Text>
-            <View className="bg-gray-100 rounded-xl border border-gray-300 flex-row items-center px-3 py-3">
-              <Icon name="globe" size={18} color="#6B7280" />
-              <Text className="flex-1 ml-3 text-gray-900 font-bold" style={{ fontSize: 15 }}>
-                🇬🇧 United Kingdom
-              </Text>
+            <View style={{ flexDirection: 'row' }}>
+              {['United Kingdom', 'India'].map((c) => (
+                <TouchableOpacity
+                  key={c}
+                  onPress={() => setFormData({ ...formData, country: c, postcode: '' })}
+                  style={{
+                    flex: 1,
+                    marginRight: c === 'United Kingdom' ? 6 : 0,
+                    paddingVertical: 11,
+                    borderRadius: 12,
+                    borderWidth: 2,
+                    borderColor: formData.country === c ? '#F97316' : '#D1D5DB',
+                    backgroundColor: formData.country === c ? '#FFF7ED' : '#F9FAFB',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: formData.country === c ? '#F97316' : '#6B7280' }}>
+                    {c === 'United Kingdom' ? '🇬🇧 United Kingdom' : '🇮🇳 India'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
 
@@ -1974,12 +1996,15 @@ export default function BusinessRegistrationScreen({ navigation }) {
           console.log('✅ Location selected:', selectedLocation);
         }}
         initialLocation={
-          // Always open the map picker centered on the UK.
-          // Only use the previously-picked location if the user has already chosen one via the picker.
+          // Open the map on the previously-picked location if the user already chose one via the picker,
+          // otherwise default to the centre of the selected country.
           (location.latitude && location.pickerSelected)
             ? location
-            : { latitude: 51.5072, longitude: -0.1276 } // London, UK
+            : formData.country === 'India'
+              ? { latitude: 28.6139, longitude: 77.2090 }  // New Delhi, India
+              : { latitude: 51.5072, longitude: -0.1276 }  // London, UK
         }
+        country={formData.country}
         googleApiKey={GOOGLE_API_KEY}
       />
 

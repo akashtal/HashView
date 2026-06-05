@@ -237,13 +237,31 @@ mongoose.connect(process.env.MONGODB_URI, {
     // Initialize Redis (optional)
     await initializeRedis();
 
-    // CRM-123 FIX: Drop problematic phone index causing Apple Sign-In errors
+    // CRM-123 FIX: Ensure users.phone_1 index is sparse so multiple users can register without a phone.
+    // This check replaces the old "always drop" approach which was destroying the correct sparse index on every boot.
     try {
-      await mongoose.connection.collection('users').dropIndex('phone_1');
-      console.log('✅ FIXED: Dropped old users.phone_1 index');
+      const userIndexes = await mongoose.connection.collection('users').indexes();
+      const phoneIdx = userIndexes.find(i => i.name === 'phone_1');
+      if (phoneIdx && !phoneIdx.sparse) {
+        // Old non-sparse index found — drop and recreate as sparse
+        await mongoose.connection.collection('users').dropIndex('phone_1');
+        await mongoose.connection.collection('users').createIndex(
+          { phone: 1 },
+          { unique: true, sparse: true, name: 'phone_1' }
+        );
+        console.log('✅ CRM-123: Rebuilt users.phone_1 as sparse unique index.');
+      } else if (!phoneIdx) {
+        // Index missing entirely — create it
+        await mongoose.connection.collection('users').createIndex(
+          { phone: 1 },
+          { unique: true, sparse: true, name: 'phone_1' }
+        );
+        console.log('✅ CRM-123: Created users.phone_1 sparse unique index.');
+      } else {
+        console.log('✅ CRM-123: users.phone_1 is already sparse — no action needed.');
+      }
     } catch (e) {
-      // Ignore if index not found
-      console.log('ℹ️  Index check: ' + e.message);
+      console.log('ℹ️  CRM-123 index check: ' + e.message);
     }
 
     // Create default admin account

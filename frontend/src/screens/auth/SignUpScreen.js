@@ -25,6 +25,8 @@ export default function SignUpScreen({ navigation, route }) {
   const { loading } = useSelector((state) => state.auth);
   const role = route.params?.role || 'customer';
   const UK_POSTCODE_REGEX = /^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$/i;
+  const INDIA_PIN_REGEX = /^\d{6}$/;
+  const SUPPORTED_COUNTRIES = ['United Kingdom', 'India'];
 
   const [formData, setFormData] = useState({
     name: '',
@@ -84,27 +86,25 @@ export default function SignUpScreen({ navigation, route }) {
       newErrors.email = 'Please enter a valid email address';
     }
 
-    // Phone validation - OPTIONAL for sign-up, but validate format if provided
-    if (formData.phone.trim()) {
+    // Phone validation - OPTIONAL for sign-up, only validate if user actually typed digits
+    // NOTE: formData.phone always contains the country code prefix (+91, +44 etc.) even when empty,
+    //       so we check rawPhoneValue (just the digits the user typed) instead.
+    if (rawPhoneValue.trim()) {
       const isValidPhone = phoneInputRef.current?.isValidNumber(rawPhoneValue);
       if (!isValidPhone) {
         newErrors.phone = 'Please enter a valid phone number';
       }
     }
 
-    // UK Address validation - OPTIONAL for sign-up, but validate format if provided
-    // If any address field is filled, validate the required ones
+    // Address validation - OPTIONAL section. Only validate if the user has filled at least one field.
+    // Building number is intentionally NOT required — many valid addresses omit it.
     const hasAnyAddressField = formData.buildingNumber.trim() ||
       formData.street.trim() ||
       formData.city.trim() ||
       formData.postcode.trim();
 
     if (hasAnyAddressField) {
-      // If user starts filling address, make key fields required
-      if (!formData.buildingNumber.trim()) {
-        newErrors.buildingNumber = 'Building number is required';
-      }
-
+      // Street, city and postcode/PIN are required if any address field is touched
       if (!formData.street.trim()) {
         newErrors.street = 'Street name is required';
       }
@@ -113,10 +113,13 @@ export default function SignUpScreen({ navigation, route }) {
         newErrors.city = 'Town/City is required';
       }
 
+      const isIndia = formData.country === 'India';
       if (!formData.postcode.trim()) {
-        newErrors.postcode = 'Postcode is required';
-      } else if (!UK_POSTCODE_REGEX.test(formData.postcode.trim())) {
-        newErrors.postcode = 'Please enter a valid UK postcode';
+        newErrors.postcode = isIndia ? 'PIN code is required' : 'Postcode is required';
+      } else if (isIndia && !INDIA_PIN_REGEX.test(formData.postcode.trim())) {
+        newErrors.postcode = 'Please enter a valid 6-digit Indian PIN code';
+      } else if (!isIndia && !UK_POSTCODE_REGEX.test(formData.postcode.trim())) {
+        newErrors.postcode = 'Please enter a valid UK postcode (e.g. SW1A 1AA)';
       }
     }
 
@@ -354,9 +357,34 @@ export default function SignUpScreen({ navigation, route }) {
               )}
             </View>
 
-            {/* UK Address Fields - shown for all platforms (OPTIONAL) */}
+            {/* Address Fields - UK or India */}
             <View className="mb-3">
-              <Text className="text-gray-900 font-semibold mb-2 text-sm">UK Address (Optional)</Text>
+              <Text className="text-gray-900 font-semibold mb-2 text-sm">Address</Text>
+
+              {/* Country Selector */}
+              <View className="flex-row mb-3">
+                {SUPPORTED_COUNTRIES.map((c) => (
+                  <TouchableOpacity
+                    key={c}
+                    onPress={() => setFormData({ ...formData, country: c, postcode: '' })}
+                    style={{
+                      flex: 1,
+                      marginRight: c === 'United Kingdom' ? 6 : 0,
+                      paddingVertical: 10,
+                      borderRadius: 12,
+                      borderWidth: 2,
+                      borderColor: formData.country === c ? COLORS.secondary : COLORS.gray200,
+                      backgroundColor: formData.country === c ? COLORS.secondary + '15' : '#F9FAFB',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: formData.country === c ? COLORS.secondary : COLORS.gray500 }}>
+                      {c === 'United Kingdom' ? '🇬🇧 United Kingdom' : '🇮🇳 India'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
               {/* Building Number & Street */}
               <View className="flex-row">
@@ -452,7 +480,9 @@ export default function SignUpScreen({ navigation, route }) {
                 </View>
 
                 <View className="flex-1 ml-2">
-                  <Text className="text-gray-700 font-medium mb-1 text-xs">Postcode</Text>
+                  <Text className="text-gray-700 font-medium mb-1 text-xs">
+                    {formData.country === 'India' ? 'PIN Code' : 'Postcode'}
+                  </Text>
                   <View
                     className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border"
                     style={{ borderColor: errors.postcode ? COLORS.error : COLORS.gray200 }}
@@ -460,16 +490,17 @@ export default function SignUpScreen({ navigation, route }) {
                     <Icon name="mail" size={18} color={errors.postcode ? COLORS.error : COLORS.gray500} />
                     <TextInput
                       className="flex-1 ml-3 text-gray-900 text-sm"
-                      placeholder="SW1A 1AA"
+                      placeholder={formData.country === 'India' ? '400001' : 'SW1A 1AA'}
                       placeholderTextColor={COLORS.gray400}
                       value={formData.postcode}
                       onChangeText={(text) => {
-                        const formatted = text.toUpperCase();
+                        const formatted = formData.country === 'India' ? text.replace(/\D/g, '') : text.toUpperCase();
                         setFormData({ ...formData, postcode: formatted });
                         if (errors.postcode) setErrors({ ...errors, postcode: null });
                       }}
-                      autoCapitalize="characters"
-                      maxLength={8}
+                      autoCapitalize={formData.country === 'India' ? 'none' : 'characters'}
+                      keyboardType={formData.country === 'India' ? 'numeric' : 'default'}
+                      maxLength={formData.country === 'India' ? 6 : 8}
                     />
                   </View>
                   {errors.postcode && (
@@ -478,13 +509,13 @@ export default function SignUpScreen({ navigation, route }) {
                 </View>
               </View>
 
-              {/* Country */}
+              {/* Country — read-only display after selector above */}
               <View className="mt-3">
                 <Text className="text-gray-700 font-medium mb-1 text-xs">Country</Text>
                 <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-3 border border-gray-200">
                   <Icon name="globe" size={18} color={COLORS.gray500} />
                   <Text className="flex-1 ml-3 text-gray-900 font-semibold text-sm">
-                    🇬🇧 {formData.country}
+                    {formData.country === 'India' ? '🇮🇳' : '🇬🇧'} {formData.country}
                   </Text>
                 </View>
               </View>

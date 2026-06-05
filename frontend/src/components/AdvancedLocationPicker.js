@@ -24,19 +24,26 @@ import COLORS from '../config/colors';
 const generateSessionToken = () => 'st_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
 const { width, height } = Dimensions.get('window');
-const UK_DEFAULT_COORDS = { latitude: 54.5, longitude: -3.3, latitudeDelta: 0.2, longitudeDelta: 0.2 };
+// Default map centres per supported country
+const DEFAULT_COORDS = {
+  'United Kingdom': { latitude: 54.5,  longitude: -3.3,  latitudeDelta: 8.0, longitudeDelta: 8.0 },
+  'India':          { latitude: 20.5,  longitude: 78.9,  latitudeDelta: 12.0, longitudeDelta: 12.0 },
+};
 
 export default function AdvancedLocationPicker({
   visible,
   onClose,
   onSelectLocation,
   initialLocation,
-  googleApiKey
+  googleApiKey,
+  country = 'United Kingdom'   // 'United Kingdom' | 'India'
 }) {
+  const defaultCoords = DEFAULT_COORDS[country] || DEFAULT_COORDS['United Kingdom'];
+  const countryCode   = country === 'India' ? 'in' : 'gb'; // Google Places country code
   const mapRef = useRef(null);
   const [region, setRegion] = useState({
-    latitude: initialLocation?.latitude ?? UK_DEFAULT_COORDS.latitude,
-    longitude: initialLocation?.longitude ?? UK_DEFAULT_COORDS.longitude,
+    latitude:  initialLocation?.latitude  ?? defaultCoords.latitude,
+    longitude: initialLocation?.longitude ?? defaultCoords.longitude,
     latitudeDelta: 0.005,
     longitudeDelta: 0.005,
   });
@@ -46,21 +53,21 @@ export default function AdvancedLocationPicker({
   const [isDragging, setIsDragging] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(false);
 
-  // When the picker becomes visible, snap to UK if no location was previously chosen
+  // When the picker becomes visible, snap to the correct country default if no prior location
   useEffect(() => {
     if (!visible) return;
     const startLat = initialLocation?.latitude;
     const startLng = initialLocation?.longitude;
-    const ukRegion = {
-      latitude: startLat ?? UK_DEFAULT_COORDS.latitude,
-      longitude: startLng ?? UK_DEFAULT_COORDS.longitude,
-      latitudeDelta: startLat ? 0.005 : UK_DEFAULT_COORDS.latitudeDelta,
-      longitudeDelta: startLng ? 0.005 : UK_DEFAULT_COORDS.longitudeDelta,
+    const snapRegion = {
+      latitude:      startLat ?? defaultCoords.latitude,
+      longitude:     startLng ?? defaultCoords.longitude,
+      latitudeDelta:  startLat ? 0.005 : defaultCoords.latitudeDelta,
+      longitudeDelta: startLng ? 0.005 : defaultCoords.longitudeDelta,
     };
-    setRegion(ukRegion);
+    setRegion(snapRegion);
     // Give the MapView 400ms to mount before animating
     setTimeout(() => {
-      mapRef.current?.animateToRegion(ukRegion, 500);
+      mapRef.current?.animateToRegion(snapRegion, 500);
     }, 400);
   }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -286,7 +293,7 @@ export default function AdvancedLocationPicker({
                   query={{
                     key: googleApiKey,
                     language: 'en',
-                    components: 'country:gb', // Limit to UK
+                    components: `country:${countryCode}`, // UK → 'country:gb', India → 'country:in'
                     sessiontoken: sessionTokenRef.current, // Groups keystrokes into one billable session
                   }}
                   fetchDetails={true}

@@ -356,91 +356,273 @@ exports.createReview = async (req, res, next) => {
     invalidateAndEmitTopReviewer(businessId);
 
     // ── SMART COUPON REWARD LOGIC ──────────────────────────────────────────
-    // 1. Fetch ALL active, non-expired coupon templates for the reviewed business
-    const now = new Date();
-    const allTemplates = await Coupon.find({
-      business: businessId,
-      type: 'business',
-      isActive: true,
-      $or: [{ validUntil: null }, { validUntil: { $gt: now } }]
-    });
+    // The review is already saved at this point. Everything below is reward
+    // issuance — if any of it fails, we MUST still return 201 so the user
+    // knows their review was accepted. Coupon failure is non-fatal.
+    try {
+      // 1. Fetch ALL active, non-expired coupon templates for the reviewed business
+      const now = new Date();
+      const allTemplates = await Coupon.find({
+        business: businessId,
+        type: 'business',
+        isActive: true,
+        $or: [{ validUntil: null }, { validUntil: { $gt: now } }]
+      });
 
-    // Filter out templates whose redemptionLimit has been fully reached (store scan limit)
-    // usageCount = how many times a coupon was issued after reviews
-    // redemptionCount = how many users actually scanned/redeemed at the store
-    // We gate by redemptionLimit (physical store redemptions), NOT usageCount (issued count)
-    const validTemplates = allTemplates.filter(t => {
-      if (t.redemptionLimit !== null && t.redemptionLimit !== undefined) {
-        return t.redemptionCount < t.redemptionLimit;
+      // Filter out templates whose redemptionLimit has been fully reached (store scan limit)
+      // usageCount = how many times a coupon was issued after reviews
+      // redemptionCount = how many users actually scanned/redeemed at the store
+      // We gate by redemptionLimit (physical store redemptions), NOT usageCount (issued count)
+      const validTemplates = allTemplates.filter(t => {
+        if (t.redemptionLimit !== null && t.redemptionLimit !== undefined) {
+          return t.redemptionCount < t.redemptionLimit;
+        }
+        if (t.usageLimit !== null && t.usageLimit !== undefined) {
+          return t.usageCount < t.usageLimit;
+        }
+        return true; // no limit set
+      });
+
+      // Pick a random template from the valid ones (so different coupons are offered)
+      let couponTemplate = null;
+      if (validTemplates.length > 0) {
+        couponTemplate = validTemplates[Math.floor(Math.random() * validTemplates.length)];
+        logger.info(`Picked template "${couponTemplate.title || couponTemplate.code}" (${couponTemplate._id}) from ${validTemplates.length} valid template(s) for business ${businessId}`);
       }
-      if (t.usageLimit !== null && t.usageLimit !== undefined) {
-        return t.usageCount < t.usageLimit;
-      }
-      return true; // no limit set
-    });
 
-    // Pick a random template from the valid ones (so different coupons are offered)
-    let couponTemplate = null;
-    if (validTemplates.length > 0) {
-      couponTemplate = validTemplates[Math.floor(Math.random() * validTemplates.length)];
-      logger.info(`Picked template "${couponTemplate.title || couponTemplate.code}" (${couponTemplate._id}) from ${validTemplates.length} valid template(s) for business ${businessId}`);
-    }
+      // Track which business the coupon will belong to (own or nearby)
+      let couponBusinessId = businessId;
+      let couponBusinessName = business.name;
+      let isNearbyCoupon = false;
 
-    // Track which business the coupon will belong to (own or nearby)
-    let couponBusinessId = businessId;
-    let couponBusinessName = business.name;
-    let isNearbyCoupon = false;
+      // 2. If this business has no valid template, find a nearby business (within 25 km) that does
+      if (!couponTemplate) {
+        logger.info(`No valid coupon template for business ${businessId} (${allTemplates.length} template(s) exist but all exhausted/expired). Searching nearby businesses...`);
 
-    // 2. If this business has no valid template, find a nearby business (within 5 km) that does
-    if (!couponTemplate) {
-      logger.info(`No valid coupon template for business ${businessId} (${allTemplates.length} template(s) exist but all exhausted/expired). Searching nearby businesses...`);
-
-      const nearbyBusinesses = await Business.aggregate([
-        {
-          $geoNear: {
-            near: { type: 'Point', coordinates: [businessLon, businessLat] },
-            distanceField: 'dist',
-            maxDistance: 5000, // 5 km
-            spherical: true,
-            query: { _id: { $ne: business._id }, status: 'active' }
-          }
-        },
-        { $limit: 20 }
-      ]);
-
-      for (const nb of nearbyBusinesses) {
-        const nbTemplates = await Coupon.find({
-          business: nb._id,
+        // Pre-fetch only business IDs that actually have active coupon templates
+        // so $geoNear doesn't have to scan every active business nearby
+        const activeCouponBizIds = await Coupon.distinct('business', {
           type: 'business',
           isActive: true,
           $or: [{ validUntil: null }, { validUntil: { $gt: now } }]
         });
 
-        const nbValid = nbTemplates.filter(t => {
-          if (t.redemptionLimit !== null && t.redemptionLimit !== undefined) {
-            return t.redemptionCount < t.redemptionLimit;
-          }
-          if (t.usageLimit !== null && t.usageLimit !== undefined) {
-            return t.usageCount < t.usageLimit;
-          }
-          return true;
-        });
+        const NEARBY_RADIUS_METERS = 25000; // 25 km — increase here if needed
 
-        if (nbValid.length > 0) {
-          couponTemplate = nbValid[Math.floor(Math.random() * nbValid.length)];
-          couponBusinessId = nb._id;
-          couponBusinessName = nb.name;
-          isNearbyCoupon = true;
-          logger.info(`Found nearby coupon template from business: ${nb.name} (${nb._id})`);
-          break;
+        const nearbyBusinesses = await Business.aggregate([
+          {
+            $geoNear: {
+              near: { type: 'Point', coordinates: [businessLon, businessLat] },
+              distanceField: 'dist',
+              maxDistance: NEARBY_RADIUS_METERS,
+              spherical: true,
+              query: { _id: { $in: activeCouponBizIds, $ne: business._id }, status: 'active' }
+            }
+          },
+          { $limit: 20 }
+        ]);
+
+        for (const nb of nearbyBusinesses) {
+          const nbTemplates = await Coupon.find({
+            business: nb._id,
+            type: 'business',
+            isActive: true,
+            $or: [{ validUntil: null }, { validUntil: { $gt: now } }]
+          });
+
+          const nbValid = nbTemplates.filter(t => {
+            if (t.redemptionLimit !== null && t.redemptionLimit !== undefined) {
+              return t.redemptionCount < t.redemptionLimit;
+            }
+            if (t.usageLimit !== null && t.usageLimit !== undefined) {
+              return t.usageCount < t.usageLimit;
+            }
+            return true;
+          });
+
+          if (nbValid.length > 0) {
+            couponTemplate = nbValid[Math.floor(Math.random() * nbValid.length)];
+            couponBusinessId = nb._id;
+            couponBusinessName = nb.name;
+            isNearbyCoupon = true;
+            logger.info(`Found nearby coupon template from business: ${nb.name} (${nb._id})`);
+            break;
+          }
         }
       }
-    }
 
-    // 3. If still no template found → no coupon, just return the review
-    if (!couponTemplate) {
-      logger.info(`No coupon template available (own or nearby) for review on business ${businessId}. Skipping coupon.`);
+      // 3. If still no template found → no coupon, return the review without one
+      if (!couponTemplate) {
+        logger.info(`No coupon template available (own or nearby) for review on business ${businessId}. Skipping coupon.`);
 
+        try {
+          const User = require('../models/User.model');
+          const user = await User.findById(req.user.id).select('name');
+          await sendPushNotification(
+            business.owner,
+            '⭐ New Review!',
+            `${user.name} left a ${rating}-star review for ${business.name}`,
+            {
+              type: 'review',
+              screen: 'BusinessDashboard',
+              reviewId: review._id.toString(),
+              businessId: businessId.toString()
+            }
+          );
+        } catch (notifError) {
+          console.error('❌ Failed to send review notification:', notifError);
+        }
+
+        return res.status(201).json({
+          success: true,
+          message: 'Review posted successfully',
+          review
+        });
+      }
+
+      // 5. Issue the coupon using exact template values
+      const couponCode = generateCouponCode();
+
+      // ── SAFE DATE SANITIZATION ───────────────────────────────────────────
+      // Some older coupon templates may have a validUntil stored as a
+      // non-Date value (e.g. string "null", empty string, or a malformed
+      // date string written by a previous code path that passed raw req.body
+      // directly to Mongoose). Calling new Date() on such a value produces
+      // an Invalid Date object which then causes Mongoose to throw:
+      //   "Cast to date failed for value ..."
+      // at Coupon.create() — AFTER the review was already saved — making
+      // the API return a 500 while the review exists with no coupon attached.
+      // We guard against this by checking isNaN before using the parsed date.
+      let couponExpiry = null;
+      if (couponTemplate.validUntil) {
+        const parsedExpiry = new Date(couponTemplate.validUntil);
+        if (!isNaN(parsedExpiry.getTime())) {
+          couponExpiry = parsedExpiry;
+        } else {
+          logger.warn(`⚠️ Coupon template ${couponTemplate._id} has invalid validUntil value: "${couponTemplate.validUntil}". Treating as no expiry.`);
+        }
+      }
+      // ────────────────────────────────────────────────────────────────────
+
+      const rewardType = couponTemplate.rewardType;
+      const rewardValue = couponTemplate.rewardValue;
+      const minPurchaseAmount = couponTemplate.minPurchaseAmount || 0;
+      const maxDiscountAmount = couponTemplate.maxDiscountAmount || null;
+      const title = couponTemplate.title || '';
+      const itemName = couponTemplate.itemName || '';
+
+      // Description: note nearby business if applicable
+      const description = isNearbyCoupon
+        ? `Reward from ${couponBusinessName}! ${couponTemplate.description || 'Thank you for your review.'}`
+        : (couponTemplate.description || 'Thank you for your review! Enjoy your reward.');
+
+      const terms = isNearbyCoupon
+        ? `Coupon for use at ${couponBusinessName}. ${couponTemplate.terms || 'Can be used once.'}`
+        : (couponTemplate.terms || 'Can be used once.');
+
+      const coupon = await Coupon.create({
+        type: 'review_reward',
+        business: couponBusinessId,  // ← own business ID or nearby business ID
+        user: req.user.id,
+        review: review._id,
+        code: couponCode,
+        title,
+        itemName,
+        rewardType,
+        rewardValue,
+        description,
+        validFrom: new Date(),
+        validUntil: couponExpiry, // null means no expiry
+        minPurchaseAmount,
+        maxDiscountAmount,
+        status: 'active',
+        terms
+      });
+
+      // Generate QR code data
+      const qrCodeData = JSON.stringify({
+        type: 'coupon',
+        couponId: coupon._id.toString(),
+        code: couponCode,
+        businessId: couponBusinessId.toString(),
+        userId: req.user.id.toString(),
+        reviewId: review._id.toString(),
+        timestamp: new Date().toISOString()
+      });
+      coupon.qrCodeData = qrCodeData;
+      await coupon.save();
+
+      // Increment template usage count (for analytics)
+      await Coupon.findByIdAndUpdate(couponTemplate._id, { $inc: { usageCount: 1 } });
+
+      review.couponAwarded = true;
+      review.coupon = coupon._id;
+      await review.save();
+
+      // Populate the coupon's business so the frontend can display the business name
+      await coupon.populate('business', 'name address phone');
+
+      // Send push notification to user
+      const couponMessage = rewardType === 'percentage'
+        ? `You've earned a ${rewardValue}% discount coupon from ${couponBusinessName}! Show it to the staff to redeem.`
+        : rewardType === 'fixed'
+          ? `You've earned a £${rewardValue} discount coupon from ${couponBusinessName}! Show it to the staff to redeem.`
+          : rewardType === 'buy1get1'
+            ? `You've earned a Buy 1 Get 1 coupon from ${couponBusinessName}! Show it to the staff to redeem.`
+            : `You've earned a free item coupon from ${couponBusinessName}! Show it to the staff to redeem.`;
+
+      await sendPushNotification(
+        req.user.id,
+        'Coupon Earned! 🎉',
+        couponMessage,
+        { type: 'coupon', couponId: coupon._id.toString() }
+      );
+
+      // Notify the reviewed business owner about this new review
+      try {
+        const User = require('../models/User.model');
+        const user = await User.findById(req.user.id).select('name');
+        await sendPushNotification(
+          business.owner,
+          '⭐ New Review!',
+          `${user.name} left a ${rating}-star review for ${business.name}`,
+          {
+            type: 'review',
+            screen: 'BusinessDashboard',
+            reviewId: review._id.toString(),
+            businessId: businessId.toString()
+          }
+        );
+        console.log(`✅ Notification sent to business owner for new review`);
+      } catch (notifError) {
+        console.error('❌ Failed to send review notification:', notifError);
+      }
+
+      return res.status(201).json({
+        success: true,
+        message: 'Review posted successfully',
+        review,
+        coupon,                         // includes populated business name
+        isNearbyCoupon,                 // frontend uses this to show "from [business]" label
+        couponBusinessName              // friendly name for display
+      });
+
+    } catch (couponError) {
+      // ── COUPON ISSUANCE FAILED — REVIEW IS STILL SAVED ──────────────────
+      // Any error inside the coupon block (CastError on validUntil, Mongoose
+      // ValidationError, network error, etc.) lands here. The review already
+      // exists in the database. We MUST return 201 so the frontend knows the
+      // review succeeded and shows the scratch card (no-coupon state).
+      // We log the full error so it is visible in production logs/Sentry.
+      logger.error(`❌ Coupon reward issuance failed for review ${review._id} on business ${businessId}. Review is saved but no coupon was created.`, {
+        reviewId: review._id,
+        businessId,
+        userId: req.user.id,
+        errorName: couponError.name,
+        errorMessage: couponError.message
+      });
+
+      // Notify the business owner about the new review even though reward failed
       try {
         const User = require('../models/User.model');
         const user = await User.findById(req.user.id).select('name');
@@ -456,125 +638,17 @@ exports.createReview = async (req, res, next) => {
           }
         );
       } catch (notifError) {
-        console.error('❌ Failed to send review notification:', notifError);
+        console.error('❌ Failed to send review notification after coupon error:', notifError);
       }
 
+      // Return success — the review was saved. No coupon in the response,
+      // so the frontend will show the scratch card in its "no reward" state.
       return res.status(201).json({
         success: true,
         message: 'Review posted successfully',
         review
       });
     }
-
-    // 5. Issue the coupon using exact template values (generating a unique code to avoid collision)
-    const couponCode = generateCouponCode();
-    // Use template's validUntil if set, otherwise no expiry (null = unlimited)
-    const couponExpiry = couponTemplate.validUntil
-      ? new Date(couponTemplate.validUntil)
-      : null;
-
-    const rewardType = couponTemplate.rewardType;
-    const rewardValue = couponTemplate.rewardValue;
-    const minPurchaseAmount = couponTemplate.minPurchaseAmount || 0;
-    const maxDiscountAmount = couponTemplate.maxDiscountAmount || null;
-    const title = couponTemplate.title || '';
-    const itemName = couponTemplate.itemName || '';
-
-    // Description: note nearby business if applicable
-    const description = isNearbyCoupon
-      ? `Reward from ${couponBusinessName}! ${couponTemplate.description || 'Thank you for your review.'}`
-      : (couponTemplate.description || 'Thank you for your review! Enjoy your reward.');
-
-    const terms = isNearbyCoupon
-      ? `Coupon for use at ${couponBusinessName}. ${couponTemplate.terms || 'Can be used once.'}`
-      : (couponTemplate.terms || 'Can be used once.');
-
-    const coupon = await Coupon.create({
-      type: 'review_reward',
-      business: couponBusinessId,  // ← own business ID or nearby business ID
-      user: req.user.id,
-      review: review._id,
-      code: couponCode,
-      title,
-      itemName,
-      rewardType,
-      rewardValue,
-      description,
-      validFrom: new Date(),
-      validUntil: couponExpiry, // null means no expiry
-      minPurchaseAmount,
-      maxDiscountAmount,
-      status: 'active',
-      terms
-    });
-
-    // Generate QR code data
-    const qrCodeData = JSON.stringify({
-      type: 'coupon',
-      couponId: coupon._id.toString(),
-      code: couponCode,
-      businessId: couponBusinessId.toString(),
-      userId: req.user.id.toString(),
-      reviewId: review._id.toString(),
-      timestamp: new Date().toISOString()
-    });
-    coupon.qrCodeData = qrCodeData;
-    await coupon.save();
-
-    // Increment template usage count (for analytics)
-    await Coupon.findByIdAndUpdate(couponTemplate._id, { $inc: { usageCount: 1 } });
-
-    review.couponAwarded = true;
-    review.coupon = coupon._id;
-    await review.save();
-
-    // Populate the coupon's business so the frontend can display the business name
-    await coupon.populate('business', 'name address phone');
-
-    // Send push notification to user
-    const couponMessage = rewardType === 'percentage'
-      ? `You've earned a ${rewardValue}% discount coupon from ${couponBusinessName}! Show it to the staff to redeem.`
-      : rewardType === 'fixed'
-        ? `You've earned a £${rewardValue} discount coupon from ${couponBusinessName}! Show it to the staff to redeem.`
-        : rewardType === 'buy1get1'
-          ? `You've earned a Buy 1 Get 1 coupon from ${couponBusinessName}! Show it to the staff to redeem.`
-          : `You've earned a free item coupon from ${couponBusinessName}! Show it to the staff to redeem.`;
-
-    await sendPushNotification(
-      req.user.id,
-      'Coupon Earned! 🎉',
-      couponMessage,
-      { type: 'coupon', couponId: coupon._id.toString() }
-    );
-
-    // Notify the reviewed business owner about this new review
-    try {
-      const User = require('../models/User.model');
-      const user = await User.findById(req.user.id).select('name');
-      await sendPushNotification(
-        business.owner,
-        '⭐ New Review!',
-        `${user.name} left a ${rating}-star review for ${business.name}`,
-        {
-          type: 'review',
-          screen: 'BusinessDashboard',
-          reviewId: review._id.toString(),
-          businessId: businessId.toString()
-        }
-      );
-      console.log(`✅ Notification sent to business owner for new review`);
-    } catch (error) {
-      console.error('❌ Failed to send review notification:', error);
-    }
-
-    res.status(201).json({
-      success: true,
-      message: 'Review posted successfully',
-      review,
-      coupon,                         // includes populated business name
-      isNearbyCoupon,                 // frontend uses this to show "from [business]" label
-      couponBusinessName              // friendly name for display
-    });
   } catch (error) {
     next(error);
   }
