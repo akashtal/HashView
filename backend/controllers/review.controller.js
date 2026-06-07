@@ -346,11 +346,17 @@ exports.createReview = async (req, res, next) => {
     const reviews = await Review.find({ business: businessId });
     const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 
-    business.rating.average = avgRating;
-    business.rating.count = reviews.length;
-    business.reviewCount = reviews.length;
-    business.lastReviewAt = new Date(); // ← stamp last review time for home screen cards
-    await business.save();
+    await Business.updateOne(
+      { _id: businessId },
+      {
+        $set: {
+          'rating.average': avgRating,
+          'rating.count': reviews.length,
+          reviewCount: reviews.length,
+          lastReviewAt: new Date()
+        }
+      }
+    );
 
     // Invalidate live top reviewer cache and trigger websocket update
     invalidateAndEmitTopReviewer(businessId);
