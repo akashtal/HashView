@@ -1,7 +1,6 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StatusBar, ScrollView, Image, Dimensions, RefreshControl } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StatusBar, ScrollView, Image, RefreshControl, Alert } from 'react-native';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -12,12 +11,12 @@ import COLORS from '../../config/colors';
 export default function CouponsScreen({ navigation }) {
   const dispatch = useDispatch();
   const { coupons, loading } = useSelector((state) => state.coupon);
-  const [selectedCoupon, setSelectedCoupon] = React.useState(null);
+  const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     dispatch(getCoupons({ status: 'active' }));
-  }, []);
+  }, [dispatch]);
 
   // Auto-refresh when screen comes into focus (e.g. after posting a review)
   useEffect(() => {
@@ -29,11 +28,17 @@ export default function CouponsScreen({ navigation }) {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await dispatch(getCoupons({ status: 'active' }));
-    setRefreshing(false);
+    try {
+      await dispatch(getCoupons({ status: 'active' })).unwrap();
+    } catch (error) {
+      console.error('Failed to refresh coupons:', error);
+      Alert.alert('Error', 'Failed to refresh coupons. Please try again.');
+    } finally {
+      setRefreshing(false);
+    }
   }, [dispatch]);
 
-  const renderCoupon = ({ item }) => {
+  const renderCoupon = useCallback(({ item }) => {
     const isExpired = item.validUntil ? new Date(item.validUntil) < new Date() : false;
     const timeLeft = item.validUntil ? new Date(item.validUntil) - new Date() : null;
     const hoursLeft = timeLeft ? Math.max(0, Math.floor(timeLeft / (1000 * 60 * 60))) : null;
@@ -71,16 +76,14 @@ export default function CouponsScreen({ navigation }) {
               {isExpired ? 'Expired' : hoursLeft === null ? 'No expiry' : `${hoursLeft}h ${minutesLeft}m left`}
             </Text>
           </View>
-          <TouchableOpacity onPress={() => setSelectedCoupon(item)}>
-            <View className="flex-row items-center">
-              <Icon name="qr-code-outline" size={16} color={COLORS.secondary} />
-              <Text className="text-xs font-semibold ml-1" style={{ color: COLORS.secondary }}>Show QR</Text>
-            </View>
-          </TouchableOpacity>
+          <View className="flex-row items-center">
+            <Icon name="qr-code-outline" size={16} color={COLORS.secondary} />
+            <Text className="text-xs font-semibold ml-1" style={{ color: COLORS.secondary }}>Show QR</Text>
+          </View>
         </View>
       </TouchableOpacity>
     );
-  };
+  }, [setSelectedCoupon]);
 
   return (
     <View className="flex-1 bg-gray-50">
@@ -238,17 +241,26 @@ export default function CouponsScreen({ navigation }) {
                     </View>
                   )}
 
-                  <View className="flex-row items-center">
-                    <Icon name="time" size={16} color="#EF4444" />
-                    <Text className="text-xs text-red-600 ml-2 font-semibold">
-                      Valid until {new Date(selectedCoupon.validUntil).toLocaleString('en-GB', {
-                        day: 'numeric',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </Text>
-                  </View>
+                  {selectedCoupon.validUntil ? (
+                    <View className="flex-row items-center">
+                      <Icon name="time" size={16} color="#EF4444" />
+                      <Text className="text-xs text-red-600 ml-2 font-semibold">
+                        Valid until {new Date(selectedCoupon.validUntil).toLocaleString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </Text>
+                    </View>
+                  ) : (
+                    <View className="flex-row items-center">
+                      <Icon name="time" size={16} color="#10B981" />
+                      <Text className="text-xs text-green-600 ml-2 font-semibold">
+                        No expiry date
+                      </Text>
+                    </View>
+                  )}
                 </View>
 
                 {/* Terms - Compact */}

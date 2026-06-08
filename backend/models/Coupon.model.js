@@ -93,6 +93,10 @@ const couponSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  parentTemplate: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Coupon'
+  },
   // Redemption (for review_reward type - individual user coupons)
   redeemedAt: Date,
   redeemedBy: {

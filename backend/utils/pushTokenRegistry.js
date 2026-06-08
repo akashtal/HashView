@@ -113,7 +113,15 @@ const registerDevicePushToken = async (user, rawToken, metadata = {}) => {
   user.pushToken = token;
   user.pushTokenUpdatedAt = now;
   user.markModified('pushTokens');
-  await user.save();
+  try {
+    await user.save();
+  } catch (saveError) {
+    if (saveError.name === 'VersionError') {
+      console.log(`[Push] VersionError caught (harmless due to concurrent registration) for user ${user._id}`);
+    } else {
+      throw saveError;
+    }
+  }
 
   return {
     token,

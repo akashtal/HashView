@@ -381,12 +381,12 @@ exports.createReview = async (req, res, next) => {
       // We gate by redemptionLimit (physical store redemptions), NOT usageCount (issued count)
       const validTemplates = allTemplates.filter(t => {
         if (t.redemptionLimit !== null && t.redemptionLimit !== undefined) {
-          return t.redemptionCount < t.redemptionLimit;
+          if (t.redemptionCount >= t.redemptionLimit) return false;
         }
         if (t.usageLimit !== null && t.usageLimit !== undefined) {
-          return t.usageCount < t.usageLimit;
+          if (t.usageCount >= t.usageLimit) return false;
         }
-        return true; // no limit set
+        return true; // no limit exceeded
       });
 
       // Pick a random template from the valid ones (so different coupons are offered)
@@ -438,10 +438,10 @@ exports.createReview = async (req, res, next) => {
 
           const nbValid = nbTemplates.filter(t => {
             if (t.redemptionLimit !== null && t.redemptionLimit !== undefined) {
-              return t.redemptionCount < t.redemptionLimit;
+              if (t.redemptionCount >= t.redemptionLimit) return false;
             }
             if (t.usageLimit !== null && t.usageLimit !== undefined) {
-              return t.usageCount < t.usageLimit;
+              if (t.usageCount >= t.usageLimit) return false;
             }
             return true;
           });
@@ -490,22 +490,17 @@ exports.createReview = async (req, res, next) => {
       const couponCode = generateCouponCode();
 
       // ── SAFE DATE SANITIZATION ───────────────────────────────────────────
-      // Some older coupon templates may have a validUntil stored as a
-      // non-Date value (e.g. string "null", empty string, or a malformed
-      // date string written by a previous code path that passed raw req.body
-      // directly to Mongoose). Calling new Date() on such a value produces
-      // an Invalid Date object which then causes Mongoose to throw:
-      //   "Cast to date failed for value ..."
-      // at Coupon.create() — AFTER the review was already saved — making
-      // the API return a 500 while the review exists with no coupon attached.
-      // We guard against this by checking isNaN before using the parsed date.
-      let couponExpiry = null;
+      // Default expiry is 30 days from now
+      const defaultExpiry = new Date();
+      defaultExpiry.setDate(defaultExpiry.getDate() + 30);
+
+      let couponExpiry = defaultExpiry;
       if (couponTemplate.validUntil) {
         const parsedExpiry = new Date(couponTemplate.validUntil);
         if (!isNaN(parsedExpiry.getTime())) {
           couponExpiry = parsedExpiry;
         } else {
-          logger.warn(`⚠️ Coupon template ${couponTemplate._id} has invalid validUntil value: "${couponTemplate.validUntil}". Treating as no expiry.`);
+          logger.warn(`⚠️ Coupon template ${couponTemplate._id} has invalid validUntil value: "${couponTemplate.validUntil}". Using 30 days default.`);
         }
       }
       // ────────────────────────────────────────────────────────────────────
@@ -528,6 +523,7 @@ exports.createReview = async (req, res, next) => {
 
       const coupon = await Coupon.create({
         type: 'review_reward',
+        parentTemplate: couponTemplate._id,
         business: couponBusinessId,  // ← own business ID or nearby business ID
         user: req.user.id,
         review: review._id,

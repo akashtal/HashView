@@ -77,6 +77,7 @@ Sentry.init({
 
 LogBox.ignoreLogs([
   'Warning: CountryModal: Support for defaultProps will be removed from function components',
+  'Warning: Invalid prop `style` supplied to `React.Fragment`',
 ]);
 
 export default Sentry.wrap(function App() {

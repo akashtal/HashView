@@ -82,9 +82,7 @@ const ScratchCardModal = ({ visible, onClose, coupon, isNearbyCoupon, couponBusi
     const lastUpdate = useRef(0);
     const hintHidden = useRef(false);
 
-    // Layout Offsets
-    const cardYOffset = useRef(0);
-    const cardXOffset = useRef((width - CARD_WIDTH) / 2);
+    // Layout Offsets - no longer needed since we use locationX/Y
 
     // Animations
     const cardScale = useRef(new Animated.Value(0.85)).current;
@@ -213,8 +211,8 @@ const ScratchCardModal = ({ visible, onClose, coupon, isNearbyCoupon, couponBusi
 
     const getLocalCoords = (evt) => {
         return {
-            localX: evt.nativeEvent.pageX - cardXOffset.current,
-            localY: evt.nativeEvent.pageY - cardYOffset.current,
+            localX: evt.nativeEvent.locationX,
+            localY: evt.nativeEvent.locationY,
         };
     };
 
@@ -280,12 +278,7 @@ const ScratchCardModal = ({ visible, onClose, coupon, isNearbyCoupon, couponBusi
                     <Text style={styles.subtitle}>Scratch the card to reveal your prize</Text>
 
                     {/* ── Card Container ── */}
-                    <View
-                        style={styles.cardWrapper}
-                        onLayout={e => {
-                            cardYOffset.current = e.nativeEvent.layout.y + (e.nativeEvent.layout.height - CARD_HEIGHT) / 2;
-                        }}
-                    >
+                    <View style={styles.cardWrapper}>
                         {/* ── BACK LAYER: Revealed Reward ── */}
                         <LinearGradient
                             colors={[BRAND.cardBg, '#EDD5FF', BRAND.cardBg]}

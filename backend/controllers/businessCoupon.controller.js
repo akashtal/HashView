@@ -441,6 +441,37 @@ exports.scanAndRedeemCoupon = async (req, res, next) => {
       });
     }
 
+    // Check if the business coupon template has reached its redemption limit
+    let couponTemplate = null;
+    if (coupon.type === 'review_reward') {
+      if (coupon.parentTemplate) {
+        couponTemplate = await Coupon.findById(coupon.parentTemplate);
+      } else {
+        // Fallback for backward compatibility
+        couponTemplate = await Coupon.findOne({
+          business: coupon.business._id,
+          type: 'business',
+          isActive: true
+        });
+      }
+
+      if (couponTemplate) {
+        if (couponTemplate.redemptionLimit !== null && couponTemplate.redemptionLimit !== undefined) {
+          if (couponTemplate.redemptionCount >= couponTemplate.redemptionLimit) {
+            return res.status(400).json({
+              success: false,
+              message: 'This coupon reward has reached its total redemption limit for this business.',
+              coupon: {
+                _id: coupon._id,
+                code: coupon.code,
+                status: coupon.status
+              }
+            });
+          }
+        }
+      }
+    }
+
     // Redeem the coupon
     coupon.status = 'redeemed';
     coupon.redeemedAt = new Date();
@@ -448,18 +479,10 @@ exports.scanAndRedeemCoupon = async (req, res, next) => {
     await coupon.save();
 
     // Update template redemption count if this is a review_reward coupon
-    if (coupon.type === 'review_reward') {
-      const couponTemplate = await Coupon.findOne({
-        business: coupon.business._id,
-        type: 'business',
-        isActive: true
+    if (coupon.type === 'review_reward' && couponTemplate) {
+      await Coupon.findByIdAndUpdate(couponTemplate._id, {
+        $inc: { redemptionCount: 1 }
       });
-
-      if (couponTemplate) {
-        await Coupon.findByIdAndUpdate(couponTemplate._id, {
-          $inc: { redemptionCount: 1 }
-        });
-      }
     }
 
     // Send notification to user

@@ -89,7 +89,7 @@ export default function HistoryScreen() {
       
       <View className="flex-row items-center justify-between mt-2 pt-2 border-t border-gray-100">
         <Text className="text-xs text-gray-500">
-          Valid until: {new Date(item.validUntil).toLocaleString()}
+          Valid until: {item.validUntil ? new Date(item.validUntil).toLocaleDateString() : 'No expiry'}
         </Text>
         {item.rewardType === 'discount_percentage' && (
           <Text className="text-sm font-bold" style={{ color: COLORS.secondary }}>{item.rewardValue}% OFF</Text>
