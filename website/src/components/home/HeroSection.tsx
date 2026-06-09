@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { CSSHashtagScene } from "@/components/3d/CSSHashtagScene";
 import { ContactModal } from "@/components/home/ContactModal";
 import { PartnerSurveyModal } from "@/components/home/PartnerSurveyModal";
+import { PromoVideo } from "@/components/home/PromoVideo";
 import Image from "next/image";
 import logo from "@/assets/logo.png";
 
@@ -78,7 +79,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10"
           >
             <Button variant="hero" size="xl" onClick={() => setContactOpen(true)}>
               Get Your Free QR Code
@@ -87,6 +88,16 @@ export const HeroSection = () => {
             <Button variant="hero-outline" size="xl" onClick={() => setPartnerSurveyOpen(true)}>
               Partner With Us
             </Button>
+          </motion.div>
+
+          {/* Promo Video Showcase */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="w-full max-w-4xl mx-auto mb-16 px-4 md:px-0"
+          >
+            <PromoVideo />
           </motion.div>
 
           {/* Stats */}
