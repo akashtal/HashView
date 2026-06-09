@@ -9,8 +9,6 @@ export function PromoVideo() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
 
@@ -51,23 +49,6 @@ export function PromoVideo() {
     setIsMuted(!isMuted);
   };
 
-  const handleTimeUpdate = () => {
-    if (!videoRef.current) return;
-    setCurrentTime(videoRef.current.currentTime);
-  };
-
-  const handleDurationChange = () => {
-    if (!videoRef.current) return;
-    setDuration(videoRef.current.duration);
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!videoRef.current) return;
-    const newTime = (parseFloat(e.target.value) / 100) * duration;
-    videoRef.current.currentTime = newTime;
-    setCurrentTime(newTime);
-  };
-
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
 
@@ -92,13 +73,6 @@ export function PromoVideo() {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
-  const formatTime = (time: number) => {
-    if (isNaN(time)) return "0:00";
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-  };
-
   return (
     <div
       ref={containerRef}
@@ -106,7 +80,7 @@ export function PromoVideo() {
       onMouseLeave={() => setIsHovering(false)}
       className="relative w-full max-w-4xl mx-auto rounded-2xl overflow-hidden glass gradient-border glow-mixed group flex flex-col"
     >
-      {/* Mock Browser Header (only visible when not in fullscreen) */}
+      {/* Mock Browser Header (hidden in fullscreen) */}
       {!isFullscreen && (
         <div className="w-full bg-secondary/80 backdrop-blur-md border-b border-border/40 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-1.5">
@@ -130,8 +104,6 @@ export function PromoVideo() {
           muted
           loop
           playsInline
-          onTimeUpdate={handleTimeUpdate}
-          onDurationChange={handleDurationChange}
           onClick={togglePlay}
           className="w-full h-full object-cover cursor-pointer"
         />
@@ -153,62 +125,49 @@ export function PromoVideo() {
           )}
         </AnimatePresence>
 
-        {/* Custom Controls Bar */}
+        {/* Custom Mini Controls Pill */}
         <AnimatePresence>
           {(isHovering || !isPlaying) && (
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 15, x: "-50%" }}
+              animate={{ opacity: 1, y: 0, x: "-50%" }}
+              exit={{ opacity: 0, y: 15, x: "-50%" }}
               transition={{ duration: 0.25 }}
-              className="absolute bottom-4 left-4 right-4 z-20"
+              className="absolute bottom-6 left-1/2 z-20"
             >
-              <div className="glass backdrop-blur-xl bg-black/60 border border-white/10 px-4 py-3 rounded-2xl flex flex-col md:flex-row items-center gap-4">
-                {/* Left Controls (Play, Volume, Time) */}
-                <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
-                  <button
-                    onClick={togglePlay}
-                    className="p-1.5 rounded-lg hover:bg-white/10 text-white transition-colors"
-                  >
-                    {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                  </button>
+              <div className="glass backdrop-blur-xl bg-black/60 border border-white/10 px-4 py-2 rounded-full flex items-center gap-3 shadow-xl">
+                {/* Play/Pause Button */}
+                <button
+                  onClick={togglePlay}
+                  className="p-1.5 rounded-full hover:bg-white/10 text-white transition-colors flex items-center justify-center"
+                  title={isPlaying ? "Pause" : "Play"}
+                >
+                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                </button>
 
-                  <button
-                    onClick={toggleMute}
-                    className="p-1.5 rounded-lg hover:bg-white/10 text-white transition-colors"
-                  >
-                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                  </button>
+                {/* Vertical Divider */}
+                <div className="w-[1px] h-4 bg-white/20" />
 
-                  <span className="text-xs text-white/80 font-mono">
-                    {formatTime(currentTime)} / {formatTime(duration)}
-                  </span>
-                </div>
+                {/* Sound Button */}
+                <button
+                  onClick={toggleMute}
+                  className="p-1.5 rounded-full hover:bg-white/10 text-white transition-colors flex items-center justify-center"
+                  title={isMuted ? "Unmute" : "Mute"}
+                >
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                </button>
 
-                {/* Progress bar */}
-                <div className="flex-1 flex items-center w-full">
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    value={duration ? (currentTime / duration) * 100 : 0}
-                    onChange={handleSeek}
-                    className="w-full h-1.5 rounded-lg bg-white/20 accent-hashview-orange hover:accent-hashview-orange-light cursor-pointer transition-all outline-none"
-                    style={{
-                      background: `linear-gradient(to right, hsl(24 95% 53%) ${duration ? (currentTime / duration) * 100 : 0}%, rgba(255,255,255,0.2) ${duration ? (currentTime / duration) * 100 : 0}%)`
-                    }}
-                  />
-                </div>
+                {/* Vertical Divider */}
+                <div className="w-[1px] h-4 bg-white/20" />
 
-                {/* Right Controls (Fullscreen) */}
-                <div className="flex items-center gap-2 justify-end w-full md:w-auto">
-                  <button
-                    onClick={toggleFullscreen}
-                    className="p-1.5 rounded-lg hover:bg-white/10 text-white transition-colors"
-                  >
-                    {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-                  </button>
-                </div>
+                {/* Fullscreen Button */}
+                <button
+                  onClick={toggleFullscreen}
+                  className="p-1.5 rounded-full hover:bg-white/10 text-white transition-colors flex items-center justify-center"
+                  title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                >
+                  {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+                </button>
               </div>
             </motion.div>
           )}
