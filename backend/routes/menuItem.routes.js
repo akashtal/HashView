@@ -12,6 +12,7 @@ const {
   getMenuStats,
   extractMenuAI,
   createMenuItemsBatch,
+  getOrderingMenu,
 } = require('../controllers/menuItem.controller');
 const { protect, authorize } = require('../middleware/auth.middleware');
 
@@ -38,6 +39,9 @@ const menuImageUpload = multer({
 
 // Get all active items for a business, grouped by category (user-facing menu tab)
 router.get('/business/:businessId', getMenuItems);
+
+// Get ordering-optimized menu (active, grouped, available, Redis cached) - Phase 2
+router.get('/business/:businessId/ordering', getOrderingMenu);
 
 // Get flat array of all active items — used internally by the AI Gateway search
 router.get('/business/:businessId/flat', getMenuItemsFlat);

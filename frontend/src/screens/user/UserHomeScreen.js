@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { View, Text, ScrollView, TouchableOpacity, FlatList, RefreshControl, ActivityIndicator, Alert, StatusBar, TextInput, Modal, Keyboard, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, FlatList, RefreshControl, ActivityIndicator, Alert, StatusBar, TextInput, Modal, Keyboard, Platform, Animated } from 'react-native';
 import { Image } from 'expo-image';
 import ToastService from '../../utils/ToastService';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,6 +12,7 @@ import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
 import { FLATLIST_OPTIMIZATIONS, optimizeImageUri } from '../../utils/performanceHelpers';
 import { FlashList } from '@shopify/flash-list';
+import useOrderSocket from '../../hooks/useOrderSocket';
 
 const RatingBadge = ({ source, rating, reviews }) => {
   const colors = {
@@ -267,6 +268,45 @@ export default function UserHomeScreen({ navigation }) {
     visible: false,
     hasOwner: false,
     businessName: ''
+  });
+
+  // Active order live tracking
+  const [activeOrder, setActiveOrder] = useState(null);
+
+  const fetchActiveOrder = useCallback(async () => {
+    if (!user || user.isGuest) return;
+    try {
+      const response = await ApiService.getMyOrders();
+      if (response.success && response.data?.length > 0) {
+        const inProgress = response.data.find(o =>
+          !['delivered', 'cancelled'].includes(o.status)
+        );
+        setActiveOrder(inProgress || null);
+      } else {
+        setActiveOrder(null);
+      }
+    } catch (e) {
+      // silently fail
+    }
+  }, [user]);
+
+  useFocusEffect(useCallback(() => {
+    fetchActiveOrder();
+  }, [fetchActiveOrder]));
+
+  useOrderSocket({
+    customerId: user?._id,
+    onOrderStatusUpdated: (updatedOrder) => {
+      setActiveOrder(prev => {
+        if (prev && prev._id === updatedOrder._id) {
+          if (['delivered', 'cancelled'].includes(updatedOrder.status)) {
+            return null; // Hide banner when done
+          }
+          return { ...prev, ...updatedOrder };
+        }
+        return prev;
+      });
+    }
   });
 
   // Track active filters count
@@ -653,13 +693,13 @@ export default function UserHomeScreen({ navigation }) {
               </View>
             </TouchableOpacity>
 
-            {/* Coupons Button */}
+            {/* Cart Button */}
             <TouchableOpacity
-              onPress={() => navigation.navigate('Coupons')}
+              onPress={() => navigation.navigate('Cart')}
               activeOpacity={0.7}
             >
               <View className="bg-white rounded-full w-11 h-11 items-center justify-center shadow-md">
-                <Icon name="gift-outline" size={20} color={COLORS.primary} />
+                <Icon name="cart-outline" size={20} color={COLORS.primary} />
               </View>
             </TouchableOpacity>
           </View>
@@ -732,6 +772,40 @@ export default function UserHomeScreen({ navigation }) {
         )}
       </LinearGradient>
 
+
+      {/* Active Order Live Status Banner */}
+      {activeOrder && !user?.isGuest && (() => {
+        const STATUS_CONFIG = {
+          new:       { label: 'Order Received',   icon: 'time-outline',          bg: ['#3B82F6', '#2563EB'], pulse: true },
+          accepted:  { label: 'Order Confirmed!', icon: 'checkmark-circle',      bg: ['#8B5CF6', '#6D28D9'], pulse: false },
+          preparing: { label: 'Being Prepared 🍳', icon: 'flame',                bg: ['#F59E0B', '#D97706'], pulse: true },
+          ready:     { label: 'Ready for Pickup!', icon: 'fast-food',            bg: ['#10B981', '#059669'], pulse: false },
+          delivered: { label: 'Order Delivered!',  icon: 'happy-outline',        bg: ['#10B981', '#059669'], pulse: false },
+        };
+        const cfg = STATUS_CONFIG[activeOrder.status] || STATUS_CONFIG.new;
+        return (
+          <TouchableOpacity
+            onPress={() => navigation.navigate('OrderTracking')}
+            activeOpacity={0.92}
+            style={{ marginHorizontal: 12, marginTop: 10, marginBottom: 2, borderRadius: 16, overflow: 'hidden', elevation: 4, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8, shadowOffset: { width: 0, height: 3 } }}
+          >
+            <LinearGradient colors={cfg.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 16 }}>
+              <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
+                <Icon name={cfg.icon} size={22} color="#FFF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: '#FFF', fontWeight: '800', fontSize: 14 }}>{cfg.label}</Text>
+                <Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 12, marginTop: 2 }}>
+                  Table {activeOrder.tableNumber} · {activeOrder.orderNumber} · {activeOrder.items?.length || 0} item{activeOrder.items?.length !== 1 ? 's' : ''}
+                </Text>
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: '600' }}>Track →</Text>
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+        );
+      })()}
 
       {/* Search Bar Temporarily Disabled */}
       {false && (

@@ -25,11 +25,19 @@ const DIETARY_OPTIONS = [
   'vegetarian', 'vegan', 'halal', 'gluten-free', 'dairy-free', 'nut-free', 'kosher', 'organic'
 ];
 
+const ALLERGEN_OPTIONS = [
+  'celery', 'gluten', 'crustaceans', 'eggs', 'fish', 'lupin',
+  'milk', 'molluscs', 'mustard', 'nuts', 'peanuts', 'sesame',
+  'soybeans', 'sulphites'
+];
+
 const BLANK_FORM = {
   name: '', description: '', price: '',
   currency: 'GBP', menuCategory: '', type: 'food',
-  tags: '', dietary: [], isAvailable: true,
+  tags: '', dietary: [], allergens: [], isAvailable: true,
   isPopular: false, duration: '',
+  prepTime: '15', calories: '', maxOrdersPerSlot: '',
+  modifiers: [], addOns: []
 };
 
 // ─── Item Card Component ──────────────────────────────────────────────────────
@@ -259,6 +267,12 @@ export default function MenuManagementScreen({ route, navigation }) {
       isAvailable: item.isAvailable !== false,
       isPopular: item.isPopular || false,
       duration: item.duration?.toString() || '',
+      prepTime: item.prepTime?.toString() || '15',
+      calories: item.calories?.toString() || '',
+      maxOrdersPerSlot: item.maxOrdersPerSlot?.toString() || '',
+      allergens: item.allergens || [],
+      modifiers: item.modifiers || [],
+      addOns: item.addOns || [],
     });
     setPickedImage(null);
     setModalVisible(true);
@@ -330,6 +344,49 @@ export default function MenuManagementScreen({ route, navigation }) {
     }));
   };
 
+  // ─── Toggle allergen label ──────────────────────────────────────────────────
+  const toggleAllergen = (label) => {
+    setForm(prev => ({
+      ...prev,
+      allergens: prev.allergens.includes(label)
+        ? prev.allergens.filter(a => a !== label)
+        : [...prev.allergens, label]
+    }));
+  };
+
+  // ─── Add-ons & Modifiers Management ───────────────────────────────────────
+  const addAddOn = () => setForm(prev => ({ ...prev, addOns: [...prev.addOns, { name: '', price: '', maxQuantity: 1 }] }));
+  const removeAddOn = (index) => setForm(prev => ({ ...prev, addOns: prev.addOns.filter((_, i) => i !== index) }));
+  const updateAddOn = (index, field, value) => {
+    const newAddOns = [...form.addOns];
+    newAddOns[index][field] = value;
+    setForm(prev => ({ ...prev, addOns: newAddOns }));
+  };
+
+  const addModifier = () => setForm(prev => ({ ...prev, modifiers: [...prev.modifiers, { name: '', required: false, maxSelections: 1, options: [] }] }));
+  const removeModifier = (index) => setForm(prev => ({ ...prev, modifiers: prev.modifiers.filter((_, i) => i !== index) }));
+  const updateModifier = (index, field, value) => {
+    const newMods = [...form.modifiers];
+    newMods[index][field] = value;
+    setForm(prev => ({ ...prev, modifiers: newMods }));
+  };
+
+  const addModifierOption = (modIndex) => {
+    const newMods = [...form.modifiers];
+    newMods[modIndex].options.push({ name: '', priceAdjustment: '0' });
+    setForm(prev => ({ ...prev, modifiers: newMods }));
+  };
+  const removeModifierOption = (modIndex, optIndex) => {
+    const newMods = [...form.modifiers];
+    newMods[modIndex].options = newMods[modIndex].options.filter((_, i) => i !== optIndex);
+    setForm(prev => ({ ...prev, modifiers: newMods }));
+  };
+  const updateModifierOption = (modIndex, optIndex, field, value) => {
+    const newMods = [...form.modifiers];
+    newMods[modIndex].options[optIndex][field] = value;
+    setForm(prev => ({ ...prev, modifiers: newMods }));
+  };
+
   // ─── Save (create or update) ──────────────────────────────────────────────
   const handleSave = async () => {
     if (!form.name.trim()) return ToastService.showError('Validation', 'Item name is required');
@@ -349,8 +406,14 @@ export default function MenuManagementScreen({ route, navigation }) {
       formData.append('isAvailable', form.isAvailable ? 'true' : 'false');
       formData.append('isPopular', form.isPopular ? 'true' : 'false');
       if (form.duration) formData.append('duration', form.duration);
-      // Dietary as JSON string
+      if (form.prepTime) formData.append('prepTime', form.prepTime);
+      if (form.calories) formData.append('calories', form.calories);
+      if (form.maxOrdersPerSlot) formData.append('maxOrdersPerSlot', form.maxOrdersPerSlot);
+      // Arrays as JSON string
       formData.append('dietary', JSON.stringify(form.dietary));
+      formData.append('allergens', JSON.stringify(form.allergens));
+      formData.append('modifiers', JSON.stringify(form.modifiers));
+      formData.append('addOns', JSON.stringify(form.addOns));
 
       if (pickedImage) {
         formData.append('image', {
@@ -714,6 +777,150 @@ export default function MenuManagementScreen({ route, navigation }) {
                         </TouchableOpacity>
                       );
                     })}
+                  </View>
+
+                  <Text style={styles.label}>Allergens</Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
+                    {ALLERGEN_OPTIONS.map(a => {
+                      const active = form.allergens.includes(a);
+                      return (
+                        <TouchableOpacity
+                          key={a}
+                          onPress={() => toggleAllergen(a)}
+                          style={[styles.dietaryChip, active && { backgroundColor: '#FEE2E2', borderColor: '#EF4444' }]}
+                        >
+                          <Text style={[styles.dietaryChipText, active && { color: '#B91C1C' }]}>
+                            {a}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+
+                  <Text style={styles.label}>Preparation Time (minutes)</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g. 15"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="number-pad"
+                    value={form.prepTime}
+                    onChangeText={t => setForm(prev => ({ ...prev, prepTime: t }))}
+                  />
+
+                  <Text style={styles.label}>Calories (kcal)</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g. 450"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="number-pad"
+                    value={form.calories}
+                    onChangeText={t => setForm(prev => ({ ...prev, calories: t }))}
+                  />
+                  
+                  {/* Modifiers UI */}
+                  <View style={{ marginBottom: 18 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <Text style={[styles.label, { marginBottom: 0 }]}>Modifier Groups (e.g., Size, Spice Level)</Text>
+                      <TouchableOpacity onPress={addModifier} style={{ backgroundColor: '#EEF2FF', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 }}>
+                        <Text style={{ color: '#4F46E5', fontSize: 12, fontWeight: '600' }}>+ Add Group</Text>
+                      </TouchableOpacity>
+                    </View>
+                    
+                    {form.modifiers.map((mod, modIdx) => (
+                      <View key={modIdx} style={{ backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, padding: 12, marginBottom: 10 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                          <TextInput
+                            style={[styles.input, { flex: 1, marginBottom: 0, paddingVertical: 8, marginRight: 8, backgroundColor: '#FFF' }]}
+                            placeholder="e.g. Choose Size"
+                            placeholderTextColor="#9CA3AF"
+                            value={mod.name}
+                            onChangeText={t => updateModifier(modIdx, 'name', t)}
+                          />
+                          <TouchableOpacity onPress={() => removeModifier(modIdx)} style={{ padding: 4 }}>
+                            <Icon name="trash-outline" size={18} color="#EF4444" />
+                          </TouchableOpacity>
+                        </View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 12 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Switch
+                              value={mod.required}
+                              onValueChange={v => updateModifier(modIdx, 'required', v)}
+                              style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
+                            />
+                            <Text style={{ fontSize: 12, color: '#374151' }}>Required</Text>
+                          </View>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                            <Text style={{ fontSize: 12, color: '#374151', marginRight: 6 }}>Max Select:</Text>
+                            <TextInput
+                              style={[styles.input, { width: 50, marginBottom: 0, paddingVertical: 4, textAlign: 'center', backgroundColor: '#FFF' }]}
+                              keyboardType="number-pad"
+                              value={mod.maxSelections?.toString()}
+                              onChangeText={t => updateModifier(modIdx, 'maxSelections', parseInt(t) || 1)}
+                            />
+                          </View>
+                        </View>
+                        
+                        {/* Modifier Options */}
+                        {mod.options.map((opt, optIdx) => (
+                          <View key={optIdx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6, marginLeft: 16 }}>
+                            <TextInput
+                              style={[styles.input, { flex: 1, marginBottom: 0, paddingVertical: 6, height: 36, backgroundColor: '#FFF', fontSize: 13 }]}
+                              placeholder="e.g. Large"
+                              placeholderTextColor="#9CA3AF"
+                              value={opt.name}
+                              onChangeText={t => updateModifierOption(modIdx, optIdx, 'name', t)}
+                            />
+                            <TextInput
+                              style={[styles.input, { width: 70, marginBottom: 0, paddingVertical: 6, height: 36, marginLeft: 6, backgroundColor: '#FFF', fontSize: 13 }]}
+                              placeholder="+£0.00"
+                              placeholderTextColor="#9CA3AF"
+                              keyboardType="decimal-pad"
+                              value={opt.priceAdjustment?.toString()}
+                              onChangeText={t => updateModifierOption(modIdx, optIdx, 'priceAdjustment', t)}
+                            />
+                            <TouchableOpacity onPress={() => removeModifierOption(modIdx, optIdx)} style={{ padding: 6, marginLeft: 2 }}>
+                              <Icon name="close" size={16} color="#9CA3AF" />
+                            </TouchableOpacity>
+                          </View>
+                        ))}
+                        <TouchableOpacity onPress={() => addModifierOption(modIdx)} style={{ alignSelf: 'flex-start', marginLeft: 16, marginTop: 4 }}>
+                          <Text style={{ color: '#4F46E5', fontSize: 12, fontWeight: '600' }}>+ Add Option</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+
+                  {/* Add-Ons UI */}
+                  <View style={{ marginBottom: 18 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <Text style={[styles.label, { marginBottom: 0 }]}>Add-Ons (e.g., Extra Cheese)</Text>
+                      <TouchableOpacity onPress={addAddOn} style={{ backgroundColor: '#EEF2FF', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 }}>
+                        <Text style={{ color: '#4F46E5', fontSize: 12, fontWeight: '600' }}>+ Add Add-On</Text>
+                      </TouchableOpacity>
+                    </View>
+                    
+                    {form.addOns.map((addon, idx) => (
+                      <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 8 }}>
+                        <TextInput
+                          style={[styles.input, { flex: 2, marginBottom: 0, paddingVertical: 8 }]}
+                          placeholder="Name (e.g. Extra Sauce)"
+                          placeholderTextColor="#9CA3AF"
+                          value={addon.name}
+                          onChangeText={t => updateAddOn(idx, 'name', t)}
+                        />
+                        <TextInput
+                          style={[styles.input, { flex: 1, marginBottom: 0, paddingVertical: 8 }]}
+                          placeholder="Price"
+                          placeholderTextColor="#9CA3AF"
+                          keyboardType="decimal-pad"
+                          value={addon.price?.toString()}
+                          onChangeText={t => updateAddOn(idx, 'price', t)}
+                        />
+                        <TouchableOpacity onPress={() => removeAddOn(idx)} style={{ padding: 8 }}>
+                          <Icon name="trash-outline" size={20} color="#EF4444" />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
                   </View>
                 </>
               )}

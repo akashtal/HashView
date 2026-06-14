@@ -1,7 +1,9 @@
 import React, { useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StatusBar, Modal, TextInput, Alert, Linking, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StatusBar, Modal, TextInput, Alert, Linking, Platform, KeyboardAvoidingView, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
@@ -14,6 +16,8 @@ export default function BusinessDashboardScreen({ navigation }) {
   const [unreadNotifications, setUnreadNotifications] = React.useState(0);
   const [redemptionStats, setRedemptionStats] = React.useState(null);
   const [loadingStats, setLoadingStats] = React.useState(false);
+  const [dashboardStats, setDashboardStats] = React.useState({ activeOrders: 0 });
+  const [showNotificationSettings, setShowNotificationSettings] = React.useState(false);
 
   // Refetch business data whenever screen comes into focus
   useFocusEffect(
@@ -89,7 +93,29 @@ export default function BusinessDashboardScreen({ navigation }) {
     }
   };
 
-
+  const downloadQRCode = async () => {
+    if (!business?.qrCode) return;
+    const fileUri = FileSystem.documentDirectory + `HashView_QR_${business.name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+    try {
+      if (business.qrCode.startsWith('data:image')) {
+        const base64Code = business.qrCode.split(',')[1];
+        await FileSystem.writeAsStringAsync(fileUri, base64Code, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        await Sharing.shareAsync(fileUri, {
+          mimeType: 'image/png',
+          dialogTitle: 'Share or Save QR Code',
+          UTI: 'public.png'
+        });
+      } else {
+        const { uri } = await FileSystem.downloadAsync(business.qrCode, fileUri);
+        await Sharing.shareAsync(uri);
+      }
+    } catch (error) {
+      console.error('Error downloading QR code:', error);
+      ToastService.showError('Error', 'Failed to save QR code');
+    }
+  };
 
   if (loading) {
     return (
@@ -313,8 +339,58 @@ export default function BusinessDashboardScreen({ navigation }) {
             )}
           </View>
 
+          {/* QR Code Section */}
+          {business?.qrCode && (
+            <View className="bg-white rounded-2xl p-6 shadow-sm mb-4 items-center border border-gray-100">
+              <Text className="text-lg font-bold text-gray-900 mb-1">Your QR Menu</Text>
+              <Text className="text-xs text-gray-500 mb-4 text-center">
+                Scan this code to instantly open your digital menu
+              </Text>
+              <View className="p-3 bg-gray-50 rounded-2xl border border-gray-200 mb-2">
+                <Image
+                  source={{ uri: business.qrCode }}
+                  style={{ width: 160, height: 160 }}
+                  resizeMode="contain"
+                />
+              </View>
+              <TouchableOpacity
+                onPress={downloadQRCode}
+                className="mt-3 flex-row items-center px-6 py-2.5 bg-[#5e399e] rounded-xl"
+              >
+                <Icon name="download-outline" size={18} color="#FFF" />
+                <Text className="text-white font-bold ml-2">Download QR Code</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* Quick Actions */}
           <View className="flex-row flex-wrap justify-between mb-4">
+            {/* ── Phase 5: Live Orders ── */}
+            <TouchableOpacity
+              onPress={() => navigation.navigate('OrdersDashboard', { businessId: business._id })}
+              className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3 relative"
+            >
+              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#FEF3C7' }}>
+                <Icon name="receipt" size={24} color="#D97706" />
+              </View>
+              <Text className="text-sm font-semibold text-gray-900">Live Orders</Text>
+              {dashboardStats?.activeOrders > 0 && (
+                <View className="absolute top-2 right-2 bg-red-500 rounded-full h-6 w-6 items-center justify-center border-2 border-white">
+                  <Text className="text-white text-xs font-bold">{dashboardStats.activeOrders}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate('KitchenView', { businessId: business._id })}
+              className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
+            >
+              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#F3E8FF' }}>
+                <Icon name="restaurant" size={24} color="#9333EA" />
+              </View>
+              <Text className="text-sm font-semibold text-gray-900">Kitchen Display</Text>
+            </TouchableOpacity>
+
             {/* ── AI: Menu & Services card (Phase 1) ── */}
             <TouchableOpacity
               onPress={() => navigation.navigate('MenuManagement', { businessId: business._id })}
@@ -384,6 +460,36 @@ export default function BusinessDashboardScreen({ navigation }) {
                 <Icon name="create" size={24} color={COLORS.secondary} />
               </View>
               <Text className="text-sm font-semibold text-gray-900">Edit Info</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate('TaxManagement', { businessId: business._id })}
+              className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
+            >
+              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#F3F4F6' }}>
+                <Icon name="receipt-outline" size={24} color="#4B5563" />
+              </View>
+              <Text className="text-sm font-semibold text-gray-900">Taxes</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate('ChargeManagement', { businessId: business._id })}
+              className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
+            >
+              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#F3F4F6' }}>
+                <Icon name="cash-outline" size={24} color="#4B5563" />
+              </View>
+              <Text className="text-sm font-semibold text-gray-900">Extra Charges</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setShowNotificationSettings(true)}
+              className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
+            >
+              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#FFF0F2' }}>
+                <Icon name="notifications" size={24} color="#E11D48" />
+              </View>
+              <Text className="text-sm font-semibold text-gray-900">Alerts & Sounds</Text>
             </TouchableOpacity>
           </View>
 
@@ -484,8 +590,31 @@ export default function BusinessDashboardScreen({ navigation }) {
         </View>
       </ScrollView>
 
-
-    </View >
+      {/* Notification Settings Modal */}
+      <Modal visible={showNotificationSettings} transparent animationType="slide">
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-white rounded-t-3xl p-6">
+            <View className="flex-row justify-between items-center mb-6">
+              <Text className="text-xl font-bold text-gray-900">Order Alerts & Sounds</Text>
+              <TouchableOpacity onPress={() => setShowNotificationSettings(false)}>
+                <Icon name="close" size={24} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+            <View className="items-center py-8">
+              <Icon name="notifications" size={64} color="#E11D48" />
+              <Text className="text-lg text-center text-gray-700 mb-2">
+                Push notifications and sounds are managed in your device settings.
+              </Text>
+              <TouchableOpacity
+                className="bg-rose-600 px-6 py-3 rounded-xl mt-4"
+                onPress={() => setShowNotificationSettings(false)}
+              >
+                <Text className="text-white font-bold">Done</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
-

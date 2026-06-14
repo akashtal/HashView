@@ -103,12 +103,13 @@ export default function QRScannerScreen({ navigation }) {
       );
 
       if (response.data.success && response.data.business) {
-        // Navigate to business detail screen
+        // Navigate to business detail screen, default to menu tab for QR scans
         setLoading(false);
         navigation.navigate('BusinessDetail', {
           business: response.data.business,
           businessId: response.data.business._id,
-          fromQR: true
+          fromQR: true,
+          initialTab: 'menu'
         });
       } else {
         ToastService.showError('Error', response.data.message || 'Failed to load business details');

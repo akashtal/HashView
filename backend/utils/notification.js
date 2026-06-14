@@ -9,6 +9,9 @@ const {
 // Create Expo SDK client — useFcmV1 uses the modern FCM HTTP v1 API
 const expo = new Expo({ useFcmV1: true });
 
+const CircuitBreaker = require('./circuitBreaker');
+const expoBreaker = new CircuitBreaker('Expo Push API', 5, 30000);
+
 // Android notification channel ID — MUST match the one created in frontend
 const ANDROID_CHANNEL_ID = 'hashview-updates';
 const NOTIFICATION_RECORD_TYPES = new Set([
@@ -108,7 +111,7 @@ exports.sendPushNotification = async (userId, title, message, data = {}) => {
 
     for (const chunk of chunks) {
       try {
-        const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+        const ticketChunk = await expoBreaker.execute(() => expo.sendPushNotificationsAsync(chunk));
         tickets.push(...ticketChunk);
       } catch (error) {
         logger.error(`[Push] Expo send error for ${user.email || userId}:`, error.message);
@@ -228,7 +231,7 @@ exports.sendBulkNotifications = async (userIds, title, message, data = {}) => {
 
   for (const chunk of chunks) {
     try {
-      const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+      const ticketChunk = await expoBreaker.execute(() => expo.sendPushNotificationsAsync(chunk));
       allTickets.push(...ticketChunk);
     } catch (error) {
       logger.error('[Push] Bulk chunk error:', error.message);

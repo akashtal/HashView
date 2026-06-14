@@ -124,6 +124,11 @@ export default function ProfileScreen({ navigation }) {
           onPress: () => navigation.navigate('EditProfile')
         },
         {
+          title: 'Order History',
+          icon: 'receipt-outline',
+          onPress: () => navigation.navigate('OrderTracking')
+        },
+        {
           title: 'My Reviews',
           icon: 'chatbubbles-outline',
           onPress: () => navigation.navigate('History')

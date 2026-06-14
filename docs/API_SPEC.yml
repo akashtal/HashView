@@ -1,0 +1,56 @@
+openapi: 3.0.0
+info:
+  title: HashView QR Ordering API
+  version: 1.0.0
+  description: API specifications for the HashView Table Ordering system
+servers:
+  - url: http://localhost:5001/api
+paths:
+  /orders:
+    post:
+      summary: Create a new order
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                businessId: { type: string }
+                customerName: { type: string }
+                tableNumber: { type: string }
+                items: 
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      menuItemId: { type: string }
+                      quantity: { type: integer }
+      responses:
+        '201':
+          description: Order created successfully
+  /orders/bulk-update:
+    patch:
+      summary: Bulk update order statuses
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderIds: { type: array, items: { type: string } }
+                status: { type: string, enum: ['accepted', 'preparing', 'ready', 'delivered'] }
+      responses:
+        '200':
+          description: Orders updated successfully
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

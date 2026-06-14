@@ -1,5 +1,7 @@
 const Business = require('../models/Business.model');
 const Review = require('../models/Review.model');
+const Order = require('../models/Order.model');
+const Notification = require('../models/Notification.model');
 const { generateBusinessQRCode } = require('../utils/qrcode');
 const { getNearbyQuery, calculateDistance } = require('../utils/geolocation');
 const { syncGoogleRatingsForBusiness } = require('../controllers/externalReviews.controller');
@@ -991,15 +993,31 @@ exports.getBusinessDashboard = async (req, res, next) => {
       { $sort: { _id: -1 } }
     ]);
 
+    const unreadNotifications = await Notification.countDocuments({
+      recipientType: 'business',
+      recipientId: business._id,
+      isRead: false
+    });
+
+    // Fetch Active Orders (Phase 5)
+    const activeOrdersCount = await Order.countDocuments({
+      business: business._id,
+      status: { $nin: ['delivered', 'cancelled'] }
+    });
+
     res.status(200).json({
       success: true,
-      dashboard: {
+      data: {
         business,
-        recentReviews: reviews,
-        analytics: {
-          totalReviews,
-          averageRating: avgRating[0]?.avg || 0,
-          ratingDistribution
+        dashboard: {
+          recentReviews: reviews,
+          analytics: {
+            totalReviews,
+            averageRating: avgRating[0]?.avg || 0,
+            ratingDistribution
+          },
+          unreadNotifications,
+          activeOrders: activeOrdersCount
         }
       }
     });
@@ -1007,6 +1025,8 @@ exports.getBusinessDashboard = async (req, res, next) => {
     next(error);
   }
 };
+
+const { generateBusinessQR } = require('../services/qrService');
 
 // @desc    Generate QR code for business
 // @route   POST /api/business/:id/generate-qr
@@ -1029,16 +1049,84 @@ exports.generateQRCode = async (req, res, next) => {
       });
     }
 
-    // Generate QR code
-    const qrCode = await generateBusinessQRCode(business._id.toString(), business.name);
-    business.qrCode = qrCode;
-    await business.save();
-
+    // Generate QR code and upload to Cloudinary using qrService
+    const qrCodeUrl = await generateBusinessQR(business._id.toString());
+    
     res.status(200).json({
       success: true,
       message: 'QR code generated successfully',
-      qrCode
+      qrCode: qrCodeUrl
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Download high-res QR image
+// @route   GET /api/business/:id/qr
+// @access  Public
+exports.getBusinessQRImage = async (req, res, next) => {
+  try {
+    const business = await Business.findById(req.params.id);
+    if (!business || !business.qrCode) {
+      return res.status(404).json({ success: false, message: 'QR Code not found for this business' });
+    }
+    // Redirect to the Cloudinary URL
+    res.redirect(business.qrCode);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get print-ready PDF/HTML for QR code
+// @route   GET /api/business/:id/qr/print
+// @access  Private (Business owner)
+exports.getBusinessQRPrint = async (req, res, next) => {
+  try {
+    const business = await Business.findById(req.params.id);
+    if (!business) {
+      return res.status(404).json({ success: false, message: 'Business not found' });
+    }
+    if (!business.qrCode) {
+      return res.status(400).json({ success: false, message: 'QR Code not generated yet. Please generate it first.' });
+    }
+
+    // Return a simple print-ready HTML page
+    const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>Print QR Code - ${business.name}</title>
+      <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 40px; background: #fff; color: #333; }
+        .container { border: 2px dashed #ccc; padding: 40px; max-width: 600px; margin: 0 auto; border-radius: 12px; }
+        h1 { font-size: 32px; margin-bottom: 10px; color: #210059; }
+        p { font-size: 18px; color: #555; margin-bottom: 30px; }
+        img { max-width: 100%; height: auto; margin-bottom: 20px; }
+        .instructions { font-size: 14px; color: #888; margin-top: 40px; }
+        @media print {
+          body { padding: 0; }
+          .container { border: none; padding: 0; }
+          .no-print { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="no-print" style="margin-bottom: 20px;">
+        <button onclick="window.print()" style="padding: 10px 20px; background: #210059; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">Print this page</button>
+      </div>
+      <div class="container">
+        <h1>${business.name}</h1>
+        <p>Scan the QR code below to view our menu and order!</p>
+        <img src="${business.qrCode}" alt="${business.name} QR Code" />
+        <p class="instructions">Powered by HashView</p>
+      </div>
+    </body>
+    </html>
+    `;
+    
+    res.send(html);
   } catch (error) {
     next(error);
   }

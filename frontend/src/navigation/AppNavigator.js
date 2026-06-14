@@ -12,7 +12,15 @@ import NotificationPermissionBanner from '../components/NotificationPermissionBa
 
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
+import HelpSupportScreen from '../screens/user/HelpSupportScreen';
+import CartScreen from '../screens/user/CartScreen';
+import CheckoutScreen from '../screens/user/CheckoutScreen';
 
+// --- Phase 5: Order Management ---
+import OrdersDashboardScreen from '../screens/business/OrdersDashboardScreen';
+import OrderDetailScreen from '../screens/business/OrderDetailScreen';
+import KitchenViewScreen from '../screens/business/KitchenViewScreen';
+import OrderTrackingScreen from '../screens/user/OrderTrackingScreen';
 
 
 const Stack = createStackNavigator();
@@ -28,7 +36,9 @@ const mainLinking = {
       // The path maps 'business/:id' to the BusinessDetail screen inside the Home tab
       Home: {
         screens: {
-          BusinessDetail: 'business/:businessId',
+          BusinessDetail: {
+            path: 'business/:businessId/:section?',
+          },
         }
       },
     }
@@ -41,7 +51,9 @@ const authLinking = {
     screens: {
       // Auth Stack (Unauthenticated)
       Login: 'login',
-      BusinessDetail: 'business/:businessId', // Direct route in AuthStack
+      BusinessDetail: {
+        path: 'business/:businessId/:section?',
+      },
     }
   }
 };
@@ -233,6 +245,15 @@ export default function AppNavigator() {
         ) : (
           <Stack.Screen name="Auth" component={AuthNavigator} />
         )}
+        <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
+        <Stack.Screen name="Cart" component={CartScreen} />
+        <Stack.Screen name="Checkout" component={CheckoutScreen} />
+        <Stack.Screen name="OrdersDashboard" component={OrdersDashboardScreen} />
+        <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
+        <Stack.Screen name="KitchenView" component={KitchenViewScreen} />
+        <Stack.Screen name="OrderTracking" component={OrderTrackingScreen} />
+        <Stack.Screen name="TaxManagement" component={require('../screens/business/TaxManagementScreen').default} />
+        <Stack.Screen name="ChargeManagement" component={require('../screens/business/ChargeManagementScreen').default} />
       </Stack.Navigator>
     </NavigationContainer>
   );

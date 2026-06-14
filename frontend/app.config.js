@@ -48,7 +48,11 @@ export default {
       buildNumber: "25",
       config: {
         googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY || "AIzaSyCgafT4Tw62CuxxN5DwbkqWIK9pVflKEXI"
-      }
+      },
+      associatedDomains: [
+        "applinks:hashview-backend.onrender.com",
+        "applinks:hashview.app"
+      ]
     },
 
     android: {
@@ -75,7 +79,29 @@ export default {
         googleMaps: {
           apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY || "AIzaSyCgafT4Tw62CuxxN5DwbkqWIK9pVflKEXI"
         }
-      }
+      },
+      intentFilters: [
+        {
+          action: "VIEW",
+          autoVerify: true,
+          data: [
+            {
+              scheme: "https",
+              host: "hashview-backend.onrender.com",
+              pathPrefix: "/business"
+            },
+            {
+              scheme: "https",
+              host: "hashview.app",
+              pathPrefix: "/business"
+            }
+          ],
+          category: [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
 
     web: {

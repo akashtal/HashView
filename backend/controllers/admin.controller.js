@@ -4,6 +4,7 @@ const BusinessOwner = require('../models/BusinessOwner.model');
 const SuspendedAccount = require('../models/SuspendedAccount.model');
 const Review = require('../models/Review.model');
 const Coupon = require('../models/Coupon.model');
+const Order = require('../models/Order.model');
 const { sendPushNotification, sendBulkNotifications } = require('../utils/notification');
 const { sendEmail } = require('../utils/emailService');
 const { generateBusinessQRCode } = require('../utils/qrcode');
@@ -26,6 +27,10 @@ exports.getDashboardStats = async (req, res, next) => {
     const pendingBusinesses = await Business.countDocuments({ status: 'pending' });
     const totalReviews = await Review.countDocuments();
     const totalCoupons = await Coupon.countDocuments();
+    
+    // Order stats
+    const totalOrders = await Order.countDocuments();
+    const activeOrders = await Order.countDocuments({ status: { $in: ['new', 'accepted', 'preparing', 'ready'] } });
 
     // Get recent users
     const recentUsers = await User.find()
@@ -81,6 +86,10 @@ exports.getDashboardStats = async (req, res, next) => {
         },
         coupons: {
           total: totalCoupons
+        },
+        orders: {
+          total: totalOrders,
+          active: activeOrders
         }
       },
       recentUsers,
@@ -600,9 +609,9 @@ exports.updateBusinessKYC = async (req, res, next) => {
       if (!business.qrCode) {
         try {
           console.log('📱 Generating QR code for approved business:', business._id);
-          const qrCode = await generateBusinessQRCode(business._id.toString(), business.name);
-          business.qrCode = qrCode;
-          console.log('✅ QR code generated successfully');
+          const { generateBusinessQR } = require('../services/qrService');
+          const qrCodeUrl = await generateBusinessQR(business._id.toString());
+          console.log('✅ QR code generated successfully:', qrCodeUrl);
         } catch (qrError) {
           console.error('❌ Error generating QR code:', qrError);
           // Don't fail the approval if QR generation fails
@@ -1856,6 +1865,66 @@ exports.triggerBackup = async (req, res, next) => {
         message: 'Database backup completed successfully',
         output: stdout
       });
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all orders (Admin system-wide monitoring)
+// @route   GET /api/admin/orders
+// @access  Private (Admin)
+exports.getAllOrders = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const skip = (page - 1) * limit;
+
+    let query = {};
+    if (req.query.businessId) query.business = req.query.businessId;
+    if (req.query.status) query.status = req.query.status;
+
+    const orders = await Order.find(query)
+      .populate('business', 'businessName')
+      .sort('-createdAt')
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Order.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+      data: orders
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get suspicious orders (Fraud Detection)
+// @route   GET /api/admin/orders/suspicious
+// @access  Private (Admin)
+exports.getSuspiciousOrders = async (req, res, next) => {
+  try {
+    // Basic fraud detection rule: 5+ orders from the same table at the same business in the last 24 hours
+    const suspiciousOrders = await Order.aggregate([
+      { $match: { createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } } },
+      { $group: {
+          _id: { business: '$business', tableNumber: '$tableNumber' },
+          count: { $sum: 1 },
+          orders: { $push: '$$ROOT' }
+      }},
+      { $match: { count: { $gte: 5 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: suspiciousOrders
     });
   } catch (error) {
     next(error);

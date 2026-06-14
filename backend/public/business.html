@@ -98,8 +98,61 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
         }
 
+        .menu-container {
+            margin-top: 20px;
+            text-align: left;
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 15px;
+            color: #333;
+            display: none;
+        }
+
+        .category-title {
+            color: #210059;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0 10px;
+            border-bottom: 2px solid #FC8603;
+            padding-bottom: 5px;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #111;
+        }
+
+        .item-desc {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .item-price {
+            font-weight: bold;
+            color: #210059;
+            margin-left: 15px;
+        }
+
         .stores {
-            margin-top: 30px;
+            margin-top: 20px;
             display: flex;
             gap: 15px;
             justify-content: center;
@@ -108,7 +161,7 @@
 
         .store-badge {
             display: block;
-            height: 50px;
+            height: 40px;
         }
 
         .footer {
@@ -116,6 +169,11 @@
             font-size: 14px;
             opacity: 0.7;
         }
+
+        /* Scrollbar for menu */
+        .menu-container::-webkit-scrollbar { width: 6px; }
+        .menu-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .menu-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
     </style>
 </head>
 
@@ -127,7 +185,7 @@
         <div class="loader" id="loader"></div>
 
         <div id="fallback" style="display: none;">
-            <p>Didn't open? Download the app:</p>
+            <p><strong>Want to order directly in the app?</strong></p>
             <div class="stores">
                 <a href="https://apps.apple.com/in/app/hashview/id6756681321" target="_blank">
                     <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83"
@@ -136,8 +194,15 @@
                 <a href="https://play.google.com/store/apps/details?id=com.hashview.apps&pcampaignid=web_share"
                     target="_blank">
                     <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-                        alt="Get it on Google Play" class="store-badge" style="height: 74px;">
+                        alt="Get it on Google Play" class="store-badge" style="height: 60px;">
                 </a>
+            </div>
+
+            <!-- Web Menu Fallback -->
+            <h3 style="margin-top: 25px; margin-bottom: 5px;">View Menu</h3>
+            <p style="font-size: 13px; opacity: 0.8; margin-bottom: 10px;">(Cart & Ordering requires the app)</p>
+            <div id="web-menu" class="menu-container">
+                <div style="text-align:center; padding: 20px;">Loading menu...</div>
             </div>
         </div>
 
@@ -147,67 +212,76 @@
     </div>
 
     <script>
-        // Get business ID from URL query parameter
-        // Expected URL format: https://hashview.app/business.html?id=BUSINESS_ID
         const urlParams = new URLSearchParams(window.location.search);
         const businessId = urlParams.get('id') || window.location.pathname.split('/').pop().replace('.html', '');
 
-        console.log('Business ID:', businessId);
+        // Update deep link for Menu
+        const deepLink = `hashview://business/${businessId}/menu`;
 
-        // Detect platform
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
         const isAndroid = /android/i.test(userAgent);
 
-        // Deep link URL
-        const deepLink = `hashview://business/${businessId}`;
-
-        // Store URLs
-        const appStoreURL = 'https://apps.apple.com/in/app/hashview/id6756681321';
-        const playStoreURL = 'https://play.google.com/store/apps/details?id=com.hashview.apps&pcampaignid=web_share';
-
-        // Try to open the app
         let appOpened = false;
 
-        // Attempt to open app via deep link
-        if (isIOS || isAndroid) {
-            // Create hidden iframe to trigger app
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = deepLink;
-            document.body.appendChild(iframe);
+        async function loadWebMenu() {
+            try {
+                const res = await fetch(`/api/menu-items/business/${businessId}/ordering`);
+                const data = await res.json();
+                const menuContainer = document.getElementById('web-menu');
+                
+                if (data.success && data.menu) {
+                    let html = '';
+                    // Assuming API returns data grouped by category as per Phase 2
+                    for (const category of data.menu) {
+                        html += `<div class="category-title">${category.category}</div>`;
+                        for (const item of category.items) {
+                            html += `
+                            <div class="menu-item">
+                                <div class="item-details">
+                                    <div class="item-name">${item.name}</div>
+                                    ${item.description ? `<div class="item-desc">${item.description}</div>` : ''}
+                                </div>
+                                <div class="item-price">£${item.price.toFixed(2)}</div>
+                            </div>`;
+                        }
+                    }
+                    if (html === '') html = '<div style="text-align:center; padding: 20px;">No items available</div>';
+                    menuContainer.innerHTML = html;
+                } else {
+                    menuContainer.innerHTML = '<div style="text-align:center; padding: 20px;">Failed to load menu</div>';
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('web-menu').innerHTML = '<div style="text-align:center; padding: 20px;">Error loading menu</div>';
+            }
+        }
 
-            // Set a flag when page loses focus (app opened)
+        if (isIOS || isAndroid) {
+            // Attempt to open the app directly
+            window.location.replace(deepLink);
+
             window.addEventListener('blur', function () {
                 appOpened = true;
             });
 
-            // After 2 seconds, if app didn't open, show fallback
+            // If app doesn't open within 2.5 seconds, redirect to the respective app store
             setTimeout(function () {
                 if (!appOpened) {
-                    document.getElementById('loader').style.display = 'none';
-                    document.getElementById('fallback').style.display = 'block';
-                    document.getElementById('title').textContent = 'Install HashView';
-                    document.getElementById('message').textContent = 'Get the app to view business details and reviews.';
-
-                    // Auto-redirect to appropriate store after 3 more seconds
-                    setTimeout(function () {
-                        if (isIOS) {
-                            window.location.href = appStoreURL;
-                        } else if (isAndroid) {
-                            window.location.href = playStoreURL;
-                        }
-                    }, 3000);
+                    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.hashview.apps';
+                    const appStoreUrl = 'https://apps.apple.com/in/app/hashview/id6756681321';
+                    window.location.replace(isAndroid ? playStoreUrl : appStoreUrl);
                 }
-            }, 2000);
+            }, 2500);
         } else {
-            // Desktop - show download options immediately
+            // Desktop
             document.getElementById('loader').style.display = 'none';
             document.getElementById('fallback').style.display = 'block';
-            document.getElementById('title').textContent = 'Get HashView Mobile App';
-            document.getElementById('message').textContent = 'Scan QR codes with our mobile app to discover local businesses.';
+            document.getElementById('title').textContent = 'Web Menu';
+            document.getElementById('message').textContent = 'Scan QR on mobile to order, or view menu below:';
+            document.getElementById('web-menu').style.display = 'block';
+            loadWebMenu();
         }
     </script>
 </body>
-
 </html>

@@ -1,0 +1,37 @@
+config:
+  target: "http://localhost:5001" # Change this to your production Socket.IO URL
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: "Warm up WebSocket connections"
+    - duration: 120
+      arrivalRate: 20
+      rampTo: 100
+      name: "Ramp up to 5,000+ connections"
+  
+  engines:
+    socketio-v3: {} # Artillery engine for Socket.IO v3/v4
+
+scenarios:
+  - name: "Business Dashboard Socket Connection"
+    engine: socketio-v3
+    flow:
+      # 1. Connect to the /orders namespace
+      - connect:
+          namespace: "/orders"
+          # Requires an auth token in a real environment
+          # auth:
+          #   token: "{{ $processEnvironment.TEST_BUSINESS_TOKEN }}"
+      
+      # 2. Join the business room
+      - emit:
+          channel: "join_business"
+          data: "{{ $processEnvironment.TEST_BUSINESS_ID }}"
+      
+      # 3. Stay connected and listen for events
+      - think: 60
+      
+      # 4. Disconnect
+      - emit:
+          channel: "leave_business"
+          data: "{{ $processEnvironment.TEST_BUSINESS_ID }}"

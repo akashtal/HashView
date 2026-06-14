@@ -9,23 +9,25 @@ import { Ionicons as Icon } from '@expo/vector-icons';
 import { getBusiness } from '../../store/slices/businessSlice';
 import { getBusinessReviews, clearOldReviews } from '../../store/slices/reviewSlice';
 import { updateUser } from '../../store/slices/authSlice';
+import { clearCart, addItem, updateQuantity, removeItem } from '../../store/slices/cartSlice';
 import COLORS from '../../config/colors';
 import { API_CONFIG } from '../../config/api.config';
 import ApiService from '../../services/api.service';
+import MenuItemModal from '../../components/MenuItemModal';
 
 // Lightweight relative-time formatter — no external dependency
 const formatRelativeTime = (dateStr) => {
   if (!dateStr) return '';
   const diff = Date.now() - new Date(dateStr).getTime();
-  const mins  = Math.floor(diff / 60000);
+  const mins = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
-  const days  = Math.floor(diff / 86400000);
+  const days = Math.floor(diff / 86400000);
   const months = Math.floor(days / 30);
-  const years  = Math.floor(days / 365);
-  if (mins  < 1)  return 'just now';
-  if (mins  < 60) return `${mins}m ago`;
+  const years = Math.floor(days / 365);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
   if (hours < 24) return `${hours}h ago`;
-  if (days  < 30) return `${days} day${days > 1 ? 's' : ''} ago`;
+  if (days < 30) return `${days} day${days > 1 ? 's' : ''} ago`;
   if (months < 12) return `${months} month${months > 1 ? 's' : ''} ago`;
   return `${years} year${years > 1 ? 's' : ''} ago`;
 };
@@ -133,13 +135,14 @@ const ReviewCard = ({ review, handleVideoPress, colors, isOld = false }) => {
 export default function BusinessDetailScreen({ navigation, route }) {
 
   const dispatch = useDispatch();
-  const { businessId, business, fromQR, initialTab } = route.params || {};
+  const { businessId, business, fromQR, initialTab, section } = route.params || {};
   const { selectedBusiness, loading } = useSelector((state) => state.business);
   const { reviews, oldReviews, oldReviewCount, oldReviewsLoading, oldReviewsHasMore, oldReviewsPage } = useSelector((state) => state.review);
   const { user } = useSelector((state) => state.auth);
+  const cart = useSelector((state) => state.cart);
   const [qrBusiness, setQrBusiness] = useState(null);
-  // initialTab param is provided when opening from a push notification
-  const [activeTab, setActiveTab] = useState(initialTab || 'reviews');
+  // initialTab param is provided when opening from a push notification, section from deep link
+  const [activeTab, setActiveTab] = useState(section === 'menu' ? 'menu' : (initialTab || 'reviews'));
   const [isFavorite, setIsFavorite] = useState(false);
   const [updates, setUpdates] = useState([]);
   const [loadingUpdates, setLoadingUpdates] = useState(false);
@@ -150,6 +153,8 @@ export default function BusinessDetailScreen({ navigation, route }) {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [videoViewerVisible, setVideoViewerVisible] = useState(false);
   const [showOldReviews, setShowOldReviews] = useState(false);
+  const [selectedMenuItem, setSelectedMenuItem] = useState(null);
+  const [menuModalVisible, setMenuModalVisible] = useState(false);
   const visitTrackedRef = useRef(false);
 
   // Fetch business data — depends only on route params, NOT on user object
@@ -191,7 +196,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
       // Track visit (fire-and-forget, once per focus, 5-min server-side cooldown)
       if (idToFetch && !visitTrackedRef.current) {
         visitTrackedRef.current = true;
-        ApiService.trackBusinessVisit(idToFetch).catch(() => {});
+        ApiService.trackBusinessVisit(idToFetch).catch(() => { });
       }
     }, [businessId, business, fromQR, dispatch])
   );
@@ -348,6 +353,75 @@ export default function BusinessDetailScreen({ navigation, route }) {
       ToastService.showInfo('Info', 'Google Business profile link not available');
     }
   };
+
+  const handleMenuItemPress = (item) => {
+    // If user tries to add an item from a different business, confirm clearing cart
+    if (cart.businessId && cart.businessId !== displayBusiness._id) {
+      Alert.alert(
+        'Clear existing cart?',
+        `You already have items from ${cart.businessName} in your cart. Adding this item will clear your previous cart. Proceed?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Clear Cart & Add',
+            style: 'destructive',
+            onPress: () => {
+              dispatch(clearCart());
+              setSelectedMenuItem(item);
+              setMenuModalVisible(true);
+            }
+          }
+        ]
+      );
+      return;
+    }
+
+    setSelectedMenuItem(item);
+    setMenuModalVisible(true);
+  };
+
+  const getItemQuantity = useCallback((itemId) => {
+    return cart.items
+      .filter(i => i.menuItem._id === itemId)
+      .reduce((sum, i) => sum + i.quantity, 0);
+  }, [cart.items]);
+
+  const handleDirectAdd = useCallback((item) => {
+    if (item.modifiers?.length > 0 || item.addOns?.length > 0) {
+      handleMenuItemPress(item);
+      return;
+    }
+    if (cart.businessId && cart.businessId !== displayBusiness._id) {
+      handleMenuItemPress(item);
+      return;
+    }
+    const cartItemId = `${item._id}-default`;
+    dispatch(addItem({
+      businessId: displayBusiness._id,
+      businessName: displayBusiness.name,
+      item: {
+        cartItemId,
+        menuItem: item,
+        quantity: 1,
+        selectedModifiers: [],
+        selectedAddOns: [],
+        itemNotes: '',
+        itemTotal: item.price
+      }
+    }));
+  }, [cart, displayBusiness, dispatch]);
+
+  const handleDirectRemove = useCallback((item) => {
+    const existingItems = cart.items.filter(i => i.menuItem._id === item._id);
+    if (existingItems.length > 0) {
+      const lastItem = existingItems[existingItems.length - 1];
+      if (lastItem.quantity > 1) {
+        dispatch(updateQuantity({ cartItemId: lastItem.cartItemId, quantity: lastItem.quantity - 1 }));
+      } else {
+        dispatch(removeItem({ cartItemId: lastItem.cartItemId }));
+      }
+    }
+  }, [cart.items, dispatch]);
 
   if ((!fromQR && loading) || !displayBusiness) {
     return (
@@ -750,7 +824,9 @@ export default function BusinessDetailScreen({ navigation, route }) {
                       {category}
                     </Text>
                     {items.map(item => (
-                      <View
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => item.isAvailable ? handleMenuItemPress(item) : null}
                         key={item._id}
                         style={{
                           backgroundColor: '#FFF', borderRadius: 14, marginBottom: 10,
@@ -789,25 +865,54 @@ export default function BusinessDetailScreen({ navigation, route }) {
                               {item.description}
                             </Text>
                           ) : null}
-                          {/* Duration for services */}
-                          {item.duration ? (
-                            <Text style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>⏱ {item.duration} min</Text>
-                          ) : null}
-                          {/* Dietary badges */}
-                          {item.dietary?.length > 0 && (
-                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
-                              {item.dietary.slice(0, 3).map(d => (
-                                <View key={d} style={{ backgroundColor: '#DCFCE7', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
-                                  <Text style={{ fontSize: 10, fontWeight: '600', color: '#166534' }}>{d}</Text>
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 4 }}>
+                            <View style={{ flex: 1, paddingRight: 10 }}>
+                              {/* Duration for services */}
+                              {item.duration ? (
+                                <Text style={{ fontSize: 11, color: '#9CA3AF' }}>⏱ {item.duration} min</Text>
+                              ) : null}
+                              {/* Dietary badges */}
+                              {item.dietary?.length > 0 && (
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                                  {item.dietary.slice(0, 3).map(d => (
+                                    <View key={d} style={{ backgroundColor: '#DCFCE7', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
+                                      <Text style={{ fontSize: 10, fontWeight: '600', color: '#166534' }}>{d}</Text>
+                                    </View>
+                                  ))}
                                 </View>
-                              ))}
+                              )}
+                              {!item.isAvailable && (
+                                <Text style={{ fontSize: 11, color: '#EF4444', marginTop: 4, fontWeight: '600' }}>Currently unavailable</Text>
+                              )}
                             </View>
-                          )}
-                          {!item.isAvailable && (
-                            <Text style={{ fontSize: 11, color: '#EF4444', marginTop: 4, fontWeight: '600' }}>Currently unavailable</Text>
-                          )}
+
+                            {/* Add/Remove Buttons */}
+                            {item.isAvailable && (
+                              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#F3F4F6', borderRadius: 20, padding: 2 }}>
+                                {getItemQuantity(item._id) > 0 ? (
+                                  <>
+                                    <TouchableOpacity
+                                      onPress={() => handleDirectRemove(item)}
+                                      style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFF', borderRadius: 14, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 2, shadowOffset: { width: 0, height: 1 }, elevation: 1 }}
+                                    >
+                                      <Icon name="remove" size={16} color="#4B5563" />
+                                    </TouchableOpacity>
+                                    <Text style={{ paddingHorizontal: 10, fontWeight: '700', color: '#111827', fontSize: 13 }}>
+                                      {getItemQuantity(item._id)}
+                                    </Text>
+                                  </>
+                                ) : null}
+                                <TouchableOpacity
+                                  onPress={() => handleDirectAdd(item)}
+                                  style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: '#6C47FF', borderRadius: 14, shadowColor: '#6C47FF', shadowOpacity: 0.3, shadowRadius: 3, shadowOffset: { width: 0, height: 2 }, elevation: 2 }}
+                                >
+                                  <Icon name="add" size={16} color="#FFF" />
+                                </TouchableOpacity>
+                              </View>
+                            )}
+                          </View>
                         </View>
-                      </View>
+                      </TouchableOpacity>
                     ))}
                   </View>
                 ))
@@ -1154,33 +1259,77 @@ export default function BusinessDetailScreen({ navigation, route }) {
         </View>
       </ScrollView >
 
-      {/* Fixed Bottom Button - Hide for Guest */}
+      {/* Fixed Bottom Container for Primary Action (Review or Cart) */}
       {
-        (!user?.isGuest && user?.role !== 'guest') && (
+        ((!user?.isGuest && user?.role !== 'guest') || (cart.items.length > 0 && cart.businessId === displayBusiness._id)) && (
           <View className="bg-white px-5 pt-4 pb-5 border-t border-gray-100 shadow-2xl">
-            <TouchableOpacity
-              onPress={handleAddReview}
-              activeOpacity={0.85}
-              className="shadow-xl"
-            >
-              <LinearGradient
-                colors={[COLORS.secondary, COLORS.secondaryDark]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                className="rounded-2xl py-4 items-center flex-row justify-center border border-white/20"
+            
+            {/* Show Cart Button if items exist, otherwise show Review Button */}
+            {(cart.items.length > 0 && cart.businessId === displayBusiness._id) ? (
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Cart')}
+                activeOpacity={0.85}
+                className="shadow-xl"
               >
-                <View className="bg-white/20 w-9 h-9 rounded-full items-center justify-center mr-3">
-                  <Icon name="star" size={20} color="#FFF" />
-                </View>
-                <Text className="text-white text-[17px] font-bold tracking-wide">
-                  Write a Review
-                </Text>
-                <Icon name="arrow-forward" size={20} color="#FFF" style={{ marginLeft: 8, opacity: 0.8 }} />
-              </LinearGradient>
-            </TouchableOpacity>
+                <LinearGradient
+                  colors={[COLORS.secondary, COLORS.secondaryDark]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  className="rounded-2xl py-4 px-5 flex-row items-center justify-between border border-white/20"
+                >
+                  <View className="flex-row items-center">
+                    <View className="bg-white/20 w-9 h-9 rounded-full items-center justify-center mr-3">
+                      <Text className="text-white text-sm font-bold">
+                        {cart.items.reduce((sum, item) => sum + item.quantity, 0)}
+                      </Text>
+                    </View>
+                    <Text className="text-white text-[17px] font-bold tracking-wide">
+                      View Cart
+                    </Text>
+                  </View>
+                  <View className="flex-row items-center">
+                    <Text className="text-white text-[17px] font-black mr-2">
+                      {displayBusiness.currency === 'GBP' ? '£' : displayBusiness.currency === 'USD' ? '$' : '€'}{cart.cartTotal.toFixed(2)}
+                    </Text>
+                    <Icon name="arrow-forward" size={20} color="#FFF" style={{ opacity: 0.8 }} />
+                  </View>
+                </LinearGradient>
+              </TouchableOpacity>
+            ) : (
+              !user?.isGuest && user?.role !== 'guest' && (
+                <TouchableOpacity
+                  onPress={handleAddReview}
+                  activeOpacity={0.85}
+                  className="shadow-xl"
+                >
+                  <LinearGradient
+                    colors={[COLORS.secondary, COLORS.secondaryDark]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    className="rounded-2xl py-4 items-center flex-row justify-center border border-white/20"
+                  >
+                    <View className="bg-white/20 w-9 h-9 rounded-full items-center justify-center mr-3">
+                      <Icon name="star" size={20} color="#FFF" />
+                    </View>
+                    <Text className="text-white text-[17px] font-bold tracking-wide">
+                      Write a Review
+                    </Text>
+                    <Icon name="arrow-forward" size={20} color="#FFF" style={{ marginLeft: 8, opacity: 0.8 }} />
+                  </LinearGradient>
+                </TouchableOpacity>
+              )
+            )}
           </View>
         )
       }
+
+      {/* Modals */}
+      <MenuItemModal
+        visible={menuModalVisible}
+        onClose={() => setMenuModalVisible(false)}
+        item={selectedMenuItem}
+        business={displayBusiness}
+      />
 
       {/* Image Viewer Modal */}
       <Modal

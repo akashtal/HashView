@@ -27,9 +27,17 @@ import VerifyEmailScreen from '../screens/user/VerifyEmailScreen';
 import FavoritesScreen from '../screens/user/FavoritesScreen';
 import ClaimBusinessScreen from '../screens/user/ClaimBusinessScreen';
 import TermsAndConditionsScreen from '../screens/auth/TermsAndConditionsScreen';
+import OrderTrackingScreen from '../screens/user/OrderTrackingScreen';
 
 // Business Screens
 import BusinessDashboardScreen from '../screens/business/BusinessDashboardScreen';
+import OrdersDashboardScreen from '../screens/business/OrdersDashboardScreen';
+import OrderAnalyticsScreen from '../screens/business/OrderAnalyticsScreen';
+import OrderDetailScreen from '../screens/business/OrderDetailScreen';
+import OrderInvoiceScreen from '../screens/business/OrderInvoiceScreen';
+import TaxManagementScreen from '../screens/business/TaxManagementScreen';
+import ChargeManagementScreen from '../screens/business/ChargeManagementScreen';
+import KitchenViewScreen from '../screens/business/KitchenViewScreen';
 import BusinessRegistrationScreen from '../screens/business/BusinessRegistrationScreen';
 import BusinessKYCScreen from '../screens/business/BusinessKYCScreen';
 
@@ -75,6 +83,7 @@ function UserStack() {
       <Stack.Screen name="ClaimBusiness" component={ClaimBusinessScreen} />
       <Stack.Screen name="TermsAndConditions" component={TermsAndConditionsScreen} />
       <Stack.Screen name="AISearch" component={AISearchScreen} />
+      <Stack.Screen name="OrderTracking" component={OrderTrackingScreen} />
     </Stack.Navigator>
   );
 }
@@ -128,6 +137,13 @@ function BusinessStack() {
       }}
     >
       <Stack.Screen name="BusinessDashboard" component={BusinessDashboardScreen} />
+      <Stack.Screen name="OrdersDashboard" component={OrdersDashboardScreen} />
+      <Stack.Screen name="OrderAnalytics" component={OrderAnalyticsScreen} />
+      <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
+      <Stack.Screen name="OrderInvoice" component={OrderInvoiceScreen} />
+      <Stack.Screen name="TaxManagement" component={TaxManagementScreen} />
+      <Stack.Screen name="ChargeManagement" component={ChargeManagementScreen} />
+      <Stack.Screen name="KitchenView" component={KitchenViewScreen} />
       <Stack.Screen name="BusinessRegistration" component={BusinessRegistrationScreen} />
       <Stack.Screen name="BusinessKYC" component={BusinessKYCScreen} />
 

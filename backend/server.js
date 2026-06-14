@@ -32,8 +32,12 @@ const externalReviewsRoutes = require('./routes/externalReviews.routes');
 const subscriptionRoutes = require('./routes/subscription.routes');
 const { handleWebhook } = require('./controllers/subscription.controller');
 const menuItemRoutes = require('./routes/menuItem.routes');
+const orderRoutes = require('./routes/order.routes'); // Phase 1: Ordering system
+const billingRulesRoutes = require('./routes/billingRules.routes'); // Phase 6: Tax & Charge Rules
+const billingRoutes = require('./routes/billing.routes'); // Phase 1: Billing engine
 const aiGateway = require('./ai-gateway/index'); // Phase 2: AI-powered search
-
+const billing = require('./routes/billing.routes');
+const healthRoutes = require('./routes/health.routes');
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -131,6 +135,10 @@ app.get('/debug-sentry', (req, res) => {
   throw new Error('Sentry Backend Test Error - ' + new Date().toISOString());
 });
 
+// API Versioning
+const apiVersioning = require('./middleware/apiVersioning');
+app.use('/api', apiVersioning);
+
 // API Routes
 const supportRoutes = require('./routes/support.routes');
 
@@ -144,6 +152,7 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/business-coupons', businessCouponRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/billing', billing);
 app.use('/api/admin/rbac', rbacRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/chat', chatRoutes);
@@ -153,12 +162,20 @@ app.use('/api/verification', require('./routes/verification.routes'));
 app.use('/api/support', supportRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 app.use('/api/menu-items', menuItemRoutes); // Phase 1: Menu & Services system
+app.use('/api/orders', orderRoutes); // Phase 5: Order routes
+app.use('/api/billing-rules', billingRulesRoutes); // Phase 6: Tax/Charge rules
+app.use('/api/business/:businessId/billing', billingRoutes); // Phase 4: Billing preview routes
+app.use('/api/health', healthRoutes);
 app.use('/ai', aiGateway);                 // Phase 2: AI-powered search gateway
 
 
 // Socket.IO for real-time chat
 const chatSocket = require('./sockets/chat.socket');
 chatSocket(io);
+
+// Initialize order tracking socket
+const orderSocket = require('./sockets/order.socket');
+orderSocket.init(io);
 
 // Initialize live business stats socket
 const businessLiveController = require('./controllers/businessLive.controller');
@@ -167,7 +184,9 @@ businessLiveController.setSocketIO(io);
 // Initialize automatic sync jobs (cron)
 if (process.env.ENABLE_AUTO_SYNC !== 'false') {
   const { initializeSyncJobs } = require('./utils/syncJobs');
+  const { initArchivalJob } = require('./utils/orderArchival');
   initializeSyncJobs();
+  initArchivalJob();
 }
 
 // Sentry error handler — catches all unhandled errors and sends to dashboard
@@ -234,8 +253,25 @@ mongoose.connect(process.env.MONGODB_URI, {
     logger.info('✅ MongoDB Connected Successfully');
     console.log('✅ MongoDB Connected Successfully');
 
-    // Initialize Redis (optional)
+    // Initialize Redis and configure Socket.IO Redis Adapter
     await initializeRedis();
+    const { redisClient } = require('./config/redis');
+    if (redisClient && redisClient.isOpen) {
+      try {
+        const { createAdapter } = require('@socket.io/redis-adapter');
+        const pubClient = redisClient.duplicate();
+        const subClient = redisClient.duplicate();
+        await Promise.all([pubClient.connect(), subClient.connect()]);
+        io.adapter(createAdapter(pubClient, subClient));
+        logger.info('✅ Socket.IO Redis adapter configured for horizontal scaling');
+        
+        // Warm up cache for top restaurants
+        const { warmMenuCache } = require('./utils/cacheWarming');
+        warmMenuCache(); // Fire and forget
+      } catch (err) {
+        logger.error('❌ Error configuring Socket.IO Redis adapter:', err);
+      }
+    }
 
     // CRM-123 FIX: Ensure users.phone_1 index is sparse so multiple users can register without a phone.
     // This check replaces the old "always drop" approach which was destroying the correct sparse index on every boot.

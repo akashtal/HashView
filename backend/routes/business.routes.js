@@ -9,6 +9,8 @@ const {
   getBusiness,
   getBusinessDashboard,
   generateQRCode,
+  getBusinessQRImage,
+  getBusinessQRPrint,
   updateBusiness,
   updateBusinessImages,
   getMyBusinesses,
@@ -42,6 +44,7 @@ router.post('/top-reviewers', getLiveTopReviewers);
 router.get('/admin/claims', protect, authorize('admin'), getBusinessClaims);
 
 router.get('/:id', getBusiness);
+router.get('/:id/qr', getBusinessQRImage);
 
 // Visit tracking — public (guests contribute too; optional auth for dedup)
 router.post('/:id/track-visit', trackVisit);
@@ -57,6 +60,7 @@ router.post('/:id/documents', protect, authorize('business'), upload.fields([
 ]), uploadDocuments);
 router.get('/:id/dashboard', protect, getBusinessDashboard);
 router.post('/:id/generate-qr', protect, authorize('business'), generateQRCode);
+router.get('/:id/qr/print', protect, authorize('business'), getBusinessQRPrint);
 router.put('/:id', protect, authorize('business'), updateBusiness);
 router.put('/:id/images', protect, authorize('business'), updateBusinessImages);
 router.put('/:id/tripadvisor-rating', protect, authorize('business', 'admin'), updateTripAdvisorRating);

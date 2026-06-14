@@ -29,7 +29,9 @@ const {
   setOwnerFreeTrialLimit,
   promoteUserToBusiness,
   getBackupStatus,
-  triggerBackup
+  triggerBackup,
+  getAllOrders,
+  getSuspiciousOrders
 } = require('../controllers/admin.controller');
 const { protect, requireAdminTier, checkPermission } = require('../middleware/auth.middleware');
 const { PERMISSIONS } = require('../constants/rbac');
@@ -63,6 +65,10 @@ router.delete('/businesses/:id', checkPermission(PERMISSIONS.DELETE_BUSINESS), d
 router.get('/reviews/analytics', checkPermission(PERMISSIONS.VIEW_REVIEWS), getReviewAnalytics);
 router.get('/reviews', checkPermission(PERMISSIONS.VIEW_REVIEWS), getAllReviews);
 router.put('/reviews/:id/status', checkPermission(PERMISSIONS.MANAGE_REVIEWS), updateReviewStatus);
+
+// ── Orders ───────────────────────────────────────────────────────────────────
+router.get('/orders', checkPermission(PERMISSIONS.VIEW_ORDERS), getAllOrders);
+router.get('/orders/suspicious', checkPermission(PERMISSIONS.VIEW_ORDERS), getSuspiciousOrders);
 
 // ── Notifications ─────────────────────────────────────────────────────────────
 router.post('/notifications/send', checkPermission(PERMISSIONS.SEND_NOTIFICATIONS), sendNotification);

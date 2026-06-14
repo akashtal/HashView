@@ -124,6 +124,52 @@ const menuItemSchema = new mongoose.Schema({
     type: [String],
     enum: ['breakfast', 'lunch', 'dinner', 'all-day'],
     default: []
+  },
+
+  // ─── Ordering-Specific Fields (Phase 2) ───────────────────────────────────────
+  modifiers: [{
+    name: { type: String, required: true },      // e.g., "Size", "Spice Level"
+    required: { type: Boolean, default: false },
+    maxSelections: { type: Number, default: 1 },
+    options: [{
+      name: { type: String, required: true },    // e.g., "Small", "Medium"
+      priceAdjustment: { type: Number, default: 0 },
+      isDefault: { type: Boolean, default: false }
+    }]
+  }],
+
+  addOns: [{
+    name: { type: String, required: true },      // e.g., "Extra Cheese"
+    price: { type: Number, required: true },
+    isAvailable: { type: Boolean, default: true },
+    maxQuantity: { type: Number, default: 5 }
+  }],
+
+  prepTime: {
+    type: Number,
+    default: 15,
+    min: 1,
+    max: 120
+  },
+
+  maxOrdersPerSlot: {
+    type: Number,
+    default: null
+  },
+
+  allergens: {
+    type: [String],
+    enum: [
+      'celery', 'gluten', 'crustaceans', 'eggs', 'fish', 'lupin',
+      'milk', 'molluscs', 'mustard', 'nuts', 'peanuts', 'sesame',
+      'soybeans', 'sulphites'
+    ],
+    default: []
+  },
+
+  calories: {
+    type: Number,
+    default: null
   }
 
 }, {

@@ -2,16 +2,22 @@ const MenuItem = require('../models/MenuItem.model');
 const Business = require('../models/Business.model');
 const BusinessOwner = require('../models/BusinessOwner.model');
 const { cloudinary } = require('../config/cloudinary');
+const { getCache, setCache, deleteCachePattern } = require('../config/redis');
+
+const CircuitBreaker = require('../utils/circuitBreaker');
+const cloudinaryBreaker = new CircuitBreaker('Cloudinary Upload', 5, 30000);
 
 // Helper: upload a buffer to Cloudinary (since the existing multer pipeline uses disk
 // storage in some places, we use the stream API for buffer uploads)
 const uploadBufferToCloudinary = (buffer, options) => {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
-      if (error) reject(error);
-      else resolve(result);
+  return cloudinaryBreaker.execute(() => {
+    return new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      });
+      stream.end(buffer);
     });
-    stream.end(buffer);
   });
 };
 
@@ -98,6 +104,60 @@ exports.getMenuItemsFlat = async (req, res) => {
   }
 };
 
+// ─── GET /api/menu-items/business/:businessId/ordering ─────────────────────────
+// Public. Returns active items grouped by category, optimized for the QR ordering flow.
+// Uses Redis caching with a 5-minute TTL.
+exports.getOrderingMenu = async (req, res) => {
+  try {
+    const { businessId } = req.params;
+    const cacheKey = `menu:ordering:${businessId}`;
+
+    // 1. Check Cache
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return res.status(200).json({
+        success: true,
+        source: 'cache',
+        count: cachedData.count,
+        data: cachedData.data
+      });
+    }
+
+    // 2. Fetch from DB
+    const items = await MenuItem.find({ business: businessId, status: 'active', isAvailable: true })
+      .sort({ menuCategory: 1, sortOrder: 1, name: 1 })
+      .lean();
+
+    // 3. Group by menuCategory
+    const grouped = {};
+    let itemCount = 0;
+    
+    items.forEach(item => {
+      const cat = item.menuCategory || 'General';
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(item);
+      itemCount++;
+    });
+
+    const responseData = {
+      count: itemCount,
+      data: grouped
+    };
+
+    // 4. Save to Cache (300 seconds = 5 minutes)
+    await setCache(cacheKey, responseData, 300);
+
+    res.status(200).json({
+      success: true,
+      source: 'database',
+      ...responseData
+    });
+  } catch (error) {
+    console.error('getOrderingMenu error:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching ordering menu' });
+  }
+};
+
 // ─── POST /api/menu-items ─────────────────────────────────────────────────────
 // Protected (business owner or admin). Creates a new menu/service item.
 exports.createMenuItem = async (req, res) => {
@@ -106,7 +166,8 @@ exports.createMenuItem = async (req, res) => {
       businessId, name, description, price, currency,
       menuCategory, type, tags, dietary,
       isAvailable, availableDays, availableTimeSlots,
-      isPopular, isFeatured, sortOrder, duration
+      isPopular, isFeatured, sortOrder, duration,
+      modifiers, addOns, prepTime, maxOrdersPerSlot, allergens, calories
     } = req.body;
 
     // Verify ownership
@@ -144,6 +205,14 @@ exports.createMenuItem = async (req, res) => {
       return [];
     };
 
+    const parseJSONField = (val) => {
+      if (!val) return undefined;
+      if (typeof val === 'string') {
+        try { return JSON.parse(val); } catch (e) { return undefined; }
+      }
+      return val;
+    };
+
     const menuItem = await MenuItem.create({
       business: businessId,
       name: name.trim(),
@@ -161,8 +230,17 @@ exports.createMenuItem = async (req, res) => {
       isPopular: isPopular === true || isPopular === 'true',
       isFeatured: isFeatured === true || isFeatured === 'true',
       sortOrder: parseInt(sortOrder) || 0,
-      duration: duration ? parseInt(duration) : undefined
+      duration: duration ? parseInt(duration) : undefined,
+      modifiers: parseJSONField(modifiers),
+      addOns: parseJSONField(addOns),
+      prepTime: prepTime ? parseInt(prepTime) : 15,
+      maxOrdersPerSlot: maxOrdersPerSlot ? parseInt(maxOrdersPerSlot) : null,
+      allergens: parseTags(allergens),
+      calories: calories ? parseInt(calories) : null
     });
+
+    // Invalidate ordering menu cache
+    await deleteCachePattern(`menu:ordering:${businessId}*`);
 
     res.status(201).json({
       success: true,
@@ -195,7 +273,8 @@ exports.updateMenuItem = async (req, res) => {
     const {
       name, description, price, currency, menuCategory, type,
       tags, dietary, isAvailable, availableDays, availableTimeSlots,
-      isPopular, isFeatured, sortOrder, duration
+      isPopular, isFeatured, sortOrder, duration,
+      modifiers, addOns, prepTime, maxOrdersPerSlot, allergens, calories
     } = req.body;
 
     // Handle image replacement
@@ -234,6 +313,14 @@ exports.updateMenuItem = async (req, res) => {
       return undefined;
     };
 
+    const parseJSONField = (val) => {
+      if (val === undefined) return undefined;
+      if (typeof val === 'string') {
+        try { return JSON.parse(val); } catch (e) { return undefined; }
+      }
+      return val;
+    };
+
     // Only update fields that were provided
     if (name !== undefined) menuItem.name = name.trim();
     if (description !== undefined) menuItem.description = description.trim();
@@ -243,6 +330,7 @@ exports.updateMenuItem = async (req, res) => {
     if (type !== undefined) menuItem.type = type;
     if (tags !== undefined) menuItem.tags = parseTags(tags);
     if (dietary !== undefined) menuItem.dietary = parseTags(dietary);
+    const previousAvailability = menuItem.isAvailable;
     if (isAvailable !== undefined) menuItem.isAvailable = isAvailable !== false && isAvailable !== 'false';
     if (availableDays !== undefined) menuItem.availableDays = Array.isArray(availableDays) ? availableDays : [];
     if (availableTimeSlots !== undefined) menuItem.availableTimeSlots = Array.isArray(availableTimeSlots) ? availableTimeSlots : [];
@@ -250,8 +338,26 @@ exports.updateMenuItem = async (req, res) => {
     if (isFeatured !== undefined) menuItem.isFeatured = isFeatured === true || isFeatured === 'true';
     if (sortOrder !== undefined) menuItem.sortOrder = parseInt(sortOrder) || 0;
     if (duration !== undefined) menuItem.duration = duration ? parseInt(duration) : undefined;
+    if (modifiers !== undefined) menuItem.modifiers = parseJSONField(modifiers);
+    if (addOns !== undefined) menuItem.addOns = parseJSONField(addOns);
+    if (prepTime !== undefined) menuItem.prepTime = parseInt(prepTime);
+    if (maxOrdersPerSlot !== undefined) menuItem.maxOrdersPerSlot = parseInt(maxOrdersPerSlot) || null;
+    if (allergens !== undefined) menuItem.allergens = parseTags(allergens);
+    if (calories !== undefined) menuItem.calories = parseInt(calories) || null;
 
     await menuItem.save();
+
+    // Invalidate ordering menu cache
+    await deleteCachePattern(`menu:ordering:${menuItem.business.toString()}*`);
+
+    // Emit Real-Time Socket Event if item becomes unavailable
+    if (previousAvailability === true && menuItem.isAvailable === false) {
+      const orderSocket = require('../sockets/order.socket');
+      orderSocket.getIo()?.of('/orders').to(`business_${menuItem.business.toString()}`).emit('menu.item_unavailable', {
+        menuItemId: menuItem._id,
+        name: menuItem.name
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -289,6 +395,9 @@ exports.deleteMenuItem = async (req, res) => {
 
     await menuItem.deleteOne();
 
+    // Invalidate ordering menu cache
+    await deleteCachePattern(`menu:ordering:${menuItem.business.toString()}*`);
+
     res.status(200).json({
       success: true,
       message: 'Menu item deleted successfully'
@@ -313,6 +422,9 @@ exports.toggleAvailability = async (req, res) => {
 
     menuItem.isAvailable = !menuItem.isAvailable;
     await menuItem.save();
+
+    // Invalidate ordering menu cache
+    await deleteCachePattern(`menu:ordering:${menuItem.business.toString()}*`);
 
     res.status(200).json({
       success: true,
@@ -348,6 +460,9 @@ exports.reorderMenuItems = async (req, res) => {
     }));
 
     await MenuItem.bulkWrite(bulkOps);
+
+    // Invalidate ordering menu cache
+    await deleteCachePattern(`menu:ordering:${businessId}*`);
 
     res.status(200).json({
       success: true,
@@ -510,6 +625,9 @@ exports.createMenuItemsBatch = async (req, res) => {
     } else {
       created = await MenuItem.insertMany(docs, { ordered: true });
     }
+
+    // Invalidate ordering menu cache
+    await deleteCachePattern(`menu:ordering:${businessId}*`);
 
     res.status(201).json({
       success: true,

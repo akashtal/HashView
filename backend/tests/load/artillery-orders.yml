@@ -1,0 +1,62 @@
+config:
+  target: "http://localhost:5001" # Change this to your production API URL
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: "Warm up phase"
+    - duration: 120
+      arrivalRate: 10
+      rampTo: 50
+      name: "Ramp up load"
+    - duration: 300
+      arrivalRate: 50
+      name: "Sustained high load"
+  
+  # Configure payload data from a CSV if you have dynamic business IDs
+  # payload:
+  #   path: "test-data.csv"
+  #   fields:
+  #     - "businessId"
+  #     - "menuItemId"
+
+  processor: "./artillery-functions.js"
+
+scenarios:
+  - name: "QR Menu Scan & Order Placement Flow"
+    weight: 10
+    flow:
+      # 1. Simulate user scanning QR and loading the menu
+      - get:
+          url: "/api/menu-items/business/{{ $processEnvironment.TEST_BUSINESS_ID }}/ordering"
+          capture:
+            - json: "$.data"
+              as: "menuData"
+      
+      # 2. Think time (user browsing menu)
+      - think: 3
+
+      # 3. Simulate placing an order
+      - post:
+          url: "/api/orders"
+          headers:
+            Content-Type: "application/json"
+            Idempotency-Key: "{{ $uuid }}"
+          json:
+            businessId: "{{ $processEnvironment.TEST_BUSINESS_ID }}"
+            customerName: "Load Test User"
+            tableNumber: "T12"
+            numberOfPeople: 2
+            items:
+              - menuItemId: "{{ $processEnvironment.TEST_MENU_ITEM_ID }}" # Replace with dynamic extraction if needed
+                quantity: 2
+            specialInstructions: "Test order from Artillery"
+          expect:
+            - statusCode: 201
+
+  - name: "Health Check Monitoring"
+    weight: 1
+    flow:
+      - get:
+          url: "/api/health"
+          expect:
+            - statusCode: 200

@@ -411,7 +411,280 @@ const ApiService = {
   // Batch create: save AI-reviewed menu items to the database in one request
   createMenuItemsBatch: (businessId, items, skipDuplicates = true) =>
     apiClient.post('/menu-items/batch', { businessId, items, skipDuplicates }),
-};
 
+  // ─── Phase 5: Order Management APIs ────────────────────────────────────────
+
+  createOrder: (data) => apiClient.post('/orders', data, {
+    headers: { 'Idempotency-Key': `${Date.now()}-${Math.random().toString(36).substring(2, 9)}` }
+  }),
+
+  getOrder: (id) => apiClient.get(`/orders/${id}`),
+
+  getBusinessOrders: (businessId, params) =>
+    apiClient.get(`/orders/business/${businessId}`, { params }),
+
+  getOrderAnalytics: (businessId, timeframe) =>
+    apiClient.get(`/orders/business/${businessId}/analytics`, { params: { timeframe } }),
+
+  exportOrdersCSV: (businessId, timeframe) =>
+    apiClient.get(`/orders/business/${businessId}/export`, { 
+      params: { timeframe },
+      responseType: 'blob' 
+    }),
+
+  getMyOrders: () => apiClient.get('/orders/my-orders'),
+
+  updateOrderStatus: (id, status) =>
+    apiClient.patch(`/orders/${id}/status`, { status }),
+
+  cancelOrder: (id, cancelReason) => 
+    apiClient.post(`/orders/${id}/cancel`, { cancelReason }),
+
+  // ─── Chat APIs ────────────────────────────────────────
+
+  getChatHistory: (userId, params) => {
+    if (!userId || !API_CONFIG.ENDPOINTS.GET_CHAT_HISTORY) {
+      return Promise.reject(new Error('Invalid chat history request'));
+    }
+    return apiClient.get(buildEndpoint(API_CONFIG.ENDPOINTS.GET_CHAT_HISTORY, { userId }), { params });
+  },
+  sendMessage: (data) => apiClient.post(API_CONFIG.ENDPOINTS.SEND_MESSAGE, data),
+  getConversations: () => apiClient.get(API_CONFIG.ENDPOINTS.GET_CONVERSATIONS),
+
+  // External Reviews APIs
+  syncGoogleReviews: (businessId) => {
+    const endpoint = API_CONFIG.ENDPOINTS.SYNC_GOOGLE_REVIEWS;
+    if (!endpoint) return Promise.reject(new Error('Endpoint not configured'));
+    return apiClient.post(buildEndpoint(endpoint, { id: businessId }) + '?ratingsOnly=true');
+  },
+
+  syncTripAdvisorReviews: (businessId) => {
+    const endpoint = API_CONFIG.ENDPOINTS.SYNC_TRIPADVISOR_REVIEWS;
+    if (!endpoint) return Promise.reject(new Error('Endpoint not configured'));
+    return apiClient.post(buildEndpoint(endpoint, { id: businessId }));
+  },
+
+  // Manually update TripAdvisor rating
+  updateTripAdvisorRating: (businessId, rating, reviewCount) => {
+    return apiClient.put(`/business/${businessId}/tripadvisor-rating`, {
+      rating: parseFloat(rating),
+      reviewCount: parseInt(reviewCount)
+    });
+  },
+
+  getAllBusinessReviews: (businessId) => {
+    const endpoint = API_CONFIG.ENDPOINTS.GET_ALL_BUSINESS_REVIEWS;
+    if (!endpoint) return Promise.reject(new Error('Endpoint not configured'));
+    return apiClient.get(buildEndpoint(endpoint, { id: businessId }));
+  },
+
+  // Upload APIs
+  uploadBusinessLogo: (formData, businessId) => {
+    const url = businessId ? `/upload/business/logo?businessId=${businessId}` : '/upload/business/logo';
+    return apiClient.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  uploadBusinessCover: (formData, businessId) => {
+    const url = businessId ? `/upload/business/cover?businessId=${businessId}` : '/upload/business/cover';
+    return apiClient.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  uploadBusinessDocuments: (formData, businessId) => {
+    const url = businessId ? `/upload/business/documents?businessId=${businessId}` : '/upload/business/documents';
+    return apiClient.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  uploadBusinessGallery: (formData, businessId) => {
+    const url = businessId ? `/upload/business/gallery?businessId=${businessId}` : '/upload/business/gallery';
+    return apiClient.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  deleteUploadedFile: (publicId) => apiClient.delete(`/upload/${publicId}`),
+  getUploadStats: () => apiClient.get('/upload/stats'),
+
+  // Review media uploads
+  uploadReviewPhotos: (formData) => {
+    return apiClient.post('/upload/review/photos', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  uploadReviewVideos: (formData) => {
+    return apiClient.post('/upload/review/videos', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+
+  // Business image management
+  updateBusinessImages: (businessId, data) => apiClient.put(
+    buildEndpoint(API_CONFIG.ENDPOINTS.UPDATE_BUSINESS_IMAGES, { id: businessId }),
+    data
+  ),
+
+  // Support & Help APIs
+  submitSupportTicket: (data) => apiClient.post('/support/ticket', data),
+
+  // Account Settings APIs
+  updateAccountSettings: (settings) => apiClient.put('/users/account-settings', settings),
+  exportUserData: () => apiClient.post('/users/export-data'),
+  deactivateAccount: () => apiClient.put('/users/deactivate'),
+  deleteAccount: (data) => apiClient.delete('/users/account', { data }),
+
+  // ─── Business Claim APIs ────────────────────────────────────────
+  claimBusiness: (businessId, data) =>
+    apiClient.post(`/business/${businessId}/claim`, data),
+
+  uploadClaimDocuments: (businessId, formData) =>
+    apiClient.post(`/business/${businessId}/claim/documents`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
+  sendClaimPhoneOtp: (businessId) =>
+    apiClient.post(`/business/${businessId}/claim/send-phone-otp`),
+
+  verifyClaimPhoneOtp: (businessId, otp) =>
+    apiClient.post(`/business/${businessId}/claim/verify-phone-otp`, { otp }),
+
+  // Admin claim management
+  getBusinessClaims: (params) =>
+    apiClient.get('/business/admin/claims', { params }),
+
+  reviewBusinessClaim: (businessId, decision, rejectionReason) =>
+    apiClient.put(`/business/${businessId}/claim/review`, { decision, rejectionReason }),
+
+  // ─── Subscription APIs ─────────────────────────────────────────────────────
+  // Get current subscription status (isPro, plan, currentPeriodEnd, cancelAtPeriodEnd)
+  getSubscriptionStatus: () => apiClient.get('/subscription/status'),
+
+  // Generate a Stripe Checkout URL — planType: 'monthly' | '6month' | 'yearly'
+  createSubscriptionCheckout: (planType = 'monthly') =>
+    apiClient.post('/subscription/create-checkout-session', { planType }),
+
+  // Generate a Stripe Customer Portal URL for managing/cancelling subscription in browser
+  createSubscriptionPortal: () => apiClient.post('/subscription/create-portal-session'),
+
+  // Returns the browser URL for the hosted plan-selection page.
+  // Open with Linking.openURL() — never shown inside the app.
+  getPricingPageUrl: async () => {
+    const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+    const token = await AsyncStorage.getItem('token');
+    if (!token) throw new Error('Not authenticated');
+    const base = (apiClient.defaults.baseURL || '').replace(/\/api\/?$/, '');
+    return `${base}/api/subscription/pricing?token=${encodeURIComponent(token)}`;
+  },
+
+  // ─── Phase 1: Menu & Services APIs ─────────────────────────────────────────
+
+  // Get all active items for a business, grouped by category (user-facing)
+  getMenuItems: (businessId, params) =>
+    apiClient.get(`/menu-items/business/${businessId}`, { params }),
+
+  // Get flat array of all active items (used by AI search display)
+  getMenuItemsFlat: (businessId) =>
+    apiClient.get(`/menu-items/business/${businessId}/flat`),
+
+  // Get menu stats for dashboard header
+  getMenuStats: (businessId) =>
+    apiClient.get(`/menu-items/business/${businessId}/stats`),
+
+  // Create a new menu/service item (supports image upload via FormData)
+  createMenuItem: (formData) =>
+    apiClient.post('/menu-items', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+
+  // Update an existing item (supports image replacement via FormData)
+  updateMenuItem: (id, formData) =>
+    apiClient.put(`/menu-items/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+
+  // Delete a menu item
+  deleteMenuItem: (id) => apiClient.delete(`/menu-items/${id}`),
+
+  // Toggle isAvailable on/off quickly
+  toggleMenuItemAvailability: (id) => apiClient.patch(`/menu-items/${id}/toggle`),
+
+  // Batch reorder (drag-to-reorder in management UI)
+  reorderMenuItems: (businessId, items) =>
+    apiClient.put('/menu-items/reorder/batch', { businessId, items }),
+
+  // AI Menu Scanner: upload a menu image and get back structured draft items
+  extractMenuFromImage: (formData) =>
+    apiClient.post('/menu-items/extract-ai', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 90000, // 90s — vision AI can be slow on large menus
+    }),
+
+  // Batch create: save AI-reviewed menu items to the database in one request
+  createMenuItemsBatch: (businessId, items, skipDuplicates = true) =>
+    apiClient.post('/menu-items/batch', { businessId, items, skipDuplicates }),
+
+  // ─── Phase 5: Order Management APIs ────────────────────────────────────────
+
+  createOrder: (data) => apiClient.post('/orders', data),
+
+  getOrder: (id) => apiClient.get(`/orders/${id}`),
+
+  getBusinessOrders: (businessId, params) =>
+    apiClient.get(`/orders/business/${businessId}`, { params }),
+
+  getMyOrders: () => apiClient.get('/orders/my-orders'),
+
+  updateOrderStatus: (id, status) =>
+    apiClient.patch(`/orders/${id}/status`, { status }),
+
+  cancelOrder: (id, cancelReason) =>
+    apiClient.post(`/orders/${id}/cancel`, { cancelReason }),
+
+  // Billing Preview
+  previewBill: (data) => apiClient.post('/billing/preview', data),
+
+  // --- Billing Rules ---
+  getTaxRules: async (businessId) => {
+    const response = await apiClient.get(`/billing-rules/tax/business/${businessId}`);
+    return response.data.data;
+  },
+  createTaxRule: async (data) => {
+    const response = await apiClient.post(`/billing-rules/tax`, data);
+    return response.data.data;
+  },
+  updateTaxRule: async (id, data) => {
+    const response = await apiClient.put(`/billing-rules/tax/${id}`, data);
+    return response.data.data;
+  },
+  toggleTaxRule: async (id) => {
+    const response = await apiClient.patch(`/billing-rules/tax/${id}/toggle`);
+    return response.data.data;
+  },
+  deleteTaxRule: async (id) => {
+    const response = await apiClient.delete(`/billing-rules/tax/${id}`);
+    return response.data;
+  },
+
+  getChargeRules: async (businessId) => {
+    const response = await apiClient.get(`/billing-rules/charge/business/${businessId}`);
+    return response.data.data;
+  },
+  createChargeRule: async (data) => {
+    const response = await apiClient.post(`/billing-rules/charge`, data);
+    return response.data.data;
+  },
+  updateChargeRule: async (id, data) => {
+    const response = await apiClient.put(`/billing-rules/charge/${id}`, data);
+    return response.data.data;
+  },
+  toggleChargeRule: async (id) => {
+    const response = await apiClient.patch(`/billing-rules/charge/${id}/toggle`);
+    return response.data.data;
+  },
+  deleteChargeRule: async (id) => {
+    const response = await apiClient.delete(`/billing-rules/charge/${id}`);
+    return response.data;
+  }
+};
 
 export default ApiService;
