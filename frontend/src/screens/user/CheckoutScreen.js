@@ -9,6 +9,8 @@ import {
   StatusBar,
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -192,7 +194,10 @@ export default function CheckoutScreen({ navigation, route }) {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <KeyboardAvoidingView 
+      className="flex-1 bg-gray-50" 
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <StatusBar barStyle="dark-content" />
 
       {/* Header */}
@@ -382,6 +387,6 @@ export default function CheckoutScreen({ navigation, route }) {
           </LinearGradient>
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
