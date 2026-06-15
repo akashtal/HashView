@@ -190,7 +190,7 @@ export default function EditProfileScreen({ navigation }) {
 
       <ScrollView className="flex-1 px-6">
         {/* Profile Picture */}
-        <View className="items-center -mt-16 mb-6">
+        <View className="items-center -mt-13 mb-6">
           <View className="bg-white rounded-2xl p-6 shadow-lg w-full">
             <View className="items-center">
               <TouchableOpacity

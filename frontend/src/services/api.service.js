@@ -644,21 +644,25 @@ const ApiService = {
   previewBill: (data) => apiClient.post('/billing/preview', data),
 
   // --- Billing Rules ---
+  getActiveBillingRules: async (businessId) => {
+    const response = await apiClient.get(`/billing-rules/business/${businessId}/active`);
+    return response.data;
+  },
   getTaxRules: async (businessId) => {
     const response = await apiClient.get(`/billing-rules/tax/business/${businessId}`);
-    return response.data.data;
+    return response.data;
   },
   createTaxRule: async (data) => {
     const response = await apiClient.post(`/billing-rules/tax`, data);
-    return response.data.data;
+    return response.data;
   },
   updateTaxRule: async (id, data) => {
     const response = await apiClient.put(`/billing-rules/tax/${id}`, data);
-    return response.data.data;
+    return response.data;
   },
   toggleTaxRule: async (id) => {
     const response = await apiClient.patch(`/billing-rules/tax/${id}/toggle`);
-    return response.data.data;
+    return response.data;
   },
   deleteTaxRule: async (id) => {
     const response = await apiClient.delete(`/billing-rules/tax/${id}`);
@@ -667,19 +671,19 @@ const ApiService = {
 
   getChargeRules: async (businessId) => {
     const response = await apiClient.get(`/billing-rules/charge/business/${businessId}`);
-    return response.data.data;
+    return response.data;
   },
   createChargeRule: async (data) => {
     const response = await apiClient.post(`/billing-rules/charge`, data);
-    return response.data.data;
+    return response.data;
   },
   updateChargeRule: async (id, data) => {
     const response = await apiClient.put(`/billing-rules/charge/${id}`, data);
-    return response.data.data;
+    return response.data;
   },
   toggleChargeRule: async (id) => {
     const response = await apiClient.patch(`/billing-rules/charge/${id}/toggle`);
-    return response.data.data;
+    return response.data;
   },
   deleteChargeRule: async (id) => {
     const response = await apiClient.delete(`/billing-rules/charge/${id}`);

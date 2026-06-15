@@ -44,7 +44,7 @@ export default function BusinessOverview() {
     try {
       const [ordersRes, analyticsRes] = await Promise.all([
         biz.getBusinessOrders(business._id, { status: 'active', limit: 5 }),
-        biz.getOrderAnalytics(business._id, 'today'),
+        biz.getOrderAnalytics(business._id, 'daily'),
       ]);
       if (ordersRes.data.success) setActiveOrders(ordersRes.data.data || []);
       if (analyticsRes.data.success) setAnalytics(analyticsRes.data.data || analyticsRes.data);
@@ -70,7 +70,7 @@ export default function BusinessOverview() {
     },
   });
 
-  const currency = business?.currency === 'GBP' ? '£' : business?.currency === 'USD' ? '$' : '₹';
+  const currency = business?.currency === 'USD' ? '$' : business?.currency === 'INR' ? '₹' : '£';
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -104,9 +104,9 @@ export default function BusinessOverview() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={ShoppingBag} label="Active Orders" value={activeOrders.length} color="bg-blue-100 text-blue-600" />
-        <StatCard icon={CheckCircle} label="Delivered Today" value={analytics?.deliveredOrders ?? '—'} color="bg-green-100 text-green-600" />
-        <StatCard icon={TrendingUp} label="Avg Order Value" value={analytics?.avgOrderValue ? `${currency}${analytics.avgOrderValue.toFixed(2)}` : '—'} color="bg-purple-100 text-purple-600" />
-        <StatCard icon={Star} label="Rating" value={business?.hashviewRating?.toFixed(1) ?? '—'} sub="HashView rating" color="bg-amber-100 text-amber-600" />
+        <StatCard icon={CheckCircle} label="Delivered Today" value={analytics?.statusBreakdown?.delivered ?? 0} color="bg-green-100 text-green-600" />
+        <StatCard icon={TrendingUp} label="Avg Order Value" value={analytics?.averageOrderValue ? `${currency}${analytics.averageOrderValue.toFixed(2)}` : '—'} color="bg-purple-100 text-purple-600" />
+        <StatCard icon={Star} label="Rating" value={business?.rating?.average?.toFixed(1) ?? '—'} sub="HashView rating" color="bg-amber-100 text-amber-600" />
       </div>
 
       {/* Quick links */}

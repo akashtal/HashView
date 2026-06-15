@@ -24,7 +24,9 @@ const NOTIFICATION_RECORD_TYPES = new Set([
   'admin_broadcast',
   'promotion',
   'announcement',
-  'business_update'
+  'business_update',
+  'order_placed',
+  'order_status'
 ]);
 
 const getNotificationRecordType = (type) => {

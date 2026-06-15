@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
@@ -20,6 +20,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import adminApi from '../api/adminApi';
+import useNotifications from '../hooks/useNotifications';
+import NotificationBell from './NotificationBell';
+import api from '../api/axios';
 
 const ROLE_BADGE = {
   admin:            { label: 'Admin',            className: 'bg-primary-100 text-primary-700 border border-primary-200' },
@@ -31,9 +34,13 @@ const Layout = ({ children, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [backupStatus, setBackupStatus] = useState(null);
   const [isBackingUp, setIsBackingUp] = useState(false);
+  const navigate = useNavigate();
   
   const location = useLocation();
   const { user, hasPermission } = useAuth();
+
+  // ── Notification Bell ─────────────────────────────────────────────────────
+  const notifs = useNotifications(api);
 
   useEffect(() => {
     if (hasPermission('VIEW_DASHBOARD')) {
@@ -178,6 +185,21 @@ const Layout = ({ children, onLogout }) => {
             <span className={`hidden sm:inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full ${badge.className}`}>
               {badge.label}
             </span>
+
+            {/* Notification Bell */}
+            <NotificationBell
+              notifications={notifs.notifications}
+              unreadCount={notifs.unreadCount}
+              loading={notifs.loading}
+              open={notifs.open}
+              onToggle={notifs.toggleOpen}
+              onClose={notifs.closeDropdown}
+              onMarkRead={notifs.markAsRead}
+              onMarkAllRead={notifs.markAllAsRead}
+              onViewAll={() => navigate('/notifications')}
+              accentColor="indigo"
+            />
+
             <div className="flex items-center gap-2 text-sm">
               <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-bold">
                 {user?.name?.charAt(0).toUpperCase() || 'A'}

@@ -1364,7 +1364,7 @@ exports.updateBusiness = async (req, res, next) => {
       });
     }
 
-    const allowedUpdates = ['name', 'description', 'email', 'phone', 'address', 'category', 'openingHours', 'socialMedia', 'website'];
+    const allowedUpdates = ['name', 'description', 'email', 'phone', 'address', 'category', 'openingHours', 'socialMedia', 'website', 'radius', 'orderRadius'];
     const updates = {};
 
     allowedUpdates.forEach(field => {

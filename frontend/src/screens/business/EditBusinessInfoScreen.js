@@ -54,7 +54,9 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
     address: '',
     description: '',
     website: '',
-    category: ''
+    category: '',
+    radius: '50',
+    orderRadius: '50'
   });
   const [images, setImages] = useState({
     logo: null,
@@ -129,7 +131,9 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         address: business.address?.fullAddress || '',
         description: business.description || '',
         website: business.socialMedia?.website || '',
-        category: business.category || ''
+        category: business.category || '',
+        radius: business.radius ? String(business.radius) : '50',
+        orderRadius: business.orderRadius ? String(business.orderRadius) : '50'
       });
 
       if (business.openingHours) {
@@ -414,6 +418,8 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         description: formData.description,
         website: formData.website,
         category: formData.category,
+        radius: parseInt(formData.radius) || 50,
+        orderRadius: parseInt(formData.orderRadius) || 50,
         openingHours: openHours
       };
 
@@ -841,6 +847,34 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
               </View>
             </View>
           ))}
+        </View>
+
+        {/* Geofencing Settings */}
+        <View className="mb-8">
+          <Text className="text-gray-900 font-semibold mb-3">Geofencing Settings</Text>
+          <View className="flex-row justify-between mb-4">
+            <View className="flex-1 mr-2">
+              <Text className="text-gray-700 font-medium mb-1 text-sm">Review Radius (m)</Text>
+              <TextInput
+                className="bg-white rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
+                keyboardType="numeric"
+                value={formData.radius}
+                onChangeText={(value) => handleInputChange('radius', value)}
+                placeholder="e.g. 50"
+              />
+            </View>
+            <View className="flex-1 ml-2">
+              <Text className="text-gray-700 font-medium mb-1 text-sm">Order Radius (m)</Text>
+              <TextInput
+                className="bg-white rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
+                keyboardType="numeric"
+                value={formData.orderRadius}
+                onChangeText={(value) => handleInputChange('orderRadius', value)}
+                placeholder="e.g. 50"
+              />
+            </View>
+          </View>
+          <Text className="text-gray-500 text-xs text-center">Set the maximum distance (10-500m) users must be within to post a review or place an order.</Text>
         </View>
 
         {/* Save Button */}

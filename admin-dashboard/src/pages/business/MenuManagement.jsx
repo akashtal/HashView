@@ -1,57 +1,111 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Pencil, Trash2, X, ToggleLeft, ToggleRight, CheckCircle, XCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Pencil, Trash2, X, ToggleLeft, ToggleRight, CheckCircle, XCircle, Plus, Image as ImageIcon, Upload } from 'lucide-react';
 import { useBusinessAuth } from '../../context/BusinessAuthContext';
 import biz from '../../api/businessApi';
 
-const CURRENCY_SYM = { GBP: '£', USD: '$', EUR: '€' };
+const CURRENCY_SYM = { GBP: '£', USD: '$', EUR: '€', INR: '₹' };
 
-function EditModal({ item, onClose, onSave }) {
+function EditModal({ item, onClose, onSave, businessId }) {
+  const isNew = !item;
   const [form, setForm] = useState({
-    name: item.name || '',
-    description: item.description || '',
-    price: item.price || '',
-    status: item.status || 'active',
+    name: item?.name || '',
+    description: item?.description || '',
+    price: item?.price || '',
+    category: item?.menuCategory || item?.category || '',
+    status: item?.status || 'active',
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(item?.image?.url || null);
   const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      await onSave(item._id, { name: form.name, description: form.description, price: Number(form.price), status: form.status });
+      const payload = new FormData();
+      payload.append('name', form.name);
+      payload.append('description', form.description);
+      payload.append('price', Number(form.price));
+      payload.append('status', form.status);
+      if (form.category) payload.append('menuCategory', form.category);
+      if (isNew) payload.append('business', businessId);
+      if (imageFile) payload.append('image', imageFile);
+
+      await onSave(isNew ? null : item._id, payload);
       onClose();
     } catch (e) { alert('Failed: ' + (e.response?.data?.message || e.message)); }
     finally { setSaving(false); }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl my-auto">
         <div className="flex justify-between items-center mb-5">
-          <h3 className="font-bold text-gray-900 text-lg">Edit Menu Item</h3>
+          <h3 className="font-bold text-gray-900 text-lg">{isNew ? 'Create Menu Item' : 'Edit Menu Item'}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
         </div>
-        <div className="space-y-4">
+        
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+          {/* Image Upload */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Item Image</label>
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full h-40 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 hover:border-purple-300 transition overflow-hidden relative group"
+            >
+              {imagePreview ? (
+                <>
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                    <span className="text-white font-medium flex items-center gap-2"><Upload size={16} /> Change Image</span>
+                  </div>
+                </>
+              ) : (
+                <div className="text-gray-400 flex flex-col items-center">
+                  <ImageIcon size={32} className="mb-2 opacity-50" />
+                  <span className="text-sm font-medium">Click to upload</span>
+                </div>
+              )}
+            </div>
+            <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} className="hidden" />
+          </div>
+
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Name</label>
-            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20" />
+            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20" placeholder="e.g. Margherita Pizza" />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Category</label>
+            <input value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20" placeholder="e.g. Starters, Mains" />
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Description</label>
-            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 resize-none" />
+            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 resize-none" placeholder="Ingredients, dietary info..." />
           </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Price</label>
-            <input type="number" min="0" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20" />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Status</label>
-            <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none">
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Price</label>
+              <input type="number" min="0" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20" placeholder="0.00" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Status</label>
+              <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
           </div>
         </div>
-        <div className="flex gap-3 mt-6">
+
+        <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100">
           <button onClick={onClose} className="flex-1 py-3 border border-gray-200 rounded-xl text-gray-600 font-semibold hover:bg-gray-50 transition">Cancel</button>
           <button onClick={handleSave} disabled={saving} className="flex-1 py-3 text-white font-bold rounded-xl transition disabled:opacity-50" style={{ background: 'linear-gradient(135deg,#6C47FF,#4C35B5)' }}>
             {saving ? 'Saving...' : 'Save Changes'}
@@ -68,6 +122,7 @@ export default function MenuManagement() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [editItem, setEditItem] = useState(null);
+  const [isCreating, setIsCreating] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [togglingId, setTogglingId] = useState(null);
 
@@ -84,9 +139,15 @@ export default function MenuManagement() {
   }, [business?._id]);
 
   const handleSave = async (id, data) => {
-    const res = await biz.updateMenuItem(id, data);
-    const updated = res.data.data || res.data;
-    setItems(prev => prev.map(i => i._id === id ? { ...i, ...updated } : i));
+    if (id) {
+      const res = await biz.updateMenuItem(id, data);
+      const updated = res.data.data || res.data;
+      setItems(prev => prev.map(i => i._id === id ? { ...i, ...updated } : i));
+    } else {
+      const res = await biz.createMenuItem(data);
+      const newItem = res.data.data || res.data;
+      setItems(prev => [...prev, newItem]);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -111,12 +172,13 @@ export default function MenuManagement() {
 
   const filtered = items.filter(i =>
     i.name?.toLowerCase().includes(search.toLowerCase()) ||
+    i.menuCategory?.toLowerCase().includes(search.toLowerCase()) ||
     i.category?.toLowerCase().includes(search.toLowerCase())
   );
 
   // Group by category
   const grouped = filtered.reduce((acc, item) => {
-    const cat = item.category || 'Uncategorized';
+    const cat = item.menuCategory || item.category || 'Uncategorized';
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(item);
     return acc;
@@ -129,9 +191,14 @@ export default function MenuManagement() {
           <h1 className="text-xl font-bold text-gray-900">Menu Management</h1>
           <p className="text-sm text-gray-500">{items.length} item{items.length !== 1 ? 's' : ''} · Edit or remove items</p>
         </div>
-        <div className="sm:ml-auto relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search menu..." className="pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 w-64" />
+        <div className="sm:ml-auto flex items-center gap-3 relative">
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search menu..." className="pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 w-64" />
+          </div>
+          <button onClick={() => setIsCreating(true)} className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-gray-800 transition">
+            <Plus size={18} /> Add Item
+          </button>
         </div>
       </div>
 
@@ -158,6 +225,15 @@ export default function MenuManagement() {
                   <div key={item._id} className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition">
                     {/* Availability indicator */}
                     <div className={`w-2 h-10 rounded-full flex-shrink-0 ${isActive ? 'bg-green-400' : 'bg-gray-300'}`} />
+
+                    {/* Image Thumbnail */}
+                    <div className="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden flex items-center justify-center border border-gray-200">
+                      {item.image?.url ? (
+                        <img src={item.image.url} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <ImageIcon size={20} className="text-gray-400" />
+                      )}
+                    </div>
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
@@ -206,8 +282,8 @@ export default function MenuManagement() {
         ))
       )}
 
-      {editItem && (
-        <EditModal item={editItem} onClose={() => setEditItem(null)} onSave={handleSave} />
+      {(editItem || isCreating) && (
+        <EditModal item={editItem} businessId={business._id} onClose={() => { setEditItem(null); setIsCreating(false); }} onSave={handleSave} />
       )}
     </div>
   );

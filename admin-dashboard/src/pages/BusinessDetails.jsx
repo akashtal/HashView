@@ -18,6 +18,7 @@ const BusinessDetails = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [reason, setReason] = useState('');
   const [radius, setRadius] = useState('');
+  const [orderRadius, setOrderRadius] = useState('');
   const [radiusEditing, setRadiusEditing] = useState(false);
   const [radiusLoading, setRadiusLoading] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -141,6 +142,7 @@ const BusinessDetails = () => {
       if (businessData) {
         setBusiness(businessData);
         setRadius(businessData.radius || 50);
+        setOrderRadius(businessData.orderRadius || 50);
         // Initialize edit form with business data
         setEditFormData({
           name: businessData.name || '',
@@ -152,6 +154,7 @@ const BusinessDetails = () => {
           latitude: businessData.location?.coordinates?.[1] || '',
           longitude: businessData.location?.coordinates?.[0] || '',
           radius: businessData.radius || 50,
+          orderRadius: businessData.orderRadius || 50,
           website: businessData.socialMedia?.website || '',
           facebook: businessData.socialMedia?.facebook || '',
           instagram: businessData.socialMedia?.instagram || '',
@@ -201,6 +204,7 @@ const BusinessDetails = () => {
         latitude: business.location?.coordinates?.[1] || '',
         longitude: business.location?.coordinates?.[0] || '',
         radius: business.radius || 50,
+        orderRadius: business.orderRadius || 50,
         website: business.socialMedia?.website || '',
         facebook: business.socialMedia?.facebook || '',
         instagram: business.socialMedia?.instagram || '',
@@ -338,7 +342,8 @@ const BusinessDetails = () => {
         ...editFormData,
         latitude: parseFloat(editFormData.latitude),
         longitude: parseFloat(editFormData.longitude),
-        radius: parseInt(editFormData.radius)
+        radius: parseInt(editFormData.radius),
+        orderRadius: parseInt(editFormData.orderRadius)
       });
 
       // Handle Image Uploads
@@ -433,15 +438,17 @@ const BusinessDetails = () => {
 
   const handleUpdateRadius = async () => {
     const radiusValue = parseInt(radius);
-    if (isNaN(radiusValue) || radiusValue < 10 || radiusValue > 500) {
-      alert('Radius must be a number between 10 and 500 meters');
+    const orderRadiusValue = parseInt(orderRadius);
+    if (isNaN(radiusValue) || radiusValue < 10 || radiusValue > 500 || isNaN(orderRadiusValue) || orderRadiusValue < 10 || orderRadiusValue > 500) {
+      alert('Radii must be numbers between 10 and 500 meters');
       return;
     }
 
     setRadiusLoading(true);
     try {
-      await adminApi.updateBusinessRadius(id, radiusValue);
-      alert(`Business review radius updated to ${radiusValue}m successfully!`);
+      // Use standard updateBusiness for both since updateBusinessRadius only does review radius
+      await adminApi.updateBusiness(id, { radius: radiusValue, orderRadius: orderRadiusValue });
+      alert(`Business radii updated successfully!`);
       fetchBusinessDetails();
       setRadiusEditing(false);
     } catch (error) {
@@ -740,21 +747,39 @@ const BusinessDetails = () => {
                     />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Review Radius (meters) <span className="text-xs text-gray-500">(10-500)</span>
-                  </label>
-                  <input
-                    type="number"
-                    min="10"
-                    max="500"
-                    name="radius"
-                    value={editFormData.radius}
-                    onChange={handleEditChange}
-                    className="w-full px-3 py-2 border-2 border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-primary-50"
-                    placeholder="Enter radius (10-500 meters)"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Users can only review this business when within this radius</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Review Radius (meters) <span className="text-xs text-gray-500">(10-500)</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="10"
+                      max="500"
+                      name="radius"
+                      value={editFormData.radius}
+                      onChange={handleEditChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      placeholder="Enter radius (10-500 meters)"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Users can only review this business when within this radius</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Order Radius (meters) <span className="text-xs text-gray-500">(10-500)</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="10"
+                      max="500"
+                      name="orderRadius"
+                      value={editFormData.orderRadius}
+                      onChange={handleEditChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                      placeholder="Enter order radius (10-500 meters)"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Users can only order when within this radius</p>
+                  </div>
                 </div>
 
                 {/* Hours Edit Section */}
@@ -1292,7 +1317,7 @@ const BusinessDetails = () => {
             </div>
           )}
 
-          {/* Review Radius Card - PROMINENT */}
+          {/* Geofencing Card - PROMINENT */}
           <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl shadow-md border-2 border-primary-200 p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
@@ -1300,9 +1325,9 @@ const BusinessDetails = () => {
                   <MapPin className="text-white" size={24} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Review Radius Setting</h2>
+                  <h2 className="text-xl font-bold text-gray-900">Geofencing Settings</h2>
                   <p className="text-sm text-gray-600 mt-0.5">
-                    Set the distance users must be within to post reviews (10-500 meters)
+                    Set the distance users must be within to post reviews or order (10-500 meters)
                   </p>
                 </div>
               </div>
@@ -1312,27 +1337,42 @@ const BusinessDetails = () => {
                   className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition shadow-sm flex items-center"
                 >
                   <Edit2 size={16} className="mr-2" />
-                  Change Radius
+                  Change Radii
                 </button>
               )}
             </div>
             {radiusEditing ? (
               <div className="bg-white rounded-lg p-4 border border-primary-200">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Radius (meters)</label>
-                    <input
-                      type="number"
-                      min="10"
-                      max="500"
-                      value={radius}
-                      onChange={(e) => setRadius(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-lg font-semibold"
-                      placeholder="Enter radius (10-500)"
-                    />
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Review Radius (meters)</label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="number"
+                        min="10"
+                        max="500"
+                        value={radius}
+                        onChange={(e) => setRadius(e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-lg font-semibold"
+                        placeholder="10-500"
+                      />
+                      <span className="text-sm font-medium text-gray-600">m</span>
+                    </div>
                   </div>
-                  <div className="flex items-end pb-3">
-                    <span className="text-lg font-medium text-gray-600">meters</span>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Order Radius (meters)</label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="number"
+                        min="10"
+                        max="500"
+                        value={orderRadius}
+                        onChange={(e) => setOrderRadius(e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-lg font-semibold"
+                        placeholder="10-500"
+                      />
+                      <span className="text-sm font-medium text-gray-600">m</span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -1342,12 +1382,13 @@ const BusinessDetails = () => {
                     className="flex-1 px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition disabled:opacity-50 flex items-center justify-center shadow-sm"
                   >
                     <Save size={18} className="mr-2" />
-                    {radiusLoading ? 'Saving...' : 'Save Radius'}
+                    {radiusLoading ? 'Saving...' : 'Save Radii'}
                   </button>
                   <button
                     onClick={() => {
                       setRadiusEditing(false);
                       setRadius(business.radius || 50);
+                      setOrderRadius(business.orderRadius || 50);
                     }}
                     className="px-4 py-3 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition"
                   >
@@ -1357,17 +1398,20 @@ const BusinessDetails = () => {
               </div>
             ) : (
               <div className="bg-white rounded-lg p-6 border border-primary-200">
-                <div className="flex items-center justify-between">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Current Review Radius</p>
+                    <p className="text-sm text-gray-500 mb-1">Review Radius</p>
                     <div className="flex items-baseline gap-2">
                       <span className="text-4xl font-bold text-primary-600">{business.radius || 50}</span>
-                      <span className="text-xl font-medium text-gray-600">meters</span>
+                      <span className="text-xl font-medium text-gray-600">m</span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-gray-500 mb-1">Users can review within</p>
-                    <p className="text-sm font-semibold text-gray-700">{business.radius || 50}m of this location</p>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Order Radius</p>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-4xl font-bold text-primary-600">{business.orderRadius || 50}</span>
+                      <span className="text-xl font-medium text-gray-600">m</span>
+                    </div>
                   </div>
                 </div>
               </div>

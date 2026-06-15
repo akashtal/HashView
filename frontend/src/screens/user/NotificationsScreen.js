@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
 
 import ApiService from '../../services/api.service';
 import ToastService from '../../utils/ToastService';
@@ -78,12 +79,17 @@ export default function NotificationsScreen({ navigation }) {
 
   const getNotificationIcon = (type) => {
     switch (type) {
+      case 'order_placed':
+        return { icon: 'restaurant', color: '#F59E0B' };
+      case 'order_status':
+        return { icon: 'cube', color: '#8B5CF6' };
       case 'coupon':
         return { icon: 'gift', color: '#10B981' };
       case 'review':
         return { icon: 'chatbubbles', color: '#3B82F6' };
       case 'business':
       case 'business_verification':
+      case 'business_update':
         return { icon: 'business', color: '#8B5CF6' };
       case 'admin_broadcast':
       case 'announcement':
@@ -93,6 +99,28 @@ export default function NotificationsScreen({ navigation }) {
         return { icon: 'information-circle', color: '#F59E0B' };
       default:
         return { icon: 'notifications', color: COLORS.primary };
+    }
+  };
+
+  const handleNotificationPress = async (notification) => {
+    // Mark as read first
+    if (notification.status !== 'read') {
+      await markAsRead(notification._id);
+    }
+    // Navigate based on type
+    const type = (notification.type || '').toLowerCase();
+    const data = notification.data || {};
+    if (type === 'order_placed' || type === 'order_status') {
+      if (data.orderId) {
+        navigation.navigate('OrderTracking', { orderId: data.orderId });
+      } else if (data.screen === 'OrdersDashboard') {
+        navigation.navigate('OrdersDashboard');
+      }
+    } else if (data.businessId) {
+      navigation.navigate('Home', {
+        screen: 'BusinessDetail',
+        params: { businessId: data.businessId }
+      });
     }
   };
 
@@ -211,10 +239,11 @@ export default function NotificationsScreen({ navigation }) {
               return (
                 <TouchableOpacity
                   key={notification._id || index}
-                  onPress={() => !notification.read && markAsRead(notification._id)}
-                  className={`bg-white rounded-2xl p-4 mb-3 shadow-sm ${!notification.read ? 'border-l-4' : ''
-                    }`}
-                  style={!notification.read ? { borderLeftColor: iconData.color } : {}}
+                  onPress={() => handleNotificationPress(notification)}
+                  className={`bg-white rounded-2xl p-4 mb-3 shadow-sm ${
+                    notification.status !== 'read' ? 'border-l-4' : ''
+                  }`}
+                  style={notification.status !== 'read' ? { borderLeftColor: iconData.color } : {}}
                 >
                   <View className="flex-row">
                     {/* Icon */}

@@ -296,16 +296,29 @@ class NotificationService {
             }
 
             // ── Normalise type to UPPERCASE for reliable comparison ────────────
-            // Backend sends 'BUSINESS_UPDATE'; older records may send 'business_update'.
             const type       = (data.type || '').toUpperCase();
             const businessId = data.businessId;
-            // targetTab is sent from backend; default to 'updates' so user sees offers
+            const orderId    = data.orderId;
             const initialTab = data.targetTab || 'updates';
 
-            console.log(`[Push] type="${type}" | businessId="${businessId}" | initialTab="${initialTab}"`);
+            console.log(`[Push] type="${type}" | businessId="${businessId}" | orderId="${orderId}"`);
 
-            if ((type === 'BUSINESS_UPDATE' || type === 'BUSINESS_UPDATES') && businessId) {
-                // ── Navigate to BusinessDetail → Updates tab ───────────────────
+            // ── Order: new order received (business owner side) ────────────────
+            if (type === 'NEW_ORDER') {
+                console.log('[Push] ✅ New order — navigating to OrdersDashboard');
+                navigation.navigate('OrdersDashboard');
+
+            // ── Order: status update (customer side) ──────────────────────────
+            } else if (type === 'ORDER_STATUS') {
+                if (orderId) {
+                    console.log(`[Push] ✅ Order status update — navigating to OrderTracking | orderId=${orderId}`);
+                    navigation.navigate('OrderTracking', { orderId });
+                } else {
+                    navigation.navigate('Home');
+                }
+
+            // ── Business update ───────────────────────────────────────────────
+            } else if ((type === 'BUSINESS_UPDATE' || type === 'BUSINESS_UPDATES') && businessId) {
                 console.log(`[Push] ✅ Navigating → Home > BusinessDetail | businessId=${businessId} | tab=${initialTab}`);
                 navigation.navigate('Home', {
                     screen: 'BusinessDetail',
@@ -318,15 +331,15 @@ class NotificationService {
 
             } else if (businessId) {
                 // ── Fallback: any notification with a businessId ───────────────
-                console.log(`[Push] 🔁 Fallback (unknown type="${type}") — navigating to BusinessDetail | businessId=${businessId}`);
+                console.log(`[Push] 🔁 Fallback (unknown type="${type}") — navigating to BusinessDetail`);
                 navigation.navigate('Home', {
                     screen: 'BusinessDetail',
                     params: { businessId, initialTab }
                 });
 
             } else {
-                // ── No businessId → safe fallback to Home ─────────────────────
-                console.log(`[Push] ℹ️ No businessId found (type="${type}") — navigating to Home`);
+                // ── No match → safe fallback to Home ─────────────────────────
+                console.log(`[Push] ℹ️ No match (type="${type}") — navigating to Home`);
                 navigation.navigate('Home');
             }
         } catch (error) {

@@ -442,7 +442,7 @@ exports.updateBusiness = async (req, res, next) => {
     const updates = {};
     const allowedFields = [
       'name', 'description', 'email', 'phone', 'category',
-      'address', 'latitude', 'longitude', 'radius',
+      'address', 'latitude', 'longitude', 'radius', 'orderRadius',
       'openingHours', 'socialMedia', 'status', 'kycStatus',
       'logo', 'coverImage', 'images', 'website',
       'tripAdvisorUrl', 'googleBusinessName'

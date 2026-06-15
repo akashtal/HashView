@@ -5,7 +5,9 @@ import {
   BookOpen, Star, Tag, Receipt, CreditCard, Megaphone,
   LogOut, Menu, X, ChevronRight, Bell, Store, Settings,
 } from 'lucide-react';
-import { useBusinessAuth } from '../context/BusinessAuthContext';
+import { useBusinessAuth, businessApi } from '../context/BusinessAuthContext';
+import useNotifications from '../hooks/useNotifications';
+import NotificationBell from './NotificationBell';
 
 const NAV = [
   { name: 'Overview',        href: '/business',                icon: LayoutDashboard },
@@ -18,6 +20,7 @@ const NAV = [
   { name: 'Tax Rules',       href: '/business/tax',            icon: Receipt },
   { name: 'Charges',         href: '/business/charges',        icon: CreditCard },
   { name: 'Updates',         href: '/business/updates',        icon: Megaphone },
+  { name: 'Notifications',   href: '/business/notifications',  icon: Bell },
   { name: 'Settings',        href: '/business/settings',       icon: Settings },
 ];
 
@@ -26,6 +29,9 @@ export default function BusinessLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, business, logout } = useBusinessAuth();
+
+  // ── Notification Bell ─────────────────────────────────────────────────────
+  const notifs = useNotifications(businessApi, 20000); // 20-second poll
 
   const handleLogout = () => {
     logout();
@@ -134,6 +140,21 @@ export default function BusinessLayout({ children }) {
               <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
               <span className="text-xs font-semibold text-purple-700">Live</span>
             </div>
+
+            {/* Notification Bell */}
+            <NotificationBell
+              notifications={notifs.notifications}
+              unreadCount={notifs.unreadCount}
+              loading={notifs.loading}
+              open={notifs.open}
+              onToggle={notifs.toggleOpen}
+              onClose={notifs.closeDropdown}
+              onMarkRead={notifs.markAsRead}
+              onMarkAllRead={notifs.markAllAsRead}
+              onViewAll={() => navigate('/business/notifications')}
+              accentColor="purple"
+            />
+
             <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-bold">
               {user?.name?.charAt(0)?.toUpperCase() || 'B'}
             </div>

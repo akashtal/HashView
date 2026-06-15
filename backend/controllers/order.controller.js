@@ -1,19 +1,47 @@
 const Order = require('../models/Order.model');
+const Business = require('../models/Business.model');
 const billingEngine = require('../services/billingEngine');
 const orderService = require('../services/orderService');
 const { notificationsQueue } = require('../services/queueService');
 const { dispatchWebhook } = require('../services/webhookService');
+const { isWithinGeofence } = require('../utils/geolocation');
 
 // @desc    Create a new order
 // @route   POST /api/orders
 // @access  Public (or Private depending on user)
 exports.createOrder = async (req, res) => {
   try {
-    const { businessId, items, customerName, tableNumber, numberOfPeople, specialInstructions } = req.body;
+    const { businessId, items, customerName, tableNumber, numberOfPeople, specialInstructions, userLocation } = req.body;
     const customerId = req.user ? req.user.id : null; // if logged in
 
     if (!businessId || !items || !items.length || !customerName || !tableNumber) {
       return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    // Geofencing Validation
+    const businessDoc = await Business.findById(businessId).select('name location orderRadius').lean();
+    if (!businessDoc) {
+      return res.status(404).json({ success: false, message: 'Business not found' });
+    }
+
+    if (businessDoc.location?.coordinates && userLocation?.latitude && userLocation?.longitude) {
+      const [busLon, busLat] = businessDoc.location.coordinates;
+      const orderRadius = businessDoc.orderRadius || 50;
+      
+      const withinGeofence = isWithinGeofence(
+        userLocation.latitude,
+        userLocation.longitude,
+        busLat,
+        busLon,
+        orderRadius
+      );
+      
+      if (!withinGeofence) {
+        return res.status(403).json({ 
+          success: false, 
+          message: `Order rejected: You must be within ${orderRadius}m of the business.` 
+        });
+      }
     }
 
     // Idempotency check
@@ -87,16 +115,18 @@ exports.createOrder = async (req, res) => {
     const orderSocket = require('../sockets/order.socket');
     orderSocket.emitNewOrder(businessId, order);
 
-    // 8. Enqueue Push Notification
+    // 8. Enqueue Push Notification to business owner
     await notificationsQueue.add('order.created', {
       type: 'order.created',
       payload: {
-        orderId: order._id,
-        businessId: order.business,
-        businessName: 'Your Business', // In reality, we could populate this
+        orderId: order._id.toString(),
+        businessId: businessId.toString(),
+        businessName: businessDoc?.name || 'Your Business',
         orderNumber: order.orderNumber,
         tableNumber: order.tableNumber,
-        totalAmount: order.billing.grandTotal
+        totalAmount: order.billing?.grandTotal
+          ? `£${order.billing.grandTotal.toFixed(2)}`
+          : 'N/A'
       }
     });
 
@@ -437,14 +467,16 @@ exports.updateOrderStatus = async (req, res) => {
     // Dispatch Webhook
     dispatchWebhook(order.business, 'order.updated', order);
 
-    // Enqueue Push Notification
+    // Enqueue Push Notification to customer (if logged in)
+    // Fetch business name so the push body is human-readable
+    const businessForPush = await Business.findById(order.business).select('name').lean();
     await notificationsQueue.add('order.status_changed', {
       type: 'order.status_changed',
       payload: {
-        orderId: order._id,
-        customerId: order.customer,
+        orderId: order._id.toString(),
+        customerId: order.customer ? order.customer.toString() : null,
         status: order.status,
-        businessName: 'The Restaurant', // Would usually be populated
+        businessName: businessForPush?.name || 'The Restaurant',
         orderNumber: order.orderNumber
       }
     });

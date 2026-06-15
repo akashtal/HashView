@@ -189,6 +189,9 @@ if (process.env.ENABLE_AUTO_SYNC !== 'false') {
   initArchivalJob();
 }
 
+// Start BullMQ workers
+require('./workers/notificationWorker');
+
 // Sentry error handler — catches all unhandled errors and sends to dashboard
 // Must be AFTER all routes, BEFORE the custom error handler
 if (process.env.SENTRY_DSN) {
@@ -264,7 +267,7 @@ mongoose.connect(process.env.MONGODB_URI, {
         await Promise.all([pubClient.connect(), subClient.connect()]);
         io.adapter(createAdapter(pubClient, subClient));
         logger.info('✅ Socket.IO Redis adapter configured for horizontal scaling');
-        
+
         // Warm up cache for top restaurants
         const { warmMenuCache } = require('./utils/cacheWarming');
         warmMenuCache(); // Fire and forget

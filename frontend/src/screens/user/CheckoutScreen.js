@@ -1,16 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, StatusBar, ActivityIndicator, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearCart } from '../../store/slices/cartSlice';
+import { logout } from '../../store/slices/authSlice';
 import COLORS from '../../config/colors';
 import ApiService from '../../services/api.service';
 
-export default function CheckoutScreen({ navigation }) {
+export default function CheckoutScreen({ navigation, route }) {
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
+  
+  const userLocation = route.params?.userLocation || null;
+  const isGuest = !user || user.isGuest || user.role === 'guest';
   
   const [dinerName, setDinerName] = useState(user?.name || '');
   const [tableNumber, setTableNumber] = useState('');
@@ -30,11 +35,31 @@ export default function CheckoutScreen({ navigation }) {
   // Get currency from the first item
   const currencySymbol = cart.items[0]?.menuItem?.currency === 'GBP' ? '£' : cart.items[0]?.menuItem?.currency === 'USD' ? '$' : '€';
 
+  // Guard: redirect guest users to login immediately
   useEffect(() => {
-    if (cart.businessId) {
-      fetchBillingRules(cart.businessId);
+    if (isGuest) {
+      Alert.alert(
+        'Login Required',
+        'You need to be logged in to place an order.',
+        [
+          { text: 'Cancel', style: 'cancel', onPress: () => navigation.goBack() },
+          {
+            text: 'Login Now',
+            style: 'default',
+            onPress: () => dispatch(logout())
+          }
+        ]
+      );
     }
-  }, [cart.businessId]);
+  }, [isGuest]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (cart.businessId) {
+        fetchBillingRules(cart.businessId);
+      }
+    }, [cart.businessId])
+  );
 
   useEffect(() => {
     calculateBillBreakdown();
@@ -42,11 +67,12 @@ export default function CheckoutScreen({ navigation }) {
 
   const fetchBillingRules = async (businessId) => {
     try {
-      const taxes = await ApiService.getTaxRules(businessId);
-      const charges = await ApiService.getChargeRules(businessId);
-      setBillingRules({ taxes: taxes || [], charges: charges || [] });
+      console.log('Fetching billing rules for business:', businessId);
+      const activeRules = await ApiService.getActiveBillingRules(businessId);
+      console.log('Received billing rules:', JSON.stringify(activeRules));
+      setBillingRules({ taxes: activeRules?.taxes || [], charges: activeRules?.charges || [] });
     } catch (error) {
-      console.log('Error fetching billing rules:', error);
+      console.log('Error fetching billing rules:', error?.response?.data || error.message);
     }
   };
 
@@ -100,7 +126,8 @@ export default function CheckoutScreen({ navigation }) {
       customerName: dinerName,
       tableNumber,
       numberOfPeople: Number(peopleCount) || 1,
-      specialInstructions
+      specialInstructions,
+      userLocation
     };
 
     try {

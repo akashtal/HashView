@@ -24,7 +24,9 @@ export default function BusinessSettings() {
       county: '',
       postcode: '',
       country: 'United Kingdom'
-    }
+    },
+    radius: 50,
+    orderRadius: 50
   });
 
   const [images, setImages] = useState({
@@ -53,7 +55,9 @@ export default function BusinessSettings() {
           county: business.address?.county || '',
           postcode: business.address?.postcode || '',
           country: business.address?.country || 'United Kingdom'
-        }
+        },
+        radius: business.radius || 50,
+        orderRadius: business.orderRadius || 50
       });
       setPreview({
         logo: business.logo?.url || null,
@@ -323,6 +327,38 @@ export default function BusinessSettings() {
                       onChange={e => setForm({ ...form, address: { ...form.address, postcode: e.target.value } })}
                       className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-gray-100">
+                <h3 className="text-md font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <MapPin size={18} className="text-purple-600" /> Geofencing Settings
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Order Radius (meters)</label>
+                    <input
+                      type="number"
+                      min="10"
+                      max="500"
+                      value={form.orderRadius}
+                      onChange={e => setForm({ ...form, orderRadius: parseInt(e.target.value) || 50 })}
+                      className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Customers must be within this distance to place orders.</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Review Radius (meters)</label>
+                    <input
+                      type="number"
+                      min="10"
+                      max="500"
+                      value={form.radius}
+                      onChange={e => setForm({ ...form, radius: parseInt(e.target.value) || 50 })}
+                      className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Customers must be within this distance to submit a review.</p>
                   </div>
                 </div>
               </div>

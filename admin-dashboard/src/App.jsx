@@ -34,6 +34,7 @@ import TaxManagement from './pages/business/TaxManagement';
 import ChargeManagement from './pages/business/ChargeManagement';
 import BusinessUpdates from './pages/business/BusinessUpdates';
 import BusinessSettings from './pages/business/BusinessSettings';
+import BusinessNotifications from './pages/business/BusinessNotifications';
 import BusinessLayout from './components/BusinessLayout';
 
 function Spinner() {
@@ -97,6 +98,7 @@ function BusinessPortalGuard() {
         <Route path="/tax" element={<TaxManagement />} />
         <Route path="/charges" element={<ChargeManagement />} />
         <Route path="/updates" element={<BusinessUpdates />} />
+        <Route path="/notifications" element={<BusinessNotifications />} />
         <Route path="/settings" element={<BusinessSettings />} />
       </Routes>
     </BusinessLayout>

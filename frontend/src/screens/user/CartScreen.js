@@ -1,14 +1,35 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, StatusBar } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image, StatusBar, Alert, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateQuantity, removeItem, clearCart } from '../../store/slices/cartSlice';
+import { logout } from '../../store/slices/authSlice';
+import * as Location from 'expo-location';
+import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
 
 export default function CartScreen({ navigation }) {
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const isGuest = !user || user.isGuest || user.role === 'guest';
   const cart = useSelector((state) => state.cart);
+  const [isCheckingLocation, setIsCheckingLocation] = useState(false);
+
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371e3; // metres
+    const φ1 = lat1 * Math.PI/180;
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2-lat1) * Math.PI/180;
+    const Δλ = (lon2-lon1) * Math.PI/180;
+
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    return R * c;
+  };
 
   const handleUpdateQuantity = (cartItemId, currentQuantity, delta) => {
     const newQuantity = currentQuantity + delta;
@@ -169,16 +190,91 @@ export default function CartScreen({ navigation }) {
 
       {/* Checkout Footer */}
       <View className="bg-white p-5 border-t border-gray-100 pb-8">
+        <Text className="text-xs text-gray-500 text-center mb-3">
+          <Icon name="location-outline" size={12} /> Note: You must be within the business order radius to place an order.
+        </Text>
         <TouchableOpacity
-          onPress={() => navigation.navigate('Checkout')}
+          onPress={async () => {
+            if (isGuest) {
+              Alert.alert(
+                'Login Required',
+                'You need to be logged in to place an order.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Login Now',
+                    style: 'default',
+                    onPress: () => dispatch(logout())
+                  }
+                ]
+              );
+              return;
+            }
+
+            if (!cart.businessId) return;
+
+            try {
+              setIsCheckingLocation(true);
+              
+              // Fetch business details to get coordinates and orderRadius
+              const res = await ApiService.getBusiness(cart.businessId);
+              const business = res?.business || res?.data?.business;
+              
+              if (!business || !business.location || !business.location.coordinates) {
+                // Fallback if business doesn't have location
+                setIsCheckingLocation(false);
+                navigation.navigate('Checkout');
+                return;
+              }
+              
+              const maxDistance = business.orderRadius || 50;
+              const [busLon, busLat] = business.location.coordinates;
+              
+              // Get user location
+              const { status } = await Location.requestForegroundPermissionsAsync();
+              if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'Location permission is required to order from this business.');
+                setIsCheckingLocation(false);
+                return;
+              }
+              
+              const location = await Location.getCurrentPositionAsync({});
+              const { latitude, longitude } = location.coords;
+              
+              const distance = calculateDistance(latitude, longitude, busLat, busLon);
+              
+              if (distance > maxDistance) {
+                Alert.alert(
+                  'Too Far Away',
+                  `You must be within ${maxDistance}m of the business to place an order. You are currently ${Math.round(distance)}m away.`
+                );
+                setIsCheckingLocation(false);
+                return;
+              }
+              
+              setIsCheckingLocation(false);
+              navigation.navigate('Checkout', { userLocation: { latitude, longitude } });
+            } catch (error) {
+              console.error('Error checking geofence:', error);
+              Alert.alert('Location Error', 'Could not verify your location. Please try again.');
+              setIsCheckingLocation(false);
+            }
+          }}
+          disabled={isCheckingLocation}
           className="shadow-lg shadow-indigo-200"
         >
           <LinearGradient
-            colors={[COLORS.secondary, COLORS.secondaryDark]}
+            colors={isCheckingLocation ? [COLORS.gray, COLORS.grayDark] : [COLORS.secondary, COLORS.secondaryDark]}
             className="rounded-xl py-4 items-center flex-row justify-center"
           >
-            <Text className="text-white text-lg font-bold mr-2">Proceed to Checkout</Text>
-            <Icon name="arrow-forward" size={20} color="#FFF" />
+            {isCheckingLocation ? (
+              <ActivityIndicator color="#FFF" size="small" />
+            ) : (
+              <>
+                <Text className="text-white text-lg font-bold mr-2">Proceed to Checkout</Text>
+                <Icon name="arrow-forward" size={20} color="#FFF" />
+              </>
+            )}
           </LinearGradient>
         </TouchableOpacity>
       </View>

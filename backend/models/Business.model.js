@@ -85,6 +85,12 @@ const businessSchema = new mongoose.Schema({
     min: 10,
     max: 500
   },
+  orderRadius: {
+    type: Number,
+    default: 50, // 50 meters default radius for ordering food
+    min: 10,
+    max: 500
+  },
   images: [{
     url: String,
     publicId: String

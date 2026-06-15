@@ -48,7 +48,7 @@ const initializeRedis = async () => {
 
 // Get value from cache
 const getCache = async (key) => {
-  if (!redisClient || !redisClient.isOpen) {
+  if (!redisClient || !redisClient.isReady) {
     return null;
   }
 
@@ -63,7 +63,7 @@ const getCache = async (key) => {
 
 // Set value in cache
 const setCache = async (key, value, expireSeconds = 300) => {
-  if (!redisClient || !redisClient.isOpen) {
+  if (!redisClient || !redisClient.isReady) {
     return false;
   }
 
@@ -78,7 +78,7 @@ const setCache = async (key, value, expireSeconds = 300) => {
 
 // Delete value from cache
 const deleteCache = async (key) => {
-  if (!redisClient || !redisClient.isOpen) {
+  if (!redisClient || !redisClient.isReady) {
     return false;
   }
 
@@ -93,7 +93,7 @@ const deleteCache = async (key) => {
 
 // Delete multiple keys by pattern
 const deleteCachePattern = async (pattern) => {
-  if (!redisClient || !redisClient.isOpen) {
+  if (!redisClient || !redisClient.isReady) {
     return false;
   }
 
@@ -111,7 +111,7 @@ const deleteCachePattern = async (pattern) => {
 
 // Check if cache is available
 const isCacheAvailable = () => {
-  return redisClient && redisClient.isOpen;
+  return redisClient && redisClient.isReady;
 };
 
 // Close Redis connection

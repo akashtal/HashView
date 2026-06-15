@@ -29,7 +29,7 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['general', 'coupon', 'review', 'business_verification', 'kyc', 'system', 'admin_broadcast', 'promotion', 'announcement', 'business_update'],
+    enum: ['general', 'coupon', 'review', 'business_verification', 'kyc', 'system', 'admin_broadcast', 'promotion', 'announcement', 'business_update', 'order_placed', 'order_status'],
     default: 'general'
   },
   recipientType: {

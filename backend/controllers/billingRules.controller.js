@@ -1,14 +1,26 @@
 const TaxRule = require('../models/TaxRule.model');
 const ChargeRule = require('../models/ChargeRule.model');
+const Business = require('../models/Business.model');
 const redis = require('../config/redis');
 
 // Cache helpers
 const clearBillingRulesCache = async (businessId) => {
-  if (!redis) return;
+  if (!redis || !redis.deleteCache) return;
   try {
-    await redis.del(`billing_rules:${businessId}`);
+    await redis.deleteCache(`billing_rules:${businessId}`);
   } catch (error) {
     console.error('Redis cache clear error:', error);
+  }
+};
+
+const verifyOwnership = async (businessId, user) => {
+  if (user.role === 'admin') return true;
+  try {
+    const business = await Business.findById(businessId);
+    if (!business || !business.owner) return false;
+    return business.owner.toString() === user._id.toString();
+  } catch (err) {
+    return false;
   }
 };
 
@@ -19,7 +31,8 @@ exports.createTaxRule = async (req, res, next) => {
     const { businessId, name, rate, type, mode, appliesTo, specificCategories, specificItems } = req.body;
     
     // Authorization check
-    if (req.user.role !== 'admin' && req.businessId !== businessId) {
+    const isOwner = await verifyOwnership(businessId, req.user);
+    if (!isOwner) {
       return res.status(403).json({ success: false, message: 'Not authorized to create tax rules for this business' });
     }
 
@@ -47,7 +60,7 @@ exports.getTaxRules = async (req, res, next) => {
   try {
     const { businessId } = req.params;
     
-    const rules = await TaxRule.find({ businessId }).sort({ createdAt: -1 });
+    const rules = await TaxRule.find({ business: businessId }).sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: rules });
   } catch (error) {
     next(error);
@@ -62,7 +75,8 @@ exports.updateTaxRule = async (req, res, next) => {
     }
     
     // Auth check
-    if (req.user.role !== 'admin' && req.businessId !== rule.businessId.toString()) {
+    const isOwner = await verifyOwnership(rule.business, req.user);
+    if (!isOwner) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
@@ -95,14 +109,15 @@ exports.toggleTaxRule = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Tax rule not found' });
     }
     
-    if (req.user.role !== 'admin' && req.businessId !== rule.businessId.toString()) {
+    const isOwner = await verifyOwnership(rule.business, req.user);
+    if (!isOwner) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
     rule.isActive = !rule.isActive;
     await rule.save();
     
-    await clearBillingRulesCache(rule.businessId);
+    await clearBillingRulesCache(rule.business);
 
     res.status(200).json({ success: true, data: rule });
   } catch (error) {
@@ -117,7 +132,8 @@ exports.deleteTaxRule = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Tax rule not found' });
     }
     
-    if (req.user.role !== 'admin' && req.businessId !== rule.businessId.toString()) {
+    const isOwner = await verifyOwnership(rule.business, req.user);
+    if (!isOwner) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
@@ -128,7 +144,7 @@ exports.deleteTaxRule = async (req, res, next) => {
     // Let's implement actual deletion since billing Engine uses snapshots, so deleting the rule won't affect old orders.
     await TaxRule.findByIdAndDelete(req.params.id);
     
-    await clearBillingRulesCache(rule.businessId);
+    await clearBillingRulesCache(rule.business);
 
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
@@ -142,7 +158,8 @@ exports.createChargeRule = async (req, res, next) => {
   try {
     const { businessId, name, rate, type, isConditional, conditionType, conditionValue } = req.body;
     
-    if (req.user.role !== 'admin' && req.businessId !== businessId) {
+    const isOwner = await verifyOwnership(businessId, req.user);
+    if (!isOwner) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
@@ -169,7 +186,7 @@ exports.getChargeRules = async (req, res, next) => {
   try {
     const { businessId } = req.params;
     
-    const rules = await ChargeRule.find({ businessId }).sort({ createdAt: -1 });
+    const rules = await ChargeRule.find({ business: businessId }).sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: rules });
   } catch (error) {
     next(error);
@@ -183,7 +200,8 @@ exports.updateChargeRule = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Charge rule not found' });
     }
     
-    if (req.user.role !== 'admin' && req.businessId !== rule.businessId.toString()) {
+    const isOwner = await verifyOwnership(rule.business, req.user);
+    if (!isOwner) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
@@ -215,14 +233,14 @@ exports.toggleChargeRule = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Charge rule not found' });
     }
     
-    if (req.user.role !== 'admin' && req.businessId !== rule.businessId.toString()) {
+    const isOwner = await verifyOwnership(rule.business, req.user);
+    if (!isOwner) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
     rule.isActive = !rule.isActive;
     await rule.save();
-    
-    await clearBillingRulesCache(rule.businessId);
+    await clearBillingRulesCache(rule.business);
 
     res.status(200).json({ success: true, data: rule });
   } catch (error) {
@@ -237,13 +255,14 @@ exports.deleteChargeRule = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Charge rule not found' });
     }
     
-    if (req.user.role !== 'admin' && req.businessId !== rule.businessId.toString()) {
+    const isOwner = await verifyOwnership(rule.business, req.user);
+    if (!isOwner) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
     await ChargeRule.findByIdAndDelete(req.params.id);
     
-    await clearBillingRulesCache(rule.businessId);
+    await clearBillingRulesCache(rule.business);
 
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
@@ -257,22 +276,22 @@ exports.getActiveRules = async (req, res, next) => {
     const { businessId } = req.params;
     
     // Check cache
-    if (redis) {
-      const cached = await redis.get(`billing_rules:${businessId}`);
+    if (redis && redis.getCache) {
+      const cached = await redis.getCache(`billing_rules:${businessId}`);
       if (cached) {
-        return res.status(200).json({ success: true, data: JSON.parse(cached) });
+        return res.status(200).json({ success: true, data: cached });
       }
     }
 
     const [taxes, charges] = await Promise.all([
-      TaxRule.find({ businessId, isActive: true }),
-      ChargeRule.find({ businessId, isActive: true })
+      TaxRule.find({ business: businessId, isActive: true }),
+      ChargeRule.find({ business: businessId, isActive: true })
     ]);
     
     const data = { taxes, charges };
     
-    if (redis) {
-      await redis.setex(`billing_rules:${businessId}`, 3600, JSON.stringify(data)); // 1 hour TTL
+    if (redis && redis.setCache) {
+      await redis.setCache(`billing_rules:${businessId}`, data, 3600); // 1 hour TTL
     }
 
     res.status(200).json({ success: true, data });

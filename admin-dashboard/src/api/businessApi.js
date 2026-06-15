@@ -26,7 +26,14 @@ const biz = {
   // ── Menu ──────────────────────────────────────────────────────────────────
   getMenuItems: (businessId) =>
     businessApi.get(`/menu-items/business/${businessId}/flat?status=all`),
-  updateMenuItem: (id, data) => businessApi.put(`/menu-items/${id}`, data),
+  createMenuItem: (data) => 
+    businessApi.post(`/menu-items`, data, {
+      headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {}
+    }),
+  updateMenuItem: (id, data) => 
+    businessApi.put(`/menu-items/${id}`, data, {
+      headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {}
+    }),
   deleteMenuItem: (id) => businessApi.delete(`/menu-items/${id}`),
   toggleMenuItemAvailability: (id) => businessApi.patch(`/menu-items/${id}/toggle`),
 
@@ -46,23 +53,23 @@ const biz = {
 
   // ── Tax Rules ─────────────────────────────────────────────────────────────
   getTaxRules: (businessId) =>
-    businessApi.get(`/billing-rules/tax/${businessId}`),
+    businessApi.get(`/billing-rules/tax/business/${businessId}`),
   createTaxRule: (businessId, data) =>
-    businessApi.post(`/billing-rules/tax/${businessId}`, data),
+    businessApi.post(`/billing-rules/tax`, { ...data, businessId }),
   updateTaxRule: (businessId, ruleId, data) =>
-    businessApi.put(`/billing-rules/tax/${businessId}/${ruleId}`, data),
+    businessApi.put(`/billing-rules/tax/${ruleId}`, data),
   deleteTaxRule: (businessId, ruleId) =>
-    businessApi.delete(`/billing-rules/tax/${businessId}/${ruleId}`),
+    businessApi.delete(`/billing-rules/tax/${ruleId}`),
 
   // ── Charge Rules ──────────────────────────────────────────────────────────
   getChargeRules: (businessId) =>
-    businessApi.get(`/billing-rules/charge/${businessId}`),
+    businessApi.get(`/billing-rules/charge/business/${businessId}`),
   createChargeRule: (businessId, data) =>
-    businessApi.post(`/billing-rules/charge/${businessId}`, data),
+    businessApi.post(`/billing-rules/charge`, { ...data, businessId }),
   updateChargeRule: (businessId, ruleId, data) =>
-    businessApi.put(`/billing-rules/charge/${businessId}/${ruleId}`, data),
+    businessApi.put(`/billing-rules/charge/${ruleId}`, data),
   deleteChargeRule: (businessId, ruleId) =>
-    businessApi.delete(`/billing-rules/charge/${businessId}/${ruleId}`),
+    businessApi.delete(`/billing-rules/charge/${ruleId}`),
 
   // ── Updates / Posts ───────────────────────────────────────────────────────
   getBusinessUpdates: (businessId) =>
