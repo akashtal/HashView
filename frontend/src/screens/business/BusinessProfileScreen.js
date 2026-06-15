@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, StatusBar, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  StatusBar,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -34,18 +43,14 @@ export default function BusinessProfileScreen({ navigation }) {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: () => dispatch(logout())
-        }
-      ]
-    );
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: () => dispatch(logout()),
+      },
+    ]);
   };
 
   const menuItems = [
@@ -53,7 +58,7 @@ export default function BusinessProfileScreen({ navigation }) {
       title: 'My Businesses',
       icon: 'business-outline',
       onPress: () => navigation.navigate('BusinessDashboard'),
-      description: 'Manage your business listings'
+      description: 'Manage your business listings',
     },
     {
       title: 'Business Analytics',
@@ -68,7 +73,7 @@ export default function BusinessProfileScreen({ navigation }) {
         }
         navigation.navigate('BusinessAnalytics', { businessId: myBusinesses[0]._id });
       },
-      description: 'View insights and statistics'
+      description: 'View insights and statistics',
     },
     {
       title: 'My Reviews',
@@ -83,7 +88,7 @@ export default function BusinessProfileScreen({ navigation }) {
         }
         navigation.navigate('BusinessReviews', { businessId: myBusinesses[0]._id });
       },
-      description: 'Reviews from customers'
+      description: 'Reviews from customers',
     },
     {
       title: 'My Coupons',
@@ -98,25 +103,25 @@ export default function BusinessProfileScreen({ navigation }) {
         }
         navigation.navigate('ManageCouponsNew', { businessId: myBusinesses[0]._id });
       },
-      description: 'Create, edit & delete coupons'
+      description: 'Create, edit & delete coupons',
     },
     {
       title: 'Account Settings',
       icon: 'settings-outline',
       onPress: () => navigation.navigate('AccountSettings'),
-      description: 'Update your profile'
+      description: 'Update your profile',
     },
     {
       title: 'Notifications',
       icon: 'notifications-outline',
       onPress: () => navigation.navigate('Notifications'),
-      description: 'View all notifications'
+      description: 'View all notifications',
     },
     {
       title: 'Help & Support',
       icon: 'help-circle-outline',
       onPress: () => navigation.navigate('HelpSupport'),
-      description: 'Get help and contact us'
+      description: 'Get help and contact us',
     },
   ];
 
@@ -132,10 +137,7 @@ export default function BusinessProfileScreen({ navigation }) {
   return (
     <ScrollView className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-20 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-20 px-6">
         <Text className="text-white text-2xl font-bold mb-4">Business Profile</Text>
 
         <View className="bg-white rounded-2xl p-6 shadow-lg -mb-16">
@@ -147,7 +149,10 @@ export default function BusinessProfileScreen({ navigation }) {
                 style={{ borderWidth: 3, borderColor: COLORS.secondary }}
               />
             ) : (
-              <View className="w-20 h-20 rounded-full items-center justify-center mb-3" style={{ backgroundColor: '#FFF9F0' }}>
+              <View
+                className="w-20 h-20 rounded-full items-center justify-center mb-3"
+                style={{ backgroundColor: '#FFF9F0' }}
+              >
                 <Text className="text-3xl font-bold" style={{ color: COLORS.secondary }}>
                   {user?.name?.charAt(0) || 'B'}
                 </Text>
@@ -159,18 +164,47 @@ export default function BusinessProfileScreen({ navigation }) {
             {effectivelyPro ? (
               /* ── Pro subscriber ── */
               <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
-                <View style={{ backgroundColor: '#7C3AED', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5, flexDirection: 'row', alignItems: 'center' }}>
+                <View
+                  style={{
+                    backgroundColor: '#7C3AED',
+                    borderRadius: 20,
+                    paddingHorizontal: 12,
+                    paddingVertical: 5,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}
+                >
                   <Icon name="star" size={12} color="#fff" style={{ marginRight: 4 }} />
                   <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12 }}>PRO</Text>
                 </View>
-                <View style={{ backgroundColor: '#FFF9F0', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, marginLeft: 8 }}>
-                  <Text style={{ fontSize: 14, fontWeight: '600', color: COLORS.secondary }}>Business Owner</Text>
+                <View
+                  style={{
+                    backgroundColor: '#FFF9F0',
+                    borderRadius: 20,
+                    paddingHorizontal: 16,
+                    paddingVertical: 8,
+                    marginLeft: 8,
+                  }}
+                >
+                  <Text style={{ fontSize: 14, fontWeight: '600', color: COLORS.secondary }}>
+                    Business Owner
+                  </Text>
                 </View>
               </View>
             ) : (
               /* ── Free plan ── */
-              <View style={{ backgroundColor: '#FFF9F0', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, marginTop: 8 }}>
-                <Text style={{ fontSize: 14, fontWeight: '600', color: COLORS.secondary }}>Business Owner</Text>
+              <View
+                style={{
+                  backgroundColor: '#FFF9F0',
+                  borderRadius: 20,
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  marginTop: 8,
+                }}
+              >
+                <Text style={{ fontSize: 14, fontWeight: '600', color: COLORS.secondary }}>
+                  Business Owner
+                </Text>
               </View>
             )}
           </View>
@@ -184,7 +218,10 @@ export default function BusinessProfileScreen({ navigation }) {
             onPress={item.onPress}
             className="bg-white rounded-xl p-4 mb-3 shadow-sm flex-row items-center"
           >
-            <View className="w-12 h-12 rounded-full items-center justify-center mr-4" style={{ backgroundColor: '#FFF9F0' }}>
+            <View
+              className="w-12 h-12 rounded-full items-center justify-center mr-4"
+              style={{ backgroundColor: '#FFF9F0' }}
+            >
               <Icon name={item.icon} size={22} color={COLORS.secondary} />
             </View>
             <View className="flex-1">
@@ -209,9 +246,7 @@ export default function BusinessProfileScreen({ navigation }) {
       </View>
 
       <View className="px-6 pb-6">
-        <Text className="text-center text-gray-400 text-xs">
-          HashView Business v1.1.8
-        </Text>
+        <Text className="text-center text-gray-400 text-xs">HashView Business v1.1.8</Text>
       </View>
     </ScrollView>
   );

@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StatusBar,
-  Dimensions
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -24,7 +24,7 @@ export default function AnalyticsDashboardScreen({ navigation, route }) {
     totalCoupons: 0,
     redeemedCoupons: 0,
     ratingTrend: [],
-    recentActivity: []
+    recentActivity: [],
   });
   const [timeRange, setTimeRange] = useState('week'); // week, month, all
 
@@ -50,19 +50,18 @@ export default function AnalyticsDashboardScreen({ navigation, route }) {
 
       setAnalytics({
         totalReviews: reviews.length,
-        averageRating: reviews.length > 0
-          ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-          : 0,
+        averageRating:
+          reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0,
         totalCoupons: coupons.length,
-        redeemedCoupons: coupons.filter(c => c.status === 'redeemed').length,
+        redeemedCoupons: coupons.filter((c) => c.status === 'redeemed').length,
         ratingBreakdown: {
-          5: reviews.filter(r => r.rating === 5).length,
-          4: reviews.filter(r => r.rating === 4).length,
-          3: reviews.filter(r => r.rating === 3).length,
-          2: reviews.filter(r => r.rating === 2).length,
-          1: reviews.filter(r => r.rating === 1).length,
+          5: reviews.filter((r) => r.rating === 5).length,
+          4: reviews.filter((r) => r.rating === 4).length,
+          3: reviews.filter((r) => r.rating === 3).length,
+          2: reviews.filter((r) => r.rating === 2).length,
+          1: reviews.filter((r) => r.rating === 1).length,
         },
-        recentReviews: reviews.slice(0, 5)
+        recentReviews: reviews.slice(0, 5),
       });
     } catch (error) {
       console.error(error);
@@ -83,9 +82,7 @@ export default function AnalyticsDashboardScreen({ navigation, route }) {
         <View className="flex-1">
           <Text className="text-sm text-gray-500">{title}</Text>
           <Text className="text-2xl font-bold text-gray-900">{value}</Text>
-          {subtitle && (
-            <Text className="text-xs text-gray-400 mt-1">{subtitle}</Text>
-          )}
+          {subtitle && <Text className="text-xs text-gray-400 mt-1">{subtitle}</Text>}
         </View>
       </View>
     </View>
@@ -96,9 +93,7 @@ export default function AnalyticsDashboardScreen({ navigation, route }) {
       <Text className="text-lg font-bold text-gray-900 mb-4">Rating Distribution</Text>
       {[5, 4, 3, 2, 1].map((rating) => {
         const count = analytics.ratingBreakdown?.[rating] || 0;
-        const percentage = analytics.totalReviews > 0
-          ? (count / analytics.totalReviews) * 100
-          : 0;
+        const percentage = analytics.totalReviews > 0 ? (count / analytics.totalReviews) * 100 : 0;
 
         return (
           <View key={rating} className="flex-row items-center mb-3">
@@ -109,7 +104,7 @@ export default function AnalyticsDashboardScreen({ navigation, route }) {
                 className="h-full rounded-full"
                 style={{
                   width: `${percentage}%`,
-                  backgroundColor: COLORS.secondary
+                  backgroundColor: COLORS.secondary,
                 }}
               />
             </View>
@@ -123,9 +118,10 @@ export default function AnalyticsDashboardScreen({ navigation, route }) {
   );
 
   const EngagementMetrics = () => {
-    const redemptionRate = analytics.totalCoupons > 0
-      ? ((analytics.redeemedCoupons / analytics.totalCoupons) * 100).toFixed(1)
-      : 0;
+    const redemptionRate =
+      analytics.totalCoupons > 0
+        ? ((analytics.redeemedCoupons / analytics.totalCoupons) * 100).toFixed(1)
+        : 0;
 
     return (
       <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
@@ -153,7 +149,7 @@ export default function AnalyticsDashboardScreen({ navigation, route }) {
               className="h-full rounded-full"
               style={{
                 width: `${redemptionRate}%`,
-                backgroundColor: COLORS.secondary
+                backgroundColor: COLORS.secondary,
               }}
             />
           </View>
@@ -168,10 +164,7 @@ export default function AnalyticsDashboardScreen({ navigation, route }) {
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header — always visible */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
         <View className="flex-row items-center mb-4">
           <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
             <Icon name="arrow-back" size={24} color="#FFF" />
@@ -187,15 +180,14 @@ export default function AnalyticsDashboardScreen({ navigation, route }) {
               onPress={() => setTimeRange(range.toLowerCase())}
               className="flex-1 py-2 rounded-lg"
               style={{
-                backgroundColor: timeRange === range.toLowerCase()
-                  ? COLORS.secondary
-                  : 'transparent'
+                backgroundColor:
+                  timeRange === range.toLowerCase() ? COLORS.secondary : 'transparent',
               }}
             >
               <Text
                 className="text-center font-semibold text-sm"
                 style={{
-                  color: timeRange === range.toLowerCase() ? '#FFF' : 'rgba(255,255,255,0.8)'
+                  color: timeRange === range.toLowerCase() ? '#FFF' : 'rgba(255,255,255,0.8)',
                 }}
               >
                 {range}
@@ -267,9 +259,7 @@ export default function AnalyticsDashboardScreen({ navigation, route }) {
                 </View>
               ))
             ) : (
-              <Text className="text-sm text-gray-500 text-center py-4">
-                No recent reviews
-              </Text>
+              <Text className="text-sm text-gray-500 text-center py-4">No recent reviews</Text>
             )}
           </View>
 
@@ -288,7 +278,8 @@ export default function AnalyticsDashboardScreen({ navigation, route }) {
               • You've received {analytics.totalReviews} reviews total
             </Text>
             <Text className="text-sm text-gray-700">
-              • {analytics.redeemedCoupons} out of {analytics.totalCoupons} coupons have been redeemed
+              • {analytics.redeemedCoupons} out of {analytics.totalCoupons} coupons have been
+              redeemed
             </Text>
           </View>
         </ScrollView>

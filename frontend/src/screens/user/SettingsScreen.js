@@ -44,7 +44,12 @@ export default function SettingsScreen({ navigation }) {
       setTimeout(async () => {
         const result = await dispatch(checkSubscriptionStatus());
         if (result?.payload?.isPro) {
-          Toast.show({ type: 'success', text1: '🎉 Pro Unlocked!', text2: 'All premium features are now active.', visibilityTime: 4000 });
+          Toast.show({
+            type: 'success',
+            text1: '🎉 Pro Unlocked!',
+            text2: 'All premium features are now active.',
+            visibilityTime: 4000,
+          });
         }
       }, 3500);
     } catch (err) {
@@ -52,7 +57,6 @@ export default function SettingsScreen({ navigation }) {
     } finally {
       setSubLoading(false);
     }
-
   }, [dispatch, isPro]);
   // Settings State
   const [settings, setSettings] = useState({
@@ -85,10 +89,7 @@ export default function SettingsScreen({ navigation }) {
     setSettings({ ...settings, dataUsage: preference });
     try {
       await AsyncStorage.setItem('setting_dataUsage', preference);
-      ToastService.showSuccess(
-        'Data Usage Updated',
-        `Data usage set to ${preference}`
-      );
+      ToastService.showSuccess('Data Usage Updated', `Data usage set to ${preference}`);
     } catch (error) {
       console.error('Save data usage error:', error);
     }
@@ -107,59 +108,51 @@ export default function SettingsScreen({ navigation }) {
             try {
               // Clear specific cache keys
               const keys = await AsyncStorage.getAllKeys();
-              const cacheKeys = keys.filter(key => key.startsWith('cache_'));
+              const cacheKeys = keys.filter((key) => key.startsWith('cache_'));
               await AsyncStorage.multiRemove(cacheKeys);
 
               ToastService.showSuccess('Cache Cleared', 'All cached data has been cleared');
             } catch (error) {
               ToastService.showError('Error', 'Failed to clear cache');
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
 
   const resetSettings = () => {
-    Alert.alert(
-      'Reset Settings',
-      'This will reset all app settings to default values. Continue?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: async () => {
-            const defaultSettings = {
-              pushNotifications: true,
-              emailNotifications: true,
-              locationServices: true,
-              darkMode: false,
-              biometricAuth: false,
-              autoSync: true,
-              dataUsage: 'wifi',
-            };
+    Alert.alert('Reset Settings', 'This will reset all app settings to default values. Continue?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Reset',
+        style: 'destructive',
+        onPress: async () => {
+          const defaultSettings = {
+            pushNotifications: true,
+            emailNotifications: true,
+            locationServices: true,
+            darkMode: false,
+            biometricAuth: false,
+            autoSync: true,
+            dataUsage: 'wifi',
+          };
 
-            setSettings(defaultSettings);
+          setSettings(defaultSettings);
 
-            // Clear all setting keys from AsyncStorage
-            try {
-              const keys = await AsyncStorage.getAllKeys();
-              const settingKeys = keys.filter(key => key.startsWith('setting_'));
-              await AsyncStorage.multiRemove(settingKeys);
+          // Clear all setting keys from AsyncStorage
+          try {
+            const keys = await AsyncStorage.getAllKeys();
+            const settingKeys = keys.filter((key) => key.startsWith('setting_'));
+            await AsyncStorage.multiRemove(settingKeys);
 
-              showMessage({
-                message: 'Settings Reset',
-                description: 'All settings have been reset to default',
-                type: 'success',
-              });
-            } catch (error) {
-              ToastService.showError('Error', 'Failed to reset settings');
-            }
+            ToastService.showSuccess('Settings Reset', 'All settings have been reset to default');
+          } catch (error) {
+            ToastService.showError('Error', 'Failed to reset settings');
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const openPrivacyPolicy = () => {
@@ -175,10 +168,7 @@ export default function SettingsScreen({ navigation }) {
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
         <View className="flex-row items-center">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -192,12 +182,9 @@ export default function SettingsScreen({ navigation }) {
 
       <ScrollView className="flex-1">
         <View className="px-6 py-4">
-
           {/* Notifications Settings */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Notifications
-            </Text>
+            <Text className="text-lg font-bold text-gray-900 mb-4">Notifications</Text>
 
             <View className="flex-row items-center justify-between mb-4">
               <View className="flex-1 mr-4">
@@ -219,9 +206,7 @@ export default function SettingsScreen({ navigation }) {
             <View className="flex-row items-center justify-between">
               <View className="flex-1 mr-4">
                 <Text className="text-base text-gray-900 font-medium">Email Notifications</Text>
-                <Text className="text-sm text-gray-500 mt-1">
-                  Get important updates via email
-                </Text>
+                <Text className="text-sm text-gray-500 mt-1">Get important updates via email</Text>
               </View>
               <Switch
                 value={settings.emailNotifications}
@@ -234,9 +219,7 @@ export default function SettingsScreen({ navigation }) {
 
           {/* Privacy & Security */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Privacy & Security
-            </Text>
+            <Text className="text-lg font-bold text-gray-900 mb-4">Privacy & Security</Text>
 
             <View className="flex-row items-center justify-between mb-4">
               <View className="flex-1 mr-4">
@@ -257,7 +240,9 @@ export default function SettingsScreen({ navigation }) {
 
             <View className="flex-row items-center justify-between mb-4">
               <View className="flex-1 mr-4">
-                <Text className="text-base text-gray-900 font-medium">Biometric Authentication</Text>
+                <Text className="text-base text-gray-900 font-medium">
+                  Biometric Authentication
+                </Text>
                 <Text className="text-sm text-gray-500 mt-1">
                   Use fingerprint or Face ID to login
                 </Text>
@@ -292,10 +277,11 @@ export default function SettingsScreen({ navigation }) {
                 >
                   <Icon name="card-outline" size={22} color={COLORS.primary} />
                   <Text className="flex-1 ml-3 text-base text-gray-900">Manage Subscription</Text>
-                  {subLoading
-                    ? <ActivityIndicator size="small" color={COLORS.primary} />
-                    : <Icon name="open-outline" size={20} color="#D1D5DB" />
-                  }
+                  {subLoading ? (
+                    <ActivityIndicator size="small" color={COLORS.primary} />
+                  ) : (
+                    <Icon name="open-outline" size={20} color="#D1D5DB" />
+                  )}
                 </TouchableOpacity>
               </>
             )}
@@ -303,16 +289,12 @@ export default function SettingsScreen({ navigation }) {
 
           {/* App Preferences */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              App Preferences
-            </Text>
+            <Text className="text-lg font-bold text-gray-900 mb-4">App Preferences</Text>
 
             <View className="flex-row items-center justify-between mb-4">
               <View className="flex-1 mr-4">
                 <Text className="text-base text-gray-900 font-medium">Dark Mode</Text>
-                <Text className="text-sm text-gray-500 mt-1">
-                  Coming soon
-                </Text>
+                <Text className="text-sm text-gray-500 mt-1">Coming soon</Text>
               </View>
               <Switch
                 value={settings.darkMode}
@@ -343,9 +325,7 @@ export default function SettingsScreen({ navigation }) {
 
           {/* Data Usage */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Data Usage
-            </Text>
+            <Text className="text-lg font-bold text-gray-900 mb-4">Data Usage</Text>
 
             <Text className="text-sm text-gray-600 mb-3">
               Control when to download images and videos
@@ -358,7 +338,7 @@ export default function SettingsScreen({ navigation }) {
                 className="flex-row items-center py-3 border-b border-gray-100"
               >
                 <Icon
-                  name={settings.dataUsage === option ? "radio-button-on" : "radio-button-off"}
+                  name={settings.dataUsage === option ? 'radio-button-on' : 'radio-button-off'}
                   size={22}
                   color={settings.dataUsage === option ? COLORS.primary : '#D1D5DB'}
                 />
@@ -371,9 +351,7 @@ export default function SettingsScreen({ navigation }) {
 
           {/* Storage & Cache */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Storage & Cache
-            </Text>
+            <Text className="text-lg font-bold text-gray-900 mb-4">Storage & Cache</Text>
 
             <TouchableOpacity
               onPress={clearCache}
@@ -392,9 +370,7 @@ export default function SettingsScreen({ navigation }) {
 
           {/* About & Legal */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              About & Legal
-            </Text>
+            <Text className="text-lg font-bold text-gray-900 mb-4">About & Legal</Text>
 
             <TouchableOpacity
               onPress={openPrivacyPolicy}
@@ -424,9 +400,7 @@ export default function SettingsScreen({ navigation }) {
 
           {/* Danger Zone */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-6 border-2 border-red-100">
-            <Text className="text-lg font-bold text-red-600 mb-4">
-              Danger Zone
-            </Text>
+            <Text className="text-lg font-bold text-red-600 mb-4">Danger Zone</Text>
 
             <TouchableOpacity
               onPress={resetSettings}

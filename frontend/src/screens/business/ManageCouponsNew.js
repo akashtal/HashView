@@ -9,7 +9,7 @@ import {
   Alert,
   Modal,
   TextInput,
-  RefreshControl
+  RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -35,7 +35,7 @@ export default function ManageCouponsNew({ navigation, route }) {
     maxDiscountAmount: '',
     usageLimit: '',
     redemptionLimit: '', // How many users can redeem coupons from this template
-    terms: ''
+    terms: '',
   });
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function ManageCouponsNew({ navigation, route }) {
       maxDiscountAmount: '',
       usageLimit: '',
       redemptionLimit: '',
-      terms: ''
+      terms: '',
     });
     setEditingCoupon(null);
   };
@@ -92,7 +92,7 @@ export default function ManageCouponsNew({ navigation, route }) {
         maxDiscountAmount: coupon.maxDiscountAmount?.toString() || '',
         usageLimit: coupon.usageLimit?.toString() || '',
         redemptionLimit: coupon.redemptionLimit?.toString() || '',
-        terms: coupon.terms || ''
+        terms: coupon.terms || '',
       });
     } else {
       resetForm();
@@ -102,7 +102,8 @@ export default function ManageCouponsNew({ navigation, route }) {
 
   const handleSubmit = async () => {
     // Validation for free items
-    const isFreeItem = formData.discountType === 'free_item' || formData.discountType === 'free_drink';
+    const isFreeItem =
+      formData.discountType === 'free_item' || formData.discountType === 'free_drink';
 
     if (!formData.code || !formData.title) {
       ToastService.showWarning('Validation Error', 'Please fill in Code and Title');
@@ -110,7 +111,10 @@ export default function ManageCouponsNew({ navigation, route }) {
     }
 
     if (isFreeItem && !formData.itemName) {
-      ToastService.showWarning('Validation Error', 'Please enter the item name for free item coupon');
+      ToastService.showWarning(
+        'Validation Error',
+        'Please enter the item name for free item coupon'
+      );
       return;
     }
 
@@ -129,10 +133,12 @@ export default function ManageCouponsNew({ navigation, route }) {
         discountValue: isFreeItem ? 0 : parseFloat(formData.discountValue),
         itemName: isFreeItem ? formData.itemName : null,
         minPurchaseAmount: parseFloat(formData.minPurchaseAmount) || 0,
-        maxDiscountAmount: formData.maxDiscountAmount ? parseFloat(formData.maxDiscountAmount) : null,
+        maxDiscountAmount: formData.maxDiscountAmount
+          ? parseFloat(formData.maxDiscountAmount)
+          : null,
         usageLimit: formData.usageLimit ? parseInt(formData.usageLimit) : null,
         redemptionLimit: formData.redemptionLimit ? parseInt(formData.redemptionLimit) : null,
-        terms: formData.terms
+        terms: formData.terms,
       };
 
       if (editingCoupon) {
@@ -149,10 +155,7 @@ export default function ManageCouponsNew({ navigation, route }) {
       resetForm();
       fetchCoupons();
     } catch (error) {
-      ToastService.showError(
-        'Error',
-        error.response?.data?.message || 'Failed to save coupon'
-      );
+      ToastService.showError('Error', error.response?.data?.message || 'Failed to save coupon');
     }
   };
 
@@ -173,8 +176,8 @@ export default function ManageCouponsNew({ navigation, route }) {
             } catch (error) {
               ToastService.showError('Delete Failed', 'Failed to delete coupon');
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -182,7 +185,10 @@ export default function ManageCouponsNew({ navigation, route }) {
   const handleToggleStatus = async (coupon) => {
     try {
       await ApiService.toggleCouponStatus(coupon._id);
-      ToastService.showSuccess('Success', `Coupon ${coupon.isActive ? 'deactivated' : 'activated'} successfully`);
+      ToastService.showSuccess(
+        'Success',
+        `Coupon ${coupon.isActive ? 'deactivated' : 'activated'} successfully`
+      );
       fetchCoupons();
     } catch (error) {
       ToastService.showError('Error', 'Failed to update coupon status');
@@ -211,15 +217,24 @@ export default function ManageCouponsNew({ navigation, route }) {
         <View className="flex-row justify-between items-start mb-3">
           <View className="flex-1">
             <View className="flex-row items-center mb-2 flex-wrap">
-              <View className="rounded-full px-3 py-1 mr-2 mb-1" style={{ backgroundColor: '#FFF9F0' }}>
+              <View
+                className="rounded-full px-3 py-1 mr-2 mb-1"
+                style={{ backgroundColor: '#FFF9F0' }}
+              >
                 <Text className="text-xs font-bold" style={{ color: COLORS.secondary }}>
                   {coupon.code}
                 </Text>
               </View>
-              <View className={`rounded-full px-3 py-1 mb-1 ${coupon.isActive ? 'bg-green-100' : 'bg-gray-100'
-                }`}>
-                <Text className={`text-xs font-semibold ${coupon.isActive ? 'text-green-700' : 'text-gray-700'
-                  }`}>
+              <View
+                className={`rounded-full px-3 py-1 mb-1 ${
+                  coupon.isActive ? 'bg-green-100' : 'bg-gray-100'
+                }`}
+              >
+                <Text
+                  className={`text-xs font-semibold ${
+                    coupon.isActive ? 'text-green-700' : 'text-gray-700'
+                  }`}
+                >
                   {coupon.isActive ? 'Active' : 'Inactive'}
                 </Text>
               </View>
@@ -230,17 +245,13 @@ export default function ManageCouponsNew({ navigation, route }) {
 
             <View className="flex-row items-center mb-1">
               <Icon name="pricetag-outline" size={14} color="#6B7280" />
-              <Text className="text-xs text-gray-600 ml-1">
-                {getDiscountDisplay(coupon)}
-              </Text>
+              <Text className="text-xs text-gray-600 ml-1">{getDiscountDisplay(coupon)}</Text>
             </View>
 
             {coupon.minPurchaseAmount > 0 && (
               <View className="flex-row items-center mb-1">
                 <Icon name="cart-outline" size={14} color="#6B7280" />
-                <Text className="text-xs text-gray-600 ml-1">
-                  Min. £{coupon.minPurchaseAmount}
-                </Text>
+                <Text className="text-xs text-gray-600 ml-1">Min. £{coupon.minPurchaseAmount}</Text>
               </View>
             )}
 
@@ -262,7 +273,10 @@ export default function ManageCouponsNew({ navigation, route }) {
             )}
           </View>
 
-          <View className="w-16 h-16 rounded-xl items-center justify-center" style={{ backgroundColor: '#FFF9F0' }}>
+          <View
+            className="w-16 h-16 rounded-xl items-center justify-center"
+            style={{ backgroundColor: '#FFF9F0' }}
+          >
             <Icon name="ticket" size={32} color={COLORS.secondary} />
           </View>
         </View>
@@ -299,9 +313,7 @@ export default function ManageCouponsNew({ navigation, route }) {
             className="flex-1 flex-row items-center justify-center py-2 ml-2 rounded-lg bg-red-50"
           >
             <Icon name="trash-outline" size={18} color="#EF4444" />
-            <Text className="text-red-600 ml-1 font-semibold text-xs">
-              Delete
-            </Text>
+            <Text className="text-red-600 ml-1 font-semibold text-xs">Delete</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -322,10 +334,7 @@ export default function ManageCouponsNew({ navigation, route }) {
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">
             <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
@@ -351,10 +360,7 @@ export default function ManageCouponsNew({ navigation, route }) {
             <Text className="text-gray-500 text-center mt-2 mb-6">
               Create your first coupon and start attracting more customers!
             </Text>
-            <TouchableOpacity
-              onPress={() => handleOpenModal()}
-              activeOpacity={0.8}
-            >
+            <TouchableOpacity onPress={() => handleOpenModal()} activeOpacity={0.8}>
               <LinearGradient
                 colors={[COLORS.secondary, COLORS.secondaryDark]}
                 className="rounded-xl px-6 py-3"
@@ -391,10 +397,12 @@ export default function ManageCouponsNew({ navigation, route }) {
               <Text className="text-2xl font-bold text-gray-900">
                 {editingCoupon ? 'Edit Coupon' : 'Create Coupon'}
               </Text>
-              <TouchableOpacity onPress={() => {
-                setModalVisible(false);
-                resetForm();
-              }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setModalVisible(false);
+                  resetForm();
+                }}
+              >
                 <Icon name="close" size={28} color="#6B7280" />
               </TouchableOpacity>
             </View>
@@ -451,17 +459,26 @@ export default function ManageCouponsNew({ navigation, route }) {
                     { value: 'percentage', label: 'Percentage' },
                     { value: 'fixed', label: 'Fixed Amount' },
                     { value: 'buy1get1', label: 'Buy 1 Get 1' },
-                    { value: 'free_item', label: 'Free Item' }
+                    { value: 'free_item', label: 'Free Item' },
                   ].map((type) => (
                     <TouchableOpacity
                       key={type.value}
                       onPress={() => setFormData({ ...formData, discountType: type.value })}
-                      className={`rounded-xl px-4 py-2 mr-2 mb-2 border-2 ${formData.discountType === type.value ? 'border-orange-500' : 'border-gray-200'
-                        }`}
-                      style={{ backgroundColor: formData.discountType === type.value ? '#FFF9F0' : '#F9FAFB' }}
+                      className={`rounded-xl px-4 py-2 mr-2 mb-2 border-2 ${
+                        formData.discountType === type.value
+                          ? 'border-orange-500'
+                          : 'border-gray-200'
+                      }`}
+                      style={{
+                        backgroundColor:
+                          formData.discountType === type.value ? '#FFF9F0' : '#F9FAFB',
+                      }}
                     >
-                      <Text className={`font-semibold text-sm ${formData.discountType === type.value ? 'text-orange-600' : 'text-gray-700'
-                        }`}>
+                      <Text
+                        className={`font-semibold text-sm ${
+                          formData.discountType === type.value ? 'text-orange-600' : 'text-gray-700'
+                        }`}
+                      >
                         {type.label}
                       </Text>
                     </TouchableOpacity>
@@ -547,7 +564,9 @@ export default function ManageCouponsNew({ navigation, route }) {
 
               {/* Redemption Limit */}
               <View className="mb-4">
-                <Text className="text-gray-900 font-semibold mb-2">Redemption Limit (Optional)</Text>
+                <Text className="text-gray-900 font-semibold mb-2">
+                  Redemption Limit (Optional)
+                </Text>
                 <TextInput
                   className="bg-gray-50 rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
                   placeholder="e.g., 10 (leave empty for unlimited)"
@@ -557,7 +576,8 @@ export default function ManageCouponsNew({ navigation, route }) {
                   onChangeText={(value) => setFormData({ ...formData, redemptionLimit: value })}
                 />
                 <Text className="text-xs text-gray-500 mt-1">
-                  How many users can redeem coupons from this template (e.g., 10 users can redeem review reward coupons)
+                  How many users can redeem coupons from this template (e.g., 10 users can redeem
+                  review reward coupons)
                 </Text>
               </View>
 
@@ -578,10 +598,7 @@ export default function ManageCouponsNew({ navigation, route }) {
               </View>
 
               {/* Submit Button */}
-              <TouchableOpacity
-                onPress={handleSubmit}
-                activeOpacity={0.8}
-              >
+              <TouchableOpacity onPress={handleSubmit} activeOpacity={0.8}>
                 <LinearGradient
                   colors={[COLORS.secondary, COLORS.secondaryDark]}
                   className="rounded-xl py-4 items-center"

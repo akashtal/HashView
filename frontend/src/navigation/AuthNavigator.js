@@ -37,4 +37,3 @@ export default function AuthNavigator() {
     </Stack.Navigator>
   );
 }
-

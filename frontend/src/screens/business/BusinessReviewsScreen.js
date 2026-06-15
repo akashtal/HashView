@@ -8,7 +8,7 @@ import {
   StatusBar,
   Image,
   RefreshControl,
-  Alert
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -34,7 +34,7 @@ export default function BusinessReviewsScreen({ navigation, route }) {
       let filteredReviews = response.reviews || [];
 
       if (filter !== 'all') {
-        filteredReviews = filteredReviews.filter(r => r.status === filter);
+        filteredReviews = filteredReviews.filter((r) => r.status === filter);
       }
 
       setReviews(filteredReviews);
@@ -73,12 +73,12 @@ export default function BusinessReviewsScreen({ navigation, route }) {
         {/* User Info */}
         <View className="flex-row items-center mb-3">
           {review.user?.profileImage ? (
-            <Image
-              source={{ uri: review.user.profileImage }}
-              className="w-12 h-12 rounded-full"
-            />
+            <Image source={{ uri: review.user.profileImage }} className="w-12 h-12 rounded-full" />
           ) : (
-            <View className="w-12 h-12 rounded-full items-center justify-center" style={{ backgroundColor: '#FFF9F0' }}>
+            <View
+              className="w-12 h-12 rounded-full items-center justify-center"
+              style={{ backgroundColor: '#FFF9F0' }}
+            >
               <Text className="text-lg font-bold" style={{ color: COLORS.secondary }}>
                 {review.user?.name?.charAt(0) || 'U'}
               </Text>
@@ -87,13 +87,27 @@ export default function BusinessReviewsScreen({ navigation, route }) {
 
           <View className="flex-1 ml-3">
             <View className="flex-row items-center justify-between">
-              <Text className="text-base font-bold text-gray-900">{review.user?.name || 'Anonymous'}</Text>
-              <View className={`px-3 py-1 rounded-full ${review.status === 'approved' ? 'bg-green-100' :
-                  review.status === 'pending' ? 'bg-yellow-100' : 'bg-red-100'
-                }`}>
-                <Text className={`text-xs font-semibold capitalize ${review.status === 'approved' ? 'text-green-700' :
-                    review.status === 'pending' ? 'text-yellow-700' : 'text-red-700'
-                  }`}>
+              <Text className="text-base font-bold text-gray-900">
+                {review.user?.name || 'Anonymous'}
+              </Text>
+              <View
+                className={`px-3 py-1 rounded-full ${
+                  review.status === 'approved'
+                    ? 'bg-green-100'
+                    : review.status === 'pending'
+                      ? 'bg-yellow-100'
+                      : 'bg-red-100'
+                }`}
+              >
+                <Text
+                  className={`text-xs font-semibold capitalize ${
+                    review.status === 'approved'
+                      ? 'text-green-700'
+                      : review.status === 'pending'
+                        ? 'text-yellow-700'
+                        : 'text-red-700'
+                  }`}
+                >
                   {review.status}
                 </Text>
               </View>
@@ -104,7 +118,7 @@ export default function BusinessReviewsScreen({ navigation, route }) {
                 month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
               })}
             </Text>
           </View>
@@ -113,27 +127,19 @@ export default function BusinessReviewsScreen({ navigation, route }) {
         {/* Rating */}
         <View className="flex-row items-center mb-3">
           {renderStars(review.rating)}
-          <Text className="text-sm text-gray-600 ml-2 font-semibold">
-            {review.rating}.0
-          </Text>
+          <Text className="text-sm text-gray-600 ml-2 font-semibold">{review.rating}.0</Text>
         </View>
 
         {/* Comment */}
         {review.comment && (
-          <Text className="text-sm text-gray-700 mb-3 leading-5">
-            {review.comment}
-          </Text>
+          <Text className="text-sm text-gray-700 mb-3 leading-5">{review.comment}</Text>
         )}
 
         {/* Images */}
         {review.images && review.images.length > 0 && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-3">
             {review.images.map((img, index) => (
-              <Image
-                key={index}
-                source={{ uri: img }}
-                className="w-20 h-20 rounded-lg mr-2"
-              />
+              <Image key={index} source={{ uri: img }} className="w-20 h-20 rounded-lg mr-2" />
             ))}
           </ScrollView>
         )}
@@ -150,16 +156,16 @@ export default function BusinessReviewsScreen({ navigation, route }) {
             {review.couponAwarded && (
               <View className="flex-row items-center">
                 <Icon name="gift" size={16} color={COLORS.secondary} />
-                <Text className="text-xs ml-1" style={{ color: COLORS.secondary }}>Coupon Given</Text>
+                <Text className="text-xs ml-1" style={{ color: COLORS.secondary }}>
+                  Coupon Given
+                </Text>
               </View>
             )}
           </View>
 
           <View className="flex-row items-center">
             <Icon name="thumbs-up-outline" size={14} color="#6B7280" />
-            <Text className="text-xs text-gray-600 ml-1">
-              {review.helpfulCount || 0}
-            </Text>
+            <Text className="text-xs text-gray-600 ml-1">{review.helpfulCount || 0}</Text>
           </View>
         </View>
       </View>
@@ -179,10 +185,7 @@ export default function BusinessReviewsScreen({ navigation, route }) {
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
         <View className="flex-row items-center mb-4">
           <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
             <Icon name="arrow-back" size={24} color="#FFF" />
@@ -198,8 +201,11 @@ export default function BusinessReviewsScreen({ navigation, route }) {
               onPress={() => setFilter(status)}
               className={`flex-1 py-2 rounded-lg ${filter === status ? 'bg-white' : ''}`}
             >
-              <Text className={`text-center font-semibold capitalize ${filter === status ? 'text-orange-500' : 'text-white'
-                }`}>
+              <Text
+                className={`text-center font-semibold capitalize ${
+                  filter === status ? 'text-orange-500' : 'text-white'
+                }`}
+              >
                 {status}
               </Text>
             </TouchableOpacity>
@@ -214,15 +220,17 @@ export default function BusinessReviewsScreen({ navigation, route }) {
       >
         {reviews.length === 0 ? (
           <View className="items-center justify-center py-20">
-            <View className="w-24 h-24 rounded-full items-center justify-center mb-4" style={{ backgroundColor: '#FFF9F0' }}>
+            <View
+              className="w-24 h-24 rounded-full items-center justify-center mb-4"
+              style={{ backgroundColor: '#FFF9F0' }}
+            >
               <Icon name="chatbubbles-outline" size={48} color={COLORS.secondary} />
             </View>
             <Text className="text-xl font-bold text-gray-900 mb-2">No Reviews Yet</Text>
             <Text className="text-sm text-gray-500 text-center px-8">
               {filter === 'all'
-                ? 'You haven\'t received any reviews yet'
-                : `No ${filter} reviews found`
-              }
+                ? "You haven't received any reviews yet"
+                : `No ${filter} reviews found`}
             </Text>
           </View>
         ) : (

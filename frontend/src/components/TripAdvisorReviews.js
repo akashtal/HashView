@@ -7,7 +7,7 @@ import COLORS from '../config/colors';
 /**
  * TripAdvisor Reviews Component
  * Displays reviews fetched from Common Ninja API
- * 
+ *
  * Props:
  * - reviews: Array of TripAdvisor review objects
  * - rating: Average rating
@@ -16,14 +16,14 @@ import COLORS from '../config/colors';
  * - displayMode: 'summary' | 'list' | 'widget' | 'hybrid'
  * - tripAdvisorUrl: Link to TripAdvisor page
  */
-export default function TripAdvisorReviews({ 
-  reviews = [], 
-  rating = 0, 
+export default function TripAdvisorReviews({
+  reviews = [],
+  rating = 0,
   reviewCount = 0,
   widgetUrl = null,
   tripAdvisorUrl = null,
   displayMode = 'summary',
-  maxReviews = 10
+  maxReviews = 10,
 }) {
   const renderStars = (ratingValue) => {
     return (
@@ -51,7 +51,7 @@ export default function TripAdvisorReviews({
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -66,7 +66,10 @@ export default function TripAdvisorReviews({
         <View className="flex-row items-center justify-between">
           {/* TripAdvisor Logo & Name */}
           <View className="flex-row items-center flex-1">
-            <View className="w-10 h-10 rounded-full items-center justify-center mr-3" style={{ backgroundColor: '#E8F5F1' }}>
+            <View
+              className="w-10 h-10 rounded-full items-center justify-center mr-3"
+              style={{ backgroundColor: '#E8F5F1' }}
+            >
               <Icon name="airplane" size={20} color="#00AA6C" />
             </View>
             <View className="flex-1">
@@ -83,9 +86,7 @@ export default function TripAdvisorReviews({
           {rating > 0 ? (
             <View className="flex-row items-center">
               {renderStars(Math.round(rating))}
-              <Text className="ml-2 text-xl font-bold text-gray-900">
-                {rating.toFixed(1)}
-              </Text>
+              <Text className="ml-2 text-xl font-bold text-gray-900">{rating.toFixed(1)}</Text>
             </View>
           ) : (
             <Text className="text-sm text-gray-400">No rating yet</Text>
@@ -130,7 +131,9 @@ export default function TripAdvisorReviews({
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-row items-center">
               <Image
-                source={{ uri: 'https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg' }}
+                source={{
+                  uri: 'https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg',
+                }}
                 style={{ width: 120, height: 30 }}
                 resizeMode="contain"
               />
@@ -138,13 +141,11 @@ export default function TripAdvisorReviews({
             {rating > 0 && (
               <View className="flex-row items-center">
                 {renderStars(Math.round(rating))}
-                <Text className="ml-2 text-base font-bold text-gray-900">
-                  {rating.toFixed(1)}
-                </Text>
+                <Text className="ml-2 text-base font-bold text-gray-900">{rating.toFixed(1)}</Text>
               </View>
             )}
           </View>
-          
+
           {reviewCount > 0 && (
             <Text className="text-sm text-gray-600">
               {reviewCount} {reviewCount === 1 ? 'review' : 'reviews'}
@@ -156,9 +157,7 @@ export default function TripAdvisorReviews({
         {displayReviews.length === 0 ? (
           <View className="bg-white rounded-2xl p-8 items-center">
             <Icon name="chatbubbles-outline" size={48} color="#D1D5DB" />
-            <Text className="text-gray-500 text-center mt-4">
-              No TripAdvisor reviews yet
-            </Text>
+            <Text className="text-gray-500 text-center mt-4">No TripAdvisor reviews yet</Text>
           </View>
         ) : (
           displayReviews.map((review, index) => (
@@ -171,10 +170,7 @@ export default function TripAdvisorReviews({
               {/* Reviewer Info */}
               <View className="flex-row items-center mb-3">
                 {review.authorPhoto ? (
-                  <Image
-                    source={{ uri: review.authorPhoto }}
-                    className="w-12 h-12 rounded-full"
-                  />
+                  <Image source={{ uri: review.authorPhoto }} className="w-12 h-12 rounded-full" />
                 ) : (
                   <View className="w-12 h-12 rounded-full items-center justify-center bg-green-100">
                     <Text className="text-lg font-bold text-green-700">
@@ -182,14 +178,12 @@ export default function TripAdvisorReviews({
                     </Text>
                   </View>
                 )}
-                
+
                 <View className="flex-1 ml-3">
                   <Text className="text-base font-bold text-gray-900">
                     {review.author || 'Anonymous'}
                   </Text>
-                  <Text className="text-xs text-gray-500 mt-1">
-                    {formatDate(review.date)}
-                  </Text>
+                  <Text className="text-xs text-gray-500 mt-1">{formatDate(review.date)}</Text>
                 </View>
 
                 {/* TripAdvisor Logo Badge */}
@@ -204,17 +198,13 @@ export default function TripAdvisorReviews({
               <View className="flex-row items-center mb-2">
                 {renderStars(review.rating)}
                 {review.title && (
-                  <Text className="ml-2 text-sm font-semibold text-gray-900">
-                    {review.title}
-                  </Text>
+                  <Text className="ml-2 text-sm font-semibold text-gray-900">{review.title}</Text>
                 )}
               </View>
 
               {/* Review Text */}
               {review.text && (
-                <Text className="text-sm text-gray-700 leading-5 mb-3">
-                  {review.text}
-                </Text>
+                <Text className="text-sm text-gray-700 leading-5 mb-3">{review.text}</Text>
               )}
 
               {/* Helpful Count */}
@@ -229,9 +219,7 @@ export default function TripAdvisorReviews({
 
               {/* Link to full review */}
               <View className="flex-row items-center mt-3 pt-3 border-t border-gray-100">
-                <Text className="text-xs text-gray-500 flex-1">
-                  View on TripAdvisor
-                </Text>
+                <Text className="text-xs text-gray-500 flex-1">View on TripAdvisor</Text>
                 <Icon name="open-outline" size={14} color="#00AA6C" />
               </View>
             </TouchableOpacity>
@@ -252,7 +240,10 @@ export default function TripAdvisorReviews({
 
         {/* Hybrid Mode: Show widget below reviews */}
         {displayMode === 'hybrid' && widgetUrl && (
-          <View className="mt-4 bg-white rounded-2xl overflow-hidden shadow-sm" style={{ height: 400 }}>
+          <View
+            className="mt-4 bg-white rounded-2xl overflow-hidden shadow-sm"
+            style={{ height: 400 }}
+          >
             <WebView
               source={{ uri: widgetUrl }}
               javaScriptEnabled={true}
@@ -266,4 +257,3 @@ export default function TripAdvisorReviews({
 
   return null;
 }
-

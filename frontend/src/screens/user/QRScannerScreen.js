@@ -6,7 +6,7 @@ import {
   Alert,
   ActivityIndicator,
   TouchableOpacity,
-  StatusBar
+  StatusBar,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -59,7 +59,10 @@ export default function QRScannerScreen({ navigation }) {
           businessId = urlMatch[1];
           console.log('✅ Extracted business ID from URL:', businessId);
         } else {
-          ToastService.showError('Invalid QR Code', 'This QR code is not a valid HashView business QR code.');
+          ToastService.showError(
+            'Invalid QR Code',
+            'This QR code is not a valid HashView business QR code.'
+          );
           setScanned(false);
           setLoading(false);
           return;
@@ -72,13 +75,19 @@ export default function QRScannerScreen({ navigation }) {
             businessId = qrData.id;
             console.log('✅ Extracted business ID from JSON:', businessId);
           } else {
-            ToastService.showError('Invalid QR Code', 'This QR code is not a valid business QR code.');
+            ToastService.showError(
+              'Invalid QR Code',
+              'This QR code is not a valid business QR code.'
+            );
             setScanned(false);
             setLoading(false);
             return;
           }
         } catch (e) {
-          ToastService.showError('Invalid QR Code', 'This QR code is not a valid HashView business QR code.');
+          ToastService.showError(
+            'Invalid QR Code',
+            'This QR code is not a valid HashView business QR code.'
+          );
           setScanned(false);
           setLoading(false);
           return;
@@ -86,21 +95,21 @@ export default function QRScannerScreen({ navigation }) {
       }
 
       if (!businessId) {
-        ToastService.showError('Invalid QR Code', 'Could not extract business information from QR code.');
+        ToastService.showError(
+          'Invalid QR Code',
+          'Could not extract business information from QR code.'
+        );
         setScanned(false);
         setLoading(false);
         return;
       }
 
       // Fetch business details using business ID
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/business/${businessId}`,
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const response = await axios.get(`${API_CONFIG.BASE_URL}/business/${businessId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
       if (response.data.success && response.data.business) {
         // Navigate to business detail screen, default to menu tab for QR scans
@@ -109,7 +118,7 @@ export default function QRScannerScreen({ navigation }) {
           business: response.data.business,
           businessId: response.data.business._id,
           fromQR: true,
-          initialTab: 'menu'
+          initialTab: 'menu',
         });
       } else {
         ToastService.showError('Error', response.data.message || 'Failed to load business details');
@@ -138,27 +147,16 @@ export default function QRScannerScreen({ navigation }) {
 
   if (!permission.granted) {
     return (
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.secondary]}
-        style={styles.container}
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.secondary]} style={styles.container}>
         <StatusBar barStyle="light-content" />
         <View style={styles.permissionContainer}>
           <Icon name="camera-outline" size={80} color="#fff" />
           <Text style={styles.permissionTitle}>Camera Permission Required</Text>
-          <Text style={styles.permissionText}>
-            We need access to your camera to scan QR codes
-          </Text>
-          <TouchableOpacity
-            style={styles.permissionButton}
-            onPress={requestPermission}
-          >
+          <Text style={styles.permissionText}>We need access to your camera to scan QR codes</Text>
+          <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
             <Text style={styles.permissionButtonText}>Grant Permission</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Text style={styles.backButtonText}>Go Back</Text>
           </TouchableOpacity>
         </View>
@@ -178,15 +176,9 @@ export default function QRScannerScreen({ navigation }) {
             barcodeTypes: ['qr'],
           }}
         >
-          <LinearGradient
-            colors={['transparent', 'rgba(0,0,0,0.7)']}
-            style={styles.overlay}
-          >
+          <LinearGradient colors={['transparent', 'rgba(0,0,0,0.7)']} style={styles.overlay}>
             <View style={styles.header}>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => navigation.goBack()}
-              >
+              <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
                 <Icon name="close" size={28} color="#fff" />
               </TouchableOpacity>
               <Text style={styles.headerTitle}>Scan QR Code</Text>
@@ -200,9 +192,7 @@ export default function QRScannerScreen({ navigation }) {
                 <View style={[styles.corner, styles.bottomLeft]} />
                 <View style={[styles.corner, styles.bottomRight]} />
               </View>
-              <Text style={styles.scanInstruction}>
-                Position the QR code within the frame
-              </Text>
+              <Text style={styles.scanInstruction}>Position the QR code within the frame</Text>
             </View>
 
             {loading && (
@@ -378,4 +368,3 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 });
-

@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Switch, Alert, ActivityIndicator, Modal, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Switch,
+  Alert,
+  ActivityIndicator,
+  Modal,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSelector } from 'react-redux';
@@ -69,7 +83,7 @@ const TaxManagementScreen = ({ navigation, route }) => {
         rate: Number(rate),
         type,
         mode,
-        appliesTo
+        appliesTo,
       };
 
       if (editingTax) {
@@ -88,7 +102,7 @@ const TaxManagementScreen = ({ navigation, route }) => {
   const handleToggle = async (id) => {
     try {
       // Optimistic update
-      setTaxes(prev => prev.map(t => t._id === id ? { ...t, isActive: !t.isActive } : t));
+      setTaxes((prev) => prev.map((t) => (t._id === id ? { ...t, isActive: !t.isActive } : t)));
       await ApiService.toggleTaxRule(id);
     } catch (error) {
       console.error(error);
@@ -100,14 +114,18 @@ const TaxManagementScreen = ({ navigation, route }) => {
   const handleDelete = (id) => {
     Alert.alert('Delete Tax', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: async () => {
-        try {
-          await ApiService.deleteTaxRule(id);
-          loadTaxes();
-        } catch (error) {
-          Alert.alert('Error', 'Failed to delete');
-        }
-      }}
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await ApiService.deleteTaxRule(id);
+            loadTaxes();
+          } catch (error) {
+            Alert.alert('Error', 'Failed to delete');
+          }
+        },
+      },
     ]);
   };
 
@@ -116,7 +134,11 @@ const TaxManagementScreen = ({ navigation, route }) => {
       <View style={styles.cardHeader}>
         <View>
           <Text style={styles.cardTitle}>{item.name}</Text>
-          <Text style={styles.cardSub}>{item.type === 'percentage' ? `${item.rate}%` : `$${item.rate}`} • {item.calculationMode || 'exclusive'} • {item.applicability?.replace('_', ' ') || 'entire order'}</Text>
+          <Text style={styles.cardSub}>
+            {item.type === 'percentage' ? `${item.rate}%` : `$${item.rate}`} •{' '}
+            {item.calculationMode || 'exclusive'} •{' '}
+            {item.applicability?.replace('_', ' ') || 'entire order'}
+          </Text>
         </View>
         <Switch
           value={item.isActive}
@@ -147,11 +169,13 @@ const TaxManagementScreen = ({ navigation, route }) => {
       </View>
 
       {loading ? (
-        <View style={styles.center}><ActivityIndicator size="large" color={colors.primary} /></View>
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
       ) : (
         <FlatList
           data={taxes}
-          keyExtractor={item => item._id}
+          keyExtractor={(item) => item._id}
           renderItem={renderTaxItem}
           contentContainerStyle={styles.list}
           ListEmptyComponent={<Text style={styles.emptyText}>No tax rules configured.</Text>}
@@ -163,14 +187,17 @@ const TaxManagementScreen = ({ navigation, route }) => {
       </TouchableOpacity>
 
       <Modal visible={modalVisible} animationType="slide" transparent>
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
           style={styles.modalContainer}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <View style={styles.modalContent}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            >
               <Text style={styles.modalTitle}>{editingTax ? 'Edit Tax' : 'New Tax'}</Text>
-              
+
               <Text style={styles.label}>Tax Name</Text>
               <TextInput
                 style={styles.input}
@@ -222,14 +249,21 @@ const TaxManagementScreen = ({ navigation, route }) => {
               <View style={styles.previewBox}>
                 <Text style={styles.previewTitle}>Preview (on $100 item)</Text>
                 <Text style={styles.previewText}>
-                  {type === 'percentage' 
-                    ? mode === 'exclusive' ? `Adds $${(100 * (Number(rate) || 0) / 100).toFixed(2)} to bill` : `Includes $${(100 - (100 / (1 + (Number(rate) || 0) / 100))).toFixed(2)} in price`
-                    : mode === 'exclusive' ? `Adds $${Number(rate) || 0} to bill` : `Includes $${Number(rate) || 0} in price`}
+                  {type === 'percentage'
+                    ? mode === 'exclusive'
+                      ? `Adds $${((100 * (Number(rate) || 0)) / 100).toFixed(2)} to bill`
+                      : `Includes $${(100 - 100 / (1 + (Number(rate) || 0) / 100)).toFixed(2)} in price`
+                    : mode === 'exclusive'
+                      ? `Adds $${Number(rate) || 0} to bill`
+                      : `Includes $${Number(rate) || 0} in price`}
                 </Text>
               </View>
 
               <View style={styles.modalActions}>
-                <TouchableOpacity style={styles.modalBtnCancel} onPress={() => setModalVisible(false)}>
+                <TouchableOpacity
+                  style={styles.modalBtnCancel}
+                  onPress={() => setModalVisible(false)}
+                >
                   <Text style={styles.modalBtnCancelText}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.modalBtnSave} onPress={handleSave}>
@@ -246,34 +280,109 @@ const TaxManagementScreen = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderColor: '#eee' },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+  },
   backButton: { marginRight: 16 },
   title: { fontSize: 20, fontWeight: 'bold', color: colors.text },
   list: { padding: 16 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   emptyText: { textAlign: 'center', color: '#888', marginTop: 40 },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 16, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
   cardTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 4 },
   cardSub: { fontSize: 14, color: '#666' },
   cardActions: { flexDirection: 'row', borderTopWidth: 1, borderColor: '#f0f0f0', paddingTop: 12 },
   actionButton: { flexDirection: 'row', alignItems: 'center', marginRight: 24 },
   actionText: { marginLeft: 6, fontSize: 14, color: colors.primary, fontWeight: '600' },
-  fab: { position: 'absolute', right: 20, bottom: 20, width: 56, height: 56, borderRadius: 28, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4 },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
   modalContainer: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, maxHeight: '90%' },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 24,
+    maxHeight: '90%',
+  },
   modalTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, color: colors.text },
   label: { fontSize: 14, fontWeight: '600', color: '#444', marginBottom: 8, marginTop: 12 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, fontSize: 16, backgroundColor: '#fafafa' },
-  pickerContainer: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, backgroundColor: '#fafafa', overflow: 'hidden', height: 50, justifyContent: 'center' },
-  previewBox: { backgroundColor: '#eef2ff', padding: 12, borderRadius: 8, marginTop: 16, borderWidth: 1, borderColor: '#c7d2fe' },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#fafafa',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#fafafa',
+    overflow: 'hidden',
+    height: 50,
+    justifyContent: 'center',
+  },
+  previewBox: {
+    backgroundColor: '#eef2ff',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#c7d2fe',
+  },
   previewTitle: { fontSize: 12, fontWeight: 'bold', color: '#4f46e5', marginBottom: 4 },
   previewText: { fontSize: 14, color: '#3730a3' },
   modalActions: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 30, gap: 12 },
-  modalBtnCancel: { paddingVertical: 12, paddingHorizontal: 20, borderRadius: 8, backgroundColor: '#f0f0f0' },
+  modalBtnCancel: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
+  },
   modalBtnCancelText: { color: '#444', fontWeight: 'bold', fontSize: 16 },
-  modalBtnSave: { paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8, backgroundColor: colors.primary },
-  modalBtnSaveText: { color: '#fff', fontWeight: 'bold', fontSize: 16 }
+  modalBtnSave: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    backgroundColor: colors.primary,
+  },
+  modalBtnSaveText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
 });
 
 export default TaxManagementScreen;

@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -31,7 +39,10 @@ export default function LoginWithPhoneScreen({ navigation }) {
     try {
       setSendingOTP(true);
       const response = await ApiService.sendOTP({ phone });
-      Alert.alert('Success', `OTP sent to ${phone}\n\n${response.otp ? `OTP: ${response.otp}` : ''}`);
+      Alert.alert(
+        'Success',
+        `OTP sent to ${phone}\n\n${response.otp ? `OTP: ${response.otp}` : ''}`
+      );
       setStep(2);
     } catch (error) {
       Alert.alert('Error', error.message);
@@ -55,11 +66,11 @@ export default function LoginWithPhoneScreen({ navigation }) {
 
   return (
     <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="flex-1">
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingTop: 60, paddingBottom: 40, paddingHorizontal: 24 }}>
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()}
-          className="mb-8"
-        >
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingTop: 60, paddingBottom: 40, paddingHorizontal: 24 }}
+      >
+        <TouchableOpacity onPress={() => navigation.goBack()} className="mb-8">
           <Icon name="arrow-back" size={28} color="#fff" />
         </TouchableOpacity>
 
@@ -88,11 +99,7 @@ export default function LoginWithPhoneScreen({ navigation }) {
                 </View>
               </View>
 
-              <TouchableOpacity
-                onPress={handleSendOTP}
-                disabled={sendingOTP}
-                activeOpacity={0.8}
-              >
+              <TouchableOpacity onPress={handleSendOTP} disabled={sendingOTP} activeOpacity={0.8}>
                 <LinearGradient
                   colors={[COLORS.secondary, COLORS.secondaryDark]}
                   className="rounded-xl py-4 items-center shadow-lg"
@@ -122,11 +129,7 @@ export default function LoginWithPhoneScreen({ navigation }) {
                 </View>
               </View>
 
-              <TouchableOpacity
-                onPress={handleVerifyOTP}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
+              <TouchableOpacity onPress={handleVerifyOTP} disabled={loading} activeOpacity={0.8}>
                 <LinearGradient
                   colors={[COLORS.secondary, COLORS.secondaryDark]}
                   className="rounded-xl py-4 items-center shadow-lg mb-4"
@@ -139,16 +142,15 @@ export default function LoginWithPhoneScreen({ navigation }) {
                 </LinearGradient>
               </TouchableOpacity>
 
-              <TouchableOpacity 
-                onPress={() => setStep(1)}
-                className="items-center"
-              >
-                <Text className="font-semibold" style={{ color: COLORS.secondary }}>Change Phone Number</Text>
+              <TouchableOpacity onPress={() => setStep(1)} className="items-center">
+                <Text className="font-semibold" style={{ color: COLORS.secondary }}>
+                  Change Phone Number
+                </Text>
               </TouchableOpacity>
             </>
           )}
 
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => navigation.navigate('Login')}
             className="items-center mt-6"
           >
@@ -159,4 +161,3 @@ export default function LoginWithPhoneScreen({ navigation }) {
     </LinearGradient>
   );
 }
-

@@ -15,45 +15,42 @@ const extractSubscription = (user) => ({
 });
 
 // Async thunks
-export const login = createAsyncThunk(
-  'auth/login',
-  async (credentials, { rejectWithValue }) => {
-    try {
-      Monitoring.Events.loginStarted(credentials.method || 'email');
-      const response = await ApiService.login(credentials);
+export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
+  try {
+    Monitoring.Events.loginStarted(credentials.method || 'email');
+    const response = await ApiService.login(credentials);
 
-      // Validate Role match
-      if (
-        credentials.role &&
-        response.user.role !== 'admin' &&
-        response.user.role !== credentials.role
-      ) {
-        throw new Error(
-          `Wrong account type. This is a ${response.user.role} account. Please login from the ${response.user.role} section.`
-        );
-      }
-
-      await AsyncStorage.setItem('token', response.token);
-      await AsyncStorage.setItem('user', JSON.stringify(response.user));
-
-      // Register push token with backend
-      try {
-        const pushToken = await NotificationService.getExpoPushToken();
-        if (pushToken) {
-          await NotificationService.registerTokenWithBackend(pushToken, response.token);
-        }
-      } catch (error) {
-        console.log('⚠️ Could not register push token:', error);
-      }
-
-      Monitoring.Events.loginSuccess(response.user, credentials.method || 'email');
-      return response;
-    } catch (error) {
-      Monitoring.Events.loginFailed(credentials.method || 'email', error.message);
-      return rejectWithValue(error.message);
+    // Validate Role match
+    if (
+      credentials.role &&
+      response.user.role !== 'admin' &&
+      response.user.role !== credentials.role
+    ) {
+      throw new Error(
+        `Wrong account type. This is a ${response.user.role} account. Please login from the ${response.user.role} section.`
+      );
     }
+
+    await AsyncStorage.setItem('token', response.token);
+    await AsyncStorage.setItem('user', JSON.stringify(response.user));
+
+    // Register push token with backend
+    try {
+      const pushToken = await NotificationService.getExpoPushToken();
+      if (pushToken) {
+        await NotificationService.registerTokenWithBackend(pushToken, response.token);
+      }
+    } catch (error) {
+      console.log('⚠️ Could not register push token:', error);
+    }
+
+    Monitoring.Events.loginSuccess(response.user, credentials.method || 'email');
+    return response;
+  } catch (error) {
+    Monitoring.Events.loginFailed(credentials.method || 'email', error.message);
+    return rejectWithValue(error.message);
   }
-);
+});
 
 export const loginAsGuest = createAsyncThunk(
   'auth/loginAsGuest',
@@ -64,12 +61,12 @@ export const loginAsGuest = createAsyncThunk(
         name: 'Guest User',
         email: 'guest@hashview.app',
         role: 'guest',
-        isGuest: true
+        isGuest: true,
       };
 
       return {
         user: guestUser,
-        token: 'guest-token'
+        token: 'guest-token',
       };
     } catch (error) {
       return rejectWithValue(error.message);
@@ -77,32 +74,29 @@ export const loginAsGuest = createAsyncThunk(
   }
 );
 
-export const register = createAsyncThunk(
-  'auth/register',
-  async (userData, { rejectWithValue }) => {
+export const register = createAsyncThunk('auth/register', async (userData, { rejectWithValue }) => {
+  try {
+    const response = await ApiService.register(userData);
+    await AsyncStorage.setItem('token', response.token);
+    await AsyncStorage.setItem('user', JSON.stringify(response.user));
+
+    // Register push token with backend
     try {
-      const response = await ApiService.register(userData);
-      await AsyncStorage.setItem('token', response.token);
-      await AsyncStorage.setItem('user', JSON.stringify(response.user));
-
-      // Register push token with backend
-      try {
-        const pushToken = await NotificationService.getExpoPushToken();
-        if (pushToken) {
-          await NotificationService.registerTokenWithBackend(pushToken, response.token);
-        }
-      } catch (error) {
-        console.log('⚠️ Could not register push token:', error);
+      const pushToken = await NotificationService.getExpoPushToken();
+      if (pushToken) {
+        await NotificationService.registerTokenWithBackend(pushToken, response.token);
       }
-
-      Monitoring.Events.registerSuccess(response.user, userData.method || 'email');
-      return response;
     } catch (error) {
-      Monitoring.captureError(error, { feature: 'register' });
-      return rejectWithValue(error.message);
+      console.log('⚠️ Could not register push token:', error);
     }
+
+    Monitoring.Events.registerSuccess(response.user, userData.method || 'email');
+    return response;
+  } catch (error) {
+    Monitoring.captureError(error, { feature: 'register' });
+    return rejectWithValue(error.message);
   }
-);
+});
 
 export const loginWithPhone = createAsyncThunk(
   'auth/loginWithPhone',
@@ -129,32 +123,26 @@ export const loginWithPhone = createAsyncThunk(
   }
 );
 
-export const logout = createAsyncThunk(
-  'auth/logout',
-  async () => {
-    Monitoring.Events.logout();
-    await AsyncStorage.removeItem('token');
-    await AsyncStorage.removeItem('user');
-  }
-);
+export const logout = createAsyncThunk('auth/logout', async () => {
+  Monitoring.Events.logout();
+  await AsyncStorage.removeItem('token');
+  await AsyncStorage.removeItem('user');
+});
 
-export const loadUser = createAsyncThunk(
-  'auth/loadUser',
-  async (_, { rejectWithValue }) => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        throw new Error('No token found');
-      }
-      const response = await ApiService.getMe();
-      // Re-identify user on session restore (app re-open)
-      Monitoring.identifyUser(response.user);
-      return { user: response.user, token };
-    } catch (error) {
-      return rejectWithValue(error.message);
+export const loadUser = createAsyncThunk('auth/loadUser', async (_, { rejectWithValue }) => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) {
+      throw new Error('No token found');
     }
+    const response = await ApiService.getMe();
+    // Re-identify user on session restore (app re-open)
+    Monitoring.identifyUser(response.user);
+    return { user: response.user, token };
+  } catch (error) {
+    return rejectWithValue(error.message);
   }
-);
+});
 
 // ─── Check subscription status (called on app foreground) ────────────────────
 export const checkSubscriptionStatus = createAsyncThunk(
@@ -182,7 +170,7 @@ const authSlice = createSlice({
     error: null,
     // ─── Subscription state ───────────────────────────────────────────
     isPro: false,
-    subscriptionEnabled: true,  // kill switch from backend
+    subscriptionEnabled: true, // kill switch from backend
     hasFreeTrial: true,
     freeTrial: { updatesUsed: 0, maxFreeUpdates: 25, remaining: 25 },
     subscription: {
@@ -334,13 +322,13 @@ const authSlice = createSlice({
       .addCase(checkSubscriptionStatus.fulfilled, (state, action) => {
         if (action.payload) {
           state.isPro = action.payload.isPro ?? state.isPro;
-          state.subscriptionEnabled = action.payload.subscriptionEnabled ?? state.subscriptionEnabled;
+          state.subscriptionEnabled =
+            action.payload.subscriptionEnabled ?? state.subscriptionEnabled;
           state.hasFreeTrial = action.payload.hasFreeTrial ?? state.hasFreeTrial;
           state.freeTrial = action.payload.freeTrial ?? state.freeTrial;
           state.subscription = action.payload.subscription ?? state.subscription;
         }
       });
-
   },
 });
 
@@ -364,4 +352,3 @@ export const initForegroundSubscriptionSync = (store) => {
   });
 };
 export default authSlice.reducer;
-

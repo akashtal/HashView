@@ -1,5 +1,18 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StatusBar, Image, Dimensions, Linking, Share, Modal, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  StatusBar,
+  Image,
+  Dimensions,
+  Linking,
+  Share,
+  Modal,
+  Alert,
+} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Video, ResizeMode } from 'expo-av';
 import ToastService from '../../utils/ToastService';
@@ -50,19 +63,35 @@ const ReviewCard = ({ review, handleVideoPress, colors, isOld = false }) => {
   const timeAgo = formatRelativeTime(review.updatedAt || review.createdAt);
 
   return (
-    <View className="mb-5 pb-5" style={{ borderBottomWidth: 1, borderBottomColor: '#F3F4F6', opacity: isOld ? 0.88 : 1 }}>
+    <View
+      className="mb-5 pb-5"
+      style={{ borderBottomWidth: 1, borderBottomColor: '#F3F4F6', opacity: isOld ? 0.88 : 1 }}
+    >
       {/* Reviewer row */}
       <View className="flex-row items-center mb-3">
-        <View className="w-12 h-12 rounded-full items-center justify-center mr-3" style={{ backgroundColor: avatarColor }}>
+        <View
+          className="w-12 h-12 rounded-full items-center justify-center mr-3"
+          style={{ backgroundColor: avatarColor }}
+        >
           <Text className="text-white text-lg font-bold">{initial}</Text>
         </View>
         <View className="flex-1">
-          <Text className="text-sm font-bold text-gray-900">{review.user?.name || 'Anonymous'}</Text>
+          <Text className="text-sm font-bold text-gray-900">
+            {review.user?.name || 'Anonymous'}
+          </Text>
           <View className="flex-row items-center mt-0.5">
-            <Text className="text-xs font-semibold" style={{ color: isOld ? '#9CA3AF' : '#7C3AED' }}>{timeAgo}</Text>
+            <Text
+              className="text-xs font-semibold"
+              style={{ color: isOld ? '#9CA3AF' : '#7C3AED' }}
+            >
+              {timeAgo}
+            </Text>
           </View>
         </View>
-        <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: colors.primary }}>
+        <View
+          className="w-10 h-10 rounded-lg items-center justify-center"
+          style={{ backgroundColor: colors.primary }}
+        >
           <Text className="text-white text-sm font-black">{(review.rating * 2).toFixed(0)}</Text>
         </View>
       </View>
@@ -70,7 +99,13 @@ const ReviewCard = ({ review, handleVideoPress, colors, isOld = false }) => {
       {/* Stars + Emotion */}
       <View className="flex-row items-center mb-2">
         {[...Array(5)].map((_, i) => (
-          <Icon key={i} name={i < review.rating ? 'star' : 'star-outline'} size={14} color={i < review.rating ? '#FFA500' : '#D5D5D5'} style={{ marginRight: 1 }} />
+          <Icon
+            key={i}
+            name={i < review.rating ? 'star' : 'star-outline'}
+            size={14}
+            color={i < review.rating ? '#FFA500' : '#D5D5D5'}
+            style={{ marginRight: 1 }}
+          />
         ))}
         {review.emotion && <Text className="text-xs text-gray-400 ml-2">· {review.emotion}</Text>}
       </View>
@@ -79,30 +114,46 @@ const ReviewCard = ({ review, handleVideoPress, colors, isOld = false }) => {
       <Text className="text-sm text-gray-800 leading-5 mb-3">{review.comment}</Text>
 
       {/* Category rating pills */}
-      {review.categoryRatings && (() => {
-        const rated = CATEGORY_KEYS.filter(c => review.categoryRatings[c.key]);
-        if (rated.length === 0) return null;
-        return (
-          <View className="flex-row flex-wrap mb-3" style={{ gap: 6 }}>
-            {rated.map(({ key, label }) => {
-              const val = review.categoryRatings[key];
-              const color = val >= 8 ? '#10B981' : val >= 6 ? '#F59E0B' : '#EF4444';
-              return (
-                <View key={key} className="px-2.5 py-1 rounded-full" style={{ backgroundColor: color + '18' }}>
-                  <Text className="text-[11px] font-semibold" style={{ color }}>{label} {val.toFixed(1)}</Text>
-                </View>
-              );
-            })}
-          </View>
-        );
-      })()}
+      {review.categoryRatings &&
+        (() => {
+          const rated = CATEGORY_KEYS.filter((c) => review.categoryRatings[c.key]);
+          if (rated.length === 0) return null;
+          return (
+            <View className="flex-row flex-wrap mb-3" style={{ gap: 6 }}>
+              {rated.map(({ key, label }) => {
+                const val = review.categoryRatings[key];
+                const color = val >= 8 ? '#10B981' : val >= 6 ? '#F59E0B' : '#EF4444';
+                return (
+                  <View
+                    key={key}
+                    className="px-2.5 py-1 rounded-full"
+                    style={{ backgroundColor: color + '18' }}
+                  >
+                    <Text className="text-[11px] font-semibold" style={{ color }}>
+                      {label} {val.toFixed(1)}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          );
+        })()}
 
       {/* Photos */}
       {review.images && review.images.length > 0 && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }} className="mb-2">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8 }}
+          className="mb-2"
+        >
           {review.images.map((img, idx) => (
             <TouchableOpacity key={idx} activeOpacity={0.85}>
-              <Image source={{ uri: img.url }} style={{ width: 100, height: 100, borderRadius: 10 }} resizeMode="cover" />
+              <Image
+                source={{ uri: img.url }}
+                style={{ width: 100, height: 100, borderRadius: 10 }}
+                resizeMode="cover"
+              />
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -110,17 +161,60 @@ const ReviewCard = ({ review, handleVideoPress, colors, isOld = false }) => {
 
       {/* Videos */}
       {review.videos && review.videos.length > 0 && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8 }}
+        >
           {review.videos.map((video, idx) => (
-            <TouchableOpacity key={idx} activeOpacity={0.85} style={{ width: 100, height: 100, borderRadius: 10, backgroundColor: '#1a1a1a', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }} onPress={() => handleVideoPress(video.url)}>
-              {video.thumbnail && <Image source={{ uri: video.thumbnail }} style={{ width: 100, height: 100, position: 'absolute' }} resizeMode="cover" />}
-              <View style={{ backgroundColor: 'rgba(0,0,0,0.55)', width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' }}>
+            <TouchableOpacity
+              key={idx}
+              activeOpacity={0.85}
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 10,
+                backgroundColor: '#1a1a1a',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+              }}
+              onPress={() => handleVideoPress(video.url)}
+            >
+              {video.thumbnail && (
+                <Image
+                  source={{ uri: video.thumbnail }}
+                  style={{ width: 100, height: 100, position: 'absolute' }}
+                  resizeMode="cover"
+                />
+              )}
+              <View
+                style={{
+                  backgroundColor: 'rgba(0,0,0,0.55)',
+                  width: 38,
+                  height: 38,
+                  borderRadius: 19,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <Icon name="play" size={18} color="#FFF" />
               </View>
               {video.duration && (
-                <View style={{ position: 'absolute', bottom: 5, right: 5, backgroundColor: 'rgba(0,0,0,0.8)', borderRadius: 3, paddingHorizontal: 5, paddingVertical: 2 }}>
+                <View
+                  style={{
+                    position: 'absolute',
+                    bottom: 5,
+                    right: 5,
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    borderRadius: 3,
+                    paddingHorizontal: 5,
+                    paddingVertical: 2,
+                  }}
+                >
                   <Text style={{ color: '#FFF', fontSize: 9, fontWeight: '600' }}>
-                    {Math.floor(video.duration / 60)}:{(video.duration % 60).toString().padStart(2, '0')}
+                    {Math.floor(video.duration / 60)}:
+                    {(video.duration % 60).toString().padStart(2, '0')}
                   </Text>
                 </View>
               )}
@@ -133,21 +227,27 @@ const ReviewCard = ({ review, handleVideoPress, colors, isOld = false }) => {
 };
 
 export default function BusinessDetailScreen({ navigation, route }) {
-
   const dispatch = useDispatch();
   const { businessId, business, fromQR, initialTab, section } = route.params || {};
   const { selectedBusiness, loading } = useSelector((state) => state.business);
-  const { reviews, oldReviews, oldReviewCount, oldReviewsLoading, oldReviewsHasMore, oldReviewsPage } = useSelector((state) => state.review);
+  const {
+    reviews,
+    oldReviews,
+    oldReviewCount,
+    oldReviewsLoading,
+    oldReviewsHasMore,
+    oldReviewsPage,
+  } = useSelector((state) => state.review);
   const { user } = useSelector((state) => state.auth);
   const cart = useSelector((state) => state.cart);
   const [qrBusiness, setQrBusiness] = useState(null);
   // initialTab param is provided when opening from a push notification, section from deep link
-  const [activeTab, setActiveTab] = useState(section === 'menu' ? 'menu' : (initialTab || 'reviews'));
+  const [activeTab, setActiveTab] = useState(section === 'menu' ? 'menu' : initialTab || 'reviews');
   const [isFavorite, setIsFavorite] = useState(false);
   const [updates, setUpdates] = useState([]);
   const [loadingUpdates, setLoadingUpdates] = useState(false);
-  const [menuItems, setMenuItems] = useState({});           // Phase 1: grouped menu data
-  const [loadingMenu, setLoadingMenu] = useState(false);   // Phase 1: menu loading state
+  const [menuItems, setMenuItems] = useState({}); // Phase 1: grouped menu data
+  const [loadingMenu, setLoadingMenu] = useState(false); // Phase 1: menu loading state
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
@@ -169,15 +269,17 @@ export default function BusinessDetailScreen({ navigation, route }) {
       fetchMenuItems(businessId);
     }
     // Clean up old reviews when leaving screen
-    return () => { dispatch(clearOldReviews()); };
+    return () => {
+      dispatch(clearOldReviews());
+    };
   }, [businessId, fromQR]);
 
   // Check favorite status from Redux user.favoritePlaces
   useEffect(() => {
-    const targetId = (fromQR && business) ? business._id : businessId;
+    const targetId = fromQR && business ? business._id : businessId;
     if (targetId && user?.favoritePlaces) {
       const isFav = user.favoritePlaces.some(
-        fav => (fav?._id || fav)?.toString() === targetId.toString()
+        (fav) => (fav?._id || fav)?.toString() === targetId.toString()
       );
       setIsFavorite(isFav);
     }
@@ -186,7 +288,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
   // Refetch reviews whenever the screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      const idToFetch = (fromQR && business) ? business._id : businessId;
+      const idToFetch = fromQR && business ? business._id : businessId;
       if (idToFetch) {
         // Load ALL reviews so existing reviews always appear regardless of age
         dispatch(getBusinessReviews({ businessId: idToFetch, params: { limit: 100 } }));
@@ -196,7 +298,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
       // Track visit (fire-and-forget, once per focus, 5-min server-side cooldown)
       if (idToFetch && !visitTrackedRef.current) {
         visitTrackedRef.current = true;
-        ApiService.trackBusinessVisit(idToFetch).catch(() => { });
+        ApiService.trackBusinessVisit(idToFetch).catch(() => {});
       }
     }, [businessId, business, fromQR, dispatch])
   );
@@ -236,10 +338,20 @@ export default function BusinessDetailScreen({ navigation, route }) {
 
   // 🏨 Compute aggregated category averages from all reviews (like Booking.com)
   const computeCategoryAverages = (reviewList) => {
-    const CATEGORIES = ['staff', 'facilities', 'cleanliness', 'comfort', 'valueForMoney', 'location'];
+    const CATEGORIES = [
+      'staff',
+      'facilities',
+      'cleanliness',
+      'comfort',
+      'valueForMoney',
+      'location',
+    ];
     const sums = {};
     const counts = {};
-    CATEGORIES.forEach((k) => { sums[k] = 0; counts[k] = 0; });
+    CATEGORIES.forEach((k) => {
+      sums[k] = 0;
+      counts[k] = 0;
+    });
 
     (reviewList || []).forEach((r) => {
       if (r.categoryRatings) {
@@ -254,7 +366,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
 
     const averages = {};
     CATEGORIES.forEach((k) => {
-      averages[k] = counts[k] > 0 ? (sums[k] / counts[k]) : null;
+      averages[k] = counts[k] > 0 ? sums[k] / counts[k] : null;
     });
     return averages;
   };
@@ -267,7 +379,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
     try {
       await Share.share({
         message: `Check out ${displayBusiness.name} on HashView!\n\nRating: ${displayBusiness.rating?.average?.toFixed(1) || '0.0'} ⭐\nAddress: ${displayBusiness.address?.fullAddress || 'N/A'}`,
-        title: displayBusiness.name
+        title: displayBusiness.name,
       });
     } catch (error) {
       console.error('Error sharing:', error);
@@ -344,7 +456,9 @@ export default function BusinessDetailScreen({ navigation, route }) {
         ToastService.showError('Error', 'Could not open Google Business profile');
       });
     } else if (displayBusiness.name && displayBusiness.address?.fullAddress) {
-      const searchQuery = encodeURIComponent(`${displayBusiness.name} ${displayBusiness.address.fullAddress}`);
+      const searchQuery = encodeURIComponent(
+        `${displayBusiness.name} ${displayBusiness.address.fullAddress}`
+      );
       const url = `https://www.google.com/search?q=${searchQuery}`;
       Linking.openURL(url).catch(() => {
         ToastService.showError('Error', 'Could not open Google Search');
@@ -369,8 +483,8 @@ export default function BusinessDetailScreen({ navigation, route }) {
               dispatch(clearCart());
               setSelectedMenuItem(item);
               setMenuModalVisible(true);
-            }
-          }
+            },
+          },
         ]
       );
       return;
@@ -380,48 +494,61 @@ export default function BusinessDetailScreen({ navigation, route }) {
     setMenuModalVisible(true);
   };
 
-  const getItemQuantity = useCallback((itemId) => {
-    return cart.items
-      .filter(i => i.menuItem._id === itemId)
-      .reduce((sum, i) => sum + i.quantity, 0);
-  }, [cart.items]);
+  const getItemQuantity = useCallback(
+    (itemId) => {
+      return cart.items
+        .filter((i) => i.menuItem._id === itemId)
+        .reduce((sum, i) => sum + i.quantity, 0);
+    },
+    [cart.items]
+  );
 
-  const handleDirectAdd = useCallback((item) => {
-    if (item.modifiers?.length > 0 || item.addOns?.length > 0) {
-      handleMenuItemPress(item);
-      return;
-    }
-    if (cart.businessId && cart.businessId !== displayBusiness._id) {
-      handleMenuItemPress(item);
-      return;
-    }
-    const cartItemId = `${item._id}-default`;
-    dispatch(addItem({
-      businessId: displayBusiness._id,
-      businessName: displayBusiness.name,
-      item: {
-        cartItemId,
-        menuItem: item,
-        quantity: 1,
-        selectedModifiers: [],
-        selectedAddOns: [],
-        itemNotes: '',
-        itemTotal: item.price
+  const handleDirectAdd = useCallback(
+    (item) => {
+      if (item.modifiers?.length > 0 || item.addOns?.length > 0) {
+        handleMenuItemPress(item);
+        return;
       }
-    }));
-  }, [cart, displayBusiness, dispatch]);
+      if (cart.businessId && cart.businessId !== displayBusiness._id) {
+        handleMenuItemPress(item);
+        return;
+      }
+      const cartItemId = `${item._id}-default`;
+      dispatch(
+        addItem({
+          businessId: displayBusiness._id,
+          businessName: displayBusiness.name,
+          item: {
+            cartItemId,
+            menuItem: item,
+            quantity: 1,
+            selectedModifiers: [],
+            selectedAddOns: [],
+            itemNotes: '',
+            itemTotal: item.price,
+          },
+        })
+      );
+    },
+    [cart, displayBusiness, dispatch]
+  );
 
-  const handleDirectRemove = useCallback((item) => {
-    const existingItems = cart.items.filter(i => i.menuItem._id === item._id);
-    if (existingItems.length > 0) {
-      const lastItem = existingItems[existingItems.length - 1];
-      if (lastItem.quantity > 1) {
-        dispatch(updateQuantity({ cartItemId: lastItem.cartItemId, quantity: lastItem.quantity - 1 }));
-      } else {
-        dispatch(removeItem({ cartItemId: lastItem.cartItemId }));
+  const handleDirectRemove = useCallback(
+    (item) => {
+      const existingItems = cart.items.filter((i) => i.menuItem._id === item._id);
+      if (existingItems.length > 0) {
+        const lastItem = existingItems[existingItems.length - 1];
+        if (lastItem.quantity > 1) {
+          dispatch(
+            updateQuantity({ cartItemId: lastItem.cartItemId, quantity: lastItem.quantity - 1 })
+          );
+        } else {
+          dispatch(removeItem({ cartItemId: lastItem.cartItemId }));
+        }
       }
-    }
-  }, [cart.items, dispatch]);
+    },
+    [cart.items, dispatch]
+  );
 
   if ((!fromQR && loading) || !displayBusiness) {
     return (
@@ -481,9 +608,9 @@ export default function BusinessDetailScreen({ navigation, route }) {
               className="bg-white/95 w-12 h-12 rounded-full items-center justify-center shadow-lg"
             >
               <Icon
-                name={isFavorite ? "heart" : "heart-outline"}
+                name={isFavorite ? 'heart' : 'heart-outline'}
                 size={26}
-                color={isFavorite ? "#EF4444" : "#111"}
+                color={isFavorite ? '#EF4444' : '#111'}
               />
             </TouchableOpacity>
           </View>
@@ -516,7 +643,10 @@ export default function BusinessDetailScreen({ navigation, route }) {
                   onPress={() => setActiveTab('gallery')}
                 >
                   <Icon name="images" size={28} color={COLORS.primary} />
-                  <Text className="text-[10px] font-semibold mt-0.5" style={{ color: COLORS.primary }}>
+                  <Text
+                    className="text-[10px] font-semibold mt-0.5"
+                    style={{ color: COLORS.primary }}
+                  >
                     +{displayBusiness.images.length}
                   </Text>
                 </TouchableOpacity>
@@ -575,7 +705,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
                 className="flex-row items-center px-3 py-1.5 rounded-full border"
                 style={{
                   backgroundColor: displayBusiness.isOpenNow ? '#ECFDF5' : '#FEF2F2',
-                  borderColor: displayBusiness.isOpenNow ? '#10B981' : '#EF4444'
+                  borderColor: displayBusiness.isOpenNow ? '#10B981' : '#EF4444',
                 }}
               >
                 <View
@@ -593,7 +723,10 @@ export default function BusinessDetailScreen({ navigation, route }) {
 
             {/* Category Badge */}
             <View className="bg-[#FFF9F0] px-3 py-1.5 rounded-full">
-              <Text className="text-xs font-semibold capitalize" style={{ color: COLORS.secondary }}>
+              <Text
+                className="text-xs font-semibold capitalize"
+                style={{ color: COLORS.secondary }}
+              >
                 {displayBusiness.category}
               </Text>
             </View>
@@ -620,7 +753,9 @@ export default function BusinessDetailScreen({ navigation, route }) {
               return (
                 <View className="flex-row items-center bg-green-50 border border-green-200 rounded-xl px-3 py-2 mb-4">
                   <Icon name="shield-checkmark" size={16} color="#16A34A" />
-                  <Text className="text-green-700 text-xs font-semibold ml-2">Verified Business — Owner Claimed</Text>
+                  <Text className="text-green-700 text-xs font-semibold ml-2">
+                    Verified Business — Owner Claimed
+                  </Text>
                 </View>
               );
             }
@@ -630,7 +765,9 @@ export default function BusinessDetailScreen({ navigation, route }) {
               return (
                 <View className="flex-row items-center bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-4">
                   <Icon name="time-outline" size={16} color="#D97706" />
-                  <Text className="text-amber-700 text-xs font-semibold ml-2">Claim Pending Review</Text>
+                  <Text className="text-amber-700 text-xs font-semibold ml-2">
+                    Claim Pending Review
+                  </Text>
                 </View>
               );
             }
@@ -640,7 +777,9 @@ export default function BusinessDetailScreen({ navigation, route }) {
               const isBusiness = user.role === 'business';
               return (
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('ClaimBusiness', { business: displayBusiness })}
+                  onPress={() =>
+                    navigation.navigate('ClaimBusiness', { business: displayBusiness })
+                  }
                   activeOpacity={0.85}
                   className="flex-row items-center bg-amber-50 border border-amber-300 rounded-xl px-3 py-2 mb-4"
                 >
@@ -648,7 +787,9 @@ export default function BusinessDetailScreen({ navigation, route }) {
                   <View className="flex-1 ml-2">
                     <Text className="text-amber-800 text-xs font-bold">Unclaimed Business</Text>
                     <Text className="text-amber-600 text-[10px]">
-                      {isBusiness ? "Is this your business? Claim it now →" : "Claim your business listing →"}
+                      {isBusiness
+                        ? 'Is this your business? Claim it now →'
+                        : 'Claim your business listing →'}
                     </Text>
                   </View>
                   <Icon name="chevron-forward" size={14} color="#B45309" />
@@ -711,7 +852,10 @@ export default function BusinessDetailScreen({ navigation, route }) {
           {/* Address Section */}
           <View className="bg-gray-50 rounded-2xl p-4 mb-4">
             <View className="flex-row items-start">
-              <View className="w-10 h-10 rounded-full items-center justify-center mr-3" style={{ backgroundColor: COLORS.secondary + '20' }}>
+              <View
+                className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                style={{ backgroundColor: COLORS.secondary + '20' }}
+              >
                 <Icon name="location" size={22} color={COLORS.secondary} />
               </View>
               <View className="flex-1">
@@ -729,11 +873,17 @@ export default function BusinessDetailScreen({ navigation, route }) {
           {displayBusiness.openStatus && (
             <View className="bg-gray-50 rounded-2xl p-4 mb-5">
               <View className="flex-row items-start">
-                <View className="w-10 h-10 rounded-full items-center justify-center mr-3" style={{ backgroundColor: COLORS.secondary + '20' }}>
+                <View
+                  className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                  style={{ backgroundColor: COLORS.secondary + '20' }}
+                >
                   <Icon name="time" size={22} color={COLORS.secondary} />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-[15px] font-bold mb-1.5" style={{ color: COLORS.secondary }}>
+                  <Text
+                    className="text-[15px] font-bold mb-1.5"
+                    style={{ color: COLORS.secondary }}
+                  >
                     Opening Hours
                   </Text>
                   <View className="flex-row items-center">
@@ -760,15 +910,22 @@ export default function BusinessDetailScreen({ navigation, route }) {
             {[
               { key: 'reviews', label: 'Reviews', icon: 'star-outline' },
               { key: 'menu', label: 'Menu', icon: 'restaurant-outline' },
-              { key: 'updates', label: 'Updates & Offers', icon: 'megaphone-outline', badge: updates.length },
+              {
+                key: 'updates',
+                label: 'Updates & Offers',
+                icon: 'megaphone-outline',
+                badge: updates.length,
+              },
               { key: 'gallery', label: 'Gallery', icon: 'images-outline' },
-              { key: 'about', label: 'About', icon: 'information-circle-outline' }
+              { key: 'about', label: 'About', icon: 'information-circle-outline' },
             ].map((tab) => (
               <TouchableOpacity
                 key={tab.key}
                 onPress={() => setActiveTab(tab.key)}
                 className="py-4 px-4 border-b-2 relative"
-                style={{ borderBottomColor: activeTab === tab.key ? COLORS.secondary : 'transparent' }}
+                style={{
+                  borderBottomColor: activeTab === tab.key ? COLORS.secondary : 'transparent',
+                }}
               >
                 <View className="flex-row items-center">
                   <Icon
@@ -783,10 +940,11 @@ export default function BusinessDetailScreen({ navigation, route }) {
                     {tab.label}
                   </Text>
                   {tab.badge > 0 && (
-                    <View className="rounded-full min-w-[20px] h-5 items-center justify-center ml-1.5 px-1.5" style={{ backgroundColor: COLORS.secondary }}>
-                      <Text className="text-white text-[11px] font-bold">
-                        {tab.badge}
-                      </Text>
+                    <View
+                      className="rounded-full min-w-[20px] h-5 items-center justify-center ml-1.5 px-1.5"
+                      style={{ backgroundColor: COLORS.secondary }}
+                    >
+                      <Text className="text-white text-[11px] font-bold">{tab.badge}</Text>
                     </View>
                   )}
                 </View>
@@ -797,7 +955,6 @@ export default function BusinessDetailScreen({ navigation, route }) {
 
         {/* Tab Content */}
         <View className="px-5 py-5 pb-24">
-
           {/* ── Menu Tab (Phase 1) ── */}
           {activeTab === 'menu' && (
             <View>
@@ -808,11 +965,32 @@ export default function BusinessDetailScreen({ navigation, route }) {
                 </View>
               ) : Object.keys(menuItems).length === 0 ? (
                 <View style={{ alignItems: 'center', paddingVertical: 48 }}>
-                  <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                  <View
+                    style={{
+                      width: 72,
+                      height: 72,
+                      borderRadius: 36,
+                      backgroundColor: '#EEF2FF',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: 16,
+                    }}
+                  >
                     <Icon name="restaurant-outline" size={32} color="#6366F1" />
                   </View>
-                  <Text style={{ fontSize: 17, fontWeight: '700', color: '#111827', marginBottom: 6 }}>No menu available</Text>
-                  <Text style={{ fontSize: 13, color: '#9CA3AF', textAlign: 'center', paddingHorizontal: 32 }}>
+                  <Text
+                    style={{ fontSize: 17, fontWeight: '700', color: '#111827', marginBottom: 6 }}
+                  >
+                    No menu available
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      color: '#9CA3AF',
+                      textAlign: 'center',
+                      paddingHorizontal: 32,
+                    }}
+                  >
                     This business hasn't added their menu or services yet.
                   </Text>
                 </View>
@@ -820,91 +998,235 @@ export default function BusinessDetailScreen({ navigation, route }) {
                 Object.entries(menuItems).map(([category, items]) => (
                   <View key={category} style={{ marginBottom: 24 }}>
                     {/* Category heading */}
-                    <Text style={{ fontSize: 15, fontWeight: '700', color: '#374151', marginBottom: 10, borderLeftWidth: 3, borderLeftColor: '#6366F1', paddingLeft: 10 }}>
+                    <Text
+                      style={{
+                        fontSize: 15,
+                        fontWeight: '700',
+                        color: '#374151',
+                        marginBottom: 10,
+                        borderLeftWidth: 3,
+                        borderLeftColor: '#6366F1',
+                        paddingLeft: 10,
+                      }}
+                    >
                       {category}
                     </Text>
-                    {items.map(item => (
+                    {items.map((item) => (
                       <TouchableOpacity
                         activeOpacity={0.8}
-                        onPress={() => item.isAvailable ? handleMenuItemPress(item) : null}
+                        onPress={() => (item.isAvailable ? handleMenuItemPress(item) : null)}
                         key={item._id}
                         style={{
-                          backgroundColor: '#FFF', borderRadius: 14, marginBottom: 10,
-                          flexDirection: 'row', overflow: 'hidden',
-                          shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6,
-                          shadowOffset: { width: 0, height: 2 }, elevation: 2,
-                          opacity: item.isAvailable ? 1 : 0.5
+                          backgroundColor: '#FFF',
+                          borderRadius: 14,
+                          marginBottom: 10,
+                          flexDirection: 'row',
+                          overflow: 'hidden',
+                          shadowColor: '#000',
+                          shadowOpacity: 0.05,
+                          shadowRadius: 6,
+                          shadowOffset: { width: 0, height: 2 },
+                          elevation: 2,
+                          opacity: item.isAvailable ? 1 : 0.5,
                         }}
                       >
                         {/* Image */}
                         {item.image?.url ? (
-                          <TouchableOpacity activeOpacity={0.85} onPress={() => handleImagePress(item.image.url)}>
-                            <Image source={{ uri: item.image.url }} style={{ width: 76, height: 76 }} resizeMode="cover" />
-                            <View style={{ position: 'absolute', bottom: 4, right: 4, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 4, padding: 2 }}>
+                          <TouchableOpacity
+                            activeOpacity={0.85}
+                            onPress={() => handleImagePress(item.image.url)}
+                          >
+                            <Image
+                              source={{ uri: item.image.url }}
+                              style={{ width: 76, height: 76 }}
+                              resizeMode="cover"
+                            />
+                            <View
+                              style={{
+                                position: 'absolute',
+                                bottom: 4,
+                                right: 4,
+                                backgroundColor: 'rgba(0,0,0,0.5)',
+                                borderRadius: 4,
+                                padding: 2,
+                              }}
+                            >
                               <Icon name="expand-outline" size={10} color="#FFF" />
                             </View>
                           </TouchableOpacity>
                         ) : (
-                          <View style={{ width: 76, height: 76, backgroundColor: '#F3F4F6', alignItems: 'center', justifyContent: 'center' }}>
+                          <View
+                            style={{
+                              width: 76,
+                              height: 76,
+                              backgroundColor: '#F3F4F6',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
                             <Icon name="image-outline" size={22} color="#D1D5DB" />
                           </View>
                         )}
                         {/* Info */}
                         <View style={{ flex: 1, padding: 10 }}>
-                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <Text style={{ fontWeight: '700', fontSize: 14, color: '#111827', flex: 1, marginRight: 8 }} numberOfLines={1}>
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'flex-start',
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontWeight: '700',
+                                fontSize: 14,
+                                color: '#111827',
+                                flex: 1,
+                                marginRight: 8,
+                              }}
+                              numberOfLines={1}
+                            >
                               {item.name}
                               {item.isPopular && <Text style={{ color: '#F59E0B' }}> ⭐</Text>}
                             </Text>
                             <Text style={{ fontWeight: '700', fontSize: 14, color: '#6366F1' }}>
-                              {item.currency === 'GBP' ? '£' : item.currency === 'USD' ? '$' : '€'}{item.price.toFixed(2)}
+                              {item.currency === 'GBP' ? '£' : item.currency === 'USD' ? '$' : '€'}
+                              {item.price.toFixed(2)}
                             </Text>
                           </View>
                           {item.description ? (
-                            <Text style={{ fontSize: 12, color: '#6B7280', marginTop: 3, lineHeight: 17 }} numberOfLines={2}>
+                            <Text
+                              style={{
+                                fontSize: 12,
+                                color: '#6B7280',
+                                marginTop: 3,
+                                lineHeight: 17,
+                              }}
+                              numberOfLines={2}
+                            >
                               {item.description}
                             </Text>
                           ) : null}
-                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 4 }}>
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'flex-end',
+                              marginTop: 4,
+                            }}
+                          >
                             <View style={{ flex: 1, paddingRight: 10 }}>
                               {/* Duration for services */}
                               {item.duration ? (
-                                <Text style={{ fontSize: 11, color: '#9CA3AF' }}>⏱ {item.duration} min</Text>
+                                <Text style={{ fontSize: 11, color: '#9CA3AF' }}>
+                                  ⏱ {item.duration} min
+                                </Text>
                               ) : null}
                               {/* Dietary badges */}
                               {item.dietary?.length > 0 && (
-                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
-                                  {item.dietary.slice(0, 3).map(d => (
-                                    <View key={d} style={{ backgroundColor: '#DCFCE7', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
-                                      <Text style={{ fontSize: 10, fontWeight: '600', color: '#166534' }}>{d}</Text>
+                                <View
+                                  style={{
+                                    flexDirection: 'row',
+                                    flexWrap: 'wrap',
+                                    gap: 4,
+                                    marginTop: 4,
+                                  }}
+                                >
+                                  {item.dietary.slice(0, 3).map((d) => (
+                                    <View
+                                      key={d}
+                                      style={{
+                                        backgroundColor: '#DCFCE7',
+                                        borderRadius: 6,
+                                        paddingHorizontal: 6,
+                                        paddingVertical: 2,
+                                      }}
+                                    >
+                                      <Text
+                                        style={{
+                                          fontSize: 10,
+                                          fontWeight: '600',
+                                          color: '#166534',
+                                        }}
+                                      >
+                                        {d}
+                                      </Text>
                                     </View>
                                   ))}
                                 </View>
                               )}
                               {!item.isAvailable && (
-                                <Text style={{ fontSize: 11, color: '#EF4444', marginTop: 4, fontWeight: '600' }}>Currently unavailable</Text>
+                                <Text
+                                  style={{
+                                    fontSize: 11,
+                                    color: '#EF4444',
+                                    marginTop: 4,
+                                    fontWeight: '600',
+                                  }}
+                                >
+                                  Currently unavailable
+                                </Text>
                               )}
                             </View>
 
                             {/* Add/Remove Buttons */}
                             {item.isAvailable && (
-                              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#F3F4F6', borderRadius: 20, padding: 2 }}>
+                              <View
+                                style={{
+                                  flexDirection: 'row',
+                                  alignItems: 'center',
+                                  backgroundColor: '#F3F4F6',
+                                  borderRadius: 20,
+                                  padding: 2,
+                                }}
+                              >
                                 {getItemQuantity(item._id) > 0 ? (
                                   <>
                                     <TouchableOpacity
                                       onPress={() => handleDirectRemove(item)}
-                                      style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFF', borderRadius: 14, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 2, shadowOffset: { width: 0, height: 1 }, elevation: 1 }}
+                                      style={{
+                                        width: 28,
+                                        height: 28,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: '#FFF',
+                                        borderRadius: 14,
+                                        shadowColor: '#000',
+                                        shadowOpacity: 0.1,
+                                        shadowRadius: 2,
+                                        shadowOffset: { width: 0, height: 1 },
+                                        elevation: 1,
+                                      }}
                                     >
                                       <Icon name="remove" size={16} color="#4B5563" />
                                     </TouchableOpacity>
-                                    <Text style={{ paddingHorizontal: 10, fontWeight: '700', color: '#111827', fontSize: 13 }}>
+                                    <Text
+                                      style={{
+                                        paddingHorizontal: 10,
+                                        fontWeight: '700',
+                                        color: '#111827',
+                                        fontSize: 13,
+                                      }}
+                                    >
                                       {getItemQuantity(item._id)}
                                     </Text>
                                   </>
                                 ) : null}
                                 <TouchableOpacity
                                   onPress={() => handleDirectAdd(item)}
-                                  style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: '#6C47FF', borderRadius: 14, shadowColor: '#6C47FF', shadowOpacity: 0.3, shadowRadius: 3, shadowOffset: { width: 0, height: 2 }, elevation: 2 }}
+                                  style={{
+                                    width: 28,
+                                    height: 28,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: '#6C47FF',
+                                    borderRadius: 14,
+                                    shadowColor: '#6C47FF',
+                                    shadowOpacity: 0.3,
+                                    shadowRadius: 3,
+                                    shadowOffset: { width: 0, height: 2 },
+                                    elevation: 2,
+                                  }}
                                 >
                                   <Icon name="add" size={16} color="#FFF" />
                                 </TouchableOpacity>
@@ -927,31 +1249,42 @@ export default function BusinessDetailScreen({ navigation, route }) {
                 <View className="items-center py-16">
                   <Icon name="chatbubbles-outline" size={64} color="#D1D5DB" />
                   <Text className="text-gray-400 mt-4 text-base font-medium">No reviews yet</Text>
-                  <Text className="text-gray-300 text-sm mt-1">Be the first to share your experience!</Text>
+                  <Text className="text-gray-300 text-sm mt-1">
+                    Be the first to share your experience!
+                  </Text>
                 </View>
               ) : (
                 <View>
-
                   {/* ── Overall Score Row ── */}
                   <View className="flex-row items-center mb-5">
-                    <View className="w-[52px] h-[52px] rounded-xl items-center justify-center mr-3" style={{ backgroundColor: COLORS.primary }}>
+                    <View
+                      className="w-[52px] h-[52px] rounded-xl items-center justify-center mr-3"
+                      style={{ backgroundColor: COLORS.primary }}
+                    >
                       <Text className="text-white text-xl font-black">
                         {displayBusiness.rating?.average
                           ? (displayBusiness.rating.average * 2).toFixed(1)
-                          : (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length * 2).toFixed(1)}
+                          : (
+                              (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) *
+                              2
+                            ).toFixed(1)}
                       </Text>
                     </View>
                     <View>
                       <Text className="text-base font-black text-gray-900">
                         {(() => {
-                          const avg = displayBusiness.rating?.average || (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length);
+                          const avg =
+                            displayBusiness.rating?.average ||
+                            reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
                           if (avg >= 4.5) return 'Exceptional';
                           if (avg >= 4) return 'Very good';
                           if (avg >= 3.5) return 'Good';
                           return 'Reviews';
                         })()}
                       </Text>
-                      <Text className="text-sm text-gray-500">{displayBusiness.rating?.count || reviews.length} reviews</Text>
+                      <Text className="text-sm text-gray-500">
+                        {displayBusiness.rating?.count || reviews.length} reviews
+                      </Text>
                     </View>
                   </View>
 
@@ -966,7 +1299,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
                       { key: 'comfort', label: 'Comfort' },
                       { key: 'staff', label: 'Staff' },
                     ];
-                    const available = CATS.filter(c => avgs[c.key] !== null);
+                    const available = CATS.filter((c) => avgs[c.key] !== null);
                     if (available.length === 0) return null;
                     return (
                       <View className="mb-6">
@@ -976,10 +1309,26 @@ export default function BusinessDetailScreen({ navigation, route }) {
                             <View key={key} className="mb-4">
                               <View className="flex-row justify-between items-center mb-1.5">
                                 <Text className="text-sm text-gray-800 font-semibold">{label}</Text>
-                                <Text className="text-sm font-bold text-gray-900">{val.toFixed(1)}</Text>
+                                <Text className="text-sm font-bold text-gray-900">
+                                  {val.toFixed(1)}
+                                </Text>
                               </View>
-                              <View style={{ height: 8, backgroundColor: '#E0E0E0', borderRadius: 4, overflow: 'hidden' }}>
-                                <View style={{ width: `${(val / 10) * 100}%`, height: '100%', backgroundColor: '#003580', borderRadius: 4 }} />
+                              <View
+                                style={{
+                                  height: 8,
+                                  backgroundColor: '#E0E0E0',
+                                  borderRadius: 4,
+                                  overflow: 'hidden',
+                                }}
+                              >
+                                <View
+                                  style={{
+                                    width: `${(val / 10) * 100}%`,
+                                    height: '100%',
+                                    backgroundColor: '#003580',
+                                    borderRadius: 4,
+                                  }}
+                                />
                               </View>
                             </View>
                           );
@@ -996,7 +1345,9 @@ export default function BusinessDetailScreen({ navigation, route }) {
                       <Text className="text-xs text-gray-400 mt-0.5">Most recent first</Text>
                     </View>
                     <View className="bg-purple-50 border border-purple-100 rounded-full px-3 py-1">
-                      <Text className="text-xs font-bold text-purple-700">{reviews.length} review{reviews.length !== 1 ? 's' : ''}</Text>
+                      <Text className="text-xs font-bold text-purple-700">
+                        {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+                      </Text>
                     </View>
                   </View>
 
@@ -1005,10 +1356,19 @@ export default function BusinessDetailScreen({ navigation, route }) {
                     <View className="items-center py-8 bg-gray-50 rounded-2xl mb-4">
                       <Icon name="chatbubbles-outline" size={40} color="#D1D5DB" />
                       <Text className="text-gray-400 mt-3 font-medium">No reviews yet</Text>
-                      <Text className="text-gray-300 text-xs mt-1">Be the first to share your experience!</Text>
+                      <Text className="text-gray-300 text-xs mt-1">
+                        Be the first to share your experience!
+                      </Text>
                     </View>
                   ) : (
-                    reviews.map((review) => <ReviewCard key={review._id} review={review} handleVideoPress={handleVideoPress} colors={COLORS} />)
+                    reviews.map((review) => (
+                      <ReviewCard
+                        key={review._id}
+                        review={review}
+                        handleVideoPress={handleVideoPress}
+                        colors={COLORS}
+                      />
+                    ))
                   )}
 
                   {/* ── Show Older Reviews button ── */}
@@ -1016,8 +1376,13 @@ export default function BusinessDetailScreen({ navigation, route }) {
                     <TouchableOpacity
                       onPress={() => {
                         setShowOldReviews(true);
-                        const idToFetch = (fromQR && business) ? business._id : businessId;
-                        dispatch(getBusinessReviews({ businessId: idToFetch, params: { type: 'old', limit: 10, page: 1 } }));
+                        const idToFetch = fromQR && business ? business._id : businessId;
+                        dispatch(
+                          getBusinessReviews({
+                            businessId: idToFetch,
+                            params: { type: 'old', limit: 10, page: 1 },
+                          })
+                        );
                       }}
                       activeOpacity={0.8}
                       className="flex-row items-center justify-center py-3.5 px-5 rounded-2xl border border-gray-200 bg-gray-50 mb-4"
@@ -1043,17 +1408,32 @@ export default function BusinessDetailScreen({ navigation, route }) {
                       {oldReviewsLoading && oldReviews.length === 0 ? (
                         <View className="items-center py-8">
                           <ActivityIndicator size="small" color={COLORS.primary} />
-                          <Text className="text-gray-400 text-xs mt-2">Loading older reviews...</Text>
+                          <Text className="text-gray-400 text-xs mt-2">
+                            Loading older reviews...
+                          </Text>
                         </View>
                       ) : (
-                        oldReviews.map((review) => <ReviewCard key={review._id} review={review} handleVideoPress={handleVideoPress} colors={COLORS} isOld />)
+                        oldReviews.map((review) => (
+                          <ReviewCard
+                            key={review._id}
+                            review={review}
+                            handleVideoPress={handleVideoPress}
+                            colors={COLORS}
+                            isOld
+                          />
+                        ))
                       )}
 
                       {oldReviewsHasMore && (
                         <TouchableOpacity
                           onPress={() => {
-                            const idToFetch = (fromQR && business) ? business._id : businessId;
-                            dispatch(getBusinessReviews({ businessId: idToFetch, params: { type: 'old', limit: 10, page: oldReviewsPage + 1 } }));
+                            const idToFetch = fromQR && business ? business._id : businessId;
+                            dispatch(
+                              getBusinessReviews({
+                                businessId: idToFetch,
+                                params: { type: 'old', limit: 10, page: oldReviewsPage + 1 },
+                              })
+                            );
                           }}
                           disabled={oldReviewsLoading}
                           activeOpacity={0.8}
@@ -1064,19 +1444,22 @@ export default function BusinessDetailScreen({ navigation, route }) {
                           ) : (
                             <>
                               <Icon name="add-circle-outline" size={16} color={COLORS.primary} />
-                              <Text className="text-sm font-semibold ml-2" style={{ color: COLORS.primary }}>Load More</Text>
+                              <Text
+                                className="text-sm font-semibold ml-2"
+                                style={{ color: COLORS.primary }}
+                              >
+                                Load More
+                              </Text>
                             </>
                           )}
                         </TouchableOpacity>
                       )}
                     </View>
                   )}
-
                 </View>
               )}
             </View>
           )}
-
 
           {/* Updates & Offers Tab */}
           {activeTab === 'updates' && (
@@ -1090,11 +1473,16 @@ export default function BusinessDetailScreen({ navigation, route }) {
                 <View className="items-center py-10">
                   <Icon name="megaphone-outline" size={64} color="#D1D5DB" />
                   <Text className="text-gray-400 mt-4 text-[15px]">No updates yet</Text>
-                  <Text className="text-gray-300 text-[13px] mt-1">Check back later for offers!</Text>
+                  <Text className="text-gray-300 text-[13px] mt-1">
+                    Check back later for offers!
+                  </Text>
                 </View>
               ) : (
                 updates.map((update) => (
-                  <View key={update._id} className="mb-5 bg-white rounded-3xl overflow-hidden shadow-lg">
+                  <View
+                    key={update._id}
+                    className="mb-5 bg-white rounded-3xl overflow-hidden shadow-lg"
+                  >
                     {update.image?.url && (
                       <View className="relative">
                         <Image
@@ -1109,9 +1497,16 @@ export default function BusinessDetailScreen({ navigation, route }) {
                         {/* Type Badge on Image */}
                         <View
                           className="absolute top-4 right-4 rounded-full px-3.5 py-2 flex-row items-center shadow-md"
-                          style={{ backgroundColor: update.type === 'offer' ? COLORS.secondary : COLORS.primary }}
+                          style={{
+                            backgroundColor:
+                              update.type === 'offer' ? COLORS.secondary : COLORS.primary,
+                          }}
                         >
-                          <Icon name={update.type === 'offer' ? "pricetag" : "megaphone"} size={14} color="#FFF" />
+                          <Icon
+                            name={update.type === 'offer' ? 'pricetag' : 'megaphone'}
+                            size={14}
+                            color="#FFF"
+                          />
                           <Text className="text-white text-[11px] font-bold uppercase ml-1">
                             {update.type}
                           </Text>
@@ -1125,16 +1520,27 @@ export default function BusinessDetailScreen({ navigation, route }) {
                         <View className="flex-row justify-between items-center mb-3">
                           <View
                             className="rounded-full px-3.5 py-2 flex-row items-center"
-                            style={{ backgroundColor: update.type === 'offer' ? COLORS.secondary : COLORS.primary }}
+                            style={{
+                              backgroundColor:
+                                update.type === 'offer' ? COLORS.secondary : COLORS.primary,
+                            }}
                           >
-                            <Icon name={update.type === 'offer' ? "pricetag" : "megaphone"} size={14} color="#FFF" />
+                            <Icon
+                              name={update.type === 'offer' ? 'pricetag' : 'megaphone'}
+                              size={14}
+                              color="#FFF"
+                            />
                             <Text className="text-white text-[11px] font-bold uppercase ml-1">
                               {update.type}
                             </Text>
                           </View>
                           <View className="bg-gray-100 px-3 py-1.5 rounded-lg">
                             <Text className="text-[11px] text-gray-600 font-semibold">
-                              {new Date(update.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              {new Date(update.createdAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })}
                             </Text>
                           </View>
                         </View>
@@ -1150,17 +1556,29 @@ export default function BusinessDetailScreen({ navigation, route }) {
                       {/* Offer Details */}
                       {update.type === 'offer' && update.discountValue > 0 && (
                         <LinearGradient
-                          colors={update.type === 'offer' ? ['#FFF9E6', '#FFF4CC'] : ['#F3F4F6', '#E5E7EB']}
+                          colors={
+                            update.type === 'offer'
+                              ? ['#FFF9E6', '#FFF4CC']
+                              : ['#F3F4F6', '#E5E7EB']
+                          }
                           className="flex-row items-center justify-between px-4 py-3.5 rounded-2xl border"
                           style={{ borderColor: update.type === 'offer' ? '#FFE5B4' : '#D1D5DB' }}
                         >
                           <View className="flex-row items-center">
-                            <View className="w-9 h-9 rounded-full items-center justify-center mr-3" style={{ backgroundColor: COLORS.secondary }}>
+                            <View
+                              className="w-9 h-9 rounded-full items-center justify-center mr-3"
+                              style={{ backgroundColor: COLORS.secondary }}
+                            >
                               <Icon name="pricetag" size={18} color="#FFF" />
                             </View>
                             <View>
-                              <Text className="text-base font-bold" style={{ color: COLORS.secondary }}>
-                                {update.discountType === 'percentage' ? `${update.discountValue}% OFF` : `£${update.discountValue} OFF`}
+                              <Text
+                                className="text-base font-bold"
+                                style={{ color: COLORS.secondary }}
+                              >
+                                {update.discountType === 'percentage'
+                                  ? `${update.discountValue}% OFF`
+                                  : `£${update.discountValue} OFF`}
                               </Text>
                               <Text className="text-[11px] text-gray-400 mt-0.5">
                                 Special Discount
@@ -1173,7 +1591,10 @@ export default function BusinessDetailScreen({ navigation, route }) {
                                 Valid till
                               </Text>
                               <Text className="text-[13px] text-gray-900 font-bold mt-0.5">
-                                {new Date(update.validUntil).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                {new Date(update.validUntil).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                })}
                               </Text>
                             </View>
                           )}
@@ -1191,9 +1612,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
             <View>
               {displayBusiness.description && (
                 <View className="mb-5">
-                  <Text className="text-base font-bold text-gray-900 mb-3">
-                    About
-                  </Text>
+                  <Text className="text-base font-bold text-gray-900 mb-3">About</Text>
                   <Text className="text-sm text-gray-700 leading-5">
                     {displayBusiness.description}
                   </Text>
@@ -1204,18 +1623,14 @@ export default function BusinessDetailScreen({ navigation, route }) {
               {displayBusiness.phone && (
                 <View className="mb-3 flex-row items-center">
                   <Icon name="call" size={20} color={COLORS.primary} />
-                  <Text className="text-sm text-gray-700 ml-3">
-                    {displayBusiness.phone}
-                  </Text>
+                  <Text className="text-sm text-gray-700 ml-3">{displayBusiness.phone}</Text>
                 </View>
               )}
 
               {displayBusiness.email && (
                 <View className="mb-3 flex-row items-center">
                   <Icon name="mail" size={20} color={COLORS.primary} />
-                  <Text className="text-sm text-gray-700 ml-3">
-                    {displayBusiness.email}
-                  </Text>
+                  <Text className="text-sm text-gray-700 ml-3">{displayBusiness.email}</Text>
                 </View>
               )}
             </View>
@@ -1227,10 +1642,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
               {displayBusiness.images && displayBusiness.images.length > 0 ? (
                 <View className="flex-row flex-wrap -mx-1.5">
                   {displayBusiness.images.map((img, index) => (
-                    <View
-                      key={index}
-                      className="w-1/2 px-1.5 mb-3"
-                    >
+                    <View key={index} className="w-1/2 px-1.5 mb-3">
                       <TouchableOpacity
                         activeOpacity={0.8}
                         className="rounded-2xl overflow-hidden shadow-md"
@@ -1250,24 +1662,60 @@ export default function BusinessDetailScreen({ navigation, route }) {
                   <View className="w-24 h-24 rounded-full bg-gray-100 items-center justify-center mb-5">
                     <Icon name="images-outline" size={50} color="#D1D5DB" />
                   </View>
-                  <Text className="text-gray-600 mt-2 text-base font-semibold">No gallery images</Text>
+                  <Text className="text-gray-600 mt-2 text-base font-semibold">
+                    No gallery images
+                  </Text>
                   <Text className="text-gray-400 mt-1.5 text-sm">Photos will appear here</Text>
                 </View>
               )}
             </View>
           )}
         </View>
-      </ScrollView >
+      </ScrollView>
 
       {/* Fixed Bottom Container for Primary Action (Review or Cart) */}
-      {
-        ((!user?.isGuest && user?.role !== 'guest') || (cart.items.length > 0 && cart.businessId === displayBusiness._id)) && (
-          <View className="bg-white px-5 pt-4 pb-5 border-t border-gray-100 shadow-2xl">
-            
-            {/* Show Cart Button if items exist, otherwise show Review Button */}
-            {(cart.items.length > 0 && cart.businessId === displayBusiness._id) ? (
+      {((!user?.isGuest && user?.role !== 'guest') ||
+        (cart.items.length > 0 && cart.businessId === displayBusiness._id)) && (
+        <View className="bg-white px-5 pt-4 pb-5 border-t border-gray-100 shadow-2xl">
+          {/* Show Cart Button if items exist, otherwise show Review Button */}
+          {cart.items.length > 0 && cart.businessId === displayBusiness._id ? (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Cart')}
+              activeOpacity={0.85}
+              className="shadow-xl"
+            >
+              <LinearGradient
+                colors={[COLORS.secondary, COLORS.secondaryDark]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                className="rounded-2xl py-4 px-5 flex-row items-center justify-between border border-white/20"
+              >
+                <View className="flex-row items-center">
+                  <View className="bg-white/20 w-9 h-9 rounded-full items-center justify-center mr-3">
+                    <Text className="text-white text-sm font-bold">
+                      {cart.items.reduce((sum, item) => sum + item.quantity, 0)}
+                    </Text>
+                  </View>
+                  <Text className="text-white text-[17px] font-bold tracking-wide">View Cart</Text>
+                </View>
+                <View className="flex-row items-center">
+                  <Text className="text-white text-[17px] font-black mr-2">
+                    {displayBusiness.currency === 'GBP'
+                      ? '£'
+                      : displayBusiness.currency === 'USD'
+                        ? '$'
+                        : '€'}
+                    {cart.cartTotal.toFixed(2)}
+                  </Text>
+                  <Icon name="arrow-forward" size={20} color="#FFF" style={{ opacity: 0.8 }} />
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          ) : (
+            !user?.isGuest &&
+            user?.role !== 'guest' && (
               <TouchableOpacity
-                onPress={() => navigation.navigate('Cart')}
+                onPress={handleAddReview}
                 activeOpacity={0.85}
                 className="shadow-xl"
               >
@@ -1275,53 +1723,26 @@ export default function BusinessDetailScreen({ navigation, route }) {
                   colors={[COLORS.secondary, COLORS.secondaryDark]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
-                  className="rounded-2xl py-4 px-5 flex-row items-center justify-between border border-white/20"
+                  className="rounded-2xl py-4 items-center flex-row justify-center border border-white/20"
                 >
-                  <View className="flex-row items-center">
-                    <View className="bg-white/20 w-9 h-9 rounded-full items-center justify-center mr-3">
-                      <Text className="text-white text-sm font-bold">
-                        {cart.items.reduce((sum, item) => sum + item.quantity, 0)}
-                      </Text>
-                    </View>
-                    <Text className="text-white text-[17px] font-bold tracking-wide">
-                      View Cart
-                    </Text>
+                  <View className="bg-white/20 w-9 h-9 rounded-full items-center justify-center mr-3">
+                    <Icon name="star" size={20} color="#FFF" />
                   </View>
-                  <View className="flex-row items-center">
-                    <Text className="text-white text-[17px] font-black mr-2">
-                      {displayBusiness.currency === 'GBP' ? '£' : displayBusiness.currency === 'USD' ? '$' : '€'}{cart.cartTotal.toFixed(2)}
-                    </Text>
-                    <Icon name="arrow-forward" size={20} color="#FFF" style={{ opacity: 0.8 }} />
-                  </View>
+                  <Text className="text-white text-[17px] font-bold tracking-wide">
+                    Write a Review
+                  </Text>
+                  <Icon
+                    name="arrow-forward"
+                    size={20}
+                    color="#FFF"
+                    style={{ marginLeft: 8, opacity: 0.8 }}
+                  />
                 </LinearGradient>
               </TouchableOpacity>
-            ) : (
-              !user?.isGuest && user?.role !== 'guest' && (
-                <TouchableOpacity
-                  onPress={handleAddReview}
-                  activeOpacity={0.85}
-                  className="shadow-xl"
-                >
-                  <LinearGradient
-                    colors={[COLORS.secondary, COLORS.secondaryDark]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    className="rounded-2xl py-4 items-center flex-row justify-center border border-white/20"
-                  >
-                    <View className="bg-white/20 w-9 h-9 rounded-full items-center justify-center mr-3">
-                      <Icon name="star" size={20} color="#FFF" />
-                    </View>
-                    <Text className="text-white text-[17px] font-bold tracking-wide">
-                      Write a Review
-                    </Text>
-                    <Icon name="arrow-forward" size={20} color="#FFF" style={{ marginLeft: 8, opacity: 0.8 }} />
-                  </LinearGradient>
-                </TouchableOpacity>
-              )
-            )}
-          </View>
-        )
-      }
+            )
+          )}
+        </View>
+      )}
 
       {/* Modals */}
       <MenuItemModal
@@ -1356,7 +1777,11 @@ export default function BusinessDetailScreen({ navigation, route }) {
                 minimumZoomScale={1}
                 showsHorizontalScrollIndicator={false}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}
+                contentContainerStyle={{
+                  flexGrow: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
               >
                 <Image
                   source={{ uri: selectedImage }}
@@ -1401,6 +1826,6 @@ export default function BusinessDetailScreen({ navigation, route }) {
           </View>
         </View>
       </Modal>
-    </View >
+    </View>
   );
 }

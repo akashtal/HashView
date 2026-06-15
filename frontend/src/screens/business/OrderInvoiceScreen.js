@@ -59,7 +59,10 @@ export default function OrderInvoiceScreen({ navigation, route }) {
           </TouchableOpacity>
           <Text className="text-xl font-bold text-gray-900">Invoice</Text>
         </View>
-        <TouchableOpacity onPress={handlePrint} className="bg-gray-100 px-3 py-1.5 rounded-lg flex-row items-center">
+        <TouchableOpacity
+          onPress={handlePrint}
+          className="bg-gray-100 px-3 py-1.5 rounded-lg flex-row items-center"
+        >
           <Icon name="print-outline" size={18} color="#374151" />
           <Text className="text-gray-700 font-semibold text-xs ml-1">Print</Text>
         </TouchableOpacity>
@@ -83,7 +86,9 @@ export default function OrderInvoiceScreen({ navigation, route }) {
             </View>
             <View className="items-end">
               <Text className="text-xs text-gray-400 uppercase font-bold">Customer</Text>
-              <Text className="text-lg font-bold text-gray-900">{order.customerName || 'Guest'}</Text>
+              <Text className="text-lg font-bold text-gray-900">
+                {order.customerName || 'Guest'}
+              </Text>
             </View>
           </View>
 
@@ -92,12 +97,19 @@ export default function OrderInvoiceScreen({ navigation, route }) {
             {order.items.map((item, index) => (
               <View key={index} className="flex-row justify-between mb-2">
                 <View className="flex-1 pr-4">
-                  <Text className="text-gray-800">{item.quantity}x {item.name}</Text>
-                  {item.variants && item.variants.map((v, i) => (
-                    <Text key={i} className="text-xs text-gray-500 ml-4">+ {v.name}</Text>
-                  ))}
+                  <Text className="text-gray-800">
+                    {item.quantity}x {item.name}
+                  </Text>
+                  {item.variants &&
+                    item.variants.map((v, i) => (
+                      <Text key={i} className="text-xs text-gray-500 ml-4">
+                        + {v.name}
+                      </Text>
+                    ))}
                 </View>
-                <Text className="text-gray-800 font-medium">${(item.price * item.quantity).toFixed(2)}</Text>
+                <Text className="text-gray-800 font-medium">
+                  ${(item.price * item.quantity).toFixed(2)}
+                </Text>
               </View>
             ))}
           </View>
@@ -105,19 +117,25 @@ export default function OrderInvoiceScreen({ navigation, route }) {
           <View className="border-t border-gray-100 pt-4">
             <View className="flex-row justify-between mb-2">
               <Text className="text-gray-500">Subtotal</Text>
-              <Text className="text-gray-800">${order.billing?.subTotal?.toFixed(2) || '0.00'}</Text>
+              <Text className="text-gray-800">
+                ${order.billing?.subTotal?.toFixed(2) || '0.00'}
+              </Text>
             </View>
 
             {order.billing?.taxes?.map((tax, index) => (
               <View key={index} className="flex-row justify-between mb-2">
-                <Text className="text-gray-500">{tax.name} ({tax.rate}%)</Text>
+                <Text className="text-gray-500">
+                  {tax.name} ({tax.rate}%)
+                </Text>
                 <Text className="text-gray-800">${tax.amount?.toFixed(2) || '0.00'}</Text>
               </View>
             ))}
 
             {order.billing?.charges?.map((charge, index) => (
               <View key={index} className="flex-row justify-between mb-2">
-                <Text className="text-gray-500">{charge.name} {charge.type === 'percentage' ? `(${charge.value}%)` : ''}</Text>
+                <Text className="text-gray-500">
+                  {charge.name} {charge.type === 'percentage' ? `(${charge.value}%)` : ''}
+                </Text>
                 <Text className="text-gray-800">${charge.amount?.toFixed(2) || '0.00'}</Text>
               </View>
             ))}

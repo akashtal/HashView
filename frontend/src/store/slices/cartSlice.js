@@ -25,7 +25,7 @@ const cartSlice = createSlice({
 
         // Check if identical item (same ID, same modifiers, same addons) exists
         const existingItemIndex = state.items.findIndex(
-          (i) => 
+          (i) =>
             i.menuItem._id === item.menuItem._id &&
             JSON.stringify(i.selectedModifiers) === JSON.stringify(item.selectedModifiers) &&
             JSON.stringify(i.selectedAddOns) === JSON.stringify(item.selectedAddOns)
@@ -39,7 +39,7 @@ const cartSlice = createSlice({
 
         state.cartTotal = calculateCartTotal(state.items);
       } else {
-        // Different business. The UI should intercept this and ask for confirmation 
+        // Different business. The UI should intercept this and ask for confirmation
         // to clear cart first. If it reaches here, we clear and add.
         state.businessId = businessId;
         state.businessName = businessName;
@@ -51,7 +51,7 @@ const cartSlice = createSlice({
       const { cartItemId } = action.payload; // We can use a unique ID for cart items or index
       state.items = state.items.filter((item) => item.cartItemId !== cartItemId);
       state.cartTotal = calculateCartTotal(state.items);
-      
+
       if (state.items.length === 0) {
         state.businessId = null;
         state.businessName = null;

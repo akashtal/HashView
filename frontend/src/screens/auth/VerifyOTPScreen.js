@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   StatusBar,
-  Image
+  Image,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { register } from '../../store/slices/authSlice';
@@ -74,25 +74,29 @@ export default function VerifyOTPScreen({ navigation, route }) {
         navigation.navigate('ResetPassword', { email, otpCode });
       } else {
         try {
-          const addressPayload = userData ? {
-            buildingNumber: userData.buildingNumber || '',
-            street: userData.street || '',
-            city: userData.city || '',
-            county: userData.county || '',
-            postcode: userData.postcode || '',
-            country: userData.country || 'United Kingdom',
-            landmark: userData.landmark || '',
-            fullAddress: userData.address || [
-              userData.buildingNumber,
-              userData.street,
-              userData.city,
-              userData.county,
-              userData.postcode,
-              userData.country || 'United Kingdom'
-            ]
-              .filter(Boolean)
-              .join(', ')
-          } : null;
+          const addressPayload = userData
+            ? {
+                buildingNumber: userData.buildingNumber || '',
+                street: userData.street || '',
+                city: userData.city || '',
+                county: userData.county || '',
+                postcode: userData.postcode || '',
+                country: userData.country || 'United Kingdom',
+                landmark: userData.landmark || '',
+                fullAddress:
+                  userData.address ||
+                  [
+                    userData.buildingNumber,
+                    userData.street,
+                    userData.city,
+                    userData.county,
+                    userData.postcode,
+                    userData.country || 'United Kingdom',
+                  ]
+                    .filter(Boolean)
+                    .join(', '),
+              }
+            : null;
 
           const registrationData = {
             name: userData.name,
@@ -108,8 +112,8 @@ export default function VerifyOTPScreen({ navigation, route }) {
               county: addressPayload.county,
               postcode: addressPayload.postcode,
               country: addressPayload.country,
-              landmark: addressPayload.landmark
-            })
+              landmark: addressPayload.landmark,
+            }),
           };
 
           console.log('Registering user with data:', { ...registrationData, password: '***' });
@@ -117,10 +121,7 @@ export default function VerifyOTPScreen({ navigation, route }) {
           const result = await dispatch(register(registrationData)).unwrap();
           setLoading(false);
 
-          showSuccessMessage(
-            'Success! 🎉',
-            'Your account has been created successfully!'
-          );
+          showSuccessMessage('Success! 🎉', 'Your account has been created successfully!');
         } catch (error) {
           setLoading(false);
           console.error('Registration error:', error);
@@ -149,16 +150,10 @@ export default function VerifyOTPScreen({ navigation, route }) {
   };
 
   return (
-    <LinearGradient
-      colors={[COLORS.primary, COLORS.primaryDark]}
-      className="flex-1"
-    >
+    <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="flex-1">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="mt-12 ml-6 bg-white/10 rounded-full p-3 self-start"
@@ -167,19 +162,21 @@ export default function VerifyOTPScreen({ navigation, route }) {
         </TouchableOpacity>
 
         <View className="items-center mt-8 mb-6">
-          <View style={{
-            width: 140,
-            height: 140,
-            borderRadius: 70,
-            backgroundColor: '#FFF',
-            alignItems: 'center',
-            justifyContent: 'center',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.15,
-            shadowRadius: 8,
-            elevation: 6
-          }}>
+          <View
+            style={{
+              width: 140,
+              height: 140,
+              borderRadius: 70,
+              backgroundColor: '#FFF',
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.15,
+              shadowRadius: 8,
+              elevation: 6,
+            }}
+          >
             <Image
               source={require('../../../assets/HashViewlogo-01.png')}
               style={{ width: 120, height: 120 }}
@@ -231,10 +228,7 @@ export default function VerifyOTPScreen({ navigation, route }) {
           {/* Resend Code */}
           <View className="items-center mb-6">
             <Text className="text-gray-600 mb-2">Didn't receive the code?</Text>
-            <TouchableOpacity
-              onPress={handleResend}
-              disabled={resendDisabled}
-            >
+            <TouchableOpacity onPress={handleResend} disabled={resendDisabled}>
               <Text
                 style={{ color: resendDisabled ? COLORS.gray400 : COLORS.secondary }}
                 className="font-bold text-base"
@@ -245,11 +239,7 @@ export default function VerifyOTPScreen({ navigation, route }) {
           </View>
 
           {/* Verify Button */}
-          <TouchableOpacity
-            onPress={handleContinue}
-            disabled={loading}
-            activeOpacity={0.8}
-          >
+          <TouchableOpacity onPress={handleContinue} disabled={loading} activeOpacity={0.8}>
             <LinearGradient
               colors={[COLORS.secondary, COLORS.secondaryDark]}
               className="rounded-xl py-4 items-center"
@@ -258,9 +248,7 @@ export default function VerifyOTPScreen({ navigation, route }) {
               {loading ? (
                 <ActivityIndicator color="white" size="small" />
               ) : (
-                <Text className="text-white font-bold text-lg">
-                  Verify & Continue
-                </Text>
+                <Text className="text-white font-bold text-lg">Verify & Continue</Text>
               )}
             </LinearGradient>
           </TouchableOpacity>

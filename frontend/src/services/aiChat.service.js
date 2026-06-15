@@ -129,16 +129,17 @@ async function streamChat({
       onError('Chat connection failed. Please check your connection.');
     };
 
-    xhr.send(JSON.stringify({
-      message,
-      sessionId,
-      latitude,
-      longitude,
-      searchBusinessIds,
-      searchQuery,
-      searchIntent,
-    }));
-
+    xhr.send(
+      JSON.stringify({
+        message,
+        sessionId,
+        latitude,
+        longitude,
+        searchBusinessIds,
+        searchQuery,
+        searchIntent,
+      })
+    );
   } catch (err) {
     if (isAborted) return () => {};
     onError(err.message || 'Chat connection failed. Please check your connection.');
@@ -167,14 +168,14 @@ function handleSSEEvent(event, { onToken, onSearching, onBusinessResults, onDone
       onBusinessResults?.({
         businesses: event.businesses || [],
         totalCount: event.totalCount || 0,
-        query:      event.query || '',
+        query: event.query || '',
       });
       break;
 
     case 'done':
       onDone?.({
-        fullText:           event.fullText || '',
-        sessionId:          event.sessionId,
+        fullText: event.fullText || '',
+        sessionId: event.sessionId,
         suggestedFollowUps: event.suggestedFollowUps || [],
       });
       break;
@@ -196,10 +197,12 @@ async function clearSession(sessionId) {
   try {
     const token = await AsyncStorage.getItem('token');
     await fetch(`${AI_BASE_URL}/chat/${sessionId}`, {
-      method:  'DELETE',
+      method: 'DELETE',
       headers: { Authorization: token ? `Bearer ${token}` : '' },
     });
-  } catch { /* non-fatal */ }
+  } catch {
+    /* non-fatal */
+  }
 }
 
 const AIChatService = { streamChat, clearSession };

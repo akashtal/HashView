@@ -17,6 +17,8 @@
     "eas:configure": "npx eas build:configure",
     "update": "npx eas update --branch production --message",
     "update:staging": "npx eas update --branch staging --message",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint . --ext .js,.jsx --fix",
     "postinstall": "patch-package || echo \"patch-package failed (no patches)\""
   },
   "dependencies": {
@@ -97,11 +99,16 @@
     "@react-native-community/cli": "^20.1.0",
     "@types/react": "~19.0.10",
     "eas-cli": "^16.32.0",
+    "eslint": "^8.57.1",
+    "eslint-config-expo": "^56.0.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
     "expo-module-scripts": "^5.0.7",
     "metro": "^0.82.2",
     "patch-package": "^8.0.1",
     "postcss": "^8.5.6",
     "postinstall-postinstall": "^2.1.0",
+    "prettier": "^3.8.4",
     "react-native-svg-transformer": "^1.5.1",
     "tailwindcss": "3.3.2",
     "typescript": "~5.8.3"

@@ -8,7 +8,7 @@ import {
   StatusBar,
   Dimensions,
   RefreshControl,
-  Alert
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -69,8 +69,8 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
     useShadowColorFromDataset: false,
     decimalPlaces: 0,
     propsForLabels: {
-      fontSize: 10
-    }
+      fontSize: 10,
+    },
   };
 
   return (
@@ -78,10 +78,7 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between mb-4">
           <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
             <Icon name="arrow-back" size={24} color="#FFF" />
@@ -97,8 +94,11 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
               onPress={() => setTimeRange(range)}
               className={`flex-1 py-2 rounded-lg ${timeRange === range ? 'bg-white' : ''}`}
             >
-              <Text className={`text-center font-semibold capitalize ${timeRange === range ? 'text-orange-500' : 'text-white'
-                }`}>
+              <Text
+                className={`text-center font-semibold capitalize ${
+                  timeRange === range ? 'text-orange-500' : 'text-white'
+                }`}
+              >
                 {range === 'week' ? 'Week' : range === 'month' ? 'Month' : 'Year'}
               </Text>
             </TouchableOpacity>
@@ -115,7 +115,10 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
           <View className="flex-row flex-wrap justify-between">
             {/* Total Reviews */}
             <View className="bg-white rounded-2xl p-4 mb-4 shadow-sm" style={{ width: '48%' }}>
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-3" style={{ backgroundColor: '#FFF9F0' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-3"
+                style={{ backgroundColor: '#FFF9F0' }}
+              >
                 <Icon name="star" size={24} color={COLORS.secondary} />
               </View>
               <Text className="text-2xl font-bold text-gray-900 mb-1">
@@ -132,7 +135,10 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
 
             {/* Average Rating */}
             <View className="bg-white rounded-2xl p-4 mb-4 shadow-sm" style={{ width: '48%' }}>
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-3" style={{ backgroundColor: '#FFF9F0' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-3"
+                style={{ backgroundColor: '#FFF9F0' }}
+              >
                 <Icon name="star-half" size={24} color={COLORS.secondary} />
               </View>
               <Text className="text-2xl font-bold text-gray-900 mb-1">
@@ -144,7 +150,9 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Icon
                       key={star}
-                      name={star <= Math.floor(analytics?.averageRating || 0) ? 'star' : 'star-outline'}
+                      name={
+                        star <= Math.floor(analytics?.averageRating || 0) ? 'star' : 'star-outline'
+                      }
                       size={12}
                       color={COLORS.secondary}
                     />
@@ -155,7 +163,10 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
 
             {/* Coupons Issued */}
             <View className="bg-white rounded-2xl p-4 mb-4 shadow-sm" style={{ width: '48%' }}>
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-3" style={{ backgroundColor: '#FFF9F0' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-3"
+                style={{ backgroundColor: '#FFF9F0' }}
+              >
                 <Icon name="gift" size={24} color={COLORS.secondary} />
               </View>
               <Text className="text-2xl font-bold text-gray-900 mb-1">
@@ -172,7 +183,10 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
 
             {/* Redemption Rate */}
             <View className="bg-white rounded-2xl p-4 mb-4 shadow-sm" style={{ width: '48%' }}>
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-3" style={{ backgroundColor: '#FFF9F0' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-3"
+                style={{ backgroundColor: '#FFF9F0' }}
+              >
                 <Icon name="trending-up" size={24} color={COLORS.secondary} />
               </View>
               <Text className="text-2xl font-bold text-gray-900 mb-1">
@@ -197,9 +211,11 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
                 <LineChart
                   data={{
                     labels: analytics.reviewsOverTime.labels || [],
-                    datasets: [{
-                      data: analytics.reviewsOverTime.data || [0]
-                    }]
+                    datasets: [
+                      {
+                        data: analytics.reviewsOverTime.data || [0],
+                      },
+                    ],
                   }}
                   width={Math.max(screenWidth - 80, analytics.reviewsOverTime.labels.length * 50)}
                   height={220}
@@ -207,7 +223,7 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
                   bezier
                   style={{
                     marginVertical: 8,
-                    borderRadius: 16
+                    borderRadius: 16,
                   }}
                 />
               </ScrollView>
@@ -234,7 +250,7 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
                         className="h-full rounded-full"
                         style={{
                           width: `${percentage}%`,
-                          backgroundColor: COLORS.secondary
+                          backgroundColor: COLORS.secondary,
                         }}
                       />
                     </View>
@@ -255,17 +271,19 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
               <Text className="text-lg font-bold text-gray-900 mb-4">Coupon Performance</Text>
               <BarChart
                 data={{
-                  labels: analytics.couponTypes.map(c => c.type),
-                  datasets: [{
-                    data: analytics.couponTypes.map(c => c.count)
-                  }]
+                  labels: analytics.couponTypes.map((c) => c.type),
+                  datasets: [
+                    {
+                      data: analytics.couponTypes.map((c) => c.count),
+                    },
+                  ],
                 }}
                 width={screenWidth - 80}
                 height={220}
                 chartConfig={chartConfig}
                 style={{
                   marginVertical: 8,
-                  borderRadius: 16
+                  borderRadius: 16,
                 }}
                 showValuesOnTopOfBars
               />
@@ -281,16 +299,18 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
               <BarChart
                 data={{
                   labels: analytics.peakHours.labels || [],
-                  datasets: [{
-                    data: analytics.peakHours.data || [0]
-                  }]
+                  datasets: [
+                    {
+                      data: analytics.peakHours.data || [0],
+                    },
+                  ],
                 }}
                 width={screenWidth - 80}
                 height={220}
                 chartConfig={chartConfig}
                 style={{
                   marginVertical: 8,
-                  borderRadius: 16
+                  borderRadius: 16,
                 }}
               />
             </View>
@@ -309,17 +329,23 @@ export default function BusinessAnalyticsScreen({ navigation, route }) {
 
             <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
               <Text className="text-gray-600">Verified Reviews</Text>
-              <Text className="text-lg font-bold text-gray-900">{analytics?.verifiedReviews || 0}</Text>
+              <Text className="text-lg font-bold text-gray-900">
+                {analytics?.verifiedReviews || 0}
+              </Text>
             </View>
 
             <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
               <Text className="text-gray-600">Helpful Votes</Text>
-              <Text className="text-lg font-bold text-gray-900">{analytics?.helpfulVotes || 0}</Text>
+              <Text className="text-lg font-bold text-gray-900">
+                {analytics?.helpfulVotes || 0}
+              </Text>
             </View>
 
             <View className="flex-row justify-between items-center py-3">
               <Text className="text-gray-600">Response Rate</Text>
-              <Text className="text-lg font-bold text-gray-900">{analytics?.responseRate || 0}%</Text>
+              <Text className="text-lg font-bold text-gray-900">
+                {analytics?.responseRate || 0}%
+              </Text>
             </View>
           </View>
         </View>

@@ -36,7 +36,6 @@ class OrderSocketService {
           console.error('[OrderSocket] Connection error:', error.message);
           reject(error);
         });
-
       } catch (error) {
         console.error('[OrderSocket] Initialization error:', error);
         reject(error);
@@ -99,9 +98,11 @@ class OrderSocketService {
       this.socket.on(event, callback);
     } else {
       // Setup listener after connect if not connected
-      this.connect().then(() => {
-        this.socket.on(event, callback);
-      }).catch(() => { });
+      this.connect()
+        .then(() => {
+          this.socket.on(event, callback);
+        })
+        .catch(() => {});
     }
   }
 

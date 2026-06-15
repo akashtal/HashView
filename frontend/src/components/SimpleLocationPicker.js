@@ -8,21 +8,26 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-  ScrollView
+  ScrollView,
 } from 'react-native';
 import ToastService from '../utils/ToastService';
 import * as Location from 'expo-location';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import COLORS from '../config/colors';
 
-export default function SimpleLocationPicker({ visible, onClose, onSelectLocation, initialLocation }) {
+export default function SimpleLocationPicker({
+  visible,
+  onClose,
+  onSelectLocation,
+  initialLocation,
+}) {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState({
     latitude: initialLocation?.latitude || null,
     longitude: initialLocation?.longitude || null,
-    address: initialLocation?.address || ''
+    address: initialLocation?.address || '',
   });
 
   const searchLocation = async () => {
@@ -42,7 +47,7 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
             try {
               const addressResults = await Location.reverseGeocodeAsync({
                 latitude: result.latitude,
-                longitude: result.longitude
+                longitude: result.longitude,
               });
 
               const addr = addressResults[0];
@@ -52,12 +57,12 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
 
               return {
                 ...result,
-                address: fullAddress.trim()
+                address: fullAddress.trim(),
               };
             } catch (error) {
               return {
                 ...result,
-                address: `${result.latitude.toFixed(6)}, ${result.longitude.toFixed(6)}`
+                address: `${result.latitude.toFixed(6)}, ${result.longitude.toFixed(6)}`,
               };
             }
           })
@@ -87,12 +92,12 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
       }
 
       const currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced
+        accuracy: Location.Accuracy.Balanced,
       });
 
       const addressResults = await Location.reverseGeocodeAsync({
         latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude
+        longitude: currentLocation.coords.longitude,
       });
 
       const addr = addressResults[0];
@@ -103,7 +108,7 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
       setSelectedLocation({
         latitude: currentLocation.coords.latitude,
         longitude: currentLocation.coords.longitude,
-        address: fullAddress.trim()
+        address: fullAddress.trim(),
       });
 
       ToastService.showSuccess('Success', 'Current location detected!');
@@ -132,12 +137,7 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={false}
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -251,7 +251,8 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
           <TouchableOpacity
             style={[
               styles.confirmButton,
-              (!selectedLocation.latitude || !selectedLocation.longitude) && styles.confirmButtonDisabled
+              (!selectedLocation.latitude || !selectedLocation.longitude) &&
+                styles.confirmButtonDisabled,
             ]}
             onPress={confirmLocation}
             disabled={!selectedLocation.latitude || !selectedLocation.longitude}
@@ -269,7 +270,7 @@ export default function SimpleLocationPicker({ visible, onClose, onSelectLocatio
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -280,19 +281,19 @@ const styles = StyleSheet.create({
     paddingTop: 48,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB'
+    borderBottomColor: '#E5E7EB',
   },
   closeButton: {
-    padding: 4
+    padding: 4,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333'
+    color: '#333',
   },
   content: {
     flex: 1,
-    padding: 16
+    padding: 16,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -300,19 +301,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     borderRadius: 12,
     paddingHorizontal: 12,
-    marginBottom: 16
+    marginBottom: 16,
   },
   searchIcon: {
-    marginRight: 8
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#333'
+    color: '#333',
   },
   searchButton: {
-    padding: 8
+    padding: 8,
   },
   currentLocationButton: {
     flexDirection: 'row',
@@ -321,22 +322,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#EBF5FF',
     padding: 16,
     borderRadius: 12,
-    marginBottom: 24
+    marginBottom: 24,
   },
   currentLocationText: {
     marginLeft: 12,
     fontSize: 16,
     color: COLORS.primary,
-    fontWeight: '600'
+    fontWeight: '600',
   },
   resultsContainer: {
-    marginBottom: 24
+    marginBottom: 24,
   },
   resultsTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 12
+    marginBottom: 12,
   },
   resultItem: {
     flexDirection: 'row',
@@ -344,116 +345,115 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#F9FAFB',
     borderRadius: 12,
-    marginBottom: 8
+    marginBottom: 8,
   },
   resultTextContainer: {
     flex: 1,
-    marginLeft: 12
+    marginLeft: 12,
   },
   resultAddress: {
     fontSize: 14,
     color: '#333',
-    marginBottom: 4
+    marginBottom: 4,
   },
   resultCoords: {
     fontSize: 12,
-    color: '#666'
+    color: '#666',
   },
   selectedContainer: {
-    marginBottom: 24
+    marginBottom: 24,
   },
   selectedTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 12
+    marginBottom: 12,
   },
   selectedCard: {
     backgroundColor: '#F0F9FF',
     borderRadius: 16,
     padding: 16,
     borderWidth: 2,
-    borderColor: COLORS.primary
+    borderColor: COLORS.primary,
   },
   selectedHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12
+    marginBottom: 12,
   },
   selectedLabel: {
     marginLeft: 8,
     fontSize: 18,
     fontWeight: '600',
-    color: '#333'
+    color: '#333',
   },
   selectedAddress: {
     fontSize: 14,
     color: '#666',
     marginBottom: 12,
-    lineHeight: 20
+    lineHeight: 20,
   },
   coordsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16
+    marginBottom: 16,
   },
   coordItem: {
-    flex: 1
+    flex: 1,
   },
   coordLabel: {
     fontSize: 12,
     color: '#666',
-    marginBottom: 4
+    marginBottom: 4,
   },
   coordValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333'
+    color: '#333',
   },
   mapPlaceholder: {
     backgroundColor: '#E0F2FE',
     borderRadius: 12,
     padding: 24,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   mapPlaceholderText: {
     marginTop: 12,
     fontSize: 14,
     color: '#666',
-    textAlign: 'center'
+    textAlign: 'center',
   },
   instructions: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FEF3C7',
     padding: 12,
-    borderRadius: 12
+    borderRadius: 12,
   },
   instructionText: {
     flex: 1,
     marginLeft: 8,
     fontSize: 12,
-    color: '#92400E'
+    color: '#92400E',
   },
   footer: {
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB'
+    borderTopColor: '#E5E7EB',
   },
   confirmButton: {
     backgroundColor: COLORS.primary,
     paddingVertical: 16,
     borderRadius: 12,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   confirmButtonDisabled: {
-    backgroundColor: '#D1D5DB'
+    backgroundColor: '#D1D5DB',
   },
   confirmButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600'
-  }
+    fontWeight: '600',
+  },
 });
-

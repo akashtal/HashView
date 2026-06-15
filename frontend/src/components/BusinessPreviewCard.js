@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  Image,
-} from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import COLORS from '../config/colors';
@@ -23,18 +17,11 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
  * which forces React Native to destroy & recreate the Image component
  * whenever the URI changes — bypassing any in-memory cache.
  */
-const BusinessPreviewCard = ({
-  name,
-  category,
-  coverImageUri,
-  address,
-  isFullScreen = false,
-}) => {
+const BusinessPreviewCard = ({ name, category, coverImageUri, address, isFullScreen = false }) => {
   const cardWidth = isFullScreen ? SCREEN_WIDTH - 32 : '100%';
 
   return (
     <View style={[styles.card, { width: cardWidth }]}>
-
       {/* ── Cover Image ───────────────────────────────────── */}
       <View style={styles.coverWrapper}>
         {coverImageUri ? (
@@ -114,7 +101,7 @@ const BusinessPreviewCard = ({
           <View style={{ flex: 1 }} />
           <Icon name="star" size={12} color="#F4B400" />
           <Text style={styles.googleValue}>N/A</Text>
-          <Text style={styles.googleCount}>  (0)</Text>
+          <Text style={styles.googleCount}> (0)</Text>
         </View>
       </View>
     </View>

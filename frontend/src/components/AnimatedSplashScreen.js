@@ -97,10 +97,7 @@ export default function AnimatedSplashScreen({ onAnimationComplete, isReady }) {
   }));
 
   const logoAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: logoScale.value },
-      { rotate: `${logoRotation.value}deg` },
-    ],
+    transform: [{ scale: logoScale.value }, { rotate: `${logoRotation.value}deg` }],
   }));
 
   const containerAnimatedStyle = useAnimatedStyle(() => ({
@@ -174,10 +171,30 @@ export default function AnimatedSplashScreen({ onAnimationComplete, isReady }) {
 
             {/* Inner pattern lines */}
             <View style={styles.patternContainer}>
-              <View style={[styles.patternLine, { top: 10, left: 15, transform: [{ rotate: '45deg' }] }]} />
-              <View style={[styles.patternLine, { top: 20, left: 25, transform: [{ rotate: '-45deg' }] }]} />
-              <View style={[styles.patternLine, { top: 30, left: 15, transform: [{ rotate: '45deg' }] }]} />
-              <View style={[styles.patternLine, { top: 40, left: 25, transform: [{ rotate: '-45deg' }] }]} />
+              <View
+                style={[
+                  styles.patternLine,
+                  { top: 10, left: 15, transform: [{ rotate: '45deg' }] },
+                ]}
+              />
+              <View
+                style={[
+                  styles.patternLine,
+                  { top: 20, left: 25, transform: [{ rotate: '-45deg' }] },
+                ]}
+              />
+              <View
+                style={[
+                  styles.patternLine,
+                  { top: 30, left: 15, transform: [{ rotate: '45deg' }] },
+                ]}
+              />
+              <View
+                style={[
+                  styles.patternLine,
+                  { top: 40, left: 25, transform: [{ rotate: '-45deg' }] },
+                ]}
+              />
             </View>
           </View>
         </Animated.View>
@@ -194,7 +211,9 @@ export default function AnimatedSplashScreen({ onAnimationComplete, isReady }) {
 
         {/* Orange curved lines */}
         <View style={[styles.swoosh, { top: 30, right: 40, transform: [{ rotate: '45deg' }] }]} />
-        <View style={[styles.swoosh, { bottom: 90, left: 45, transform: [{ rotate: '-45deg' }] }]} />
+        <View
+          style={[styles.swoosh, { bottom: 90, left: 45, transform: [{ rotate: '-45deg' }] }]}
+        />
       </Animated.View>
     </Animated.View>
   );
@@ -290,4 +309,3 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
 });
-

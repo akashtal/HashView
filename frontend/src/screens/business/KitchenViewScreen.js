@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl, StatusBar, Vibration } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+  StatusBar,
+  Vibration,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import ApiService from '../../services/api.service';
@@ -16,7 +25,7 @@ export default function KitchenViewScreen({ navigation, route }) {
     try {
       const response = await ApiService.getBusinessOrders(businessId, { status: 'active' });
       if (response.success) {
-        const kitchenOrders = response.data.filter(o =>
+        const kitchenOrders = response.data.filter((o) =>
           ['new', 'accepted', 'preparing'].includes(o.status)
         );
         kitchenOrders.sort((a, b) => new Date(a.placedAt) - new Date(b.placedAt));
@@ -40,7 +49,7 @@ export default function KitchenViewScreen({ navigation, route }) {
       // Add new order if it's relevant to kitchen (should be 'new' by default)
       if (['new', 'accepted', 'preparing'].includes(order.status)) {
         Vibration.vibrate([0, 500, 200, 500]);
-        setOrders(prev => {
+        setOrders((prev) => {
           const updated = [...prev, order];
           updated.sort((a, b) => new Date(a.placedAt) - new Date(b.placedAt));
           return updated;
@@ -48,14 +57,14 @@ export default function KitchenViewScreen({ navigation, route }) {
       }
     },
     onOrderStatusUpdated: (updatedOrder) => {
-      setOrders(prev => {
+      setOrders((prev) => {
         // If it's ready/delivered/cancelled, remove it from kitchen view
         if (!['new', 'accepted', 'preparing'].includes(updatedOrder.status)) {
-          return prev.filter(o => o._id !== updatedOrder._id);
+          return prev.filter((o) => o._id !== updatedOrder._id);
         }
-        return prev.map(o => o._id === updatedOrder._id ? { ...o, ...updatedOrder } : o);
+        return prev.map((o) => (o._id === updatedOrder._id ? { ...o, ...updatedOrder } : o));
       });
-    }
+    },
   });
 
   const onRefresh = useCallback(() => {
@@ -81,7 +90,9 @@ export default function KitchenViewScreen({ navigation, route }) {
         </View>
       </View>
 
-      <Text className="text-sm text-gray-500 mb-4">{new Date(item.placedAt).toLocaleTimeString()}</Text>
+      <Text className="text-sm text-gray-500 mb-4">
+        {new Date(item.placedAt).toLocaleTimeString()}
+      </Text>
 
       {item.orderNotes && (
         <View className="bg-red-50 p-3 rounded-lg mb-4">
@@ -96,10 +107,14 @@ export default function KitchenViewScreen({ navigation, route }) {
               {orderItem.quantity}x {orderItem.name}
             </Text>
             {orderItem.modifiers.map((m, i) => (
-              <Text key={`m-${i}`} className="text-sm text-gray-600 ml-4">• {m.name}</Text>
+              <Text key={`m-${i}`} className="text-sm text-gray-600 ml-4">
+                • {m.name}
+              </Text>
             ))}
             {orderItem.addOns.map((a, i) => (
-              <Text key={`a-${i}`} className="text-sm text-gray-600 ml-4">+ {a.name}</Text>
+              <Text key={`a-${i}`} className="text-sm text-gray-600 ml-4">
+                + {a.name}
+              </Text>
             ))}
             {orderItem.itemNotes && (
               <Text className="text-sm text-red-500 italic ml-4">Note: {orderItem.itemNotes}</Text>
@@ -156,7 +171,7 @@ export default function KitchenViewScreen({ navigation, route }) {
       ) : (
         <FlatList
           data={orders}
-          keyExtractor={item => item._id}
+          keyExtractor={(item) => item._id}
           renderItem={renderOrderItem}
           contentContainerStyle={{ padding: 16 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

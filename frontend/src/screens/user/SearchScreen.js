@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, ActivityIndicator, ScrollView, StatusBar } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  ScrollView,
+  StatusBar,
+} from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -46,7 +55,7 @@ export default function SearchScreen({ navigation }) {
         });
         const locCoords = {
           latitude: location.coords.latitude,
-          longitude: location.coords.longitude
+          longitude: location.coords.longitude,
         };
         setCurrentLocation(locCoords);
         setHasLocation(true);
@@ -74,20 +83,22 @@ export default function SearchScreen({ navigation }) {
         slug: 'all',
         icon: 'apps',
         color: COLORS.secondary,
-        order: -1
+        order: -1,
       };
 
       setCategories([allCategory, ...response.categories]);
     } catch (error) {
       console.error('Failed to load categories:', error);
       // Fallback to empty categories if failed
-      setCategories([{
-        _id: 'all',
-        name: 'All',
-        slug: 'all',
-        icon: 'apps',
-        color: COLORS.secondary
-      }]);
+      setCategories([
+        {
+          _id: 'all',
+          name: 'All',
+          slug: 'all',
+          icon: 'apps',
+          color: COLORS.secondary,
+        },
+      ]);
     } finally {
       setLoadingCategories(false);
     }
@@ -95,80 +106,89 @@ export default function SearchScreen({ navigation }) {
 
   // Backend handles all search and filtering logic - frontend just passes parameters
   // Call API directly and store in local state (independent from home screen)
-  const fetchFilteredBusinesses = useCallback(async (pageNumber = 1, overrideLocation = null, queryOverride = null) => {
-    try {
-      if (pageNumber === 1) {
-        setSearchLoading(true);
-      } else {
-        setLoadingMore(true);
-      }
-
-      const params = {
-        page: pageNumber,
-        limit: 10
-      };
-
-      const actualQuery = queryOverride !== null ? queryOverride : searchQuery;
-
-      // Pass search query to backend (backend handles case-insensitive search)
-      if (actualQuery && actualQuery.trim() !== '') {
-        params.search = actualQuery.trim();
-        console.log(`🔍 Searching for: ${params.search} (Page: ${pageNumber})`);
-      }
-
-      // Pass category to backend (backend handles case-insensitive matching)
-      if (selectedCategory && typeof selectedCategory === 'string' && selectedCategory.trim() !== '') {
-        params.category = selectedCategory.trim();
-        console.log(`🏷️ Filtering by category: ${params.category} (Page: ${pageNumber})`);
-      }
-
-      console.log('📡 API params:', params);
-
-      // Call API directly (not through Redux) to keep search screen independent
-      let response;
-      const targetLocation = overrideLocation || currentLocation;
-
-      if (targetLocation && targetLocation.latitude) {
-        params.latitude = targetLocation.latitude;
-        params.longitude = targetLocation.longitude;
-        params.radius = 20000000; // 20,000 km default radius so global test properties show up
-        response = await ApiService.getNearbyBusinesses(params);
-      } else {
-        response = await ApiService.getAllActiveBusinesses(params);
-      }
-
-      // API client interceptor already unwraps response.data, so response is already the data object
-      if (response && response.businesses && Array.isArray(response.businesses)) {
-        console.log(`✅ Search results received: ${response.businesses.length} businesses (Page ${response.pagination?.page || pageNumber}/${response.pagination?.pages || 1})`);
-
+  const fetchFilteredBusinesses = useCallback(
+    async (pageNumber = 1, overrideLocation = null, queryOverride = null) => {
+      try {
         if (pageNumber === 1) {
-          setSearchResults(response.businesses);
+          setSearchLoading(true);
         } else {
-          setSearchResults(prev => {
-            const newBusinesses = response.businesses.filter(
-              newBiz => !prev.some(existingBiz => existingBiz._id === newBiz._id)
-            );
-            return [...prev, ...newBusinesses];
-          });
+          setLoadingMore(true);
         }
 
-        // Update pagination data
-        setPage(response.pagination?.page || pageNumber);
-        setTotalPages(response.pagination?.pages || 1);
-      } else {
-        console.log('⚠️ No businesses in response. Response structure:', response);
-        if (pageNumber === 1) {
-          setSearchResults([]);
+        const params = {
+          page: pageNumber,
+          limit: 10,
+        };
+
+        const actualQuery = queryOverride !== null ? queryOverride : searchQuery;
+
+        // Pass search query to backend (backend handles case-insensitive search)
+        if (actualQuery && actualQuery.trim() !== '') {
+          params.search = actualQuery.trim();
+          console.log(`🔍 Searching for: ${params.search} (Page: ${pageNumber})`);
         }
+
+        // Pass category to backend (backend handles case-insensitive matching)
+        if (
+          selectedCategory &&
+          typeof selectedCategory === 'string' &&
+          selectedCategory.trim() !== ''
+        ) {
+          params.category = selectedCategory.trim();
+          console.log(`🏷️ Filtering by category: ${params.category} (Page: ${pageNumber})`);
+        }
+
+        console.log('📡 API params:', params);
+
+        // Call API directly (not through Redux) to keep search screen independent
+        let response;
+        const targetLocation = overrideLocation || currentLocation;
+
+        if (targetLocation && targetLocation.latitude) {
+          params.latitude = targetLocation.latitude;
+          params.longitude = targetLocation.longitude;
+          params.radius = 20000000; // 20,000 km default radius so global test properties show up
+          response = await ApiService.getNearbyBusinesses(params);
+        } else {
+          response = await ApiService.getAllActiveBusinesses(params);
+        }
+
+        // API client interceptor already unwraps response.data, so response is already the data object
+        if (response && response.businesses && Array.isArray(response.businesses)) {
+          console.log(
+            `✅ Search results received: ${response.businesses.length} businesses (Page ${response.pagination?.page || pageNumber}/${response.pagination?.pages || 1})`
+          );
+
+          if (pageNumber === 1) {
+            setSearchResults(response.businesses);
+          } else {
+            setSearchResults((prev) => {
+              const newBusinesses = response.businesses.filter(
+                (newBiz) => !prev.some((existingBiz) => existingBiz._id === newBiz._id)
+              );
+              return [...prev, ...newBusinesses];
+            });
+          }
+
+          // Update pagination data
+          setPage(response.pagination?.page || pageNumber);
+          setTotalPages(response.pagination?.pages || 1);
+        } else {
+          console.log('⚠️ No businesses in response. Response structure:', response);
+          if (pageNumber === 1) {
+            setSearchResults([]);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error fetching businesses:', error);
+        if (pageNumber === 1) setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+        setLoadingMore(false);
       }
-    } catch (error) {
-      console.error('❌ Error fetching businesses:', error);
-      if (pageNumber === 1) setSearchResults([]);
-    } finally {
-      setSearchLoading(false);
-      setLoadingMore(false);
-    }
-  }, [searchQuery, selectedCategory, currentLocation]);
+    },
+    [searchQuery, selectedCategory, currentLocation]
+  );
 
   // Handle load more
   const handleLoadMore = useCallback(() => {
@@ -179,7 +199,10 @@ export default function SearchScreen({ navigation }) {
   }, [searchLoading, loadingMore, page, totalPages, fetchFilteredBusinesses]);
 
   // Debounced search for text input (only for typing, not for initial load)
-  const debouncedSearch = useMemo(() => debounce((text) => fetchFilteredBusinesses(1, null, text), 500), [fetchFilteredBusinesses]);
+  const debouncedSearch = useMemo(
+    () => debounce((text) => fetchFilteredBusinesses(1, null, text), 500),
+    [fetchFilteredBusinesses]
+  );
 
   // Trigger search when category changes
   const initialCategoryMount = React.useRef(true);
@@ -196,95 +219,108 @@ export default function SearchScreen({ navigation }) {
   }, [selectedCategory]);
 
   // Memoize renderBusiness for performance
-  const renderBusiness = useCallback(({ item }) => (
-    <TouchableOpacity
-      onPress={() => navigation.navigate('BusinessDetail', { businessId: item._id })}
-      className="bg-white rounded-2xl p-3 mb-3 shadow-sm overflow-hidden"
-      style={{ height: 120 }}
-    >
-      <View className="flex-row h-full">
-        {/* Logo/Image Section */}
-        <View className="w-24 h-full mr-3 rounded-xl overflow-hidden" style={{ backgroundColor: '#FFF9F0' }}>
-          {item.coverImage?.url ? (
-            <Image
-              source={{ uri: optimizeImageUri(item.coverImage.url, 200, 80) }}
-              style={{ width: '100%', height: '100%' }}
-              contentFit="cover"
-              cachePolicy="disk"
-              recyclingKey={item._id}
-            />
-          ) : item.logo?.url ? (
-            <View className="w-full h-full items-center justify-center">
+  const renderBusiness = useCallback(
+    ({ item }) => (
+      <TouchableOpacity
+        onPress={() => navigation.navigate('BusinessDetail', { businessId: item._id })}
+        className="bg-white rounded-2xl p-3 mb-3 shadow-sm overflow-hidden"
+        style={{ height: 120 }}
+      >
+        <View className="flex-row h-full">
+          {/* Logo/Image Section */}
+          <View
+            className="w-24 h-full mr-3 rounded-xl overflow-hidden"
+            style={{ backgroundColor: '#FFF9F0' }}
+          >
+            {item.coverImage?.url ? (
               <Image
-                source={{ uri: optimizeImageUri(item.logo.url, 150, 85) }}
-                style={{ width: 70, height: 70, borderRadius: 8 }}
+                source={{ uri: optimizeImageUri(item.coverImage.url, 200, 80) }}
+                style={{ width: '100%', height: '100%' }}
                 contentFit="cover"
                 cachePolicy="disk"
-                recyclingKey={`logo-${item._id}`}
+                recyclingKey={item._id}
               />
-            </View>
-          ) : (
-            <View className="w-full h-full items-center justify-center">
-              <Icon name="business" size={36} color={COLORS.secondary} />
-            </View>
-          )}
-        </View>
-
-        {/* Content Section */}
-        <View className="flex-1 justify-between">
-          <View className="flex-1">
-            <Text className="text-base font-bold text-gray-900 mb-1" numberOfLines={1}>
-              {item.name}
-            </Text>
-
-            {/* Ratings Row */}
-            <View className="flex-row items-center mb-1 flex-wrap">
-              <Icon name="star" size={14} color={COLORS.secondary} />
-              <Text className="text-xs text-gray-600 ml-1 mr-2">
-                {item.rating?.average?.toFixed(1) || '0.0'}
-              </Text>
-              {item.externalProfiles?.googleBusiness?.rating && (
-                <>
-                  <Icon name="logo-google" size={12} color="#4285F4" />
-                  <Text className="text-xs text-gray-600 ml-1 mr-2">
-                    {item.externalProfiles.googleBusiness.rating.toFixed(1)}
-                  </Text>
-                </>
-              )}
-              {item.externalProfiles?.tripAdvisor?.rating && (
-                <>
-                  <Image
-                    source={require('../../../assets/tripadvisor.png')}
-                    style={{ width: 12, height: 12 }}
-                    resizeMode="contain"
-                  />
-                  <Text className="text-xs text-gray-600 ml-1">
-                    {item.externalProfiles.tripAdvisor.rating.toFixed(1)}
-                  </Text>
-                </>
-              )}
-            </View>
-
-            <View className="flex-row items-center">
-              <Icon name="location-outline" size={12} color="#6B7280" />
-              <Text className="text-xs text-gray-500 ml-1 flex-1" numberOfLines={1}>
-                {item.address?.fullAddress || [item.address?.area, item.address?.city].filter(Boolean).join(', ') || item.address?.city || item.address?.street || 'Location not specified'}
-              </Text>
-            </View>
+            ) : item.logo?.url ? (
+              <View className="w-full h-full items-center justify-center">
+                <Image
+                  source={{ uri: optimizeImageUri(item.logo.url, 150, 85) }}
+                  style={{ width: 70, height: 70, borderRadius: 8 }}
+                  contentFit="cover"
+                  cachePolicy="disk"
+                  recyclingKey={`logo-${item._id}`}
+                />
+              </View>
+            ) : (
+              <View className="w-full h-full items-center justify-center">
+                <Icon name="business" size={36} color={COLORS.secondary} />
+              </View>
+            )}
           </View>
 
-          <View className="flex-row items-center justify-between">
-            <View className="rounded-full px-2 py-1" style={{ backgroundColor: '#FFF9F0' }}>
-              <Text className="text-xs font-semibold capitalize" style={{ color: COLORS.secondary }}>
-                {item.category}
+          {/* Content Section */}
+          <View className="flex-1 justify-between">
+            <View className="flex-1">
+              <Text className="text-base font-bold text-gray-900 mb-1" numberOfLines={1}>
+                {item.name}
               </Text>
+
+              {/* Ratings Row */}
+              <View className="flex-row items-center mb-1 flex-wrap">
+                <Icon name="star" size={14} color={COLORS.secondary} />
+                <Text className="text-xs text-gray-600 ml-1 mr-2">
+                  {item.rating?.average?.toFixed(1) || '0.0'}
+                </Text>
+                {item.externalProfiles?.googleBusiness?.rating && (
+                  <>
+                    <Icon name="logo-google" size={12} color="#4285F4" />
+                    <Text className="text-xs text-gray-600 ml-1 mr-2">
+                      {item.externalProfiles.googleBusiness.rating.toFixed(1)}
+                    </Text>
+                  </>
+                )}
+                {item.externalProfiles?.tripAdvisor?.rating && (
+                  <>
+                    <Image
+                      source={require('../../../assets/tripadvisor.png')}
+                      style={{ width: 12, height: 12 }}
+                      resizeMode="contain"
+                    />
+                    <Text className="text-xs text-gray-600 ml-1">
+                      {item.externalProfiles.tripAdvisor.rating.toFixed(1)}
+                    </Text>
+                  </>
+                )}
+              </View>
+
+              <View className="flex-row items-center">
+                <Icon name="location-outline" size={12} color="#6B7280" />
+                <Text className="text-xs text-gray-500 ml-1 flex-1" numberOfLines={1}>
+                  {item.address?.fullAddress ||
+                    [item.address?.area, item.address?.city].filter(Boolean).join(', ') ||
+                    item.address?.city ||
+                    item.address?.street ||
+                    'Location not specified'}
+                </Text>
+              </View>
             </View>
-            <Icon name="chevron-forward" size={20} color="#D1D5DB" />
+
+            <View className="flex-row items-center justify-between">
+              <View className="rounded-full px-2 py-1" style={{ backgroundColor: '#FFF9F0' }}>
+                <Text
+                  className="text-xs font-semibold capitalize"
+                  style={{ color: COLORS.secondary }}
+                >
+                  {item.category}
+                </Text>
+              </View>
+              <Icon name="chevron-forward" size={20} color="#D1D5DB" />
+            </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  ), [navigation]); // Close useCallback
+      </TouchableOpacity>
+    ),
+    [navigation]
+  ); // Close useCallback
 
   // Memoize keyExtractor
   const keyExtractor = useCallback((item) => item._id, []);
@@ -292,10 +328,7 @@ export default function SearchScreen({ navigation }) {
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between mb-4">
           <Text className="text-white text-2xl font-bold">Search</Text>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -325,10 +358,12 @@ export default function SearchScreen({ navigation }) {
             autoFocus={true}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => {
-              setSearchQuery('');
-              fetchFilteredBusinesses(1);
-            }}>
+            <TouchableOpacity
+              onPress={() => {
+                setSearchQuery('');
+                fetchFilteredBusinesses(1);
+              }}
+            >
               <Icon name="close-circle" size={22} color="#9CA3AF" />
             </TouchableOpacity>
           )}
@@ -371,7 +406,13 @@ export default function SearchScreen({ navigation }) {
                       <View className="w-12 h-12 rounded-lg overflow-hidden mr-3 bg-gray-100">
                         {business.coverImage?.url || business.logo?.url ? (
                           <Image
-                            source={{ uri: optimizeImageUri(business.coverImage?.url || business.logo?.url, 100, 100) }}
+                            source={{
+                              uri: optimizeImageUri(
+                                business.coverImage?.url || business.logo?.url,
+                                100,
+                                100
+                              ),
+                            }}
                             className="w-full h-full"
                             resizeMode="cover"
                           />
@@ -388,12 +429,20 @@ export default function SearchScreen({ navigation }) {
                         <View className="flex-row items-center mt-1">
                           <Icon name="location-outline" size={12} color="#6B7280" />
                           <Text className="text-xs text-gray-500 ml-1 flex-1" numberOfLines={1}>
-                            {business.address?.fullAddress || [business.address?.area, business.address?.city].filter(Boolean).join(', ') || business.address?.city || business.address?.street || 'Location not specified'}
+                            {business.address?.fullAddress ||
+                              [business.address?.area, business.address?.city]
+                                .filter(Boolean)
+                                .join(', ') ||
+                              business.address?.city ||
+                              business.address?.street ||
+                              'Location not specified'}
                           </Text>
                         </View>
                         {business.category && (
                           <View className="mt-1">
-                            <Text className="text-xs text-gray-400 capitalize">{business.category}</Text>
+                            <Text className="text-xs text-gray-400 capitalize">
+                              {business.category}
+                            </Text>
                           </View>
                         )}
                       </View>
@@ -409,7 +458,10 @@ export default function SearchScreen({ navigation }) {
                     </View>
                   ) : page < totalPages ? (
                     <TouchableOpacity onPress={handleLoadMore}>
-                      <Text className="text-xs text-secondary font-bold" style={{ color: COLORS.secondary }}>
+                      <Text
+                        className="text-xs text-secondary font-bold"
+                        style={{ color: COLORS.secondary }}
+                      >
                         Load more results
                       </Text>
                     </TouchableOpacity>
@@ -417,7 +469,6 @@ export default function SearchScreen({ navigation }) {
                     <Text className="text-xs text-gray-500">End of results</Text>
                   )}
                 </View>
-
               </ScrollView>
             ) : (
               <View className="py-6 px-4 items-center">
@@ -465,8 +516,8 @@ export default function SearchScreen({ navigation }) {
                 : (category.name || category.value || category.slug || '').trim();
 
               const isSelected = isAllCategory
-                ? (!selectedCategory || selectedCategory === null)
-                : (selectedCategory === filterValue && filterValue !== '');
+                ? !selectedCategory || selectedCategory === null
+                : selectedCategory === filterValue && filterValue !== '';
 
               return (
                 <TouchableOpacity
@@ -488,9 +539,7 @@ export default function SearchScreen({ navigation }) {
                       width: 56,
                       height: 56,
                       borderRadius: 28,
-                      backgroundColor: isSelected
-                        ? '#5e399e'
-                        : '#FFFFFF',
+                      backgroundColor: isSelected ? '#5e399e' : '#FFFFFF',
                       borderWidth: isSelected ? 0 : 1.5,
                       borderColor: '#E5E7EB',
                       shadowColor: '#000',
@@ -511,8 +560,9 @@ export default function SearchScreen({ navigation }) {
                   </View>
                   {/* Category Label */}
                   <Text
-                    className={`text-[11px] font-medium text-center pb-1 ${isSelected ? 'text-[#5e399e]' : 'text-gray-700'
-                      }`}
+                    className={`text-[11px] font-medium text-center pb-1 ${
+                      isSelected ? 'text-[#5e399e]' : 'text-gray-700'
+                    }`}
                     numberOfLines={1}
                   >
                     {category.name}
@@ -534,7 +584,9 @@ export default function SearchScreen({ navigation }) {
             ) : searchResults.length === 0 ? (
               <View className="items-center py-20">
                 <Icon name="business-outline" size={64} color="#D1D5DB" />
-                <Text className="text-gray-900 text-lg font-bold mt-4">No businesses available</Text>
+                <Text className="text-gray-900 text-lg font-bold mt-4">
+                  No businesses available
+                </Text>
                 <Text className="text-gray-500 mt-2 text-center px-8">
                   Try searching or selecting a category
                 </Text>
@@ -563,7 +615,8 @@ export default function SearchScreen({ navigation }) {
                         <ActivityIndicator size="small" color={COLORS.secondary} />
                       </View>
                     ) : (
-                      page >= totalPages && searchResults.length > 0 && (
+                      page >= totalPages &&
+                      searchResults.length > 0 && (
                         <View className="py-4 items-center">
                           <Text className="text-gray-400 text-xs">End of results</Text>
                         </View>
@@ -572,8 +625,8 @@ export default function SearchScreen({ navigation }) {
                   }
                   getItemLayout={(data, index) => ({
                     length: 120,
-                    offset: 120 * index + (index * 12), // height + margin
-                    index
+                    offset: 120 * index + index * 12, // height + margin
+                    index,
                   })}
                 />
               </>

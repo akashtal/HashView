@@ -84,7 +84,7 @@ export default function LoginScreen({ navigation, route }) {
 
     const loginData = {
       ...formData,
-      role: role
+      role: role,
     };
 
     try {
@@ -119,10 +119,7 @@ export default function LoginScreen({ navigation, route }) {
   const config = roleConfig[role] || roleConfig.customer;
 
   return (
-    <LinearGradient
-      colors={[COLORS.primary, COLORS.primaryDark]}
-      className="flex-1"
-    >
+    <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="flex-1">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       <KeyboardAvoidingView
@@ -144,19 +141,21 @@ export default function LoginScreen({ navigation, route }) {
 
           {/* Logo */}
           <View className="items-center mt-8 mb-6">
-            <View style={{
-              width: 160,
-              height: 160,
-              borderRadius: 80,
-              backgroundColor: '#FFF',
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.15,
-              shadowRadius: 8,
-              elevation: 6
-            }}>
+            <View
+              style={{
+                width: 160,
+                height: 160,
+                borderRadius: 80,
+                backgroundColor: '#FFF',
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+                elevation: 6,
+              }}
+            >
               <Image
                 source={require('../../../assets/HashViewlogo-01.png')}
                 style={{ width: 140, height: 140 }}
@@ -169,18 +168,11 @@ export default function LoginScreen({ navigation, route }) {
           <View className="flex-1 bg-white rounded-t-3xl px-6 pt-8">
             {/* Header */}
             <View className="items-center mb-6">
-              <LinearGradient
-                colors={config.gradientColors}
-                className="rounded-full p-4 mb-4"
-              >
+              <LinearGradient colors={config.gradientColors} className="rounded-full p-4 mb-4">
                 <Icon name={config.icon} size={32} color="white" />
               </LinearGradient>
-              <Text className="text-3xl font-bold text-gray-900">
-                {config.title}
-              </Text>
-              <Text className="text-gray-600 mt-2">
-                Sign in to continue
-              </Text>
+              <Text className="text-3xl font-bold text-gray-900">{config.title}</Text>
+              <Text className="text-gray-600 mt-2">Sign in to continue</Text>
             </View>
 
             {/* OAuth Sign-In Options */}
@@ -202,7 +194,11 @@ export default function LoginScreen({ navigation, route }) {
                 className="flex-row items-center bg-gray-50 rounded-xl px-4 py-4 border"
                 style={{ borderColor: errors.email ? COLORS.error : COLORS.gray200 }}
               >
-                <Icon name="mail-outline" size={22} color={errors.email ? COLORS.error : COLORS.gray500} />
+                <Icon
+                  name="mail-outline"
+                  size={22}
+                  color={errors.email ? COLORS.error : COLORS.gray500}
+                />
                 <TextInput
                   className="flex-1 ml-3 text-gray-900 text-base"
                   placeholder="Enter your email"
@@ -229,7 +225,11 @@ export default function LoginScreen({ navigation, route }) {
                 className="flex-row items-center bg-gray-50 rounded-xl px-4 py-4 border"
                 style={{ borderColor: errors.password ? COLORS.error : COLORS.gray200 }}
               >
-                <Icon name="lock-closed-outline" size={22} color={errors.password ? COLORS.error : COLORS.gray500} />
+                <Icon
+                  name="lock-closed-outline"
+                  size={22}
+                  color={errors.password ? COLORS.error : COLORS.gray500}
+                />
                 <TextInput
                   className="flex-1 ml-3 text-gray-900 text-base"
                   placeholder="Enter your password"
@@ -265,11 +265,7 @@ export default function LoginScreen({ navigation, route }) {
             </TouchableOpacity>
 
             {/* Login Button */}
-            <TouchableOpacity
-              onPress={handleLogin}
-              disabled={loading}
-              activeOpacity={0.8}
-            >
+            <TouchableOpacity onPress={handleLogin} disabled={loading} activeOpacity={0.8}>
               <LinearGradient
                 colors={config.gradientColors}
                 className="rounded-xl py-4 items-center"
@@ -278,19 +274,29 @@ export default function LoginScreen({ navigation, route }) {
                 {loading ? (
                   <ActivityIndicator color="white" size="small" />
                 ) : (
-                  <Text className="text-white font-bold text-lg">
-                    Sign In
-                  </Text>
+                  <Text className="text-white font-bold text-lg">Sign In</Text>
                 )}
               </LinearGradient>
             </TouchableOpacity>
 
             {/* T&C note */}
-            <Text style={{ textAlign: 'center', fontSize: 11.5, color: '#9CA3AF', marginTop: 12, lineHeight: 17 }}>
+            <Text
+              style={{
+                textAlign: 'center',
+                fontSize: 11.5,
+                color: '#9CA3AF',
+                marginTop: 12,
+                lineHeight: 17,
+              }}
+            >
               By signing in you agree to our{' '}
               <Text
                 onPress={() => navigation.navigate('TermsAndConditions')}
-                style={{ color: COLORS.secondary, fontWeight: '600', textDecorationLine: 'underline' }}
+                style={{
+                  color: COLORS.secondary,
+                  fontWeight: '600',
+                  textDecorationLine: 'underline',
+                }}
               >
                 Terms & Conditions
               </Text>

@@ -9,7 +9,7 @@ import {
   TextInput,
   Alert,
   Image,
-  Modal
+  Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -32,7 +32,11 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
 
   // Modal states
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
-  const [timePickerModal, setTimePickerModal] = useState({ visible: false, day: null, field: null });
+  const [timePickerModal, setTimePickerModal] = useState({
+    visible: false,
+    day: null,
+    field: null,
+  });
   const [previewModalVisible, setPreviewModalVisible] = useState(false);
 
   // Prevent Android "AlreadyResumed" crash
@@ -44,7 +48,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
   const [cropModal, setCropModal] = useState({
     visible: false,
     imageUri: null,
-    type: null // 'logo' or 'coverImage'
+    type: null, // 'logo' or 'coverImage'
   });
 
   const [formData, setFormData] = useState({
@@ -56,23 +60,23 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
     website: '',
     category: '',
     radius: '50',
-    orderRadius: '50'
+    orderRadius: '50',
   });
   const [images, setImages] = useState({
     logo: null,
     coverImage: null,
-    gallery: []
+    gallery: [],
   });
   const [uploadedImages, setUploadedImages] = useState({
     logo: null,
     coverImage: null,
-    gallery: []
+    gallery: [],
   });
   const [uploadingImages, setUploadingImages] = useState(false);
   const [originalImages, setOriginalImages] = useState({
     logo: null,
     coverImage: null,
-    gallery: []
+    gallery: [],
   });
   const [openHours, setOpenHours] = useState({
     monday: { open: '09:00', close: '17:00', closed: false },
@@ -81,7 +85,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
     thursday: { open: '09:00', close: '17:00', closed: false },
     friday: { open: '09:00', close: '17:00', closed: false },
     saturday: { open: '09:00', close: '17:00', closed: false },
-    sunday: { open: '09:00', close: '17:00', closed: true }
+    sunday: { open: '09:00', close: '17:00', closed: true },
   });
 
   useEffect(() => {
@@ -95,9 +99,9 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
       const response = await ApiService.getCategories();
 
       if (response.success && response.categories) {
-        const categoryOptions = response.categories.map(cat => ({
+        const categoryOptions = response.categories.map((cat) => ({
           label: cat.name,
-          value: cat.value || cat.name.toLowerCase()
+          value: cat.value || cat.name.toLowerCase(),
         }));
         setCategories(categoryOptions);
       }
@@ -110,13 +114,32 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
   };
 
   const timeSlots = [
-    'Closed', '00:00', '01:00', '02:00', '03:00', '04:00', '05:00',
-    '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00',
-    '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00',
-    '20:00', '21:00', '22:00', '23:00'
+    'Closed',
+    '00:00',
+    '01:00',
+    '02:00',
+    '03:00',
+    '04:00',
+    '05:00',
+    '06:00',
+    '07:00',
+    '08:00',
+    '09:00',
+    '10:00',
+    '11:00',
+    '12:00',
+    '13:00',
+    '14:00',
+    '15:00',
+    '16:00',
+    '17:00',
+    '18:00',
+    '19:00',
+    '20:00',
+    '21:00',
+    '22:00',
+    '23:00',
   ];
-
-
 
   const fetchBusinessData = async () => {
     try {
@@ -133,7 +156,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         website: business.socialMedia?.website || '',
         category: business.category || '',
         radius: business.radius ? String(business.radius) : '50',
-        orderRadius: business.orderRadius ? String(business.orderRadius) : '50'
+        orderRadius: business.orderRadius ? String(business.orderRadius) : '50',
       });
 
       if (business.openingHours) {
@@ -142,24 +165,48 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
 
       // Set original images from business
       const originalImgs = {
-        logo: business.logo?.url ? { uri: business.logo.url, url: business.logo.url, publicId: business.logo.publicId } : null,
-        coverImage: business.coverImage?.url ? { uri: business.coverImage.url, url: business.coverImage.url, publicId: business.coverImage.publicId } : null,
-        gallery: (business.images || []).map(img => ({ uri: img.url, url: img.url, publicId: img.publicId }))
+        logo: business.logo?.url
+          ? { uri: business.logo.url, url: business.logo.url, publicId: business.logo.publicId }
+          : null,
+        coverImage: business.coverImage?.url
+          ? {
+              uri: business.coverImage.url,
+              url: business.coverImage.url,
+              publicId: business.coverImage.publicId,
+            }
+          : null,
+        gallery: (business.images || []).map((img) => ({
+          uri: img.url,
+          url: img.url,
+          publicId: img.publicId,
+        })),
       };
 
       setOriginalImages(originalImgs);
 
       if (business.logo?.url) {
-        setImages(prev => ({ ...prev, logo: { uri: business.logo.url } }));
-        setUploadedImages(prev => ({ ...prev, logo: { url: business.logo.url, publicId: business.logo.publicId } }));
+        setImages((prev) => ({ ...prev, logo: { uri: business.logo.url } }));
+        setUploadedImages((prev) => ({
+          ...prev,
+          logo: { url: business.logo.url, publicId: business.logo.publicId },
+        }));
       }
       if (business.coverImage?.url) {
-        setImages(prev => ({ ...prev, coverImage: { uri: business.coverImage.url } }));
-        setUploadedImages(prev => ({ ...prev, coverImage: { url: business.coverImage.url, publicId: business.coverImage.publicId } }));
+        setImages((prev) => ({ ...prev, coverImage: { uri: business.coverImage.url } }));
+        setUploadedImages((prev) => ({
+          ...prev,
+          coverImage: { url: business.coverImage.url, publicId: business.coverImage.publicId },
+        }));
       }
       if (business.images && business.images.length > 0) {
-        setImages(prev => ({ ...prev, gallery: business.images.map(img => ({ uri: img.url })) }));
-        setUploadedImages(prev => ({ ...prev, gallery: business.images.map(img => ({ url: img.url, publicId: img.publicId })) }));
+        setImages((prev) => ({
+          ...prev,
+          gallery: business.images.map((img) => ({ uri: img.url })),
+        }));
+        setUploadedImages((prev) => ({
+          ...prev,
+          gallery: business.images.map((img) => ({ url: img.url, publicId: img.publicId })),
+        }));
       }
     } catch (error) {
       console.error(error);
@@ -179,8 +226,8 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
       [day]: {
         ...openHours[day],
         [field]: value,
-        closed: value === 'Closed'
-      }
+        closed: value === 'Closed',
+      },
     });
   };
 
@@ -203,13 +250,13 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         mediaTypes: ['images'],
         allowsEditing: false,
         quality: 0.8,
-        allowsMultipleSelection: type === 'gallery'
+        allowsMultipleSelection: type === 'gallery',
       });
 
       if (!result.canceled) {
         if (type === 'gallery') {
           // Functional updater avoids stale gallery state
-          setImages(prev => ({ ...prev, gallery: [...prev.gallery, ...result.assets] }));
+          setImages((prev) => ({ ...prev, gallery: [...prev.gallery, ...result.assets] }));
         } else {
           // Capture type in a ref AT PICK TIME — handleCropComplete reads this
           // instead of the potentially stale cropModal closure value
@@ -217,7 +264,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
           setCropModal({
             visible: true,
             imageUri: result.assets[0].uri,
-            type: type
+            type: type,
           });
         }
       }
@@ -236,8 +283,8 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
     const type = cropTypeRef.current;
     if (!type) return;
     // Functional updaters ensure freshest state is always used
-    setImages(prev => ({ ...prev, [type]: croppedImage }));
-    setUploadedImages(prev => ({ ...prev, [type]: null }));
+    setImages((prev) => ({ ...prev, [type]: croppedImage }));
+    setUploadedImages((prev) => ({ ...prev, [type]: null }));
     cropTypeRef.current = null;
     setCropModal({ visible: false, imageUri: null, type: null });
   };
@@ -258,12 +305,13 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
       const extension = match ? match[1].toLowerCase() : 'jpg';
       const mimeType = `image/${extension === 'jpg' ? 'jpeg' : extension}`;
 
-      const fieldName = imageType === 'logo' ? 'logo' : imageType === 'coverImage' ? 'coverImage' : 'images';
+      const fieldName =
+        imageType === 'logo' ? 'logo' : imageType === 'coverImage' ? 'coverImage' : 'images';
 
       formData.append(fieldName, {
         uri: imageUri,
         name: filename,
-        type: mimeType
+        type: mimeType,
       });
 
       // Pass businessId to organize images in business-specific folders
@@ -285,7 +333,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
 
         return {
           url: data.url || response.url || data.imageUrl,
-          publicId: data.publicId || response.publicId || data.public_id
+          publicId: data.publicId || response.publicId || data.public_id,
         };
       }
       throw new Error(response.message || 'Upload failed');
@@ -312,7 +360,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         formData.append('images', {
           uri: img.uri,
           name: filename,
-          type: mimeType
+          type: mimeType,
         });
       });
 
@@ -323,7 +371,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         return response.images.map((img, index) => ({
           url: img.url,
           publicId: img.publicId,
-          originalUri: galleryImages[index]?.uri
+          originalUri: galleryImages[index]?.uri,
         }));
       }
 
@@ -352,44 +400,65 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
       const uploadPromises = [];
 
       // Prepare logo upload
-      const needsLogoUpload = images.logo && images.logo.uri !== originalImages.logo?.uri && !images.logo.uri.startsWith('http');
+      const needsLogoUpload =
+        images.logo &&
+        images.logo.uri !== originalImages.logo?.uri &&
+        !images.logo.uri.startsWith('http');
       if (needsLogoUpload) {
         uploadPromises.push(
           uploadImageToCloudinary(images.logo.uri, 'logo')
-            .then(data => { logoData = data; console.log('✅ Logo uploaded:', data.url); })
-            .catch(error => { throw new Error(`Logo upload failed: ${error.message}`); })
+            .then((data) => {
+              logoData = data;
+              console.log('✅ Logo uploaded:', data.url);
+            })
+            .catch((error) => {
+              throw new Error(`Logo upload failed: ${error.message}`);
+            })
         );
       }
 
       // Prepare cover upload
-      const needsCoverUpload = images.coverImage && images.coverImage.uri !== originalImages.coverImage?.uri && !images.coverImage.uri.startsWith('http');
+      const needsCoverUpload =
+        images.coverImage &&
+        images.coverImage.uri !== originalImages.coverImage?.uri &&
+        !images.coverImage.uri.startsWith('http');
       if (needsCoverUpload) {
         uploadPromises.push(
           uploadImageToCloudinary(images.coverImage.uri, 'coverImage')
-            .then(data => { coverImageData = data; console.log('✅ Cover uploaded:', data.url); })
-            .catch(error => { throw new Error(`Cover upload failed: ${error.message}`); })
+            .then((data) => {
+              coverImageData = data;
+              console.log('✅ Cover uploaded:', data.url);
+            })
+            .catch((error) => {
+              throw new Error(`Cover upload failed: ${error.message}`);
+            })
         );
       }
 
       // Prepare gallery upload
-      const newGalleryImages = images.gallery.filter(img =>
-        !originalImages.gallery.some(orig => orig.uri === img.uri)
+      const newGalleryImages = images.gallery.filter(
+        (img) => !originalImages.gallery.some((orig) => orig.uri === img.uri)
       );
       if (newGalleryImages.length > 0) {
         uploadPromises.push(
           uploadGalleryImages(newGalleryImages)
-            .then(uploadedNewGallery => {
+            .then((uploadedNewGallery) => {
               galleryData = [
-                ...uploadedImages.gallery.filter(existing =>
-                  images.gallery.some(img => img.uri === existing.url || img.uri === existing.originalUri)
+                ...uploadedImages.gallery.filter((existing) =>
+                  images.gallery.some(
+                    (img) => img.uri === existing.url || img.uri === existing.originalUri
+                  )
                 ),
-                ...uploadedNewGallery
+                ...uploadedNewGallery,
               ];
               console.log(`✅ Gallery uploaded: ${uploadedNewGallery.length} new images`);
             })
-            .catch(error => {
+            .catch((error) => {
               console.error('Gallery upload warning:', error);
-              ToastService.showWarning('Upload Warning', 'Some gallery images failed. Continuing...');
+              ToastService.showWarning(
+                'Upload Warning',
+                'Some gallery images failed. Continuing...'
+              );
             })
         );
       }
@@ -420,7 +489,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         category: formData.category,
         radius: parseInt(formData.radius) || 50,
         orderRadius: parseInt(formData.orderRadius) || 50,
-        openingHours: openHours
+        openingHours: openHours,
       };
 
       await ApiService.updateBusiness(businessId, updateData);
@@ -458,23 +527,25 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
       }
 
       // Update gallery if changed
-      if (images.gallery.length !== originalImages.gallery.length ||
-        images.gallery.some(img => !originalImages.gallery.some(orig => orig.uri === img.uri))) {
+      if (
+        images.gallery.length !== originalImages.gallery.length ||
+        images.gallery.some((img) => !originalImages.gallery.some((orig) => orig.uri === img.uri))
+      ) {
         imageUpdateData.images = galleryData
-          .filter(img => img && img.url)
-          .map(img => ({
+          .filter((img) => img && img.url)
+          .map((img) => ({
             url: img.url,
-            publicId: img.publicId || img.public_id || null
+            publicId: img.publicId || img.public_id || null,
           }));
         imagesChanged = true;
         console.log(`✅ Gallery will be updated: ${imageUpdateData.images.length} images`);
       } else if (images.gallery.length > 0 && originalImages.gallery.length > 0) {
         // Keep existing gallery if not changed
         imageUpdateData.images = originalImages.gallery
-          .filter(img => img && img.url)
-          .map(img => ({
+          .filter((img) => img && img.url)
+          .map((img) => ({
             url: img.url,
-            publicId: img.publicId || null
+            publicId: img.publicId || null,
           }));
       }
 
@@ -483,7 +554,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         console.log('📤 Updating business images in database...', {
           hasLogo: !!imageUpdateData.logo,
           hasCover: !!imageUpdateData.coverImage,
-          galleryCount: imageUpdateData.images?.length || 0
+          galleryCount: imageUpdateData.images?.length || 0,
         });
         await ApiService.updateBusinessImages(businessId, imageUpdateData);
         console.log('✅ Business images updated in database');
@@ -518,16 +589,15 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">
             <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
               <Icon name="arrow-back" size={24} color="#FFF" />
             </TouchableOpacity>
-            <Text className="text-white text-xl font-bold" numberOfLines={1}>Edit Business Info</Text>
+            <Text className="text-white text-xl font-bold" numberOfLines={1}>
+              Edit Business Info
+            </Text>
           </View>
           <TouchableOpacity
             onPress={() => setPreviewModalVisible(true)}
@@ -545,13 +615,14 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
             activeOpacity={0.75}
           >
             <Icon name="eye-outline" size={16} color="#FFF" />
-            <Text style={{ color: '#FFF', fontSize: 12, fontWeight: '700', marginLeft: 5 }}>Preview</Text>
+            <Text style={{ color: '#FFF', fontSize: 12, fontWeight: '700', marginLeft: 5 }}>
+              Preview
+            </Text>
           </TouchableOpacity>
         </View>
       </LinearGradient>
 
       <ScrollView className="flex-1 px-6 py-6" showsVerticalScrollIndicator={false}>
-
         {/* Logo */}
         <View className="mb-4">
           <View className="flex-row justify-between items-center mb-2">
@@ -641,7 +712,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
           {images.gallery.length > 0 && (
             <View className="flex-row flex-wrap mb-3">
               {images.gallery.map((img, index) => {
-                const isNew = !originalImages.gallery.some(orig => orig.uri === img.uri);
+                const isNew = !originalImages.gallery.some((orig) => orig.uri === img.uri);
 
                 return (
                   <View key={index} className="relative mr-2 mb-2">
@@ -674,7 +745,9 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
           >
             <Icon name="images-outline" size={32} color="#D1D5DB" />
             <Text className="text-gray-500 mt-2">
-              {images.gallery.length > 0 ? `Add More Images (${images.gallery.length} total)` : 'Add Gallery Images'}
+              {images.gallery.length > 0
+                ? `Add More Images (${images.gallery.length} total)`
+                : 'Add Gallery Images'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -726,7 +799,9 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
               activeOpacity={0.8}
             >
               <Icon name="expand-outline" size={13} color="#FFF" />
-              <Text style={{ color: '#FFF', fontSize: 11, fontWeight: '700', marginLeft: 4 }}>Full View</Text>
+              <Text style={{ color: '#FFF', fontSize: 11, fontWeight: '700', marginLeft: 4 }}>
+                Full View
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -815,7 +890,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
             className="bg-white rounded-xl px-4 py-3 border border-gray-200 flex-row justify-between items-center"
           >
             <Text className="text-gray-900 font-medium">
-              {categories.find(c => c.value === formData.category)?.label || 'Select Category'}
+              {categories.find((c) => c.value === formData.category)?.label || 'Select Category'}
             </Text>
             <Icon name="chevron-down" size={20} color="#6B7280" />
           </TouchableOpacity>
@@ -833,16 +908,21 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
                   onPress={() => setTimePickerModal({ visible: true, day, field: 'open' })}
                   className="flex-1 mr-2 bg-white rounded-xl px-3 py-3 border border-gray-200"
                 >
-                  <Text className="text-gray-900 text-center font-medium">{openHours[day].open}</Text>
+                  <Text className="text-gray-900 text-center font-medium">
+                    {openHours[day].open}
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={() => setTimePickerModal({ visible: true, day, field: 'close' })}
                   disabled={openHours[day].open === 'Closed'}
-                  className={`flex-1 ml-2 bg-white rounded-xl px-3 py-3 border border-gray-200 ${openHours[day].open === 'Closed' ? 'opacity-50' : ''
-                    }`}
+                  className={`flex-1 ml-2 bg-white rounded-xl px-3 py-3 border border-gray-200 ${
+                    openHours[day].open === 'Closed' ? 'opacity-50' : ''
+                  }`}
                 >
-                  <Text className="text-gray-900 text-center font-medium">{openHours[day].close}</Text>
+                  <Text className="text-gray-900 text-center font-medium">
+                    {openHours[day].close}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -874,7 +954,10 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
               />
             </View>
           </View>
-          <Text className="text-gray-500 text-xs text-center">Set the maximum distance (10-500m) users must be within to post a review or place an order.</Text>
+          <Text className="text-gray-500 text-xs text-center">
+            Set the maximum distance (10-500m) users must be within to post a review or place an
+            order.
+          </Text>
         </View>
 
         {/* Save Button */}
@@ -888,7 +971,7 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
             colors={[COLORS.secondary, COLORS.secondaryDark]}
             className="rounded-xl py-4 items-center"
           >
-            {(saving || uploadingImages) ? (
+            {saving || uploadingImages ? (
               <View className="flex-row items-center">
                 <ActivityIndicator color="#FFF" size="small" />
                 <Text className="text-white font-bold text-lg ml-3">
@@ -900,7 +983,6 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
             )}
           </LinearGradient>
         </TouchableOpacity>
-
       </ScrollView>
 
       {/* Category Selection Modal */}
@@ -933,11 +1015,17 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
                       handleInputChange('category', category.value);
                       setCategoryModalVisible(false);
                     }}
-                    className={`py-4 px-4 rounded-xl mb-2 border ${formData.category === category.value ? 'bg-purple-50 border-purple-500' : 'bg-gray-50 border-gray-200'
-                      }`}
+                    className={`py-4 px-4 rounded-xl mb-2 border ${
+                      formData.category === category.value
+                        ? 'bg-purple-50 border-purple-500'
+                        : 'bg-gray-50 border-gray-200'
+                    }`}
                   >
-                    <Text className={`font-semibold ${formData.category === category.value ? 'text-purple-700' : 'text-gray-700'
-                      }`}>
+                    <Text
+                      className={`font-semibold ${
+                        formData.category === category.value ? 'text-purple-700' : 'text-gray-700'
+                      }`}
+                    >
                       {category.label}
                     </Text>
                   </TouchableOpacity>
@@ -959,12 +1047,16 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
           <View className="bg-white rounded-t-3xl p-6">
             <View className="flex-row justify-between items-center mb-4">
               <View>
-                <Text className="text-xl font-bold text-gray-900 capitalize">{timePickerModal.day}</Text>
+                <Text className="text-xl font-bold text-gray-900 capitalize">
+                  {timePickerModal.day}
+                </Text>
                 <Text className="text-sm text-gray-600">
                   Select {timePickerModal.field === 'open' ? 'opening' : 'closing'} time
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => setTimePickerModal({ ...timePickerModal, visible: false })}>
+              <TouchableOpacity
+                onPress={() => setTimePickerModal({ ...timePickerModal, visible: false })}
+              >
                 <Icon name="close" size={28} color="#6B7280" />
               </TouchableOpacity>
             </View>
@@ -979,15 +1071,21 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
                       updateOpenHours(day, field, time);
                       setTimePickerModal({ ...timePickerModal, visible: false });
                     }}
-                    className={`w-[31%] py-3 mb-3 rounded-xl items-center border mr-[2%] ${timePickerModal.day && openHours[timePickerModal.day]?.[timePickerModal.field] === time
-                      ? 'bg-purple-50 border-purple-500'
-                      : 'bg-gray-50 border-gray-200'
-                      }`}
+                    className={`w-[31%] py-3 mb-3 rounded-xl items-center border mr-[2%] ${
+                      timePickerModal.day &&
+                      openHours[timePickerModal.day]?.[timePickerModal.field] === time
+                        ? 'bg-purple-50 border-purple-500'
+                        : 'bg-gray-50 border-gray-200'
+                    }`}
                   >
-                    <Text className={`font-bold text-xs ${timePickerModal.day && openHours[timePickerModal.day]?.[timePickerModal.field] === time
-                      ? 'text-purple-700'
-                      : 'text-gray-700'
-                      }`}>
+                    <Text
+                      className={`font-bold text-xs ${
+                        timePickerModal.day &&
+                        openHours[timePickerModal.day]?.[timePickerModal.field] === time
+                          ? 'text-purple-700'
+                          : 'text-gray-700'
+                      }`}
+                    >
                       {time}
                     </Text>
                   </TouchableOpacity>
@@ -1014,13 +1112,15 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
         transparent={true}
         onRequestClose={() => setPreviewModalVisible(false)}
       >
-        <View style={{
-          flex: 1,
-          backgroundColor: 'rgba(10,0,30,0.92)',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: 16,
-        }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(10,0,30,0.92)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 16,
+          }}
+        >
           {/* Close button */}
           <TouchableOpacity
             onPress={() => setPreviewModalVisible(false)}
@@ -1040,15 +1140,17 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
 
           {/* Title */}
           <View style={{ alignItems: 'center', marginBottom: 24, paddingTop: 60 }}>
-            <View style={{
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              borderRadius: 12,
-              paddingHorizontal: 16,
-              paddingVertical: 8,
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 8,
-            }}>
+            <View
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                borderRadius: 12,
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 8,
+              }}
+            >
               <Icon name="phone-portrait-outline" size={16} color="#C4B5FD" />
               <Text style={{ color: '#C4B5FD', fontSize: 13, fontWeight: '700', marginLeft: 8 }}>
                 USER HOME SCREEN — AS SEEN BY CUSTOMERS
@@ -1070,7 +1172,14 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
 
           {/* Hint */}
           <View style={{ marginTop: 20, paddingHorizontal: 16 }}>
-            <Text style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, textAlign: 'center', lineHeight: 17 }}>
+            <Text
+              style={{
+                color: 'rgba(255,255,255,0.45)',
+                fontSize: 11,
+                textAlign: 'center',
+                lineHeight: 17,
+              }}
+            >
               The cover image shown is exactly your cropped version.{`\n`}
               Changes will be visible to customers after you save.
             </Text>
@@ -1094,4 +1203,3 @@ export default function EditBusinessInfoScreen({ navigation, route }) {
     </View>
   );
 }
-

@@ -40,9 +40,9 @@ export const getUserReviews = createAsyncThunk(
 const reviewSlice = createSlice({
   name: 'review',
   initialState: {
-    reviews: [],           // recent (last 7 days) or all reviews
-    oldReviews: [],        // reviews older than 7 days (lazy-loaded)
-    oldReviewCount: 0,     // how many old reviews exist (for "Show Older Reviews" button)
+    reviews: [], // recent (last 7 days) or all reviews
+    oldReviews: [], // reviews older than 7 days (lazy-loaded)
+    oldReviewCount: 0, // how many old reviews exist (for "Show Older Reviews" button)
     oldReviewsLoading: false,
     oldReviewsPage: 1,
     oldReviewsHasMore: false,
@@ -52,7 +52,7 @@ const reviewSlice = createSlice({
     successMessage: null,
     createdCoupon: null,
     isNearbyCoupon: false,
-    couponBusinessName: null
+    couponBusinessName: null,
   },
   reducers: {
     clearError: (state) => {
@@ -142,7 +142,6 @@ const reviewSlice = createSlice({
   },
 });
 
-export const { clearError, clearSuccessMessage, clearCreatedCoupon, clearOldReviews } = reviewSlice.actions;
+export const { clearError, clearSuccessMessage, clearCreatedCoupon, clearOldReviews } =
+  reviewSlice.actions;
 export default reviewSlice.reducer;
-
-

@@ -13,13 +13,21 @@
  *  - Typing indicator while AI generates
  */
 
-import React, {
-  useState, useRef, useEffect, useCallback,
-} from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, FlatList,
-  Animated, Keyboard, KeyboardAvoidingView, Platform,
-  ActivityIndicator, ScrollView, Dimensions, StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  Animated,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  ScrollView,
+  Dimensions,
+  StyleSheet,
   TouchableWithoutFeedback,
 } from 'react-native';
 import { Image } from 'expo-image';
@@ -64,7 +72,7 @@ const TypingIndicator = () => {
         Animated.sequence([
           Animated.delay(delay),
           Animated.timing(dot, { toValue: -6, duration: 300, useNativeDriver: true }),
-          Animated.timing(dot, { toValue:  0, duration: 300, useNativeDriver: true }),
+          Animated.timing(dot, { toValue: 0, duration: 300, useNativeDriver: true }),
           Animated.delay(600),
         ])
       ).start();
@@ -75,8 +83,11 @@ const TypingIndicator = () => {
   }, []);
 
   const dotStyle = (anim) => ({
-    width: 7, height: 7, borderRadius: 4,
-    backgroundColor: ACCENT, marginHorizontal: 2,
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: ACCENT,
+    marginHorizontal: 2,
     transform: [{ translateY: anim }],
   });
 
@@ -100,7 +111,11 @@ const TypingIndicator = () => {
 
 const InlineBusinessCard = React.memo(({ biz, onPress }) => {
   const rating = biz.rating?.average?.toFixed(1) || '?';
-  const dist   = biz.distanceKm ? (biz.distanceKm < 1 ? `${Math.round(biz.distanceKm * 1000)}m` : `${biz.distanceKm}km`) : null;
+  const dist = biz.distanceKm
+    ? biz.distanceKm < 1
+      ? `${Math.round(biz.distanceKm * 1000)}m`
+      : `${biz.distanceKm}km`
+    : null;
   const imgUri = biz.coverImage?.url || biz.images?.[0]?.url || biz.logo?.url || null;
 
   return (
@@ -113,16 +128,25 @@ const InlineBusinessCard = React.memo(({ biz, onPress }) => {
         </View>
       )}
       <View style={{ flex: 1, marginLeft: 10 }}>
-        <Text style={styles.inlineBizName} numberOfLines={1}>{biz.name}</Text>
+        <Text style={styles.inlineBizName} numberOfLines={1}>
+          {biz.name}
+        </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
           <Icon name="star" size={11} color="#F59E0B" />
           <Text style={styles.inlineBizMeta}>{rating}</Text>
-          {dist && <><Text style={styles.inlineBizMeta}>·</Text><Text style={styles.inlineBizMeta}>{dist}</Text></>}
+          {dist && (
+            <>
+              <Text style={styles.inlineBizMeta}>·</Text>
+              <Text style={styles.inlineBizMeta}>{dist}</Text>
+            </>
+          )}
           <Text style={[styles.inlineBizMeta, { color: ACCENT }]}>{biz.category}</Text>
         </View>
         {biz.matchingMenuItems?.length > 0 && (
           <Text style={styles.inlineBizMenuItem} numberOfLines={1}>
-            {biz.matchingMenuItems.map(m => `${m.name}${m.price ? ` £${m.price.toFixed(2)}` : ''}`).join(' · ')}
+            {biz.matchingMenuItems
+              .map((m) => `${m.name}${m.price ? ` £${m.price.toFixed(2)}` : ''}`)
+              .join(' · ')}
           </Text>
         )}
       </View>
@@ -139,12 +163,8 @@ const MessageBubble = React.memo(({ msg, onBusinessPress, onFollowUp }) => {
     return (
       <View style={styles.bizResultsBlock}>
         <Text style={styles.bizResultsTitle}>{msg.content}</Text>
-        {(msg.businesses || []).map(biz => (
-          <InlineBusinessCard
-            key={biz._id}
-            biz={biz}
-            onPress={() => onBusinessPress?.(biz._id)}
-          />
+        {(msg.businesses || []).map((biz) => (
+          <InlineBusinessCard key={biz._id} biz={biz} onPress={() => onBusinessPress?.(biz._id)} />
         ))}
       </View>
     );
@@ -166,7 +186,12 @@ const MessageBubble = React.memo(({ msg, onBusinessPress, onFollowUp }) => {
   if (isUser) {
     return (
       <View style={styles.userMsgRow}>
-        <LinearGradient colors={['#7C5CC4', ACCENT]} style={styles.userBubble} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+        <LinearGradient
+          colors={['#7C5CC4', ACCENT]}
+          style={styles.userBubble}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
           <Text style={styles.userBubbleText}>{msg.content}</Text>
         </LinearGradient>
       </View>
@@ -195,11 +220,7 @@ const MessageBubble = React.memo(({ msg, onBusinessPress, onFollowUp }) => {
           contentContainerStyle={{ paddingRight: 16 }}
         >
           {msg.suggestedFollowUps.map((s, i) => (
-            <TouchableOpacity
-              key={i}
-              onPress={() => onFollowUp?.(s)}
-              style={styles.followUpChip}
-            >
+            <TouchableOpacity key={i} onPress={() => onFollowUp?.(s)} style={styles.followUpChip}>
               <Text style={styles.followUpChipText}>{s}</Text>
             </TouchableOpacity>
           ))}
@@ -225,16 +246,16 @@ export default function ChatPanel({
   latitude,
   longitude,
 }) {
-  const dispatch   = useDispatch();
-  const insets     = useSafeAreaInsets();
-  const listRef    = useRef(null);
-  const inputRef   = useRef(null);
-  const abortRef   = useRef(null); // Holds the stream abort function
+  const dispatch = useDispatch();
+  const insets = useSafeAreaInsets();
+  const listRef = useRef(null);
+  const inputRef = useRef(null);
+  const abortRef = useRef(null); // Holds the stream abort function
 
-  const messages    = useSelector(selectChatMessages);
+  const messages = useSelector(selectChatMessages);
   const isStreaming = useSelector(selectChatIsStreaming);
-  const followUps   = useSelector(selectChatFollowUps);
-  const sessionId   = useSelector(selectChatSessionId);
+  const followUps = useSelector(selectChatFollowUps);
+  const sessionId = useSelector(selectChatSessionId);
 
   const [inputText, setInputText] = useState('');
 
@@ -243,8 +264,8 @@ export default function ChatPanel({
 
   useEffect(() => {
     Animated.spring(slideAnim, {
-      toValue:   visible ? 0 : PANEL_HEIGHT,
-      damping:   20,
+      toValue: visible ? 0 : PANEL_HEIGHT,
+      damping: 20,
       stiffness: 200,
       useNativeDriver: true,
     }).start();
@@ -270,49 +291,63 @@ export default function ChatPanel({
   }, [messages.length, isStreaming]);
 
   // ─── Send message ────────────────────────────────────────────────────────────
-  const sendMessage = useCallback(async (text) => {
-    const trimmed = (text || inputText).trim();
-    if (!trimmed || isStreaming) return;
+  const sendMessage = useCallback(
+    async (text) => {
+      const trimmed = (text || inputText).trim();
+      if (!trimmed || isStreaming) return;
 
-    setInputText('');
-    Keyboard.dismiss();
+      setInputText('');
+      Keyboard.dismiss();
 
-    dispatch(addUserMessage({ content: trimmed }));
-    dispatch(startStreaming());
+      dispatch(addUserMessage({ content: trimmed }));
+      dispatch(startStreaming());
 
-    const abort = await AIChatService.streamChat({
-      message:          trimmed,
-      sessionId:        sessionId || searchSessionId,
+      const abort = await AIChatService.streamChat({
+        message: trimmed,
+        sessionId: sessionId || searchSessionId,
+        latitude,
+        longitude,
+        searchBusinessIds: sessionId ? undefined : searchBusinessIds, // Only pass on first message
+        searchQuery: sessionId ? undefined : searchQuery,
+        searchIntent: sessionId ? undefined : searchIntent,
+
+        onToken: (token) => {
+          dispatch(appendToken(token));
+        },
+
+        onSearching: (query) => {
+          dispatch(addSearchingIndicator(query));
+        },
+
+        onBusinessResults: ({ businesses, totalCount, query: q }) => {
+          dispatch(addInlineBusinessResults({ businesses, totalCount, query: q }));
+        },
+
+        onDone: ({ fullText, sessionId: newSessionId, suggestedFollowUps }) => {
+          dispatch(finishStreaming({ fullText, sessionId: newSessionId, suggestedFollowUps }));
+          if (newSessionId && !sessionId) dispatch(setSessionId(newSessionId));
+        },
+
+        onError: (errMsg) => {
+          dispatch(setChatError(errMsg));
+        },
+      });
+
+      abortRef.current = abort;
+    },
+    [
+      inputText,
+      isStreaming,
+      sessionId,
+      searchSessionId,
+      searchBusinessIds,
+      searchQuery,
+      searchIntent,
       latitude,
       longitude,
-      searchBusinessIds: sessionId ? undefined : searchBusinessIds, // Only pass on first message
-      searchQuery:       sessionId ? undefined : searchQuery,
-      searchIntent:      sessionId ? undefined : searchIntent,
-
-      onToken: (token) => {
-        dispatch(appendToken(token));
-      },
-
-      onSearching: (query) => {
-        dispatch(addSearchingIndicator(query));
-      },
-
-      onBusinessResults: ({ businesses, totalCount, query: q }) => {
-        dispatch(addInlineBusinessResults({ businesses, totalCount, query: q }));
-      },
-
-      onDone: ({ fullText, sessionId: newSessionId, suggestedFollowUps }) => {
-        dispatch(finishStreaming({ fullText, sessionId: newSessionId, suggestedFollowUps }));
-        if (newSessionId && !sessionId) dispatch(setSessionId(newSessionId));
-      },
-
-      onError: (errMsg) => {
-        dispatch(setChatError(errMsg));
-      },
-    });
-
-    abortRef.current = abort;
-  }, [inputText, isStreaming, sessionId, searchSessionId, searchBusinessIds, searchQuery, searchIntent, latitude, longitude, dispatch]);
+      dispatch,
+    ]
+  );
 
   const handleFollowUp = useCallback((text) => sendMessage(text), [sendMessage]);
 
@@ -323,22 +358,24 @@ export default function ChatPanel({
       setTimeout(() => {
         dispatch(startStreaming());
         AIChatService.streamChat({
-          message:          `I just searched for "${searchQuery || 'businesses'}" and got ${searchBusinessIds.length} results. Briefly greet me and mention you can answer questions about these results.`,
-          sessionId:        searchSessionId,
+          message: `I just searched for "${searchQuery || 'businesses'}" and got ${searchBusinessIds.length} results. Briefly greet me and mention you can answer questions about these results.`,
+          sessionId: searchSessionId,
           latitude,
           longitude,
           searchBusinessIds,
           searchQuery,
           searchIntent,
-          onToken:           (tok) => dispatch(appendToken(tok)),
-          onSearching:       (q)   => dispatch(addSearchingIndicator(q)),
-          onBusinessResults: (d)   => dispatch(addInlineBusinessResults(d)),
-          onDone:            (d)   => {
+          onToken: (tok) => dispatch(appendToken(tok)),
+          onSearching: (q) => dispatch(addSearchingIndicator(q)),
+          onBusinessResults: (d) => dispatch(addInlineBusinessResults(d)),
+          onDone: (d) => {
             dispatch(finishStreaming(d));
             if (d.sessionId) dispatch(setSessionId(d.sessionId));
           },
-          onError:           (e)   => dispatch(setChatError(e)),
-        }).then(abort => { abortRef.current = abort; });
+          onError: (e) => dispatch(setChatError(e)),
+        }).then((abort) => {
+          abortRef.current = abort;
+        });
       }, 400);
     }
   }, [visible]);
@@ -350,19 +387,35 @@ export default function ChatPanel({
       {/* Backdrop */}
       <TouchableWithoutFeedback onPress={onClose}>
         <Animated.View
-          style={[styles.backdrop, {
-            opacity: slideAnim.interpolate({ inputRange: [0, PANEL_HEIGHT], outputRange: [1, 0] }),
-          }]}
+          style={[
+            styles.backdrop,
+            {
+              opacity: slideAnim.interpolate({
+                inputRange: [0, PANEL_HEIGHT],
+                outputRange: [1, 0],
+              }),
+            },
+          ]}
         />
       </TouchableWithoutFeedback>
 
       {/* Panel */}
-      <Animated.View style={[styles.panel, { transform: [{ translateY: slideAnim }], paddingBottom: insets.bottom }]}>
+      <Animated.View
+        style={[
+          styles.panel,
+          { transform: [{ translateY: slideAnim }], paddingBottom: insets.bottom },
+        ]}
+      >
         {/* ── Header ── */}
         <View style={styles.header}>
           <View style={styles.handle} />
           <View style={styles.headerContent}>
-            <LinearGradient colors={[ACCENT, '#7C5CC4']} style={styles.headerIcon} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+            <LinearGradient
+              colors={[ACCENT, '#7C5CC4']}
+              style={styles.headerIcon}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
               <Icon name="sparkles" size={16} color="#fff" />
             </LinearGradient>
             <View style={{ flex: 1 }}>
@@ -371,7 +424,12 @@ export default function ChatPanel({
                 {searchQuery ? `About: "${searchQuery}"` : 'Ask anything about businesses'}
               </Text>
             </View>
-            <TouchableOpacity onPress={() => { dispatch(clearChat()); }} style={styles.headerBtn}>
+            <TouchableOpacity
+              onPress={() => {
+                dispatch(clearChat());
+              }}
+              style={styles.headerBtn}
+            >
               <Icon name="refresh-outline" size={18} color="#9CA3AF" />
             </TouchableOpacity>
             <TouchableOpacity onPress={onClose} style={styles.headerBtn}>
@@ -449,8 +507,21 @@ const EmptyState = () => (
     <Text style={styles.emptySubtitle}>
       Questions about menu items, prices,{'\n'}reviews, dietary options, or directions
     </Text>
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 16, gap: 8 }}>
-      {['🍗 What dishes do they have?', '💷 What are the prices?', '⭐ What do reviews say?', '🥗 Any vegan options?'].map((s, i) => (
+    <View
+      style={{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        marginTop: 16,
+        gap: 8,
+      }}
+    >
+      {[
+        '🍗 What dishes do they have?',
+        '💷 What are the prices?',
+        '⭐ What do reviews say?',
+        '🥗 Any vegan options?',
+      ].map((s, i) => (
         <View key={i} style={styles.exampleChip}>
           <Text style={styles.exampleChipText}>{s}</Text>
         </View>
@@ -467,22 +538,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.45)',
   },
   panel: {
-    position:        'absolute',
-    bottom:          0,
-    left:            0,
-    right:           0,
-    height:          PANEL_HEIGHT,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: PANEL_HEIGHT,
     backgroundColor: '#FAFAFA',
-    borderTopLeftRadius:  28,
+    borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    shadowColor:     '#000',
-    shadowOffset:    { width: 0, height: -6 },
-    shadowOpacity:   0.15,
-    shadowRadius:    20,
-    elevation:       24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 24,
   },
   handle: {
-    width: 40, height: 4,
+    width: 40,
+    height: 4,
     backgroundColor: '#E5E7EB',
     borderRadius: 2,
     alignSelf: 'center',
@@ -502,19 +574,29 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   headerIcon: {
-    width: 34, height: 34, borderRadius: 17,
-    alignItems: 'center', justifyContent: 'center',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: {
-    fontSize: 16, fontWeight: '800', color: '#111827',
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#111827',
   },
   headerSub: {
-    fontSize: 11, color: '#9CA3AF', marginTop: 1,
+    fontSize: 11,
+    color: '#9CA3AF',
+    marginTop: 1,
   },
   headerBtn: {
-    width: 34, height: 34, borderRadius: 17,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: '#F3F4F6',
-    alignItems: 'center', justifyContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // Messages
@@ -549,10 +631,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   aiAvatar: {
-    width: 30, height: 30, borderRadius: 15,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: ACCENT,
-    alignItems: 'center', justifyContent: 'center',
-    marginRight: 10, flexShrink: 0, marginTop: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    flexShrink: 0,
+    marginTop: 2,
   },
   aiBubble: {
     flex: 1,
@@ -616,7 +703,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   inlineBizImage: {
-    width: 52, height: 52, borderRadius: 12,
+    width: 52,
+    height: 52,
+    borderRadius: 12,
     flexShrink: 0,
   },
   inlineBizImageFallback: {
@@ -625,13 +714,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   inlineBizName: {
-    fontSize: 14, fontWeight: '700', color: '#111827',
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#111827',
   },
   inlineBizMeta: {
-    fontSize: 12, color: '#9CA3AF',
+    fontSize: 12,
+    color: '#9CA3AF',
   },
   inlineBizMenuItem: {
-    fontSize: 11, color: ACCENT, marginTop: 3, fontWeight: '600',
+    fontSize: 11,
+    color: ACCENT,
+    marginTop: 3,
+    fontWeight: '600',
   },
 
   // Input bar
@@ -658,9 +753,12 @@ const styles = StyleSheet.create({
     borderColor: '#DDD6FE',
   },
   sendBtn: {
-    width: 42, height: 42, borderRadius: 21,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: ACCENT,
-    alignItems: 'center', justifyContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0,
   },
   sendBtnDisabled: {
@@ -674,23 +772,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   emptyIconWrap: {
-    width: 64, height: 64, borderRadius: 32,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: '#F3F0FF',
-    alignItems: 'center', justifyContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 18, fontWeight: '800', color: '#1F2937', marginBottom: 6,
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#1F2937',
+    marginBottom: 6,
   },
   emptySubtitle: {
-    fontSize: 13, color: '#9CA3AF', textAlign: 'center', lineHeight: 20,
+    fontSize: 13,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    lineHeight: 20,
   },
   exampleChip: {
     backgroundColor: '#F3F0FF',
     borderRadius: 20,
-    paddingHorizontal: 14, paddingVertical: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
   },
   exampleChipText: {
-    fontSize: 12, color: ACCENT, fontWeight: '500',
+    fontSize: 12,
+    color: ACCENT,
+    fontWeight: '500',
   },
 });

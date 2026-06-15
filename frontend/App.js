@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import { StatusBar, Platform, LogBox, Alert } from 'react-native';
+import { LogBox, Alert } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 import * as Updates from 'expo-updates';
@@ -17,7 +17,7 @@ import {
   MaterialIcons,
   MaterialCommunityIcons,
   FontAwesome,
-  Feather
+  Feather,
 } from '@expo/vector-icons';
 
 // ─── MonitoringBridge ────────────────────────────────────────────────────────
@@ -36,7 +36,9 @@ function MonitoringBridge() {
 }
 
 Sentry.init({
-  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN || 'https://60f954a3bddd424291b0f4429a0a20db@o4511507769982976.ingest.de.sentry.io/4511507772932176',
+  dsn:
+    process.env.EXPO_PUBLIC_SENTRY_DSN ||
+    'https://60f954a3bddd424291b0f4429a0a20db@o4511507769982976.ingest.de.sentry.io/4511507772932176',
 
   // Environment tagging — shows prod vs dev errors separately in the dashboard
   environment: __DEV__ ? 'development' : 'production',
@@ -56,8 +58,8 @@ Sentry.init({
   // so frontend errors and backend errors are linked on the same trace.
   tracePropagationTargets: [
     'localhost',
-    '192.168.',            // LAN dev
-    'api.hashview.co.uk',  // Production API
+    '192.168.', // LAN dev
+    'api.hashview.co.uk', // Production API
   ],
 
   // ─── Session Replay ──────────────────────────────────────────────────────
@@ -68,7 +70,7 @@ Sentry.init({
 
   integrations: [
     Sentry.mobileReplayIntegration({
-      maskAllText: false,     // keep text visible for debugging
+      maskAllText: false, // keep text visible for debugging
       maskAllImages: false,
     }),
     Sentry.feedbackIntegration(), // shake-to-report bug widget
@@ -200,7 +202,10 @@ export default Sentry.wrap(function App() {
 
   return (
     <PostHogProvider
-      apiKey={process.env.EXPO_PUBLIC_POSTHOG_API_KEY || 'phc_AHGyhoy6uMZyqMwxy6ZHiV3BouskvJUXGnPGHfG4YKeu'}
+      apiKey={
+        process.env.EXPO_PUBLIC_POSTHOG_API_KEY ||
+        'phc_AHGyhoy6uMZyqMwxy6ZHiV3BouskvJUXGnPGHfG4YKeu'
+      }
       options={{
         host: process.env.EXPO_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
         // Automatically capture app open, app backgrounded, and screen views
@@ -208,7 +213,7 @@ export default Sentry.wrap(function App() {
         // Record session replays — pairs with Sentry replays for full coverage
         enableSessionReplay: true,
         sessionReplayConfig: {
-          maskAllTextInputs: false,  // keep text visible for debugging
+          maskAllTextInputs: false, // keep text visible for debugging
           maskAllImages: false,
         },
       }}

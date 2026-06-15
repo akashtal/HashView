@@ -8,7 +8,7 @@ import {
   Linking,
   StatusBar,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -28,62 +28,68 @@ export default function HelpSupportScreen({ navigation }) {
     {
       id: 1,
       question: 'How do I write a review for a business?',
-      answer: 'To write a review, navigate to the business detail page and tap the "Write Review" button. Make sure you\'re within the business location (geofence) to submit your review. You\'ll earn a discount coupon automatically after posting!'
+      answer:
+        'To write a review, navigate to the business detail page and tap the "Write Review" button. Make sure you\'re within the business location (geofence) to submit your review. You\'ll earn a discount coupon automatically after posting!',
     },
     {
       id: 2,
       question: 'How does the geofencing system work?',
-      answer: 'Geofencing ensures authentic reviews by requiring you to be physically present at the business location. When you try to write a review, the app checks your GPS coordinates against the business location. You must be within the specified radius (usually 50 meters) to post a review.'
+      answer:
+        'Geofencing ensures authentic reviews by requiring you to be physically present at the business location. When you try to write a review, the app checks your GPS coordinates against the business location. You must be within the specified radius (usually 50 meters) to post a review.',
     },
     {
       id: 3,
       question: 'How do I redeem my discount coupons?',
-      answer: 'Go to "My Coupons" from your profile, select the coupon you want to use, and show the QR code to the business staff. They\'ll scan it to verify and apply your discount. Your coupon stays active until it is redeemed — no time limit!'
+      answer:
+        'Go to "My Coupons" from your profile, select the coupon you want to use, and show the QR code to the business staff. They\'ll scan it to verify and apply your discount. Your coupon stays active until it is redeemed — no time limit!',
     },
     {
       id: 4,
       question: 'Why did my coupon expire?',
-      answer: 'Coupons are valid until you redeem them at the business — there is no time limit. Simply show the QR code to staff and they will apply your discount whenever you visit.'
+      answer:
+        'Coupons are valid until you redeem them at the business — there is no time limit. Simply show the QR code to staff and they will apply your discount whenever you visit.',
     },
     {
       id: 5,
       question: 'Can I edit or delete my review?',
-      answer: 'Yes! You can edit your review within 24 hours of posting it. Go to "My Reviews" in your profile, select the review, and choose "Edit". If you need to delete a review, contact our support team.'
+      answer:
+        'Yes! You can edit your review within 24 hours of posting it. Go to "My Reviews" in your profile, select the review, and choose "Edit". If you need to delete a review, contact our support team.',
     },
     {
       id: 6,
       question: 'How do I update my profile information?',
-      answer: 'Tap on your profile icon, then select "Personal Information" to edit your name, email, phone number, and profile picture. Don\'t forget to save your changes!'
+      answer:
+        'Tap on your profile icon, then select "Personal Information" to edit your name, email, phone number, and profile picture. Don\'t forget to save your changes!',
     },
     {
       id: 7,
-      question: 'What if I can\'t find a business on the app?',
-      answer: 'If a business isn\'t listed, they may not have registered yet. You can suggest they sign up as a business owner. Alternatively, search using different keywords or check the "Nearby" tab for businesses near your current location.'
+      question: "What if I can't find a business on the app?",
+      answer:
+        'If a business isn\'t listed, they may not have registered yet. You can suggest they sign up as a business owner. Alternatively, search using different keywords or check the "Nearby" tab for businesses near your current location.',
     },
     {
       id: 8,
       question: 'How can I become a business owner on HashView?',
-      answer: 'If you own a business, tap "Sign Up" and select "Business Owner" during registration. You\'ll need to complete a simple registration process including business details and document uploads.'
+      answer:
+        'If you own a business, tap "Sign Up" and select "Business Owner" during registration. You\'ll need to complete a simple registration process including business details and document uploads.',
     },
     {
       id: 9,
       question: 'Is my location data safe?',
-      answer: 'Yes! We only use your location data to enable the geofencing feature for reviews. Your location is not shared with other users or third parties. You can disable location services anytime in Settings.'
+      answer:
+        'Yes! We only use your location data to enable the geofencing feature for reviews. Your location is not shared with other users or third parties. You can disable location services anytime in Settings.',
     },
     {
       id: 10,
       question: 'How do I report inappropriate content?',
-      answer: 'If you see inappropriate reviews or content, tap the three-dot menu on the review and select "Report". Our moderation team will review it within 24 hours.'
-    }
+      answer:
+        'If you see inappropriate reviews or content, tap the three-dot menu on the review and select "Report". Our moderation team will review it within 24 hours.',
+    },
   ];
-
 
   const handleSubmitTicket = async () => {
     if (!contactForm.subject.trim() || !contactForm.message.trim()) {
-      ToastService.showWarning(
-        'Validation Error',
-        'Please fill in both subject and message'
-      );
+      ToastService.showWarning('Validation Error', 'Please fill in both subject and message');
       return;
     }
 
@@ -113,10 +119,7 @@ export default function HelpSupportScreen({ navigation }) {
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
         <View className="flex-row items-center">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -132,9 +135,7 @@ export default function HelpSupportScreen({ navigation }) {
         <View className="px-6 py-4">
           {/* Submit Ticket Form */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Submit a Ticket
-            </Text>
+            <Text className="text-lg font-bold text-gray-900 mb-4">Submit a Ticket</Text>
 
             <View className="mb-4">
               <Text className="text-sm font-medium text-gray-700 mb-2">Subject</Text>
@@ -177,9 +178,7 @@ export default function HelpSupportScreen({ navigation }) {
 
           {/* FAQs */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Frequently Asked Questions
-            </Text>
+            <Text className="text-lg font-bold text-gray-900 mb-4">Frequently Asked Questions</Text>
 
             {faqs.map((faq) => (
               <View key={faq.id} className="mb-3">
@@ -191,7 +190,7 @@ export default function HelpSupportScreen({ navigation }) {
                     {faq.question}
                   </Text>
                   <Icon
-                    name={expandedFaq === faq.id ? "chevron-up" : "chevron-down"}
+                    name={expandedFaq === faq.id ? 'chevron-up' : 'chevron-down'}
                     size={20}
                     color={COLORS.primary}
                   />
@@ -199,24 +198,18 @@ export default function HelpSupportScreen({ navigation }) {
 
                 {expandedFaq === faq.id && (
                   <View className="pl-4 pr-2 pb-3">
-                    <Text className="text-sm text-gray-600 leading-relaxed">
-                      {faq.answer}
-                    </Text>
+                    <Text className="text-sm text-gray-600 leading-relaxed">{faq.answer}</Text>
                   </View>
                 )}
 
-                {faq.id < faqs.length && (
-                  <View className="border-b border-gray-100" />
-                )}
+                {faq.id < faqs.length && <View className="border-b border-gray-100" />}
               </View>
             ))}
           </View>
 
           {/* App Info */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              App Information
-            </Text>
+            <Text className="text-lg font-bold text-gray-900 mb-4">App Information</Text>
 
             <View className="border-t border-gray-100 my-3" />
 

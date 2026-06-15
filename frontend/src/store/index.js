@@ -16,7 +16,7 @@ const cartPersistenceMiddleware = (storeAPI) => (next) => (action) => {
   // Only persist if the action is a cart action
   if (action.type?.startsWith('cart/')) {
     const cartState = storeAPI.getState().cart;
-    AsyncStorage.setItem('@hashview_cart', JSON.stringify(cartState)).catch(err => {
+    AsyncStorage.setItem('@hashview_cart', JSON.stringify(cartState)).catch((err) => {
       console.log('Error saving cart to AsyncStorage', err);
     });
   }
@@ -58,5 +58,3 @@ initForegroundSubscriptionSync(store);
 initCartSync(store);
 
 export default store;
-
-

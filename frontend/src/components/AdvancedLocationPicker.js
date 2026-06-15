@@ -11,7 +11,7 @@ import {
   Platform,
   SafeAreaView,
   Keyboard,
-  FlatList
+  FlatList,
 } from 'react-native';
 import ToastService from '../utils/ToastService';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
@@ -21,13 +21,14 @@ import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplet
 import COLORS from '../config/colors';
 
 // Helper: generate a unique session token string for Autocomplete billing grouping
-const generateSessionToken = () => 'st_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+const generateSessionToken = () =>
+  'st_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
 const { width, height } = Dimensions.get('window');
 // Default map centres per supported country
 const DEFAULT_COORDS = {
-  'United Kingdom': { latitude: 54.5,  longitude: -3.3,  latitudeDelta: 8.0, longitudeDelta: 8.0 },
-  'India':          { latitude: 20.5,  longitude: 78.9,  latitudeDelta: 12.0, longitudeDelta: 12.0 },
+  'United Kingdom': { latitude: 54.5, longitude: -3.3, latitudeDelta: 8.0, longitudeDelta: 8.0 },
+  India: { latitude: 20.5, longitude: 78.9, latitudeDelta: 12.0, longitudeDelta: 12.0 },
 };
 
 export default function AdvancedLocationPicker({
@@ -36,13 +37,13 @@ export default function AdvancedLocationPicker({
   onSelectLocation,
   initialLocation,
   googleApiKey,
-  country = 'United Kingdom'   // 'United Kingdom' | 'India'
+  country = 'United Kingdom', // 'United Kingdom' | 'India'
 }) {
   const defaultCoords = DEFAULT_COORDS[country] || DEFAULT_COORDS['United Kingdom'];
-  const countryCode   = country === 'India' ? 'in' : 'gb'; // Google Places country code
+  const countryCode = country === 'India' ? 'in' : 'gb'; // Google Places country code
   const mapRef = useRef(null);
   const [region, setRegion] = useState({
-    latitude:  initialLocation?.latitude  ?? defaultCoords.latitude,
+    latitude: initialLocation?.latitude ?? defaultCoords.latitude,
     longitude: initialLocation?.longitude ?? defaultCoords.longitude,
     latitudeDelta: 0.005,
     longitudeDelta: 0.005,
@@ -59,9 +60,9 @@ export default function AdvancedLocationPicker({
     const startLat = initialLocation?.latitude;
     const startLng = initialLocation?.longitude;
     const snapRegion = {
-      latitude:      startLat ?? defaultCoords.latitude,
-      longitude:     startLng ?? defaultCoords.longitude,
-      latitudeDelta:  startLat ? 0.005 : defaultCoords.latitudeDelta,
+      latitude: startLat ?? defaultCoords.latitude,
+      longitude: startLng ?? defaultCoords.longitude,
+      latitudeDelta: startLat ? 0.005 : defaultCoords.latitudeDelta,
       longitudeDelta: startLng ? 0.005 : defaultCoords.longitudeDelta,
     };
     setRegion(snapRegion);
@@ -82,7 +83,7 @@ export default function AdvancedLocationPicker({
       country: '',
     };
 
-    components.forEach(component => {
+    components.forEach((component) => {
       const types = component.types;
       if (types.includes('street_number')) {
         result.buildingNumber = component.long_name;
@@ -143,20 +144,19 @@ export default function AdvancedLocationPicker({
       const addressResults = await Location.reverseGeocodeAsync({ latitude, longitude });
       const addr = addressResults[0];
       if (addr) {
-        const fullAddress = [
-          addr.name,
-          addr.street,
-          addr.city,
-          addr.postalCode,
-          addr.country
-        ].filter(Boolean).join(', ');
+        const fullAddress = [addr.name, addr.street, addr.city, addr.postalCode, addr.country]
+          .filter(Boolean)
+          .join(', ');
         setAddress(fullAddress);
         setAddressComponents(extractExpoAddressComponents(addr));
         return; // Done — no API call needed
       }
     } catch (expoError) {
       // Expo geocoder failed — fall through to Google fallback
-      console.log('Expo reverse geocoding unavailable, trying Google fallback:', expoError?.message);
+      console.log(
+        'Expo reverse geocoding unavailable, trying Google fallback:',
+        expoError?.message
+      );
     }
 
     // FALLBACK ONLY: Use Google Geocoding API if Expo failed and key is available
@@ -228,7 +228,7 @@ export default function AdvancedLocationPicker({
       latitude: region.latitude,
       longitude: region.longitude,
       address: address,
-      addressComponents: addressComponents // Pass structured data back
+      addressComponents: addressComponents, // Pass structured data back
     });
     onClose();
   };
@@ -236,7 +236,6 @@ export default function AdvancedLocationPicker({
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={styles.container}>
-
         <View style={styles.mapContainer}>
           <MapView
             ref={mapRef}
@@ -254,7 +253,12 @@ export default function AdvancedLocationPicker({
           {/* Fixed Center Marker */}
           <View style={styles.centerMarkerContainer} pointerEvents="none">
             <View style={styles.markerWrapper}>
-              <Icon name="location-sharp" size={48} color={COLORS.primary} style={styles.markerIcon} />
+              <Icon
+                name="location-sharp"
+                size={48}
+                color={COLORS.primary}
+                style={styles.markerIcon}
+              />
               <View style={styles.markerShadow} />
             </View>
           </View>
@@ -267,8 +271,8 @@ export default function AdvancedLocationPicker({
               </TouchableOpacity>
               <View style={{ flex: 1 }}>
                 <GooglePlacesAutocomplete
-                  placeholder='Search for a place'
-                  keyboardShouldPersistTaps='handled'
+                  placeholder="Search for a place"
+                  keyboardShouldPersistTaps="handled"
                   onPress={(data, details = null) => {
                     // Reset session token after selection — next search is a NEW billable session
                     sessionTokenRef.current = generateSessionToken();
@@ -286,7 +290,9 @@ export default function AdvancedLocationPicker({
 
                       // Extract components from Google details directly
                       if (details.address_components) {
-                        setAddressComponents(extractGoogleAddressComponents(details.address_components));
+                        setAddressComponents(
+                          extractGoogleAddressComponents(details.address_components)
+                        );
                       }
                     }
                   }}
@@ -313,7 +319,7 @@ export default function AdvancedLocationPicker({
                       fontSize: 16,
                       backgroundColor: '#fff',
                       borderRadius: 8,
-                      shadowColor: "#000",
+                      shadowColor: '#000',
                       shadowOffset: { width: 0, height: 2 },
                       shadowOpacity: 0.1,
                       shadowRadius: 4,
@@ -327,8 +333,8 @@ export default function AdvancedLocationPicker({
                     },
                   }}
                   enablePoweredByContainer={false}
-                  debounce={600}     // Increased from 400ms → 600ms: fewer API calls while typing
-                  minLength={3}      // Require 3+ chars before firing: avoids calls on short inputs
+                  debounce={600} // Increased from 400ms → 600ms: fewer API calls while typing
+                  minLength={3} // Require 3+ chars before firing: avoids calls on short inputs
                 />
               </View>
             </View>
@@ -371,7 +377,6 @@ export default function AdvancedLocationPicker({
               </TouchableOpacity>
             </View>
           </View>
-
         </View>
       </SafeAreaView>
     </Modal>
@@ -406,7 +411,7 @@ const styles = StyleSheet.create({
     marginBottom: 48,
   },
   markerIcon: {
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -434,7 +439,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 8,
     marginRight: 10,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -453,7 +458,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -473,7 +478,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 16,
     padding: 20,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,

@@ -4,7 +4,7 @@ const path = require('path');
 function walk(dir) {
   let results = [];
   const list = fs.readdirSync(dir);
-  list.forEach(file => {
+  list.forEach((file) => {
     file = path.join(dir, file);
     const stat = fs.statSync(file);
     if (stat && stat.isDirectory()) {
@@ -25,8 +25,9 @@ for (const file of files) {
   const content = fs.readFileSync(file, 'utf8');
   if (content.includes('useEffect(')) {
     const hasImport = /import\s+.*?\{\s*[^}]*?\buseEffect\b[^}]*?\}.*?['"]react['"]/.test(content);
-    const allUseEffectsAreReactDot = content.match(/useEffect\(/g)?.length === content.match(/React\.useEffect\(/g)?.length;
-    
+    const allUseEffectsAreReactDot =
+      content.match(/useEffect\(/g)?.length === content.match(/React\.useEffect\(/g)?.length;
+
     if (!hasImport && !allUseEffectsAreReactDot) {
       console.log('MISSING IMPORT IN: ' + file);
     }

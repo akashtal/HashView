@@ -69,7 +69,7 @@ jobs:
       
       - name: Check code style
         working-directory: ./frontend
-        run: npx eslint . --ext .js,.jsx || echo "ESLint not configured"
+        run: npm run lint
 
   build-android:
     name: Build Android APK

@@ -35,22 +35,19 @@ export default function ForgotPasswordScreen({ navigation }) {
     // Navigate to confirm email screen for password reset
     navigation.navigate('ConfirmEmail', {
       userData: { email },
-      isPasswordReset: true
+      isPasswordReset: true,
     });
   };
 
   return (
-    <LinearGradient
-      colors={[COLORS.primary, COLORS.primaryDark]}
-      className="flex-1"
-    >
+    <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="flex-1">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
-      
-      <KeyboardAvoidingView 
+
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
         className="flex-1"
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -63,19 +60,21 @@ export default function ForgotPasswordScreen({ navigation }) {
           </TouchableOpacity>
 
           <View className="items-center mt-8 mb-6">
-            <View style={{
-              width: 160,
-              height: 160,
-              borderRadius: 80,
-              backgroundColor: '#FFF',
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.15,
-              shadowRadius: 8,
-              elevation: 6
-            }}>
+            <View
+              style={{
+                width: 160,
+                height: 160,
+                borderRadius: 80,
+                backgroundColor: '#FFF',
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+                elevation: 6,
+              }}
+            >
               <Image
                 source={require('../../../assets/HashViewlogo-01.png')}
                 style={{ width: 140, height: 140 }}
@@ -92,9 +91,7 @@ export default function ForgotPasswordScreen({ navigation }) {
               >
                 <Icon name="lock-closed" size={40} color="white" />
               </LinearGradient>
-              <Text className="text-3xl font-bold text-gray-900 text-center">
-                Forgot Password?
-              </Text>
+              <Text className="text-3xl font-bold text-gray-900 text-center">Forgot Password?</Text>
               <Text className="text-gray-600 text-center mt-2 px-4">
                 Enter your email and we'll send you a verification code to reset your password
               </Text>
@@ -117,11 +114,7 @@ export default function ForgotPasswordScreen({ navigation }) {
               </View>
             </View>
 
-            <TouchableOpacity
-              onPress={handleResetPassword}
-              disabled={loading}
-              activeOpacity={0.8}
-            >
+            <TouchableOpacity onPress={handleResetPassword} disabled={loading} activeOpacity={0.8}>
               <LinearGradient
                 colors={[COLORS.secondary, COLORS.secondaryDark]}
                 className="rounded-xl py-4 items-center"
@@ -130,9 +123,7 @@ export default function ForgotPasswordScreen({ navigation }) {
                 {loading ? (
                   <ActivityIndicator color="white" size="small" />
                 ) : (
-                  <Text className="text-white font-bold text-lg">
-                    Send Reset Code
-                  </Text>
+                  <Text className="text-white font-bold text-lg">Send Reset Code</Text>
                 )}
               </LinearGradient>
             </TouchableOpacity>

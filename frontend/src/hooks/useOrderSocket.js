@@ -3,7 +3,7 @@ import orderSocketService from '../services/orderSocket.service';
 
 /**
  * Hook to manage Socket.IO connections for the /orders namespace.
- * 
+ *
  * @param {Object} options
  * @param {string} [options.orderId] - If provided, joins the room for a specific order (customer tracking)
  * @param {string} [options.businessId] - If provided, joins the room for a business (dashboard/kitchen)
@@ -11,7 +11,13 @@ import orderSocketService from '../services/orderSocket.service';
  * @param {Function} [options.onNewOrder] - Callback when a new order is placed (business only)
  * @param {Function} [options.onOrderStatusUpdated] - Callback when an order status changes
  */
-export const useOrderSocket = ({ orderId, businessId, customerId, onNewOrder, onOrderStatusUpdated }) => {
+export const useOrderSocket = ({
+  orderId,
+  businessId,
+  customerId,
+  onNewOrder,
+  onOrderStatusUpdated,
+}) => {
   // Use refs to avoid constantly re-binding listeners if callbacks change reference
   const callbacksRef = useRef({ onNewOrder, onOrderStatusUpdated });
 
@@ -33,22 +39,25 @@ export const useOrderSocket = ({ orderId, businessId, customerId, onNewOrder, on
     };
 
     // Connect and join rooms
-    orderSocketService.connect().then(() => {
-      if (orderId) {
-        orderSocketService.joinOrder(orderId);
-      }
-      if (businessId) {
-        orderSocketService.joinBusiness(businessId);
-      }
-      if (customerId) {
-        orderSocketService.joinCustomer(customerId);
-      }
-      
-      orderSocketService.on('new_order', handleNewOrder);
-      orderSocketService.on('order_status_updated', handleOrderStatusUpdated);
-    }).catch(err => {
-      console.warn('Could not initialize useOrderSocket connection:', err);
-    });
+    orderSocketService
+      .connect()
+      .then(() => {
+        if (orderId) {
+          orderSocketService.joinOrder(orderId);
+        }
+        if (businessId) {
+          orderSocketService.joinBusiness(businessId);
+        }
+        if (customerId) {
+          orderSocketService.joinCustomer(customerId);
+        }
+
+        orderSocketService.on('new_order', handleNewOrder);
+        orderSocketService.on('order_status_updated', handleOrderStatusUpdated);
+      })
+      .catch((err) => {
+        console.warn('Could not initialize useOrderSocket connection:', err);
+      });
 
     return () => {
       if (orderId) {
@@ -66,7 +75,7 @@ export const useOrderSocket = ({ orderId, businessId, customerId, onNewOrder, on
   }, [orderId, businessId, customerId]);
 
   return {
-    socket: orderSocketService.socket
+    socket: orderSocketService.socket,
   };
 };
 

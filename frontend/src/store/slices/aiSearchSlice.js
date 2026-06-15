@@ -45,21 +45,21 @@ const initialState = {
   hasMore: false,
 
   // AI metadata
-  message: '',              // AI-generated summary, e.g. "Found 4 restaurants near you 🍗"
-  intent: null,             // Extracted intent filters (also passed to chat for context)
-  appliedFilters: [],       // Filter chips for UI
-  provider: null,           // Which AI provider was used
-  fallbackUsed: false,      // Whether AI fallback (regex) was used
-  searchAccuracy: 'exact',  // 'exact' | 'partial' | 'related' | 'none'
-  matchNote: null,          // Shown when fuzzy matching was used
-  correctedQuery: null,     // Set when the AI corrected a spelling mistake
+  message: '', // AI-generated summary, e.g. "Found 4 restaurants near you 🍗"
+  intent: null, // Extracted intent filters (also passed to chat for context)
+  appliedFilters: [], // Filter chips for UI
+  provider: null, // Which AI provider was used
+  fallbackUsed: false, // Whether AI fallback (regex) was used
+  searchAccuracy: 'exact', // 'exact' | 'partial' | 'related' | 'none'
+  matchNote: null, // Shown when fuzzy matching was used
+  correctedQuery: null, // Set when the AI corrected a spelling mistake
 
   // UI state
   loading: false,
   loadingMore: false,
   error: null,
   lastSearchAt: null,
-  isAIAvailable: true,      // Optimistic: assume AI is available
+  isAIAvailable: true, // Optimistic: assume AI is available
 };
 
 const aiSearchSlice = createSlice({
@@ -110,24 +110,21 @@ const aiSearchSlice = createSlice({
         }
       })
       .addCase(performAISearch.fulfilled, (state, action) => {
-        const {
-          businesses, pagination, message, intent,
-          appliedFilters, meta,
-        } = action.payload;
+        const { businesses, pagination, message, intent, appliedFilters, meta } = action.payload;
 
         const isLoadMore = action.meta.arg.page > 1;
 
         if (isLoadMore) {
           // Append without duplicates
-          const existingIds = new Set(state.businesses.map(b => b._id));
-          const newBusinesses = businesses.filter(b => !existingIds.has(b._id));
+          const existingIds = new Set(state.businesses.map((b) => b._id));
+          const newBusinesses = businesses.filter((b) => !existingIds.has(b._id));
           state.businesses = [...state.businesses, ...newBusinesses];
           state.loadingMore = false;
         } else {
           state.businesses = businesses || [];
           state.loading = false;
           state.message = message || '';
-          state.intent = intent || null;           // store intent for chat context
+          state.intent = intent || null; // store intent for chat context
           state.appliedFilters = appliedFilters || [];
           state.provider = meta?.provider || null;
           state.fallbackUsed = meta?.fallbackUsed || false;
@@ -158,9 +155,8 @@ const aiSearchSlice = createSlice({
   },
 });
 
-export const {
-  setQuery, clearSearch, setSessionId, markAIUnavailable, markAIAvailable,
-} = aiSearchSlice.actions;
+export const { setQuery, clearSearch, setSessionId, markAIUnavailable, markAIAvailable } =
+  aiSearchSlice.actions;
 
 // ─── Selectors ────────────────────────────────────────────────────────────────
 

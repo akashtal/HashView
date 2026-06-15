@@ -69,4 +69,3 @@ const couponSlice = createSlice({
 
 export const { clearError } = couponSlice.actions;
 export default couponSlice.reducer;
-

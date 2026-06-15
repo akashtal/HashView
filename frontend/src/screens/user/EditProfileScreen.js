@@ -9,7 +9,7 @@ import {
   Alert,
   ActivityIndicator,
   StatusBar,
-  Platform
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
@@ -147,7 +147,6 @@ export default function EditProfileScreen({ navigation }) {
       setTimeout(() => {
         navigation.goBack();
       }, 1000);
-
     } catch (error) {
       setLoading(false);
       console.error('Update profile error:', error);
@@ -160,10 +159,7 @@ export default function EditProfileScreen({ navigation }) {
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-10 pb-2 px-4"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-10 pb-2 px-4">
         <View className="flex-row items-center mb-4">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -193,11 +189,7 @@ export default function EditProfileScreen({ navigation }) {
         <View className="items-center -mt-13 mb-6">
           <View className="bg-white rounded-2xl p-6 shadow-lg w-full">
             <View className="items-center">
-              <TouchableOpacity
-                onPress={pickImage}
-                disabled={uploading}
-                className="relative"
-              >
+              <TouchableOpacity onPress={pickImage} disabled={uploading} className="relative">
                 {formData.profileImage ? (
                   <Image
                     source={{ uri: formData.profileImage }}
@@ -227,18 +219,14 @@ export default function EditProfileScreen({ navigation }) {
                 </View>
               </TouchableOpacity>
 
-              <Text className="text-gray-500 text-sm mt-3">
-                Tap to change profile picture
-              </Text>
+              <Text className="text-gray-500 text-sm mt-3">Tap to change profile picture</Text>
             </View>
           </View>
         </View>
 
         {/* Form Fields */}
         <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-          <Text className="text-lg font-bold text-gray-900 mb-4">
-            Personal Information
-          </Text>
+          <Text className="text-lg font-bold text-gray-900 mb-4">Personal Information</Text>
 
           {/* Name Field */}
           <View className="mb-4">
@@ -256,9 +244,7 @@ export default function EditProfileScreen({ navigation }) {
                 editable={!loading}
               />
             </View>
-            {errors.name && (
-              <Text className="text-red-500 text-xs mt-1 ml-2">{errors.name}</Text>
-            )}
+            {errors.name && <Text className="text-red-500 text-xs mt-1 ml-2">{errors.name}</Text>}
           </View>
 
           {/* Email Field */}
@@ -279,9 +265,7 @@ export default function EditProfileScreen({ navigation }) {
                 editable={!loading}
               />
             </View>
-            {errors.email && (
-              <Text className="text-red-500 text-xs mt-1 ml-2">{errors.email}</Text>
-            )}
+            {errors.email && <Text className="text-red-500 text-xs mt-1 ml-2">{errors.email}</Text>}
           </View>
 
           {/* Phone Field */}
@@ -317,7 +301,10 @@ export default function EditProfileScreen({ navigation }) {
               style={{ backgroundColor: '#FFF9F0' }}
             >
               <Icon name="shield-checkmark-outline" size={20} color={COLORS.secondary} />
-              <Text className="flex-1 ml-3 text-base font-semibold capitalize" style={{ color: COLORS.secondary }}>
+              <Text
+                className="flex-1 ml-3 text-base font-semibold capitalize"
+                style={{ color: COLORS.secondary }}
+              >
                 {user?.role}
               </Text>
             </View>
@@ -326,9 +313,7 @@ export default function EditProfileScreen({ navigation }) {
 
         {/* Account Verification */}
         <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-          <Text className="text-lg font-bold text-gray-900 mb-4">
-            Account Verification
-          </Text>
+          <Text className="text-lg font-bold text-gray-900 mb-4">Account Verification</Text>
 
           {/* Email Verification */}
           <View>
@@ -338,7 +323,7 @@ export default function EditProfileScreen({ navigation }) {
                   <Icon
                     name="mail-outline"
                     size={20}
-                    color={user?.emailVerified ? "#10B981" : "#9CA3AF"}
+                    color={user?.emailVerified ? '#10B981' : '#9CA3AF'}
                   />
                   <Text className="text-base font-medium text-gray-900 ml-2">
                     Email Verification
@@ -366,14 +351,11 @@ export default function EditProfileScreen({ navigation }) {
               )}
             </View>
           </View>
-
         </View>
 
         {/* Additional Options */}
         <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-          <Text className="text-lg font-bold text-gray-900 mb-4">
-            Account Security
-          </Text>
+          <Text className="text-lg font-bold text-gray-900 mb-4">Account Security</Text>
 
           <TouchableOpacity
             onPress={() => navigation.navigate('ChangePassword')}
@@ -396,16 +378,14 @@ export default function EditProfileScreen({ navigation }) {
 
         {/* Account Info */}
         <View className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-          <Text className="text-lg font-bold text-gray-900 mb-4">
-            Account Information
-          </Text>
+          <Text className="text-lg font-bold text-gray-900 mb-4">Account Information</Text>
 
           <View className="flex-row justify-between items-center mb-3">
             <Text className="text-gray-600">Member Since</Text>
             <Text className="text-gray-900 font-medium">
               {new Date(user?.createdAt).toLocaleDateString('en-US', {
                 month: 'short',
-                year: 'numeric'
+                year: 'numeric',
               })}
             </Text>
           </View>
@@ -413,14 +393,8 @@ export default function EditProfileScreen({ navigation }) {
           <View className="flex-row justify-between items-center mb-3">
             <Text className="text-gray-600">Account Status</Text>
             <View className="flex-row items-center">
-              <Icon
-                name="checkmark-circle"
-                size={18}
-                color="#10B981"
-              />
-              <Text className="ml-2 font-medium text-green-600">
-                Active
-              </Text>
+              <Icon name="checkmark-circle" size={18} color="#10B981" />
+              <Text className="ml-2 font-medium text-green-600">Active</Text>
             </View>
           </View>
 

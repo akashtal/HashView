@@ -22,7 +22,6 @@ import OrderDetailScreen from '../screens/business/OrderDetailScreen';
 import KitchenViewScreen from '../screens/business/KitchenViewScreen';
 import OrderTrackingScreen from '../screens/user/OrderTrackingScreen';
 
-
 const Stack = createStackNavigator();
 
 // Deep Linking Configuration
@@ -39,10 +38,10 @@ const mainLinking = {
           BusinessDetail: {
             path: 'business/:businessId/:section?',
           },
-        }
+        },
       },
-    }
-  }
+    },
+  },
 };
 
 const authLinking = {
@@ -54,8 +53,8 @@ const authLinking = {
       BusinessDetail: {
         path: 'business/:businessId/:section?',
       },
-    }
-  }
+    },
+  },
 };
 
 /**
@@ -192,7 +191,9 @@ export default function AppNavigator() {
               navigationRef.current?.navigate('Login');
             }, 150);
           }
-        } catch { /* non-fatal */ }
+        } catch {
+          /* non-fatal */
+        }
       })();
     }
     prevIsAuthenticated.current = isAuthenticated;
@@ -210,12 +211,18 @@ export default function AppNavigator() {
   // Show loading screen while checking auth
   if (!isReady || loading) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#210059', alignItems: 'center', justifyContent: 'center' }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: '#210059',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <ActivityIndicator size="large" color="#fff" />
       </View>
     );
   }
-
 
   const linking = isAuthenticated ? mainLinking : authLinking;
 
@@ -252,8 +259,14 @@ export default function AppNavigator() {
         <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
         <Stack.Screen name="KitchenView" component={KitchenViewScreen} />
         <Stack.Screen name="OrderTracking" component={OrderTrackingScreen} />
-        <Stack.Screen name="TaxManagement" component={require('../screens/business/TaxManagementScreen').default} />
-        <Stack.Screen name="ChargeManagement" component={require('../screens/business/ChargeManagementScreen').default} />
+        <Stack.Screen
+          name="TaxManagement"
+          component={require('../screens/business/TaxManagementScreen').default}
+        />
+        <Stack.Screen
+          name="ChargeManagement"
+          component={require('../screens/business/ChargeManagementScreen').default}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

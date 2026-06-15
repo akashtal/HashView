@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Switch, Alert, ActivityIndicator, Modal, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Switch,
+  Alert,
+  ActivityIndicator,
+  Modal,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSelector } from 'react-redux';
@@ -76,7 +90,7 @@ const ChargeManagementScreen = ({ navigation, route }) => {
         type,
         isConditional,
         conditionType: isConditional ? conditionType : 'none',
-        conditionValue: isConditional && conditionValue ? Number(conditionValue) : null
+        conditionValue: isConditional && conditionValue ? Number(conditionValue) : null,
       };
 
       if (editingCharge) {
@@ -94,7 +108,7 @@ const ChargeManagementScreen = ({ navigation, route }) => {
 
   const handleToggle = async (id) => {
     try {
-      setCharges(prev => prev.map(c => c._id === id ? { ...c, isActive: !c.isActive } : c));
+      setCharges((prev) => prev.map((c) => (c._id === id ? { ...c, isActive: !c.isActive } : c)));
       await ApiService.toggleChargeRule(id);
     } catch (error) {
       console.error(error);
@@ -106,14 +120,18 @@ const ChargeManagementScreen = ({ navigation, route }) => {
   const handleDelete = (id) => {
     Alert.alert('Delete Charge', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: async () => {
-        try {
-          await ApiService.deleteChargeRule(id);
-          loadCharges();
-        } catch (error) {
-          Alert.alert('Error', 'Failed to delete');
-        }
-      }}
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await ApiService.deleteChargeRule(id);
+            loadCharges();
+          } catch (error) {
+            Alert.alert('Error', 'Failed to delete');
+          }
+        },
+      },
     ]);
   };
 
@@ -123,11 +141,12 @@ const ChargeManagementScreen = ({ navigation, route }) => {
         <View style={{ flex: 1, paddingRight: 12 }}>
           <Text style={styles.cardTitle}>{item.name}</Text>
           <Text style={styles.cardSub}>
-            {item.type === 'percentage' ? `${item.rate}%` : `$${item.rate}`} 
+            {item.type === 'percentage' ? `${item.rate}%` : `$${item.rate}`}
           </Text>
           {item.isConditional && item.conditionType !== 'none' && (
             <Text style={styles.conditionBadge}>
-              Condition: {item.conditionType} {item.conditionType === 'order_value' ? '<' : '<'} {item.conditionValue}
+              Condition: {item.conditionType} {item.conditionType === 'order_value' ? '<' : '<'}{' '}
+              {item.conditionValue}
             </Text>
           )}
         </View>
@@ -160,11 +179,13 @@ const ChargeManagementScreen = ({ navigation, route }) => {
       </View>
 
       {loading ? (
-        <View style={styles.center}><ActivityIndicator size="large" color={colors.primary} /></View>
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
       ) : (
         <FlatList
           data={charges}
-          keyExtractor={item => item._id}
+          keyExtractor={(item) => item._id}
           renderItem={renderChargeItem}
           contentContainerStyle={styles.list}
           ListEmptyComponent={<Text style={styles.emptyText}>No charge rules configured.</Text>}
@@ -176,14 +197,17 @@ const ChargeManagementScreen = ({ navigation, route }) => {
       </TouchableOpacity>
 
       <Modal visible={modalVisible} animationType="slide" transparent>
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
           style={styles.modalContainer}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <View style={styles.modalContent}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            >
               <Text style={styles.modalTitle}>{editingCharge ? 'Edit Charge' : 'New Charge'}</Text>
-              
+
               <Text style={styles.label}>Charge Name</Text>
               <TextInput
                 style={styles.input}
@@ -216,7 +240,11 @@ const ChargeManagementScreen = ({ navigation, route }) => {
 
               <View style={styles.switchRow}>
                 <Text style={styles.label}>Is Conditional?</Text>
-                <Switch value={isConditional} onValueChange={setIsConditional} trackColor={{ true: colors.primary }} />
+                <Switch
+                  value={isConditional}
+                  onValueChange={setIsConditional}
+                  trackColor={{ true: colors.primary }}
+                />
               </View>
 
               {isConditional && (
@@ -233,7 +261,9 @@ const ChargeManagementScreen = ({ navigation, route }) => {
                   <Text style={styles.label}>Condition Value (X)</Text>
                   <TextInput
                     style={styles.input}
-                    placeholder={conditionType === 'time_of_day' ? 'e.g. 22 (for 10 PM)' : 'e.g. 50'}
+                    placeholder={
+                      conditionType === 'time_of_day' ? 'e.g. 22 (for 10 PM)' : 'e.g. 50'
+                    }
                     keyboardType="numeric"
                     value={conditionValue}
                     onChangeText={setConditionValue}
@@ -245,15 +275,18 @@ const ChargeManagementScreen = ({ navigation, route }) => {
               <View style={styles.previewBox}>
                 <Text style={styles.previewTitle}>Preview (on $100 order)</Text>
                 <Text style={styles.previewText}>
-                  {type === 'percentage' 
-                    ? `Adds $${(100 * (Number(rate) || 0) / 100).toFixed(2)} to bill`
+                  {type === 'percentage'
+                    ? `Adds $${((100 * (Number(rate) || 0)) / 100).toFixed(2)} to bill`
                     : `Adds $${Number(rate) || 0} to bill`}
                   {isConditional ? ' (if condition met)' : ''}
                 </Text>
               </View>
 
               <View style={styles.modalActions}>
-                <TouchableOpacity style={styles.modalBtnCancel} onPress={() => setModalVisible(false)}>
+                <TouchableOpacity
+                  style={styles.modalBtnCancel}
+                  onPress={() => setModalVisible(false)}
+                >
                   <Text style={styles.modalBtnCancelText}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.modalBtnSave} onPress={handleSave}>
@@ -270,37 +303,137 @@ const ChargeManagementScreen = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderColor: '#eee' },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+  },
   backButton: { marginRight: 16 },
   title: { fontSize: 20, fontWeight: 'bold', color: colors.text },
   list: { padding: 16 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   emptyText: { textAlign: 'center', color: '#888', marginTop: 40 },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 16, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
   cardTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 4 },
   cardSub: { fontSize: 14, color: '#666' },
-  conditionBadge: { marginTop: 6, fontSize: 12, color: '#e67e22', backgroundColor: '#fdf2e9', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, alignSelf: 'flex-start', overflow: 'hidden' },
+  conditionBadge: {
+    marginTop: 6,
+    fontSize: 12,
+    color: '#e67e22',
+    backgroundColor: '#fdf2e9',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    overflow: 'hidden',
+  },
   cardActions: { flexDirection: 'row', borderTopWidth: 1, borderColor: '#f0f0f0', paddingTop: 12 },
   actionButton: { flexDirection: 'row', alignItems: 'center', marginRight: 24 },
   actionText: { marginLeft: 6, fontSize: 14, color: colors.primary, fontWeight: '600' },
-  fab: { position: 'absolute', right: 20, bottom: 20, width: 56, height: 56, borderRadius: 28, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4 },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
   modalContainer: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, maxHeight: '90%' },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 24,
+    maxHeight: '90%',
+  },
   modalTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, color: colors.text },
   label: { fontSize: 14, fontWeight: '600', color: '#444', marginBottom: 8, marginTop: 12 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, fontSize: 16, backgroundColor: '#fafafa' },
-  pickerContainer: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, backgroundColor: '#fafafa', overflow: 'hidden', height: 50, justifyContent: 'center' },
-  switchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, borderTopWidth: 1, borderTopColor: '#eee', paddingTop: 16 },
-  conditionBox: { backgroundColor: '#f9f9f9', padding: 12, borderRadius: 8, marginTop: 12, borderWidth: 1, borderColor: '#eee' },
-  previewBox: { backgroundColor: '#eef2ff', padding: 12, borderRadius: 8, marginTop: 16, borderWidth: 1, borderColor: '#c7d2fe' },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#fafafa',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#fafafa',
+    overflow: 'hidden',
+    height: 50,
+    justifyContent: 'center',
+  },
+  switchRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingTop: 16,
+  },
+  conditionBox: {
+    backgroundColor: '#f9f9f9',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  previewBox: {
+    backgroundColor: '#eef2ff',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#c7d2fe',
+  },
   previewTitle: { fontSize: 12, fontWeight: 'bold', color: '#4f46e5', marginBottom: 4 },
   previewText: { fontSize: 14, color: '#3730a3' },
   modalActions: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 30, gap: 12 },
-  modalBtnCancel: { paddingVertical: 12, paddingHorizontal: 20, borderRadius: 8, backgroundColor: '#f0f0f0' },
+  modalBtnCancel: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
+  },
   modalBtnCancelText: { color: '#444', fontWeight: 'bold', fontSize: 16 },
-  modalBtnSave: { paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8, backgroundColor: colors.primary },
-  modalBtnSaveText: { color: '#fff', fontWeight: 'bold', fontSize: 16 }
+  modalBtnSave: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    backgroundColor: colors.primary,
+  },
+  modalBtnSaveText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
 });
 
 export default ChargeManagementScreen;

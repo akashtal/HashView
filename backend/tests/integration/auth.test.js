@@ -33,9 +33,9 @@ describe('Auth API Integration Tests', () => {
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.user.email).toBe(userData.email);
-      expect(response.body.data.user.role).toBe('customer');
-      expect(response.body.data.token).toBeDefined();
+      expect(response.body.user.email).toBe(userData.email);
+      expect(response.body.user.role).toBe('customer');
+      expect(response.body.token).toBeDefined();
     });
 
     it('should not register user with existing email', async () => {
@@ -136,8 +136,8 @@ describe('Auth API Integration Tests', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.token).toBeDefined();
-      expect(response.body.data.user.email).toBe('testuser@example.com');
+      expect(response.body.token).toBeDefined();
+      expect(response.body.user.email).toBe('testuser@example.com');
     });
 
     it('should not login with incorrect password', async () => {
@@ -172,7 +172,7 @@ describe('Auth API Integration Tests', () => {
           password: 'Test@123'
         });
 
-      const token = response.body.data.token;
+      const token = response.body.token;
 
       expect(token).toBeDefined();
       expect(token.split('.')).toHaveLength(3); // JWT has 3 parts
@@ -194,7 +194,7 @@ describe('Auth API Integration Tests', () => {
           role: 'customer'
         });
 
-      authToken = response.body.data.token;
+      authToken = response.body.token;
     });
 
     it('should get current user with valid token', async () => {
@@ -204,7 +204,7 @@ describe('Auth API Integration Tests', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.email).toBe('testuser@example.com');
+      expect(response.body.user.email).toBe('testuser@example.com');
     });
 
     it('should not get user without token', async () => {

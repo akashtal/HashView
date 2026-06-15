@@ -19,6 +19,24 @@ global.console = {
 
 let mongoServer;
 
+// Mock BullMQ to prevent Redis connection attempts during tests
+jest.mock('bullmq', () => {
+  return {
+    Queue: jest.fn().mockImplementation(() => ({
+      add: jest.fn(),
+      close: jest.fn()
+    })),
+    Worker: jest.fn().mockImplementation(() => ({
+      on: jest.fn(),
+      close: jest.fn()
+    })),
+    QueueEvents: jest.fn().mockImplementation(() => ({
+      on: jest.fn(),
+      close: jest.fn()
+    }))
+  };
+});
+
 // Override mongoose.connect to intercept any database connection attempt in the tests
 // and redirect it to the mongodb-memory-server instance.
 const originalConnect = mongoose.connect;

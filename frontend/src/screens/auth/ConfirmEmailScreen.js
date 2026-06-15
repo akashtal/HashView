@@ -10,7 +10,7 @@ import {
   StatusBar,
   Image,
   KeyboardAvoidingView,
-  Platform
+  Platform,
 } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -45,7 +45,7 @@ export default function ConfirmEmailScreen({ navigation, route }) {
       navigation.navigate('VerifyOTP', {
         email,
         userData,
-        isPasswordReset
+        isPasswordReset,
       });
 
       showSuccessMessage(
@@ -59,10 +59,7 @@ export default function ConfirmEmailScreen({ navigation, route }) {
   };
 
   return (
-    <LinearGradient
-      colors={[COLORS.primary, COLORS.primaryDark]}
-      className="flex-1"
-    >
+    <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="flex-1">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       <KeyboardAvoidingView
@@ -82,19 +79,21 @@ export default function ConfirmEmailScreen({ navigation, route }) {
           </TouchableOpacity>
 
           <View className="items-center mt-8 mb-6">
-            <View style={{
-              width: 140,
-              height: 140,
-              borderRadius: 70,
-              backgroundColor: '#FFF',
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.15,
-              shadowRadius: 8,
-              elevation: 6
-            }}>
+            <View
+              style={{
+                width: 140,
+                height: 140,
+                borderRadius: 70,
+                backgroundColor: '#FFF',
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+                elevation: 6,
+              }}
+            >
               <Image
                 source={require('../../../assets/HashViewlogo-01.png')}
                 style={{ width: 120, height: 120 }}
@@ -137,11 +136,7 @@ export default function ConfirmEmailScreen({ navigation, route }) {
               </View>
             </View>
 
-            <TouchableOpacity
-              onPress={handleContinue}
-              disabled={loading}
-              activeOpacity={0.8}
-            >
+            <TouchableOpacity onPress={handleContinue} disabled={loading} activeOpacity={0.8}>
               <LinearGradient
                 colors={[COLORS.secondary, COLORS.secondaryDark]}
                 className="rounded-xl py-4 items-center"
@@ -150,9 +145,7 @@ export default function ConfirmEmailScreen({ navigation, route }) {
                 {loading ? (
                   <ActivityIndicator color="white" size="small" />
                 ) : (
-                  <Text className="text-white font-bold text-lg">
-                    Send Verification Code
-                  </Text>
+                  <Text className="text-white font-bold text-lg">Send Verification Code</Text>
                 )}
               </LinearGradient>
             </TouchableOpacity>

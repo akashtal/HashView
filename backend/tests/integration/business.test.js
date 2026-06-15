@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const { app } = require('../../server');
 const User = require('../../models/User.model');
 const Business = require('../../models/Business.model');
+const BusinessOwner = require('../../models/BusinessOwner.model');
 
 describe('Business API Integration Tests', () => {
   let businessOwnerToken;
@@ -13,6 +14,7 @@ describe('Business API Integration Tests', () => {
   beforeEach(async () => {
     // Clear collections
     await User.deleteMany({});
+    await BusinessOwner.deleteMany({});
     await Business.deleteMany({});
 
     // Create business owner
@@ -26,12 +28,13 @@ describe('Business API Integration Tests', () => {
         role: 'business'
       });
 
-    businessOwnerToken = response.body.data.token;
-    businessOwnerId = response.body.data.user.id;
+    businessOwnerToken = response.body.token;
+    businessOwnerId = response.body.user._id;
   });
 
   afterAll(async () => {
     await User.deleteMany({});
+    await BusinessOwner.deleteMany({});
     await Business.deleteMany({});
     await mongoose.connection.close();
   });
@@ -43,17 +46,13 @@ describe('Business API Integration Tests', () => {
         category: 'restaurant',
         email: 'restaurant@example.com',
         phone: '1234567890',
-        address: {
-          street: '123 Main St',
-          city: 'New York',
-          state: 'NY',
-          country: 'USA',
-          zipCode: '10001'
-        },
-        location: {
-          type: 'Point',
-          coordinates: [-74.0060, 40.7128] // [longitude, latitude]
-        },
+        street: '123 Main St',
+        city: 'New York',
+        state: 'NY',
+        country: 'USA',
+        postcode: '10001',
+        latitude: 40.7128,
+        longitude: -74.0060,
         description: 'A great restaurant'
       };
 
@@ -64,9 +63,9 @@ describe('Business API Integration Tests', () => {
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.name).toBe(businessData.name);
-      expect(response.body.data.status).toBe('pending');
-      expect(response.body.data.kycStatus).toBe('pending');
+      expect(response.body.business.name).toBe(businessData.name);
+      expect(response.body.business.status).toBe('pending');
+      expect(response.body.business.kycStatus).toBe('pending');
     });
 
     it('should require authentication', async () => {
@@ -75,10 +74,13 @@ describe('Business API Integration Tests', () => {
         category: 'restaurant',
         email: 'restaurant@example.com',
         phone: '1234567890',
-        location: {
-          type: 'Point',
-          coordinates: [-74.0060, 40.7128]
-        }
+        street: '123 Main St',
+        city: 'New York',
+        state: 'NY',
+        country: 'USA',
+        postcode: '10001',
+        latitude: 40.7128,
+        longitude: -74.0060
       };
 
       const response = await request(app)
@@ -108,10 +110,13 @@ describe('Business API Integration Tests', () => {
         category: 'restaurant',
         email: 'restaurant@example.com',
         phone: '1234567890',
-        location: {
-          type: 'Point',
-          coordinates: [200, 100] // Invalid coordinates
-        }
+        street: '123 Main St',
+        city: 'New York',
+        state: 'NY',
+        country: 'USA',
+        postcode: '10001',
+        latitude: 100, // Invalid coordinates
+        longitude: 200
       };
 
       const response = await request(app)
@@ -129,10 +134,13 @@ describe('Business API Integration Tests', () => {
         category: 'restaurant',
         email: 'restaurant@example.com',
         phone: '1234567890',
-        location: {
-          type: 'Point',
-          coordinates: [-74.0060, 40.7128]
-        }
+        street: '123 Main St',
+        city: 'New York',
+        state: 'NY',
+        country: 'USA',
+        postcode: '10001',
+        latitude: 40.7128,
+        longitude: -74.0060
       };
 
       const response = await request(app)
@@ -140,7 +148,7 @@ describe('Business API Integration Tests', () => {
         .set('Authorization', `Bearer ${businessOwnerToken}`)
         .send(businessData);
 
-      expect(response.body.data.radius).toBe(50);
+      expect(response.body.business.radius).toBe(50);
     });
   });
 
@@ -154,6 +162,11 @@ describe('Business API Integration Tests', () => {
           category: 'restaurant',
           email: 'rest1@example.com',
           phone: '1111111111',
+          address: {
+            street: '123 Main St',
+            city: 'New York',
+            postcode: '10001'
+          },
           location: {
             type: 'Point',
             coordinates: [-74.0060, 40.7128] // New York
@@ -166,6 +179,11 @@ describe('Business API Integration Tests', () => {
           category: 'restaurant',
           email: 'rest2@example.com',
           phone: '2222222222',
+          address: {
+            street: '123 Main St',
+            city: 'New York',
+            postcode: '10001'
+          },
           location: {
             type: 'Point',
             coordinates: [-74.0070, 40.7130] // ~100m away
@@ -178,6 +196,11 @@ describe('Business API Integration Tests', () => {
           category: 'restaurant',
           email: 'rest3@example.com',
           phone: '3333333333',
+          address: {
+            street: '123 Main St',
+            city: 'New York',
+            postcode: '10001'
+          },
           location: {
             type: 'Point',
             coordinates: [-118.2437, 34.0522] // Los Angeles
@@ -200,7 +223,7 @@ describe('Business API Integration Tests', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.length).toBe(2); // Should return 2 nearby businesses
+      expect(response.body.businesses.length).toBe(2); // Should return 2 nearby businesses
     });
 
     it('should require latitude and longitude', async () => {
@@ -231,6 +254,11 @@ describe('Business API Integration Tests', () => {
         category: 'restaurant',
         email: 'pending@example.com',
         phone: '4444444444',
+        address: {
+          street: '123 Main St',
+          city: 'New York',
+          postcode: '10001'
+        },
         location: {
           type: 'Point',
           coordinates: [-74.0062, 40.7129]
@@ -247,8 +275,8 @@ describe('Business API Integration Tests', () => {
         });
 
       // Should still return 2 active businesses, not the pending one
-      expect(response.body.data.length).toBe(2);
-      const statuses = response.body.data.map(b => b.status);
+      expect(response.body.businesses.length).toBe(2);
+      const statuses = response.body.businesses.map(b => b.status);
       expect(statuses.every(status => status === 'active')).toBe(true);
     });
   });
@@ -263,6 +291,13 @@ describe('Business API Integration Tests', () => {
         category: 'restaurant',
         email: 'restaurant@example.com',
         phone: '1234567890',
+        address: {
+          street: '123 Main St',
+          city: 'New York',
+          state: 'NY',
+          country: 'USA',
+          postcode: '10001'
+        },
         location: {
           type: 'Point',
           coordinates: [-74.0060, 40.7128]
@@ -279,7 +314,7 @@ describe('Business API Integration Tests', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.name).toBe('Test Restaurant');
+      expect(response.body.business.name).toBe('Test Restaurant');
     });
 
     it('should return 404 for non-existent business', async () => {
@@ -292,10 +327,10 @@ describe('Business API Integration Tests', () => {
       expect(response.body.success).toBe(false);
     });
 
-    it('should return 400 for invalid ID format', async () => {
+    it('should return 404 for invalid ID format', async () => {
       const response = await request(app)
         .get('/api/business/invalid-id')
-        .expect(400);
+        .expect(404);
 
       expect(response.body.success).toBe(false);
     });

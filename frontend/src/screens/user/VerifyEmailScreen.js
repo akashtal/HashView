@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   StatusBar,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -52,10 +52,7 @@ export default function VerifyEmailScreen({ navigation }) {
 
       await ApiService.sendEmailOTP({ email: user.email });
 
-      ToastService.showSuccess(
-        'OTP Sent!',
-        `Verification code sent to ${user.email}`
-      );
+      ToastService.showSuccess('OTP Sent!', `Verification code sent to ${user.email}`);
 
       setTimer(60);
       setCanResend(false);
@@ -89,10 +86,7 @@ export default function VerifyEmailScreen({ navigation }) {
     const otpCode = otp.join('');
 
     if (otpCode.length !== 6) {
-      ToastService.showWarning(
-        'Invalid OTP',
-        'Please enter the 6-digit code'
-      );
+      ToastService.showWarning('Invalid OTP', 'Please enter the 6-digit code');
       return;
     }
 
@@ -101,16 +95,13 @@ export default function VerifyEmailScreen({ navigation }) {
 
       const response = await ApiService.verifyEmailOTP({
         email: user.email,
-        otp: otpCode
+        otp: otpCode,
       });
 
       // Update user in Redux to mark email as verified
       dispatch(updateUser({ ...user, emailVerified: true }));
 
-      ToastService.showSuccess(
-        'Email Verified!',
-        'Your email has been successfully verified'
-      );
+      ToastService.showSuccess('Email Verified!', 'Your email has been successfully verified');
 
       setLoading(false);
 
@@ -118,7 +109,6 @@ export default function VerifyEmailScreen({ navigation }) {
       setTimeout(() => {
         navigation.goBack();
       }, 1500);
-
     } catch (error) {
       setLoading(false);
       ToastService.showError('Verification Failed', error.message || 'Invalid or expired OTP');
@@ -142,10 +132,7 @@ export default function VerifyEmailScreen({ navigation }) {
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
         <View className="flex-row items-center">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -167,15 +154,11 @@ export default function VerifyEmailScreen({ navigation }) {
             >
               <Icon name="mail" size={40} color={COLORS.secondary} />
             </View>
-            <Text className="text-2xl font-bold text-gray-900 mb-2">
-              Verify Your Email
-            </Text>
+            <Text className="text-2xl font-bold text-gray-900 mb-2">Verify Your Email</Text>
             <Text className="text-center text-gray-600 px-4">
               We've sent a 6-digit verification code to
             </Text>
-            <Text className="text-center font-semibold text-gray-900 mt-1">
-              {user?.email}
-            </Text>
+            <Text className="text-center font-semibold text-gray-900 mt-1">{user?.email}</Text>
           </View>
 
           {/* OTP Input */}
@@ -192,7 +175,7 @@ export default function VerifyEmailScreen({ navigation }) {
                   className="w-12 h-14 rounded-xl text-center text-2xl font-bold border-2"
                   style={{
                     borderColor: digit ? COLORS.primary : '#E5E7EB',
-                    color: COLORS.primary
+                    color: COLORS.primary,
                   }}
                   value={digit}
                   onChangeText={(value) => handleOtpChange(value, index)}
@@ -210,9 +193,7 @@ export default function VerifyEmailScreen({ navigation }) {
               {!canResend ? (
                 <View className="flex-row items-center">
                   <Icon name="time-outline" size={18} color="#9CA3AF" />
-                  <Text className="text-gray-600 ml-2">
-                    Resend code in {timer}s
-                  </Text>
+                  <Text className="text-gray-600 ml-2">Resend code in {timer}s</Text>
                 </View>
               ) : (
                 <TouchableOpacity
@@ -240,17 +221,13 @@ export default function VerifyEmailScreen({ navigation }) {
               disabled={loading || otp.join('').length !== 6}
               className="rounded-xl py-4 items-center"
               style={{
-                backgroundColor: loading || otp.join('').length !== 6
-                  ? '#D1D5DB'
-                  : COLORS.primary
+                backgroundColor: loading || otp.join('').length !== 6 ? '#D1D5DB' : COLORS.primary,
               }}
             >
               {loading ? (
                 <ActivityIndicator color="#FFF" />
               ) : (
-                <Text className="text-white font-bold text-base">
-                  Verify Email
-                </Text>
+                <Text className="text-white font-bold text-base">Verify Email</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -260,13 +237,10 @@ export default function VerifyEmailScreen({ navigation }) {
             <View className="flex-row items-start">
               <Icon name="information-circle" size={24} color="#3B82F6" />
               <View className="flex-1 ml-3">
-                <Text className="text-blue-900 font-semibold mb-2">
-                  Didn't receive the code?
-                </Text>
+                <Text className="text-blue-900 font-semibold mb-2">Didn't receive the code?</Text>
                 <Text className="text-blue-700 text-sm leading-relaxed">
-                  • Check your spam/junk folder{'\n'}
-                  • Make sure {user?.email} is correct{'\n'}
-                  • Wait for the timer to resend
+                  • Check your spam/junk folder{'\n'}• Make sure {user?.email} is correct{'\n'}•
+                  Wait for the timer to resend
                 </Text>
               </View>
             </View>

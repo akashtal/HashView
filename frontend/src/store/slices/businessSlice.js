@@ -60,14 +60,15 @@ export const registerBusiness = createAsyncThunk(
     } catch (error) {
       console.error('❌ Business registration error:', error);
       const errorData = error?.response?.data;
-      const errorMessage = errorData?.message ||
+      const errorMessage =
+        errorData?.message ||
         error?.message ||
         'Failed to register business. Please check your connection and try again.';
       const errorDetails = errorData?.errors || [];
       console.error('Error details:', { message: errorMessage, errors: errorDetails });
       return rejectWithValue({
         message: errorMessage,
-        errors: errorDetails
+        errors: errorDetails,
       });
     }
   }
@@ -98,14 +99,14 @@ const businessSlice = createSlice({
       currentPage: 1,
       totalPages: 1,
       totalCount: 0,
-      hasMore: false
+      hasMore: false,
     },
     nearbyPagination: {
       currentPage: 1,
       totalPages: 1,
       totalCount: 0,
-      hasMore: false
-    }
+      hasMore: false,
+    },
   },
   reducers: {
     clearError: (state) => {
@@ -117,7 +118,7 @@ const businessSlice = createSlice({
     clearBusinesses: (state) => {
       state.businesses = [];
       state.nearbyBusinesses = [];
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -138,7 +139,7 @@ const businessSlice = createSlice({
         } else {
           // Filter out duplicates based on _id
           const newBusinesses = businesses.filter(
-            newBiz => !state.businesses.some(existingBiz => existingBiz._id === newBiz._id)
+            (newBiz) => !state.businesses.some((existingBiz) => existingBiz._id === newBiz._id)
           );
           state.businesses = [...state.businesses, ...newBusinesses];
         }
@@ -147,7 +148,7 @@ const businessSlice = createSlice({
           currentPage: currentPage,
           totalPages: totalPages,
           totalCount: total || 0,
-          hasMore: currentPage < totalPages
+          hasMore: currentPage < totalPages,
         };
       })
       .addCase(getAllActiveBusinesses.rejected, (state, action) => {
@@ -169,7 +170,8 @@ const businessSlice = createSlice({
           state.nearbyBusinesses = businesses;
         } else {
           const newBusinesses = businesses.filter(
-            newBiz => !state.nearbyBusinesses.some(existingBiz => existingBiz._id === newBiz._id)
+            (newBiz) =>
+              !state.nearbyBusinesses.some((existingBiz) => existingBiz._id === newBiz._id)
           );
           state.nearbyBusinesses = [...state.nearbyBusinesses, ...newBusinesses];
         }
@@ -178,7 +180,7 @@ const businessSlice = createSlice({
           currentPage: currentPage,
           totalPages: totalPages,
           totalCount: total || 0,
-          hasMore: currentPage < totalPages
+          hasMore: currentPage < totalPages,
         };
       })
       .addCase(getNearbyBusinesses.rejected, (state, action) => {
@@ -228,4 +230,3 @@ const businessSlice = createSlice({
 
 export const { clearError, clearSelectedBusiness, clearBusinesses } = businessSlice.actions;
 export default businessSlice.reducer;
-

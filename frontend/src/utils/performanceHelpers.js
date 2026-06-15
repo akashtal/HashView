@@ -1,6 +1,6 @@
 /**
  * Performance Optimization Helpers
- * 
+ *
  * Utility functions to improve app performance
  */
 
@@ -48,15 +48,15 @@ export const makeCancellable = (promise) => {
 
   const wrappedPromise = new Promise((resolve, reject) => {
     promise
-      .then(value => (cancelled ? reject({ cancelled: true }) : resolve(value)))
-      .catch(error => (cancelled ? reject({ cancelled: true }) : reject(error)));
+      .then((value) => (cancelled ? reject({ cancelled: true }) : resolve(value)))
+      .catch((error) => (cancelled ? reject({ cancelled: true }) : reject(error)));
   });
 
   return {
     promise: wrappedPromise,
     cancel: () => {
       cancelled = true;
-    }
+    },
   };
 };
 
@@ -169,4 +169,3 @@ export default {
   getItemLayout,
   optimizeImageUri,
 };
-

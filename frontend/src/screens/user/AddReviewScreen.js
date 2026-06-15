@@ -1,7 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, ScrollView,
-  ActivityIndicator, Alert, StatusBar, Platform, AppState, Image
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+  StatusBar,
+  Platform,
+  AppState,
+  Image,
 } from 'react-native';
 import ToastService from '../../utils/ToastService';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,7 +20,11 @@ import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
 import { Accelerometer } from 'expo-sensors';
 import Constants from 'expo-constants';
-import { createReview, clearSuccessMessage, clearCreatedCoupon } from '../../store/slices/reviewSlice';
+import {
+  createReview,
+  clearSuccessMessage,
+  clearCreatedCoupon,
+} from '../../store/slices/reviewSlice';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
 import ScratchCardModal from '../../components/ScratchCardModal';
@@ -19,7 +32,8 @@ import ScratchCardModal from '../../components/ScratchCardModal';
 export default function AddReviewScreen({ navigation, route }) {
   const dispatch = useDispatch();
   const { business } = route.params;
-  const { loading, successMessage, error, createdCoupon, isNearbyCoupon, couponBusinessName } = useSelector((state) => state.review);
+  const { loading, successMessage, error, createdCoupon, isNearbyCoupon, couponBusinessName } =
+    useSelector((state) => state.review);
 
   // Modal State
   const [showScratchCard, setShowScratchCard] = useState(false);
@@ -36,7 +50,7 @@ export default function AddReviewScreen({ navigation, route }) {
       comfort: 0,
       valueForMoney: 0,
       location: 0,
-    }
+    },
   });
 
   // Media state
@@ -126,7 +140,6 @@ export default function AddReviewScreen({ navigation, route }) {
     }
   }, [error]);
 
-
   // 🔄 CRITICAL: Reset location when business changes (prevents cache bug!)
   useEffect(() => {
     setLocation(null);
@@ -164,14 +177,15 @@ export default function AddReviewScreen({ navigation, route }) {
         deviceId: Constants.sessionId || 'unknown',
         deviceName: Constants.deviceName || 'unknown',
         manufacturer: Platform.OS === 'android' ? 'Android' : 'Apple',
-        modelName: Constants.platform?.ios?.model || Constants.platform?.android?.model || 'unknown',
+        modelName:
+          Constants.platform?.ios?.model || Constants.platform?.android?.model || 'unknown',
         osName: Platform.OS,
         osVersion: Platform.Version.toString(),
         platform: Platform.OS,
         platformVersion: Platform.Version,
         isDevice: !Constants.isDevice ? false : true,
         appVersion: Constants.expoConfig?.version || '1.0.0',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       setDeviceFingerprint(fingerprint);
@@ -182,7 +196,7 @@ export default function AddReviewScreen({ navigation, route }) {
       setDeviceFingerprint({
         platform: Platform.OS,
         platformVersion: Platform.Version,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
   };
@@ -196,12 +210,11 @@ export default function AddReviewScreen({ navigation, route }) {
       let bestAccuracy = 999;
 
       try {
-
         subscription = await Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.Highest,
             distanceInterval: 1, // Update on small movements
-            timeInterval: 1000,  // Check every second
+            timeInterval: 1000, // Check every second
           },
           (loc) => {
             const accuracy = loc.coords.accuracy ?? 999;
@@ -224,7 +237,9 @@ export default function AddReviewScreen({ navigation, route }) {
         // Timeout after 10 seconds - use best available reading
         setTimeout(() => {
           if (!gotFresh) {
-            console.log(`⏱️ GPS timeout after 10s - using best reading (${bestAccuracy.toFixed(1)}m)`);
+            console.log(
+              `⏱️ GPS timeout after 10s - using best reading (${bestAccuracy.toFixed(1)}m)`
+            );
             if (subscription) subscription.remove();
 
             // Accept best reading if it's reasonable (≤ 50m)
@@ -232,11 +247,12 @@ export default function AddReviewScreen({ navigation, route }) {
               console.log('✅ Accepting best available GPS reading');
               resolve(bestReading);
             } else {
-              reject(new Error('GPS accuracy too low. Please try again outdoors with clear sky view.'));
+              reject(
+                new Error('GPS accuracy too low. Please try again outdoors with clear sky view.')
+              );
             }
           }
         }, 10000);
-
       } catch (error) {
         if (subscription) subscription.remove();
         reject(error);
@@ -281,11 +297,13 @@ export default function AddReviewScreen({ navigation, route }) {
     const expectedMaxDistance = maxSpeed * timeElapsed;
 
     if (distance > expectedMaxDistance && distance > TELEPORTATION_THRESHOLD) {
-      console.log(`🚨 TELEPORTATION DETECTED: Moved ${distance.toFixed(1)}m in ${timeElapsed.toFixed(1)}s`);
+      console.log(
+        `🚨 TELEPORTATION DETECTED: Moved ${distance.toFixed(1)}m in ${timeElapsed.toFixed(1)}s`
+      );
       logSuspiciousActivity('TELEPORTATION', {
         distance: distance,
         timeElapsed: timeElapsed,
-        speed: distance / timeElapsed
+        speed: distance / timeElapsed,
       });
       return true;
     }
@@ -309,9 +327,7 @@ export default function AddReviewScreen({ navigation, route }) {
     if (Platform.OS === 'ios') {
       if (locationData.accuracy && locationData.accuracy < 5) {
         // Too perfect accuracy can indicate mock location
-        const perfectAccuracyCount = locationHistory.filter(
-          loc => loc.accuracy < 5
-        ).length;
+        const perfectAccuracyCount = locationHistory.filter((loc) => loc.accuracy < 5).length;
 
         if (perfectAccuracyCount > 5) {
           console.log('🚨 SUSPICIOUS: Too perfect GPS accuracy');
@@ -328,10 +344,10 @@ export default function AddReviewScreen({ navigation, route }) {
     const activity = {
       type: activityType,
       timestamp: Date.now(),
-      metadata: metadata
+      metadata: metadata,
     };
 
-    setSuspiciousActivities(prev => [...prev, activity]);
+    setSuspiciousActivities((prev) => [...prev, activity]);
     console.log(`⚠️ Suspicious activity logged: ${activityType}`, metadata);
   };
 
@@ -345,13 +361,13 @@ export default function AddReviewScreen({ navigation, route }) {
       console.log(`⏳ Retrying in ${delay / 1000} seconds...`);
 
       setTimeout(async () => {
-        setRetryCount(prev => prev + 1);
+        setRetryCount((prev) => prev + 1);
         await retryLocationCheck();
       }, delay);
     } else {
       showDetailedError(
         'GPS Signal Lost',
-        'We\'ve lost your GPS signal after multiple attempts.\n\nPossible reasons:\n• You moved indoors\n• GPS is disabled\n• Poor signal area\n\nPlease move to an area with better GPS signal and try again.',
+        "We've lost your GPS signal after multiple attempts.\n\nPossible reasons:\n• You moved indoors\n• GPS is disabled\n• Poor signal area\n\nPlease move to an area with better GPS signal and try again.",
         'GPS_LOST',
         true // Show report issue button
       );
@@ -422,7 +438,7 @@ export default function AddReviewScreen({ navigation, route }) {
     if (detectMockLocation(newLocation)) {
       showDetailedError(
         'Mock Location Detected',
-        'We detected that you\'re using a fake/mock GPS location.\n\nTo ensure review authenticity, please:\n• Disable any mock location apps\n• Use your real GPS location\n• Restart the app',
+        "We detected that you're using a fake/mock GPS location.\n\nTo ensure review authenticity, please:\n• Disable any mock location apps\n• Use your real GPS location\n• Restart the app",
         'MOCK_LOCATION',
         false
       );
@@ -433,7 +449,7 @@ export default function AddReviewScreen({ navigation, route }) {
     if (detectTeleportation({ ...coords, timestamp: Date.now() })) {
       showDetailedError(
         'Suspicious Location Jump',
-        'Your location jumped suddenly by a large distance.\n\nThis could indicate:\n• GPS signal interference\n• Device location spoofing\n\nPlease ensure you\'re using real GPS and try again.',
+        "Your location jumped suddenly by a large distance.\n\nThis could indicate:\n• GPS signal interference\n• Device location spoofing\n\nPlease ensure you're using real GPS and try again.",
         'TELEPORTATION',
         true
       );
@@ -443,26 +459,23 @@ export default function AddReviewScreen({ navigation, route }) {
     // Calculate distance to business
     const businessLat = business.location.coordinates[1];
     const businessLon = business.location.coordinates[0];
-    const distance = calculateDistance(
-      coords.latitude,
-      coords.longitude,
-      businessLat,
-      businessLon
-    );
+    const distance = calculateDistance(coords.latitude, coords.longitude, businessLat, businessLon);
 
     setCurrentDistance(distance);
     setLocation(newLocation);
 
     // Add to location history
-    setLocationHistory(prev => [
-      ...prev,
-      {
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-        accuracy: coords.accuracy,
-        timestamp: Date.now()
-      }
-    ].slice(-20)); // Keep last 20 locations
+    setLocationHistory((prev) =>
+      [
+        ...prev,
+        {
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          accuracy: coords.accuracy,
+          timestamp: Date.now(),
+        },
+      ].slice(-20)
+    ); // Keep last 20 locations
 
     // Check if still within geofence
     if (distance > MAX_ALLOWED_RADIUS) {
@@ -488,7 +501,9 @@ export default function AddReviewScreen({ navigation, route }) {
       navigation.goBack();
     }
 
-    console.log(`📏 Distance: ${distance.toFixed(1)}m | Accuracy: ${coords.accuracy.toFixed(1)}m | Timer: ${verificationTimer}s`);
+    console.log(
+      `📏 Distance: ${distance.toFixed(1)}m | Accuracy: ${coords.accuracy.toFixed(1)}m | Timer: ${verificationTimer}s`
+    );
   };
 
   // ==================== MOTION SENSOR VERIFICATION ====================
@@ -497,7 +512,7 @@ export default function AddReviewScreen({ navigation, route }) {
 
     Accelerometer.setUpdateInterval(1000);
 
-    accelerometerSubscription.current = Accelerometer.addListener(accelerometerData => {
+    accelerometerSubscription.current = Accelerometer.addListener((accelerometerData) => {
       const { x, y, z } = accelerometerData;
       const magnitude = Math.sqrt(x * x + y * y + z * z);
 
@@ -526,7 +541,7 @@ export default function AddReviewScreen({ navigation, route }) {
         console.log('✅ 30-second verification complete!');
         ToastService.showSuccess(
           'Verification Complete! ✅',
-          'You\'ve stayed within the business location for 30 seconds. You can now submit your review!'
+          "You've stayed within the business location for 30 seconds. You can now submit your review!"
         );
       }
     }, 1000);
@@ -542,7 +557,7 @@ export default function AddReviewScreen({ navigation, route }) {
       if (status !== 'granted') {
         showDetailedError(
           'Permission Required',
-          'We need your location permission to verify you\'re at the business.\n\nThis ensures review authenticity and prevents fake reviews.',
+          "We need your location permission to verify you're at the business.\n\nThis ensures review authenticity and prevents fake reviews.",
           'PERMISSION_DENIED',
           false
         );
@@ -607,12 +622,14 @@ export default function AddReviewScreen({ navigation, route }) {
       setLocation(initialLocation);
       setCurrentDistance(distance);
       setGpsAccuracy(initialLocation.coords.accuracy);
-      setLocationHistory([{
-        latitude: initialLocation.coords.latitude,
-        longitude: initialLocation.coords.longitude,
-        accuracy: initialLocation.coords.accuracy,
-        timestamp: Date.now()
-      }]);
+      setLocationHistory([
+        {
+          latitude: initialLocation.coords.latitude,
+          longitude: initialLocation.coords.longitude,
+          accuracy: initialLocation.coords.accuracy,
+          timestamp: Date.now(),
+        },
+      ]);
 
       // Step 8: Start continuous monitoring
       await startContinuousLocationMonitoring();
@@ -628,7 +645,6 @@ export default function AddReviewScreen({ navigation, route }) {
 
       console.log('✅ Comprehensive verification initialized!');
       console.log('========================================================\n');
-
     } catch (error) {
       console.error('❌ Location verification error:', error);
 
@@ -678,17 +694,20 @@ export default function AddReviewScreen({ navigation, route }) {
                     business: business._id,
                     location: location?.coords,
                     suspiciousActivities: suspiciousActivities,
-                    deviceFingerprint: deviceFingerprint
+                    deviceFingerprint: deviceFingerprint,
                   });
 
-                  ToastService.showSuccess('Report Submitted', 'Our team will review your case. Thank you!');
+                  ToastService.showSuccess(
+                    'Report Submitted',
+                    'Our team will review your case. Thank you!'
+                  );
                   navigation.goBack();
-                }
+                },
               },
-              { text: 'Cancel', style: 'cancel' }
+              { text: 'Cancel', style: 'cancel' },
             ]
           );
-        }
+        },
       });
     }
 
@@ -700,7 +719,7 @@ export default function AddReviewScreen({ navigation, route }) {
           setShowGeofenceInfo(true);
           setCheckingLocation(true);
           setRetryCount(0);
-        }
+        },
       });
     }
 
@@ -708,7 +727,7 @@ export default function AddReviewScreen({ navigation, route }) {
     buttons.push({
       text: errorCode === 'OUT_OF_RANGE' || errorCode === 'MOCK_LOCATION' ? 'OK' : 'Cancel',
       onPress: () => navigation.goBack(),
-      style: 'cancel'
+      style: 'cancel',
     });
 
     Alert.alert(title, message, buttons, { cancelable: false });
@@ -718,58 +737,54 @@ export default function AddReviewScreen({ navigation, route }) {
   const pickPhotos = async () => {
     try {
       // Show options: Camera or Gallery
-      Alert.alert(
-        'Add Photos',
-        'Choose an option',
-        [
-          {
-            text: 'Take Photo',
-            onPress: async () => {
-              const { status } = await ImagePicker.requestCameraPermissionsAsync();
-              if (status !== 'granted') {
-                Alert.alert('Permission Required', 'Please grant permission to use camera');
-                return;
-              }
+      Alert.alert('Add Photos', 'Choose an option', [
+        {
+          text: 'Take Photo',
+          onPress: async () => {
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permission Required', 'Please grant permission to use camera');
+              return;
+            }
 
-              const result = await ImagePicker.launchCameraAsync({
-                mediaTypes: ['images'],
-                allowsEditing: true,
-                quality: 0.8,
-              });
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ['images'],
+              allowsEditing: true,
+              quality: 0.8,
+            });
 
-              if (!result.canceled && result.assets) {
-                setSelectedPhotos([...selectedPhotos, result.assets[0]]);
-              }
+            if (!result.canceled && result.assets) {
+              setSelectedPhotos([...selectedPhotos, result.assets[0]]);
             }
           },
-          {
-            text: 'Choose from Gallery',
-            onPress: async () => {
-              const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-              if (status !== 'granted') {
-                Alert.alert('Permission Required', 'Please grant permission to access photos');
-                return;
-              }
+        },
+        {
+          text: 'Choose from Gallery',
+          onPress: async () => {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permission Required', 'Please grant permission to access photos');
+              return;
+            }
 
-              const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ['images'],
-                allowsMultipleSelection: true,
-                quality: 0.8,
-                selectionLimit: 5 - selectedPhotos.length, // Max 5 photos total
-              });
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ['images'],
+              allowsMultipleSelection: true,
+              quality: 0.8,
+              selectionLimit: 5 - selectedPhotos.length, // Max 5 photos total
+            });
 
-              if (!result.canceled && result.assets) {
-                const newPhotos = result.assets.slice(0, 5 - selectedPhotos.length);
-                setSelectedPhotos([...selectedPhotos, ...newPhotos]);
-              }
+            if (!result.canceled && result.assets) {
+              const newPhotos = result.assets.slice(0, 5 - selectedPhotos.length);
+              setSelectedPhotos([...selectedPhotos, ...newPhotos]);
             }
           },
-          {
-            text: 'Cancel',
-            style: 'cancel'
-          }
-        ]
-      );
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ]);
     } catch (error) {
       console.error('Error picking photos:', error);
       Alert.alert('Error', 'Failed to pick photos');
@@ -779,59 +794,55 @@ export default function AddReviewScreen({ navigation, route }) {
   const pickVideos = async () => {
     try {
       // Show options: Record Video or Choose from Gallery
-      Alert.alert(
-        'Add Videos',
-        'Choose an option',
-        [
-          {
-            text: 'Record Video',
-            onPress: async () => {
-              const { status } = await ImagePicker.requestCameraPermissionsAsync();
-              if (status !== 'granted') {
-                Alert.alert('Permission Required', 'Please grant permission to use camera');
-                return;
-              }
+      Alert.alert('Add Videos', 'Choose an option', [
+        {
+          text: 'Record Video',
+          onPress: async () => {
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permission Required', 'Please grant permission to use camera');
+              return;
+            }
 
-              const result = await ImagePicker.launchCameraAsync({
-                mediaTypes: ['videos'],
-                videoMaxDuration: 30, // Max 30 seconds
-                quality: 0.8,
-              });
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ['videos'],
+              videoMaxDuration: 30, // Max 30 seconds
+              quality: 0.8,
+            });
 
-              if (!result.canceled && result.assets) {
-                setSelectedVideos([...selectedVideos, result.assets[0]]);
-              }
+            if (!result.canceled && result.assets) {
+              setSelectedVideos([...selectedVideos, result.assets[0]]);
             }
           },
-          {
-            text: 'Choose from Gallery',
-            onPress: async () => {
-              const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-              if (status !== 'granted') {
-                Alert.alert('Permission Required', 'Please grant permission to access videos');
-                return;
-              }
+        },
+        {
+          text: 'Choose from Gallery',
+          onPress: async () => {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permission Required', 'Please grant permission to access videos');
+              return;
+            }
 
-              const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ['videos'],
-                allowsMultipleSelection: true,
-                quality: 0.8,
-                videoMaxDuration: 30, // Max 30 seconds per video
-                selectionLimit: 2 - selectedVideos.length, // Max 2 videos total
-              });
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ['videos'],
+              allowsMultipleSelection: true,
+              quality: 0.8,
+              videoMaxDuration: 30, // Max 30 seconds per video
+              selectionLimit: 2 - selectedVideos.length, // Max 2 videos total
+            });
 
-              if (!result.canceled && result.assets) {
-                const newVideos = result.assets.slice(0, 2 - selectedVideos.length);
-                setSelectedVideos([...selectedVideos, ...newVideos]);
-              }
+            if (!result.canceled && result.assets) {
+              const newVideos = result.assets.slice(0, 2 - selectedVideos.length);
+              setSelectedVideos([...selectedVideos, ...newVideos]);
             }
           },
-          {
-            text: 'Cancel',
-            style: 'cancel'
-          }
-        ]
-      );
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ]);
     } catch (error) {
       console.error('Error picking videos:', error);
       Alert.alert('Error', 'Failed to pick videos');
@@ -865,7 +876,7 @@ export default function AddReviewScreen({ navigation, route }) {
           photoFormData.append('photos', {
             uri: photo.uri,
             name: filename,
-            type: mimeType
+            type: mimeType,
           });
         });
 
@@ -891,7 +902,7 @@ export default function AddReviewScreen({ navigation, route }) {
           videoFormData.append('videos', {
             uri: video.uri,
             name: filename,
-            type: mimeType
+            type: mimeType,
           });
         });
 
@@ -922,7 +933,10 @@ export default function AddReviewScreen({ navigation, route }) {
 
     // Validation 2: Comment length
     if (formData.comment.length < 10) {
-      Alert.alert('Review Too Short', 'Please write at least 10 characters to share your experience.');
+      Alert.alert(
+        'Review Too Short',
+        'Please write at least 10 characters to share your experience.'
+      );
       return;
     }
 
@@ -977,59 +991,56 @@ export default function AddReviewScreen({ navigation, route }) {
           uploadedMedia = await uploadMediaToCloudinary();
           console.log('✅ Media uploaded successfully:', {
             photos: uploadedMedia.photos.length,
-            videos: uploadedMedia.videos.length
+            videos: uploadedMedia.videos.length,
           });
         } catch (error) {
-          Alert.alert(
-            'Upload Failed',
-            'Failed to upload photos/videos. Continue without media?',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Continue',
-                onPress: () => {
-                  // Continue without media
-                  uploadedMedia = { photos: [], videos: [] };
-                }
-              }
-            ]
-          );
+          Alert.alert('Upload Failed', 'Failed to upload photos/videos. Continue without media?', [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Continue',
+              onPress: () => {
+                // Continue without media
+                uploadedMedia = { photos: [], videos: [] };
+              },
+            },
+          ]);
           return;
         }
       }
 
       // Submit to backend with ALL security metadata + media
-      dispatch(createReview({
-        business: business._id,
-        rating: formData.rating,
-        comment: formData.comment,
-        emotion: formData.emotion, // Add emotion field
-        // 🏨 Booking.com-style category ratings
-        categoryRatings: {
-          staff: formData.categoryRatings.staff || null,
-          facilities: formData.categoryRatings.facilities || null,
-          cleanliness: formData.categoryRatings.cleanliness || null,
-          comfort: formData.categoryRatings.comfort || null,
-          valueForMoney: formData.categoryRatings.valueForMoney || null,
-          location: formData.categoryRatings.location || null,
-        },
-        latitude: finalLocation.coords.latitude,
-        longitude: finalLocation.coords.longitude,
-        images: uploadedMedia.photos, // Cloudinary URLs
-        videos: uploadedMedia.videos, // Cloudinary URLs
-        // Security metadata
-        locationAccuracy: finalLocation.coords.accuracy,
-        verificationTime: VERIFICATION_TIME,
-        motionDetected: motionDetected,
-        isMockLocation: isMockLocation,
-        locationHistoryCount: locationHistory.length,
-        suspiciousActivities: suspiciousActivities,
-        deviceFingerprint: deviceFingerprint,
-        devicePlatform: Platform.OS,
-      }));
+      dispatch(
+        createReview({
+          business: business._id,
+          rating: formData.rating,
+          comment: formData.comment,
+          emotion: formData.emotion, // Add emotion field
+          // 🏨 Booking.com-style category ratings
+          categoryRatings: {
+            staff: formData.categoryRatings.staff || null,
+            facilities: formData.categoryRatings.facilities || null,
+            cleanliness: formData.categoryRatings.cleanliness || null,
+            comfort: formData.categoryRatings.comfort || null,
+            valueForMoney: formData.categoryRatings.valueForMoney || null,
+            location: formData.categoryRatings.location || null,
+          },
+          latitude: finalLocation.coords.latitude,
+          longitude: finalLocation.coords.longitude,
+          images: uploadedMedia.photos, // Cloudinary URLs
+          videos: uploadedMedia.videos, // Cloudinary URLs
+          // Security metadata
+          locationAccuracy: finalLocation.coords.accuracy,
+          verificationTime: VERIFICATION_TIME,
+          motionDetected: motionDetected,
+          isMockLocation: isMockLocation,
+          locationHistoryCount: locationHistory.length,
+          suspiciousActivities: suspiciousActivities,
+          deviceFingerprint: deviceFingerprint,
+          devicePlatform: Platform.OS,
+        })
+      );
 
       console.log('✅ Review submitted with full security metadata + media!');
-
     } catch (error) {
       console.error('❌ Failed to get final location:', error);
       Alert.alert('Location Error', 'Could not verify your final location. Please try again.');
@@ -1060,7 +1071,9 @@ export default function AddReviewScreen({ navigation, route }) {
             </View>
             <View className="flex-row items-center mb-2">
               <Icon name="checkmark-circle" size={20} color={COLORS.secondary} />
-              <Text className="text-gray-700 ml-2">GPS accuracy better than {MAX_GPS_ACCURACY}m</Text>
+              <Text className="text-gray-700 ml-2">
+                GPS accuracy better than {MAX_GPS_ACCURACY}m
+              </Text>
             </View>
             <View className="flex-row items-center mb-2">
               <Icon name="time" size={20} color={COLORS.secondary} />
@@ -1074,7 +1087,8 @@ export default function AddReviewScreen({ navigation, route }) {
 
           <View className="bg-yellow-50 rounded-xl p-4 mb-4 border border-yellow-200">
             <Text className="text-sm text-gray-700 text-center">
-              This comprehensive verification prevents fake reviews and ensures all reviews are from real visitors.
+              This comprehensive verification prevents fake reviews and ensures all reviews are from
+              real visitors.
             </Text>
           </View>
 
@@ -1093,10 +1107,7 @@ export default function AddReviewScreen({ navigation, route }) {
             </LinearGradient>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            className="mt-3 py-3 items-center"
-          >
+          <TouchableOpacity onPress={() => navigation.goBack()} className="mt-3 py-3 items-center">
             <Text className="text-gray-500 font-semibold">Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -1141,11 +1152,13 @@ export default function AddReviewScreen({ navigation, route }) {
           <View className="flex-1">
             <View className="flex-row items-center mb-1">
               <Icon
-                name={verificationComplete ? "checkmark-circle" : "time"}
+                name={verificationComplete ? 'checkmark-circle' : 'time'}
                 size={20}
-                color={verificationComplete ? "#10B981" : "#F59E0B"}
+                color={verificationComplete ? '#10B981' : '#F59E0B'}
               />
-              <Text className={`ml-2 font-bold ${verificationComplete ? 'text-green-700' : 'text-yellow-700'}`}>
+              <Text
+                className={`ml-2 font-bold ${verificationComplete ? 'text-green-700' : 'text-yellow-700'}`}
+              >
                 {verificationComplete ? 'Verified ✓' : `Verifying... ${verificationTimer}s`}
               </Text>
             </View>
@@ -1161,13 +1174,13 @@ export default function AddReviewScreen({ navigation, route }) {
               {motionDetected && (
                 <>
                   <Text className="text-xs text-gray-600">•</Text>
-                  <Text className="text-xs text-green-600">
-                    🚶 Motion ✓
-                  </Text>
+                  <Text className="text-xs text-green-600">🚶 Motion ✓</Text>
                 </>
               )}
             </View>
-            <Text className={`text-[10px] mt-1 font-semibold ${gpsAccuracy > MAX_GPS_ACCURACY ? 'text-red-500' : 'text-green-600'}`}>
+            <Text
+              className={`text-[10px] mt-1 font-semibold ${gpsAccuracy > MAX_GPS_ACCURACY ? 'text-red-500' : 'text-green-600'}`}
+            >
               📡 {accuracyStatus}
             </Text>
           </View>
@@ -1206,18 +1219,28 @@ export default function AddReviewScreen({ navigation, route }) {
         </View>
 
         {formData.rating > 0 && (
-          <Text className="text-center text-lg font-semibold mb-4" style={{ color: COLORS.secondary }}>
-            {formData.rating === 5 ? 'Excellent!' :
-              formData.rating === 4 ? 'Great!' :
-                formData.rating === 3 ? 'Good' :
-                  formData.rating === 2 ? 'Could be better' : 'Poor'}
+          <Text
+            className="text-center text-lg font-semibold mb-4"
+            style={{ color: COLORS.secondary }}
+          >
+            {formData.rating === 5
+              ? 'Excellent!'
+              : formData.rating === 4
+                ? 'Great!'
+                : formData.rating === 3
+                  ? 'Good'
+                  : formData.rating === 2
+                    ? 'Could be better'
+                    : 'Poor'}
           </Text>
         )}
 
         {/* 🏨 Booking.com-style Category Ratings */}
         <View className="mb-6">
           <Text className="text-xl font-bold text-gray-900 mb-1">Rate by Category</Text>
-          <Text className="text-sm text-gray-500 mb-4">Optional — help others with detailed scores</Text>
+          <Text className="text-sm text-gray-500 mb-4">
+            Optional — help others with detailed scores
+          </Text>
           {[
             { key: 'staff', label: 'Staff', icon: 'people' },
             { key: 'facilities', label: 'Facilities', icon: 'business' },
@@ -1235,8 +1258,16 @@ export default function AddReviewScreen({ navigation, route }) {
                     <Text className="text-gray-800 font-semibold ml-2">{label}</Text>
                   </View>
                   {val > 0 ? (
-                    <View className="px-3 py-1 rounded-full" style={{ backgroundColor: val >= 8 ? '#D1FAE5' : val >= 6 ? '#FEF3C7' : '#FEE2E2' }}>
-                      <Text className="font-bold text-sm" style={{ color: val >= 8 ? '#065F46' : val >= 6 ? '#92400E' : '#991B1B' }}>
+                    <View
+                      className="px-3 py-1 rounded-full"
+                      style={{
+                        backgroundColor: val >= 8 ? '#D1FAE5' : val >= 6 ? '#FEF3C7' : '#FEE2E2',
+                      }}
+                    >
+                      <Text
+                        className="font-bold text-sm"
+                        style={{ color: val >= 8 ? '#065F46' : val >= 6 ? '#92400E' : '#991B1B' }}
+                      >
                         {val.toFixed(1)}
                       </Text>
                     </View>
@@ -1249,17 +1280,24 @@ export default function AddReviewScreen({ navigation, route }) {
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
                     <TouchableOpacity
                       key={score}
-                      onPress={() => setFormData({
-                        ...formData,
-                        categoryRatings: { ...formData.categoryRatings, [key]: score }
-                      })}
+                      onPress={() =>
+                        setFormData({
+                          ...formData,
+                          categoryRatings: { ...formData.categoryRatings, [key]: score },
+                        })
+                      }
                       style={{
                         flex: 1,
                         height: 28,
                         borderRadius: 4,
-                        backgroundColor: val >= score
-                          ? (val >= 8 ? '#10B981' : val >= 6 ? '#F59E0B' : '#EF4444')
-                          : '#E5E7EB',
+                        backgroundColor:
+                          val >= score
+                            ? val >= 8
+                              ? '#10B981'
+                              : val >= 6
+                                ? '#F59E0B'
+                                : '#EF4444'
+                            : '#E5E7EB',
                       }}
                     />
                   ))}
@@ -1287,8 +1325,9 @@ export default function AddReviewScreen({ navigation, route }) {
               <TouchableOpacity
                 key={emotion.value}
                 onPress={() => setFormData({ ...formData, emotion: emotion.value })}
-                className={`m-1.5 items-center justify-center rounded-xl py-2 px-3 ${formData.emotion === emotion.value ? 'bg-blue-50 border-2' : 'bg-white border'
-                  }`}
+                className={`m-1.5 items-center justify-center rounded-xl py-2 px-3 ${
+                  formData.emotion === emotion.value ? 'bg-blue-50 border-2' : 'bg-white border'
+                }`}
                 style={{
                   borderColor: formData.emotion === emotion.value ? '#3B82F6' : '#E5E7EB',
                   minWidth: 75,
@@ -1301,8 +1340,9 @@ export default function AddReviewScreen({ navigation, route }) {
               >
                 <Text className="text-2xl mb-0.5">{emotion.emoji}</Text>
                 <Text
-                  className={`text-xs font-medium ${formData.emotion === emotion.value ? 'text-blue-700' : 'text-gray-600'
-                    }`}
+                  className={`text-xs font-medium ${
+                    formData.emotion === emotion.value ? 'text-blue-700' : 'text-gray-600'
+                  }`}
                 >
                   {emotion.label}
                 </Text>
@@ -1331,7 +1371,9 @@ export default function AddReviewScreen({ navigation, route }) {
 
         {/* Add Photos & Videos Section */}
         <View className="mb-6">
-          <Text className="text-lg font-bold text-gray-900 mb-3">Add Photos & Videos (Optional)</Text>
+          <Text className="text-lg font-bold text-gray-900 mb-3">
+            Add Photos & Videos (Optional)
+          </Text>
 
           {/* Photo & Video Buttons */}
           <View className="flex-row gap-3 mb-4">
@@ -1363,7 +1405,9 @@ export default function AddReviewScreen({ navigation, route }) {
           {/* Selected Photos Preview */}
           {selectedPhotos.length > 0 && (
             <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-700 mb-2">Selected Photos ({selectedPhotos.length})</Text>
+              <Text className="text-sm font-semibold text-gray-700 mb-2">
+                Selected Photos ({selectedPhotos.length})
+              </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
                 {selectedPhotos.map((photo, index) => (
                   <View key={index} className="mr-3 relative">
@@ -1375,7 +1419,13 @@ export default function AddReviewScreen({ navigation, route }) {
                     <TouchableOpacity
                       onPress={() => removePhoto(index)}
                       className="absolute -top-2 -right-2 bg-red-500 rounded-full w-6 h-6 items-center justify-center"
-                      style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 4 }}
+                      style={{
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 4,
+                        elevation: 4,
+                      }}
                     >
                       <Icon name="close" size={14} color="#FFF" />
                     </TouchableOpacity>
@@ -1388,7 +1438,9 @@ export default function AddReviewScreen({ navigation, route }) {
           {/* Selected Videos Preview */}
           {selectedVideos.length > 0 && (
             <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-700 mb-2">Selected Videos ({selectedVideos.length})</Text>
+              <Text className="text-sm font-semibold text-gray-700 mb-2">
+                Selected Videos ({selectedVideos.length})
+              </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
                 {selectedVideos.map((video, index) => (
                   <View key={index} className="mr-3 relative">
@@ -1401,7 +1453,13 @@ export default function AddReviewScreen({ navigation, route }) {
                     <TouchableOpacity
                       onPress={() => removeVideo(index)}
                       className="absolute -top-2 -right-2 bg-red-500 rounded-full w-6 h-6 items-center justify-center"
-                      style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 4 }}
+                      style={{
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 4,
+                        elevation: 4,
+                      }}
                     >
                       <Icon name="close" size={14} color="#FFF" />
                     </TouchableOpacity>
@@ -1430,7 +1488,8 @@ export default function AddReviewScreen({ navigation, route }) {
             <View className="flex-row items-start">
               <Icon name="alert-circle" size={20} color="#F59E0B" />
               <Text className="text-sm text-gray-700 ml-2 flex-1">
-                Please wait {verificationTimer} more seconds for location verification to complete before submitting.
+                Please wait {verificationTimer} more seconds for location verification to complete
+                before submitting.
               </Text>
             </View>
           </View>
@@ -1461,7 +1520,7 @@ export default function AddReviewScreen({ navigation, route }) {
             }
             className="rounded-xl py-4 items-center shadow-lg"
           >
-            {(loading || uploadingMedia) ? (
+            {loading || uploadingMedia ? (
               <View className="flex-row items-center">
                 <ActivityIndicator color="#fff" size="small" />
                 <Text className="text-white font-semibold text-base ml-3">

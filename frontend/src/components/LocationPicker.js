@@ -8,7 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-  Platform
+  Platform,
 } from 'react-native';
 import ToastService from '../utils/ToastService';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -21,12 +21,12 @@ export default function LocationPicker({ visible, onClose, onSelectLocation, ini
     latitude: initialLocation?.latitude || 26.1445,
     longitude: initialLocation?.longitude || 91.7362,
     latitudeDelta: 0.01,
-    longitudeDelta: 0.01
+    longitudeDelta: 0.01,
   });
 
   const [markerCoordinate, setMarkerCoordinate] = useState({
     latitude: initialLocation?.latitude || 26.1445,
-    longitude: initialLocation?.longitude || 91.7362
+    longitude: initialLocation?.longitude || 91.7362,
   });
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -67,7 +67,7 @@ export default function LocationPicker({ visible, onClose, onSelectLocation, ini
           latitude,
           longitude,
           latitudeDelta: 0.01,
-          longitudeDelta: 0.01
+          longitudeDelta: 0.01,
         };
 
         setRegion(newRegion);
@@ -95,24 +95,24 @@ export default function LocationPicker({ visible, onClose, onSelectLocation, ini
       }
 
       const currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced
+        accuracy: Location.Accuracy.Balanced,
       });
 
       const newRegion = {
         latitude: currentLocation.coords.latitude,
         longitude: currentLocation.coords.longitude,
         latitudeDelta: 0.01,
-        longitudeDelta: 0.01
+        longitudeDelta: 0.01,
       };
 
       setRegion(newRegion);
       setMarkerCoordinate({
         latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude
+        longitude: currentLocation.coords.longitude,
       });
       getAddressFromCoordinates({
         latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude
+        longitude: currentLocation.coords.longitude,
       });
     } catch (error) {
       console.error('Error getting current location:', error);
@@ -126,18 +126,13 @@ export default function LocationPicker({ visible, onClose, onSelectLocation, ini
     onSelectLocation({
       latitude: markerCoordinate.latitude,
       longitude: markerCoordinate.longitude,
-      address: address || searchQuery
+      address: address || searchQuery,
     });
     onClose();
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={false}
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -198,10 +193,7 @@ export default function LocationPicker({ visible, onClose, onSelectLocation, ini
         ) : null}
 
         {/* Current Location Button */}
-        <TouchableOpacity
-          style={styles.currentLocationButton}
-          onPress={getCurrentLocation}
-        >
+        <TouchableOpacity style={styles.currentLocationButton} onPress={getCurrentLocation}>
           <Icon name="locate" size={24} color={COLORS.primary} />
         </TouchableOpacity>
 
@@ -215,10 +207,7 @@ export default function LocationPicker({ visible, onClose, onSelectLocation, ini
               📍 Lng: {markerCoordinate.longitude.toFixed(6)}
             </Text>
           </View>
-          <TouchableOpacity
-            style={styles.confirmButton}
-            onPress={confirmLocation}
-          >
+          <TouchableOpacity style={styles.confirmButton} onPress={confirmLocation}>
             <Text style={styles.confirmButtonText}>Confirm Location</Text>
           </TouchableOpacity>
         </View>
@@ -237,7 +226,7 @@ export default function LocationPicker({ visible, onClose, onSelectLocation, ini
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -248,15 +237,15 @@ const styles = StyleSheet.create({
     paddingTop: 48,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB'
+    borderBottomColor: '#E5E7EB',
   },
   closeButton: {
-    padding: 4
+    padding: 4,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333'
+    color: '#333',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -264,25 +253,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     margin: 16,
     borderRadius: 12,
-    paddingHorizontal: 12
+    paddingHorizontal: 12,
   },
   searchIcon: {
-    marginRight: 8
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#333'
+    color: '#333',
   },
   searchButton: {
-    padding: 8
+    padding: 8,
   },
   map: {
-    flex: 1
+    flex: 1,
   },
   markerContainer: {
-    alignItems: 'center'
+    alignItems: 'center',
   },
   addressContainer: {
     flexDirection: 'row',
@@ -290,13 +279,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 12,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB'
+    borderTopColor: '#E5E7EB',
   },
   addressText: {
     flex: 1,
     marginLeft: 8,
     fontSize: 14,
-    color: '#333'
+    color: '#333',
   },
   currentLocationButton: {
     position: 'absolute',
@@ -312,42 +301,41 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
-    shadowRadius: 3.84
+    shadowRadius: 3.84,
   },
   footer: {
     backgroundColor: '#fff',
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB'
+    borderTopColor: '#E5E7EB',
   },
   coordinateInfo: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 12
+    marginBottom: 12,
   },
   coordinateText: {
     fontSize: 12,
-    color: '#666'
+    color: '#666',
   },
   confirmButton: {
     backgroundColor: COLORS.primary,
     paddingVertical: 14,
     borderRadius: 12,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   confirmButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600'
+    fontWeight: '600',
   },
   instructions: {
     backgroundColor: '#FEF3C7',
     padding: 12,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   instructionText: {
     fontSize: 12,
-    color: '#92400E'
-  }
+    color: '#92400E',
+  },
 });
-

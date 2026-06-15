@@ -1,6 +1,5 @@
 // For EAS builds, set EXPO_PUBLIC_API_BASE_URL in eas.json
 export const API_CONFIG = {
-
   // Local development server (ACTIVE - connecting to local backend)
   BASE_URL: 'http://192.168.1.4:5001/api',
   SOCKET_URL: 'http://192.168.1.4:5001',
@@ -86,7 +85,6 @@ export const API_CONFIG = {
     SYNC_GOOGLE_REVIEWS: '/external-reviews/:id/sync-google-reviews',
     SYNC_TRIPADVISOR_REVIEWS: '/external-reviews/:id/sync-tripadvisor-reviews',
     GET_ALL_BUSINESS_REVIEWS: '/external-reviews/:id/all-reviews',
-  }
+  },
 };
 export default API_CONFIG;
-

@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
-  StatusBar
+  StatusBar,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -51,11 +51,11 @@ export default function NotificationsScreen({ navigation }) {
       await ApiService.markAsRead(notificationId);
 
       // Update local state
-      setNotifications(notifications.map(notif =>
-        notif._id === notificationId
-          ? { ...notif, read: true }
-          : notif
-      ));
+      setNotifications(
+        notifications.map((notif) =>
+          notif._id === notificationId ? { ...notif, read: true } : notif
+        )
+      );
 
       ToastService.showSuccess('Marked as read', '');
     } catch (error) {
@@ -68,7 +68,7 @@ export default function NotificationsScreen({ navigation }) {
       await ApiService.markAllRead();
 
       // Update all notifications to read
-      setNotifications(notifications.map(notif => ({ ...notif, read: true })));
+      setNotifications(notifications.map((notif) => ({ ...notif, read: true })));
 
       ToastService.showSuccess('All notifications marked as read', '');
     } catch (error) {
@@ -119,7 +119,7 @@ export default function NotificationsScreen({ navigation }) {
     } else if (data.businessId) {
       navigation.navigate('Home', {
         screen: 'BusinessDetail',
-        params: { businessId: data.businessId }
+        params: { businessId: data.businessId },
       });
     }
   };
@@ -140,17 +140,14 @@ export default function NotificationsScreen({ navigation }) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between mb-4">
           <View className="flex-row items-center flex-1">
             <TouchableOpacity
@@ -174,9 +171,7 @@ export default function NotificationsScreen({ navigation }) {
               onPress={markAllAsRead}
               className="px-4 py-2 bg-white/20 rounded-full"
             >
-              <Text className="text-white text-sm font-semibold">
-                Mark all read
-              </Text>
+              <Text className="text-white text-sm font-semibold">Mark all read</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -187,12 +182,12 @@ export default function NotificationsScreen({ navigation }) {
             <TouchableOpacity
               key={filterType}
               onPress={() => setFilter(filterType)}
-              className={`flex-1 py-2 rounded-full ${filter === filterType ? 'bg-white' : ''
-                }`}
+              className={`flex-1 py-2 rounded-full ${filter === filterType ? 'bg-white' : ''}`}
             >
               <Text
-                className={`text-center font-semibold capitalize ${filter === filterType ? 'text-gray-900' : 'text-white'
-                  }`}
+                className={`text-center font-semibold capitalize ${
+                  filter === filterType ? 'text-gray-900' : 'text-white'
+                }`}
               >
                 {filterType}
               </Text>
@@ -210,14 +205,12 @@ export default function NotificationsScreen({ navigation }) {
       ) : notifications.length === 0 ? (
         <View className="flex-1 items-center justify-center px-6">
           <Icon name="notifications-off-outline" size={80} color="#D1D5DB" />
-          <Text className="text-xl font-bold text-gray-900 mt-4">
-            No Notifications
-          </Text>
+          <Text className="text-xl font-bold text-gray-900 mt-4">No Notifications</Text>
           <Text className="text-gray-500 text-center mt-2">
             {filter === 'unread'
               ? "You're all caught up! No unread notifications."
               : filter === 'read'
-                ? "No read notifications yet."
+                ? 'No read notifications yet.'
                 : "You'll see notifications here when you receive them."}
           </Text>
         </View>
@@ -268,9 +261,7 @@ export default function NotificationsScreen({ navigation }) {
                         )}
                       </View>
 
-                      <Text className="text-sm text-gray-600 mb-2">
-                        {notification.message}
-                      </Text>
+                      <Text className="text-sm text-gray-600 mb-2">{notification.message}</Text>
 
                       <View className="flex-row items-center justify-between">
                         <Text className="text-xs text-gray-400">

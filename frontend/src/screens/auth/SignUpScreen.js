@@ -41,7 +41,7 @@ export default function SignUpScreen({ navigation, route }) {
     county: '',
     postcode: '',
     country: 'United Kingdom',
-    landmark: ''
+    landmark: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -98,7 +98,8 @@ export default function SignUpScreen({ navigation, route }) {
 
     // Address validation - OPTIONAL section. Only validate if the user has filled at least one field.
     // Building number is intentionally NOT required — many valid addresses omit it.
-    const hasAnyAddressField = formData.buildingNumber.trim() ||
+    const hasAnyAddressField =
+      formData.buildingNumber.trim() ||
       formData.street.trim() ||
       formData.city.trim() ||
       formData.postcode.trim();
@@ -157,7 +158,7 @@ export default function SignUpScreen({ navigation, route }) {
       formData.city?.trim(),
       formData.county?.trim(),
       formData.postcode?.trim().toUpperCase(),
-      formData.country
+      formData.country,
     ]
       .filter(Boolean)
       .join(', ');
@@ -180,17 +181,14 @@ export default function SignUpScreen({ navigation, route }) {
           postcode: formData.postcode.trim().toUpperCase() || '',
           country: formData.country || 'United Kingdom',
           landmark: formData.landmark.trim() || '',
-          address: formattedAddress
-        })
-      }
+          address: formattedAddress,
+        }),
+      },
     });
   };
 
   return (
-    <LinearGradient
-      colors={[COLORS.primary, COLORS.primaryDark]}
-      className="flex-1"
-    >
+    <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="flex-1">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       <KeyboardAvoidingView
@@ -213,19 +211,21 @@ export default function SignUpScreen({ navigation, route }) {
 
           {/* Logo */}
           <View className="items-center mt-4 mb-4">
-            <View style={{
-              width: 120,
-              height: 120,
-              borderRadius: 60,
-              backgroundColor: '#FFF',
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.15,
-              shadowRadius: 8,
-              elevation: 6
-            }}>
+            <View
+              style={{
+                width: 120,
+                height: 120,
+                borderRadius: 60,
+                backgroundColor: '#FFF',
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+                elevation: 6,
+              }}
+            >
               <Image
                 source={require('../../../assets/HashViewlogo-01.png')}
                 style={{ width: 100, height: 100 }}
@@ -238,18 +238,11 @@ export default function SignUpScreen({ navigation, route }) {
           <View className="flex-1 bg-white rounded-t-3xl px-6 pt-6">
             {/* Header */}
             <View className="items-center mb-5">
-              <LinearGradient
-                colors={config.gradientColors}
-                className="rounded-full p-3 mb-3"
-              >
+              <LinearGradient colors={config.gradientColors} className="rounded-full p-3 mb-3">
                 <Icon name={config.icon} size={28} color="white" />
               </LinearGradient>
-              <Text className="text-2xl font-bold text-gray-900">
-                {config.title}
-              </Text>
-              <Text className="text-gray-600 text-sm mt-1">
-                {config.subtitle}
-              </Text>
+              <Text className="text-2xl font-bold text-gray-900">{config.title}</Text>
+              <Text className="text-gray-600 text-sm mt-1">{config.subtitle}</Text>
             </View>
 
             {/* OAuth Sign-In Options */}
@@ -259,7 +252,9 @@ export default function SignUpScreen({ navigation, route }) {
 
               <View className="flex-row items-center my-4">
                 <View className="flex-1 h-[1px] bg-gray-300" />
-                <Text className="mx-3 text-gray-500 font-medium text-sm">OR REGISTER WITH EMAIL</Text>
+                <Text className="mx-3 text-gray-500 font-medium text-sm">
+                  OR REGISTER WITH EMAIL
+                </Text>
                 <View className="flex-1 h-[1px] bg-gray-300" />
               </View>
             </View>
@@ -271,7 +266,11 @@ export default function SignUpScreen({ navigation, route }) {
                 className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border"
                 style={{ borderColor: errors.name ? COLORS.error : COLORS.gray200 }}
               >
-                <Icon name="person-outline" size={20} color={errors.name ? COLORS.error : COLORS.gray500} />
+                <Icon
+                  name="person-outline"
+                  size={20}
+                  color={errors.name ? COLORS.error : COLORS.gray500}
+                />
                 <TextInput
                   className="flex-1 ml-3 text-gray-900"
                   placeholder="Enter your full name"
@@ -284,9 +283,7 @@ export default function SignUpScreen({ navigation, route }) {
                   autoCapitalize="words"
                 />
               </View>
-              {errors.name && (
-                <Text className="text-red-500 text-xs mt-1">{errors.name}</Text>
-              )}
+              {errors.name && <Text className="text-red-500 text-xs mt-1">{errors.name}</Text>}
             </View>
 
             {/* Email Input */}
@@ -296,7 +293,11 @@ export default function SignUpScreen({ navigation, route }) {
                 className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border"
                 style={{ borderColor: errors.email ? COLORS.error : COLORS.gray200 }}
               >
-                <Icon name="mail-outline" size={20} color={errors.email ? COLORS.error : COLORS.gray500} />
+                <Icon
+                  name="mail-outline"
+                  size={20}
+                  color={errors.email ? COLORS.error : COLORS.gray500}
+                />
                 <TextInput
                   className="flex-1 ml-3 text-gray-900"
                   placeholder="Enter your email"
@@ -311,14 +312,14 @@ export default function SignUpScreen({ navigation, route }) {
                   autoCorrect={false}
                 />
               </View>
-              {errors.email && (
-                <Text className="text-red-500 text-xs mt-1">{errors.email}</Text>
-              )}
+              {errors.email && <Text className="text-red-500 text-xs mt-1">{errors.email}</Text>}
             </View>
 
             {/* Phone Number Input - shown for all platforms (OPTIONAL) */}
             <View className="mb-3">
-              <Text className="text-gray-700 font-semibold mb-2 text-sm">Phone Number (Optional)</Text>
+              <Text className="text-gray-700 font-semibold mb-2 text-sm">
+                Phone Number (Optional)
+              </Text>
               <PhoneInput
                 ref={phoneInputRef}
                 defaultCode="GB"
@@ -352,9 +353,7 @@ export default function SignUpScreen({ navigation, route }) {
                 codeTextStyle={{ color: COLORS.gray900 }}
                 textInputStyle={{ color: COLORS.gray900, fontSize: 16 }}
               />
-              {errors.phone && (
-                <Text className="text-red-500 text-xs mt-1">{errors.phone}</Text>
-              )}
+              {errors.phone && <Text className="text-red-500 text-xs mt-1">{errors.phone}</Text>}
             </View>
 
             {/* Address Fields - UK or India */}
@@ -379,7 +378,13 @@ export default function SignUpScreen({ navigation, route }) {
                       justifyContent: 'center',
                     }}
                   >
-                    <Text style={{ fontSize: 13, fontWeight: '700', color: formData.country === c ? COLORS.secondary : COLORS.gray500 }}>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontWeight: '700',
+                        color: formData.country === c ? COLORS.secondary : COLORS.gray500,
+                      }}
+                    >
                       {c === 'United Kingdom' ? '🇬🇧 United Kingdom' : '🇮🇳 India'}
                     </Text>
                   </TouchableOpacity>
@@ -416,7 +421,11 @@ export default function SignUpScreen({ navigation, route }) {
                     className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border"
                     style={{ borderColor: errors.street ? COLORS.error : COLORS.gray200 }}
                   >
-                    <Icon name="business" size={18} color={errors.street ? COLORS.error : COLORS.gray500} />
+                    <Icon
+                      name="business"
+                      size={18}
+                      color={errors.street ? COLORS.error : COLORS.gray500}
+                    />
                     <TextInput
                       className="flex-1 ml-3 text-gray-900 text-sm"
                       placeholder="e.g., Baker Street"
@@ -455,9 +464,7 @@ export default function SignUpScreen({ navigation, route }) {
                     autoCapitalize="words"
                   />
                 </View>
-                {errors.city && (
-                  <Text className="text-red-500 text-xs mt-1">{errors.city}</Text>
-                )}
+                {errors.city && <Text className="text-red-500 text-xs mt-1">{errors.city}</Text>}
               </View>
 
               {/* County & Postcode */}
@@ -487,14 +494,21 @@ export default function SignUpScreen({ navigation, route }) {
                     className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border"
                     style={{ borderColor: errors.postcode ? COLORS.error : COLORS.gray200 }}
                   >
-                    <Icon name="mail" size={18} color={errors.postcode ? COLORS.error : COLORS.gray500} />
+                    <Icon
+                      name="mail"
+                      size={18}
+                      color={errors.postcode ? COLORS.error : COLORS.gray500}
+                    />
                     <TextInput
                       className="flex-1 ml-3 text-gray-900 text-sm"
                       placeholder={formData.country === 'India' ? '400001' : 'SW1A 1AA'}
                       placeholderTextColor={COLORS.gray400}
                       value={formData.postcode}
                       onChangeText={(text) => {
-                        const formatted = formData.country === 'India' ? text.replace(/\D/g, '') : text.toUpperCase();
+                        const formatted =
+                          formData.country === 'India'
+                            ? text.replace(/\D/g, '')
+                            : text.toUpperCase();
                         setFormData({ ...formData, postcode: formatted });
                         if (errors.postcode) setErrors({ ...errors, postcode: null });
                       }}
@@ -546,7 +560,11 @@ export default function SignUpScreen({ navigation, route }) {
                 className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border"
                 style={{ borderColor: errors.password ? COLORS.error : COLORS.gray200 }}
               >
-                <Icon name="lock-closed-outline" size={20} color={errors.password ? COLORS.error : COLORS.gray500} />
+                <Icon
+                  name="lock-closed-outline"
+                  size={20}
+                  color={errors.password ? COLORS.error : COLORS.gray500}
+                />
                 <TextInput
                   className="flex-1 ml-3 text-gray-900"
                   placeholder="Create a password"
@@ -578,7 +596,11 @@ export default function SignUpScreen({ navigation, route }) {
                 className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border"
                 style={{ borderColor: errors.confirmPassword ? COLORS.error : COLORS.gray200 }}
               >
-                <Icon name="lock-closed-outline" size={20} color={errors.confirmPassword ? COLORS.error : COLORS.gray500} />
+                <Icon
+                  name="lock-closed-outline"
+                  size={20}
+                  color={errors.confirmPassword ? COLORS.error : COLORS.gray500}
+                />
                 <TextInput
                   className="flex-1 ml-3 text-gray-900"
                   placeholder="Confirm your password"
@@ -613,12 +635,24 @@ export default function SignUpScreen({ navigation, route }) {
                 activeOpacity={0.7}
                 style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}
               >
-                <View style={{
-                  width: 22, height: 22, borderRadius: 6, borderWidth: 2,
-                  borderColor: errors.terms ? '#EF4444' : (agreedToTerms ? COLORS.secondary : COLORS.gray300),
-                  backgroundColor: agreedToTerms ? COLORS.secondary : '#fff',
-                  alignItems: 'center', justifyContent: 'center', marginTop: 1, flexShrink: 0,
-                }}>
+                <View
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 6,
+                    borderWidth: 2,
+                    borderColor: errors.terms
+                      ? '#EF4444'
+                      : agreedToTerms
+                        ? COLORS.secondary
+                        : COLORS.gray300,
+                    backgroundColor: agreedToTerms ? COLORS.secondary : '#fff',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: 1,
+                    flexShrink: 0,
+                  }}
+                >
                   {agreedToTerms && <Icon name="checkmark" size={14} color="#fff" />}
                 </View>
                 <View style={{ flex: 1 }}>
@@ -626,11 +660,15 @@ export default function SignUpScreen({ navigation, route }) {
                     I agree to the{' '}
                     <Text
                       onPress={() => navigation.navigate('TermsAndConditions')}
-                      style={{ color: COLORS.secondary, fontWeight: '700', textDecorationLine: 'underline' }}
+                      style={{
+                        color: COLORS.secondary,
+                        fontWeight: '700',
+                        textDecorationLine: 'underline',
+                      }}
                     >
                       Terms & Conditions
-                    </Text>
-                    {' '}of HashView
+                    </Text>{' '}
+                    of HashView
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -653,9 +691,7 @@ export default function SignUpScreen({ navigation, route }) {
                 className="rounded-xl py-4 items-center"
                 style={{ elevation: 4 }}
               >
-                <Text className="text-white font-bold text-base">
-                  Create Account
-                </Text>
+                <Text className="text-white font-bold text-base">Create Account</Text>
               </LinearGradient>
             </TouchableOpacity>
 

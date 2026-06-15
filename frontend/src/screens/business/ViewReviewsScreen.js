@@ -18,10 +18,8 @@ import ToastService from '../../utils/ToastService';
 const computeCategoryAverages = (reviews) => {
   const keys = ['location', 'cleanliness', 'valueForMoney', 'facilities', 'comfort', 'staff'];
   const result = {};
-  keys.forEach(key => {
-    const vals = reviews
-      .map(r => r.categoryRatings?.[key])
-      .filter(v => v != null && v > 0);
+  keys.forEach((key) => {
+    const vals = reviews.map((r) => r.categoryRatings?.[key]).filter((v) => v != null && v > 0);
     result[key] = vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
   });
   return result;
@@ -29,22 +27,28 @@ const computeCategoryAverages = (reviews) => {
 
 const AVATAR_COLORS = ['#6C47FF', '#F59E0B', '#10B981', '#EF4444', '#3B82F6', '#EC4899'];
 const CATEGORY_KEYS = [
-  { key: 'staff',         label: 'Staff' },
-  { key: 'facilities',    label: 'Facilities' },
-  { key: 'cleanliness',   label: 'Cleanliness' },
-  { key: 'comfort',       label: 'Comfort' },
+  { key: 'staff', label: 'Staff' },
+  { key: 'facilities', label: 'Facilities' },
+  { key: 'cleanliness', label: 'Cleanliness' },
+  { key: 'comfort', label: 'Comfort' },
   { key: 'valueForMoney', label: 'Value' },
-  { key: 'location',      label: 'Location' },
+  { key: 'location', label: 'Location' },
 ];
 
 export default function ViewReviewsScreen({ navigation, route }) {
   const { businessId } = route.params;
-  const [reviews, setReviews]       = useState([]);
-  const [loading, setLoading]       = useState(true);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filterRating, setFilterRating] = useState(null);
-  const [stats, setStats] = useState({ average: 0, total: 0, breakdown: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } });
+  const [stats, setStats] = useState({
+    average: 0,
+    total: 0,
+    breakdown: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+  });
 
-  useEffect(() => { fetchReviews(); }, [filterRating]);
+  useEffect(() => {
+    fetchReviews();
+  }, [filterRating]);
 
   const fetchReviews = async () => {
     try {
@@ -55,9 +59,11 @@ export default function ViewReviewsScreen({ navigation, route }) {
       setReviews(list);
       if (list.length > 0) {
         const total = list.length;
-        const sum   = list.reduce((acc, r) => acc + r.rating, 0);
+        const sum = list.reduce((acc, r) => acc + r.rating, 0);
         const breakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-        list.forEach(r => { breakdown[r.rating] = (breakdown[r.rating] || 0) + 1; });
+        list.forEach((r) => {
+          breakdown[r.rating] = (breakdown[r.rating] || 0) + 1;
+        });
         setStats({ average: sum / total, total, breakdown });
       } else {
         setStats({ average: 0, total: 0, breakdown: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } });
@@ -72,7 +78,7 @@ export default function ViewReviewsScreen({ navigation, route }) {
 
   const renderRatingBar = (rating) => {
     const count = stats.breakdown[rating] || 0;
-    const pct   = stats.total > 0 ? (count / stats.total) * 100 : 0;
+    const pct = stats.total > 0 ? (count / stats.total) * 100 : 0;
     return (
       <TouchableOpacity
         key={rating}
@@ -85,7 +91,10 @@ export default function ViewReviewsScreen({ navigation, route }) {
         <View className="flex-1 mx-3 h-2 bg-gray-200 rounded-full overflow-hidden">
           <View
             className="h-full rounded-full"
-            style={{ width: `${pct}%`, backgroundColor: filterRating === rating ? COLORS.primary : COLORS.secondary }}
+            style={{
+              width: `${pct}%`,
+              backgroundColor: filterRating === rating ? COLORS.primary : COLORS.secondary,
+            }}
           />
         </View>
         <Text className="text-sm text-gray-600 w-8 text-right">{count}</Text>
@@ -95,7 +104,7 @@ export default function ViewReviewsScreen({ navigation, route }) {
 
   const ratingLabel = (avg) => {
     if (avg >= 4.5) return 'Exceptional';
-    if (avg >= 4)   return 'Very good';
+    if (avg >= 4) return 'Very good';
     if (avg >= 3.5) return 'Good';
     return 'Reviews';
   };
@@ -121,7 +130,6 @@ export default function ViewReviewsScreen({ navigation, route }) {
       ) : (
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
           <View className="px-5 py-5">
-
             {/* ── Stats Summary Card ── */}
             <View className="bg-white rounded-2xl p-5 shadow-sm mb-4">
               <View className="items-center mb-4">
@@ -150,7 +158,9 @@ export default function ViewReviewsScreen({ navigation, route }) {
               <View className="flex-row items-center justify-between bg-white rounded-xl p-3 mb-4">
                 <Text className="text-sm text-gray-700">Showing {filterRating}-star reviews</Text>
                 <TouchableOpacity onPress={() => setFilterRating(null)}>
-                  <Text className="text-sm font-semibold" style={{ color: COLORS.secondary }}>Clear Filter</Text>
+                  <Text className="text-sm font-semibold" style={{ color: COLORS.secondary }}>
+                    Clear Filter
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -175,7 +185,9 @@ export default function ViewReviewsScreen({ navigation, route }) {
                     </Text>
                   </View>
                   <View>
-                    <Text className="text-base font-black text-gray-900">{ratingLabel(stats.average)}</Text>
+                    <Text className="text-base font-black text-gray-900">
+                      {ratingLabel(stats.average)}
+                    </Text>
                     <Text className="text-sm text-gray-500">{stats.total} reviews</Text>
                   </View>
                 </View>
@@ -184,14 +196,14 @@ export default function ViewReviewsScreen({ navigation, route }) {
                 {(() => {
                   const avgs = computeCategoryAverages(reviews);
                   const CATS = [
-                    { key: 'location',      label: 'Location' },
-                    { key: 'cleanliness',   label: 'Cleanliness' },
+                    { key: 'location', label: 'Location' },
+                    { key: 'cleanliness', label: 'Cleanliness' },
                     { key: 'valueForMoney', label: 'Value for money' },
-                    { key: 'facilities',    label: 'Facilities' },
-                    { key: 'comfort',       label: 'Comfort' },
-                    { key: 'staff',         label: 'Staff' },
+                    { key: 'facilities', label: 'Facilities' },
+                    { key: 'comfort', label: 'Comfort' },
+                    { key: 'staff', label: 'Staff' },
                   ];
-                  const available = CATS.filter(c => avgs[c.key] !== null);
+                  const available = CATS.filter((c) => avgs[c.key] !== null);
                   if (available.length === 0) return null;
                   return (
                     <View className="mb-6">
@@ -201,10 +213,26 @@ export default function ViewReviewsScreen({ navigation, route }) {
                           <View key={key} className="mb-4">
                             <View className="flex-row justify-between items-center mb-1.5">
                               <Text className="text-sm text-gray-800 font-semibold">{label}</Text>
-                              <Text className="text-sm font-bold text-gray-900">{val.toFixed(1)}</Text>
+                              <Text className="text-sm font-bold text-gray-900">
+                                {val.toFixed(1)}
+                              </Text>
                             </View>
-                            <View style={{ height: 8, backgroundColor: '#E0E0E0', borderRadius: 4, overflow: 'hidden' }}>
-                              <View style={{ width: `${(val / 10) * 100}%`, height: '100%', backgroundColor: '#003580', borderRadius: 4 }} />
+                            <View
+                              style={{
+                                height: 8,
+                                backgroundColor: '#E0E0E0',
+                                borderRadius: 4,
+                                overflow: 'hidden',
+                              }}
+                            >
+                              <View
+                                style={{
+                                  width: `${(val / 10) * 100}%`,
+                                  height: '100%',
+                                  backgroundColor: '#003580',
+                                  borderRadius: 4,
+                                }}
+                              />
                             </View>
                           </View>
                         );
@@ -222,7 +250,7 @@ export default function ViewReviewsScreen({ navigation, route }) {
 
                 {/* ── Detailed Review Cards ── */}
                 {reviews.map((review) => {
-                  const initial     = review.user?.name?.charAt(0)?.toUpperCase() || 'U';
+                  const initial = review.user?.name?.charAt(0)?.toUpperCase() || 'U';
                   const avatarColor = AVATAR_COLORS[initial.charCodeAt(0) % AVATAR_COLORS.length];
                   return (
                     <View
@@ -243,8 +271,11 @@ export default function ViewReviewsScreen({ navigation, route }) {
                             {review.user?.name || 'Anonymous'}
                           </Text>
                           <Text className="text-xs text-gray-500 mt-0.5">
-                            Reviewed: {new Date(review.createdAt).toLocaleDateString('en-GB', {
-                              day: 'numeric', month: 'long', year: 'numeric'
+                            Reviewed:{' '}
+                            {new Date(review.createdAt).toLocaleDateString('en-GB', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
                             })}
                           </Text>
                         </View>
@@ -278,29 +309,31 @@ export default function ViewReviewsScreen({ navigation, route }) {
                       <Text className="text-sm text-gray-800 leading-5 mb-3">{review.comment}</Text>
 
                       {/* Category rating pills */}
-                      {review.categoryRatings && (() => {
-                        const rated = CATEGORY_KEYS.filter(c => review.categoryRatings[c.key]);
-                        if (rated.length === 0) return null;
-                        return (
-                          <View className="flex-row flex-wrap mb-3" style={{ gap: 6 }}>
-                            {rated.map(({ key, label }) => {
-                              const val   = review.categoryRatings[key];
-                              const color = val >= 8 ? '#10B981' : val >= 6 ? '#F59E0B' : '#EF4444';
-                              return (
-                                <View
-                                  key={key}
-                                  className="px-2.5 py-1 rounded-full"
-                                  style={{ backgroundColor: color + '18' }}
-                                >
-                                  <Text className="text-[11px] font-semibold" style={{ color }}>
-                                    {label} {val.toFixed(1)}
-                                  </Text>
-                                </View>
-                              );
-                            })}
-                          </View>
-                        );
-                      })()}
+                      {review.categoryRatings &&
+                        (() => {
+                          const rated = CATEGORY_KEYS.filter((c) => review.categoryRatings[c.key]);
+                          if (rated.length === 0) return null;
+                          return (
+                            <View className="flex-row flex-wrap mb-3" style={{ gap: 6 }}>
+                              {rated.map(({ key, label }) => {
+                                const val = review.categoryRatings[key];
+                                const color =
+                                  val >= 8 ? '#10B981' : val >= 6 ? '#F59E0B' : '#EF4444';
+                                return (
+                                  <View
+                                    key={key}
+                                    className="px-2.5 py-1 rounded-full"
+                                    style={{ backgroundColor: color + '18' }}
+                                  >
+                                    <Text className="text-[11px] font-semibold" style={{ color }}>
+                                      {label} {val.toFixed(1)}
+                                    </Text>
+                                  </View>
+                                );
+                              })}
+                            </View>
+                          );
+                        })()}
 
                       {/* Photos */}
                       {review.images && review.images.length > 0 && (
@@ -325,7 +358,10 @@ export default function ViewReviewsScreen({ navigation, route }) {
                       {review.couponAwarded && (
                         <View className="flex-row items-center pt-2">
                           <Icon name="gift" size={14} color={COLORS.secondary} />
-                          <Text className="text-xs ml-1.5 font-semibold" style={{ color: COLORS.secondary }}>
+                          <Text
+                            className="text-xs ml-1.5 font-semibold"
+                            style={{ color: COLORS.secondary }}
+                          >
                             Coupon Awarded
                           </Text>
                         </View>

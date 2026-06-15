@@ -20,23 +20,23 @@ function cleanDisplayText(text) {
 
 const initialState = {
   // Panel UI
-  isOpen:       false,  // Is the chat slide-up panel visible?
+  isOpen: false, // Is the chat slide-up panel visible?
 
   // Session
-  sessionId:    null,   // Links this chat to search context in Redis
+  sessionId: null, // Links this chat to search context in Redis
 
   // Messages
-  messages:     [],     // [{ id, role, content, timestamp, businesses?, suggestedFollowUps?, isStreaming? }]
+  messages: [], // [{ id, role, content, timestamp, businesses?, suggestedFollowUps?, isStreaming? }]
 
   // Streaming state
-  isStreaming:  false,  // Is the AI currently generating a response?
-  streamBuffer: '',     // Accumulates tokens during streaming
+  isStreaming: false, // Is the AI currently generating a response?
+  streamBuffer: '', // Accumulates tokens during streaming
 
   // Suggested follow-up chips
   suggestedFollowUps: [],
 
   // Error
-  error:        null,
+  error: null,
 };
 
 const aiChatSlice = createSlice({
@@ -63,8 +63,8 @@ const aiChatSlice = createSlice({
     addUserMessage(state, action) {
       const { content, id } = action.payload;
       state.messages.push({
-        id:        id || `u_${Date.now()}`,
-        role:      'user',
+        id: id || `u_${Date.now()}`,
+        role: 'user',
         content,
         timestamp: Date.now(),
       });
@@ -78,15 +78,15 @@ const aiChatSlice = createSlice({
 
     // ─── Streaming ──────────────────────────────────────────────────────────────
     startStreaming(state) {
-      state.isStreaming  = true;
+      state.isStreaming = true;
       state.streamBuffer = '';
-      state.error        = null;
+      state.error = null;
       // Add a placeholder assistant message that will grow as tokens arrive
       state.messages.push({
-        id:          `a_${Date.now()}`,
-        role:        'assistant',
-        content:     '',
-        timestamp:   Date.now(),
+        id: `a_${Date.now()}`,
+        role: 'assistant',
+        content: '',
+        timestamp: Date.now(),
         isStreaming: true,
       });
     },
@@ -96,7 +96,7 @@ const aiChatSlice = createSlice({
       state.streamBuffer += token;
 
       // Find the active streaming message (may not be last if biz results were added)
-      const streamingIdx = state.messages.findIndex(m => m.isStreaming);
+      const streamingIdx = state.messages.findIndex((m) => m.isStreaming);
       if (streamingIdx !== -1) {
         // Strip SEARCH_TRIGGER from displayed content so user never sees it
         state.messages[streamingIdx].content = cleanDisplayText(state.streamBuffer);
@@ -105,7 +105,7 @@ const aiChatSlice = createSlice({
 
     finishStreaming(state, action) {
       const { fullText, suggestedFollowUps, sessionId } = action.payload;
-      state.isStreaming  = false;
+      state.isStreaming = false;
       state.streamBuffer = '';
 
       if (sessionId) state.sessionId = sessionId;
@@ -113,12 +113,12 @@ const aiChatSlice = createSlice({
 
       // Find the streaming message by searching all messages (it may not be last
       // if inline business result cards were pushed after it)
-      const streamingIdx = state.messages.findIndex(m => m.isStreaming);
+      const streamingIdx = state.messages.findIndex((m) => m.isStreaming);
       if (streamingIdx !== -1) {
         const msg = state.messages[streamingIdx];
         // Use the server-provided fullText (already SEARCH_TRIGGER-clean) if available
-        msg.content     = fullText || cleanDisplayText(msg.content);
-        msg.isStreaming  = false;
+        msg.content = fullText || cleanDisplayText(msg.content);
+        msg.isStreaming = false;
         if (suggestedFollowUps) msg.suggestedFollowUps = suggestedFollowUps;
       }
 
@@ -131,9 +131,9 @@ const aiChatSlice = createSlice({
     // ─── Mid-chat Business Results ──────────────────────────────────────────────
     addSearchingIndicator(state, action) {
       state.messages.push({
-        id:        `search_${Date.now()}`,
-        role:      'assistant',
-        content:   `Searching for "${action.payload}"...`,
+        id: `search_${Date.now()}`,
+        role: 'assistant',
+        content: `Searching for "${action.payload}"...`,
         timestamp: Date.now(),
         isSearching: true,
       });
@@ -143,14 +143,14 @@ const aiChatSlice = createSlice({
       const { businesses, totalCount, query } = action.payload;
 
       // Remove the "searching..." indicator if present
-      state.messages = state.messages.filter(m => !m.isSearching);
+      state.messages = state.messages.filter((m) => !m.isSearching);
 
       // Add a special business-results message
       state.messages.push({
-        id:         `biz_${Date.now()}`,
-        role:       'assistant',
-        content:    `Found ${totalCount} results for "${query}"`,
-        timestamp:  Date.now(),
+        id: `biz_${Date.now()}`,
+        role: 'assistant',
+        content: `Found ${totalCount} results for "${query}"`,
+        timestamp: Date.now(),
         businesses,
         isBizResults: true,
       });
@@ -159,28 +159,28 @@ const aiChatSlice = createSlice({
     // ─── Error ──────────────────────────────────────────────────────────────────
     setChatError(state, action) {
       state.isStreaming = false;
-      state.error       = action.payload;
+      state.error = action.payload;
 
       // Remove any incomplete streaming message
-      state.messages = state.messages.filter(m => !m.isStreaming);
+      state.messages = state.messages.filter((m) => !m.isStreaming);
 
       // Add error message to chat
       state.messages.push({
-        id:        `err_${Date.now()}`,
-        role:      'assistant',
-        content:   '⚠️ Sorry, I ran into an issue. Please try again.',
+        id: `err_${Date.now()}`,
+        role: 'assistant',
+        content: '⚠️ Sorry, I ran into an issue. Please try again.',
         timestamp: Date.now(),
-        isError:   true,
+        isError: true,
       });
     },
 
     // ─── Clear ──────────────────────────────────────────────────────────────────
     clearChat(state) {
-      state.messages          = [];
-      state.streamBuffer      = '';
-      state.isStreaming       = false;
+      state.messages = [];
+      state.streamBuffer = '';
+      state.isStreaming = false;
       state.suggestedFollowUps = [];
-      state.error             = null;
+      state.error = null;
       // Note: we keep sessionId so the server session can be reused for context
     },
 
@@ -194,22 +194,28 @@ const aiChatSlice = createSlice({
 });
 
 export const {
-  openChat, closeChat, toggleChat,
+  openChat,
+  closeChat,
+  toggleChat,
   setSessionId,
   addUserMessage,
-  startStreaming, appendToken, finishStreaming,
-  addSearchingIndicator, addInlineBusinessResults,
+  startStreaming,
+  appendToken,
+  finishStreaming,
+  addSearchingIndicator,
+  addInlineBusinessResults,
   setChatError,
-  clearChat, clearAndResetSession,
+  clearChat,
+  clearAndResetSession,
 } = aiChatSlice.actions;
 
 // ─── Selectors ─────────────────────────────────────────────────────────────────
 
-export const selectChatIsOpen        = (state) => state.aiChat.isOpen;
-export const selectChatMessages      = (state) => state.aiChat.messages;
-export const selectChatIsStreaming   = (state) => state.aiChat.isStreaming;
-export const selectChatSessionId     = (state) => state.aiChat.sessionId;
-export const selectChatFollowUps     = (state) => state.aiChat.suggestedFollowUps;
-export const selectChatError         = (state) => state.aiChat.error;
+export const selectChatIsOpen = (state) => state.aiChat.isOpen;
+export const selectChatMessages = (state) => state.aiChat.messages;
+export const selectChatIsStreaming = (state) => state.aiChat.isStreaming;
+export const selectChatSessionId = (state) => state.aiChat.sessionId;
+export const selectChatFollowUps = (state) => state.aiChat.suggestedFollowUps;
+export const selectChatError = (state) => state.aiChat.error;
 
 export default aiChatSlice.reducer;

@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   StatusBar,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -56,10 +56,7 @@ export default function ChangePasswordScreen({ navigation }) {
 
   const handleChangePassword = async () => {
     if (!validateForm()) {
-      ToastService.showWarning(
-        'Validation Error',
-        'Please fix the errors before continuing'
-      );
+      ToastService.showWarning('Validation Error', 'Please fix the errors before continuing');
       return;
     }
 
@@ -71,10 +68,7 @@ export default function ChangePasswordScreen({ navigation }) {
         newPassword: formData.newPassword,
       });
 
-      ToastService.showSuccess(
-        'Password Changed!',
-        'Your password has been updated successfully'
-      );
+      ToastService.showSuccess('Password Changed!', 'Your password has been updated successfully');
 
       setLoading(false);
 
@@ -89,11 +83,13 @@ export default function ChangePasswordScreen({ navigation }) {
       setTimeout(() => {
         navigation.goBack();
       }, 1500);
-
     } catch (error) {
       setLoading(false);
       console.error('Change password error:', error);
-      ToastService.showError('Password Change Failed', error.message || 'Failed to change password');
+      ToastService.showError(
+        'Password Change Failed',
+        error.message || 'Failed to change password'
+      );
     }
   };
 
@@ -124,10 +120,7 @@ export default function ChangePasswordScreen({ navigation }) {
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
         <View className="flex-row items-center">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -144,11 +137,10 @@ export default function ChangePasswordScreen({ navigation }) {
         <View className="bg-blue-50 rounded-2xl p-4 mb-6 flex-row items-start">
           <Icon name="information-circle" size={24} color="#3B82F6" />
           <View className="flex-1 ml-3">
-            <Text className="text-blue-900 font-semibold mb-1">
-              Password Security Tips
-            </Text>
+            <Text className="text-blue-900 font-semibold mb-1">Password Security Tips</Text>
             <Text className="text-blue-700 text-sm leading-relaxed">
-              Use at least 8 characters with a mix of uppercase, lowercase, numbers, and symbols for a strong password.
+              Use at least 8 characters with a mix of uppercase, lowercase, numbers, and symbols for
+              a strong password.
             </Text>
           </View>
         </View>
@@ -157,9 +149,7 @@ export default function ChangePasswordScreen({ navigation }) {
         <View className="bg-white rounded-2xl p-6 shadow-sm">
           {/* Current Password */}
           <View className="mb-5">
-            <Text className="text-sm font-medium text-gray-700 mb-2">
-              Current Password
-            </Text>
+            <Text className="text-sm font-medium text-gray-700 mb-2">Current Password</Text>
             <View className="flex-row items-center border border-gray-300 rounded-xl px-4 py-3 bg-gray-50">
               <Icon name="lock-closed-outline" size={20} color="#9CA3AF" />
               <TextInput
@@ -179,24 +169,20 @@ export default function ChangePasswordScreen({ navigation }) {
                 className="ml-2"
               >
                 <Icon
-                  name={showCurrentPassword ? "eye-outline" : "eye-off-outline"}
+                  name={showCurrentPassword ? 'eye-outline' : 'eye-off-outline'}
                   size={20}
                   color="#9CA3AF"
                 />
               </TouchableOpacity>
             </View>
             {errors.currentPassword && (
-              <Text className="text-red-500 text-xs mt-1 ml-2">
-                {errors.currentPassword}
-              </Text>
+              <Text className="text-red-500 text-xs mt-1 ml-2">{errors.currentPassword}</Text>
             )}
           </View>
 
           {/* New Password */}
           <View className="mb-5">
-            <Text className="text-sm font-medium text-gray-700 mb-2">
-              New Password
-            </Text>
+            <Text className="text-sm font-medium text-gray-700 mb-2">New Password</Text>
             <View className="flex-row items-center border border-gray-300 rounded-xl px-4 py-3 bg-gray-50">
               <Icon name="lock-closed-outline" size={20} color="#9CA3AF" />
               <TextInput
@@ -216,7 +202,7 @@ export default function ChangePasswordScreen({ navigation }) {
                 className="ml-2"
               >
                 <Icon
-                  name={showNewPassword ? "eye-outline" : "eye-off-outline"}
+                  name={showNewPassword ? 'eye-outline' : 'eye-off-outline'}
                   size={20}
                   color="#9CA3AF"
                 />
@@ -245,7 +231,7 @@ export default function ChangePasswordScreen({ navigation }) {
                               ? passwordStrength.color
                               : passwordStrength.strength === 'strong'
                                 ? passwordStrength.color
-                                : '#E5E7EB'
+                                : '#E5E7EB',
                       }}
                     />
                   ))}
@@ -254,17 +240,13 @@ export default function ChangePasswordScreen({ navigation }) {
             )}
 
             {errors.newPassword && (
-              <Text className="text-red-500 text-xs mt-1 ml-2">
-                {errors.newPassword}
-              </Text>
+              <Text className="text-red-500 text-xs mt-1 ml-2">{errors.newPassword}</Text>
             )}
           </View>
 
           {/* Confirm Password */}
           <View className="mb-6">
-            <Text className="text-sm font-medium text-gray-700 mb-2">
-              Confirm New Password
-            </Text>
+            <Text className="text-sm font-medium text-gray-700 mb-2">Confirm New Password</Text>
             <View className="flex-row items-center border border-gray-300 rounded-xl px-4 py-3 bg-gray-50">
               <Icon name="lock-closed-outline" size={20} color="#9CA3AF" />
               <TextInput
@@ -284,16 +266,14 @@ export default function ChangePasswordScreen({ navigation }) {
                 className="ml-2"
               >
                 <Icon
-                  name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
+                  name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
                   size={20}
                   color="#9CA3AF"
                 />
               </TouchableOpacity>
             </View>
             {errors.confirmPassword && (
-              <Text className="text-red-500 text-xs mt-1 ml-2">
-                {errors.confirmPassword}
-              </Text>
+              <Text className="text-red-500 text-xs mt-1 ml-2">{errors.confirmPassword}</Text>
             )}
 
             {/* Match Indicator */}
@@ -302,27 +282,21 @@ export default function ChangePasswordScreen({ navigation }) {
                 <Icon
                   name={
                     formData.newPassword === formData.confirmPassword
-                      ? "checkmark-circle"
-                      : "close-circle"
+                      ? 'checkmark-circle'
+                      : 'close-circle'
                   }
                   size={16}
-                  color={
-                    formData.newPassword === formData.confirmPassword
-                      ? "#10B981"
-                      : "#EF4444"
-                  }
+                  color={formData.newPassword === formData.confirmPassword ? '#10B981' : '#EF4444'}
                 />
                 <Text
                   className="text-xs ml-1"
                   style={{
                     color:
-                      formData.newPassword === formData.confirmPassword
-                        ? "#10B981"
-                        : "#EF4444"
+                      formData.newPassword === formData.confirmPassword ? '#10B981' : '#EF4444',
                   }}
                 >
                   {formData.newPassword === formData.confirmPassword
-                    ? "Passwords match"
+                    ? 'Passwords match'
                     : "Passwords don't match"}
                 </Text>
               </View>
@@ -339,9 +313,7 @@ export default function ChangePasswordScreen({ navigation }) {
             {loading ? (
               <ActivityIndicator color="#FFF" />
             ) : (
-              <Text className="text-white font-bold text-base">
-                Change Password
-              </Text>
+              <Text className="text-white font-bold text-base">Change Password</Text>
             )}
           </TouchableOpacity>
 
@@ -358,23 +330,19 @@ export default function ChangePasswordScreen({ navigation }) {
 
         {/* Security Tips */}
         <View className="bg-white rounded-2xl p-6 shadow-sm mt-4 mb-6">
-          <Text className="text-lg font-bold text-gray-900 mb-3">
-            Password Best Practices
-          </Text>
+          <Text className="text-lg font-bold text-gray-900 mb-3">Password Best Practices</Text>
 
           <View className="space-y-3">
             {[
               'Use a unique password for each account',
               'Avoid using personal information',
               'Change your password regularly',
-              'Don\'t share your password with anyone',
-              'Use a password manager for security'
+              "Don't share your password with anyone",
+              'Use a password manager for security',
             ].map((tip, index) => (
               <View key={index} className="flex-row items-start mb-2">
                 <Icon name="checkmark-circle" size={20} color="#10B981" />
-                <Text className="text-sm text-gray-600 ml-2 flex-1">
-                  {tip}
-                </Text>
+                <Text className="text-sm text-gray-600 ml-2 flex-1">{tip}</Text>
               </View>
             ))}
           </View>

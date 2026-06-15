@@ -44,7 +44,6 @@ export const setPostHogClient = (client) => {
 // INIT — called once from App.js useEffect at app startup
 // ─────────────────────────────────────────────────────────────────────────────
 const init = () => {
-
   // ── 1. Firebase Crashlytics ────────────────────────────────────────────────
   if (firebaseCrashlytics) {
     try {
@@ -125,7 +124,9 @@ const identifyUser = (user) => {
         name: userName,
         role: userRole,
       });
-    } catch (e) { /* silent */ }
+    } catch (e) {
+      /* silent */
+    }
   }
 
   // ── Firebase Crashlytics: attach user to native crash reports ────────────
@@ -134,7 +135,9 @@ const identifyUser = (user) => {
       firebaseCrashlytics().setUserId(userId);
       firebaseCrashlytics().setAttribute('role', userRole);
       firebaseCrashlytics().setAttribute('email', userEmail);
-    } catch (e) { /* silent */ }
+    } catch (e) {
+      /* silent */
+    }
   }
 
   // ── Firebase Analytics: set user properties ──────────────────────────────
@@ -142,7 +145,9 @@ const identifyUser = (user) => {
     try {
       firebaseAnalytics().setUserId(userId);
       firebaseAnalytics().setUserProperties({ role: userRole });
-    } catch (e) { /* silent */ }
+    } catch (e) {
+      /* silent */
+    }
   }
 };
 
@@ -153,13 +158,19 @@ const clearUser = () => {
   Sentry.setUser(null);
 
   if (posthogClient) {
-    try { posthogClient.reset(); } catch (e) { /* silent */ }
+    try {
+      posthogClient.reset();
+    } catch (e) {
+      /* silent */
+    }
   }
 
   if (firebaseCrashlytics) {
     try {
       firebaseCrashlytics().setUserId('');
-    } catch (e) { /* silent */ }
+    } catch (e) {
+      /* silent */
+    }
   }
 };
 
@@ -191,7 +202,9 @@ const captureError = (error, context = {}) => {
       firebaseCrashlytics().recordError(error);
       if (feature) firebaseCrashlytics().setAttribute('last_feature', feature);
       if (screen) firebaseCrashlytics().setAttribute('last_screen', screen);
-    } catch (e) { /* silent */ }
+    } catch (e) {
+      /* silent */
+    }
   }
 
   // PostHog event so you can correlate errors with user journeys
@@ -221,7 +234,9 @@ const captureMessage = (message, context = {}) => {
   if (firebaseCrashlytics) {
     try {
       firebaseCrashlytics().log(message);
-    } catch (e) { /* silent */ }
+    } catch (e) {
+      /* silent */
+    }
   }
 };
 
@@ -261,15 +276,15 @@ const track = (eventName, properties = {}) => {
   if (posthogClient) {
     try {
       posthogClient.capture(eventName, properties);
-    } catch (e) { /* silent */ }
+    } catch (e) {
+      /* silent */
+    }
   }
 
   // Firebase Analytics
   if (firebaseAnalytics) {
     try {
-      const safeEventName = eventName
-        .replace(/[^a-zA-Z0-9_]/g, '_')
-        .slice(0, 40);
+      const safeEventName = eventName.replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 40);
       const safeProps = {};
       Object.entries(properties).forEach(([k, v]) => {
         if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
@@ -277,7 +292,9 @@ const track = (eventName, properties = {}) => {
         }
       });
       firebaseAnalytics().logEvent(safeEventName, safeProps);
-    } catch (e) { /* silent */ }
+    } catch (e) {
+      /* silent */
+    }
   }
 };
 
@@ -298,21 +315,27 @@ const trackScreen = (screenName, screenClass = '') => {
         screen_name: screenName,
         screen_class: screenClass || screenName,
       });
-    } catch (e) { /* silent */ }
+    } catch (e) {
+      /* silent */
+    }
   }
 
   // PostHog screen event
   if (posthogClient) {
     try {
       posthogClient.screen(screenName);
-    } catch (e) { /* silent */ }
+    } catch (e) {
+      /* silent */
+    }
   }
 
   // Crashlytics: track last screen user was on before a crash
   if (firebaseCrashlytics) {
     try {
       firebaseCrashlytics().setAttribute('last_screen', screenName);
-    } catch (e) { /* silent */ }
+    } catch (e) {
+      /* silent */
+    }
   }
 };
 
@@ -331,7 +354,11 @@ const Events = {
     breadcrumb(`Login succeeded via ${method}`, 'auth');
     identifyUser(user);
     track('login_success', { method, role: user?.role });
-    if (firebaseAnalytics) { try { firebaseAnalytics().logEvent('login', { method }); } catch (e) {} }
+    if (firebaseAnalytics) {
+      try {
+        firebaseAnalytics().logEvent('login', { method });
+      } catch (e) {}
+    }
   },
   loginFailed: (method, reason) => {
     track('login_failed', { method, reason });
@@ -340,7 +367,11 @@ const Events = {
   registerSuccess: (user, method) => {
     identifyUser(user);
     track('register_success', { method, role: user?.role });
-    if (firebaseAnalytics) { try { firebaseAnalytics().logEvent('sign_up', { method }); } catch (e) {} }
+    if (firebaseAnalytics) {
+      try {
+        firebaseAnalytics().logEvent('sign_up', { method });
+      } catch (e) {}
+    }
   },
   logout: () => {
     track('logout');
@@ -469,7 +500,10 @@ const Events = {
   // ─── Filters & Maps ────────────────────────────────────────────────────────
   filterApplied: (filterType, filterValue) => {
     breadcrumb(`Filter applied: ${filterType}=${filterValue}`, 'action');
-    track('filter_applied', { filter_type: filterType, filter_value: String(filterValue).slice(0, 50) });
+    track('filter_applied', {
+      filter_type: filterType,
+      filter_value: String(filterValue).slice(0, 50),
+    });
   },
   mapOpened: () => track('map_opened'),
 
@@ -506,8 +540,8 @@ const triggerNativeCrash = () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const Monitoring = {
-  init,                   // call once in App.js on mount
-  setPostHogClient,       // call from App.js after PostHogProvider is ready
+  init, // call once in App.js on mount
+  setPostHogClient, // call from App.js after PostHogProvider is ready
   identifyUser,
   clearUser,
   captureError,
@@ -515,7 +549,7 @@ const Monitoring = {
   breadcrumb,
   track,
   trackScreen,
-  triggerNativeCrash,     // Call this to test/activate Crashlytics
+  triggerNativeCrash, // Call this to test/activate Crashlytics
   Events,
 };
 

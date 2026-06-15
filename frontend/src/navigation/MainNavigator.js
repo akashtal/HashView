@@ -54,7 +54,6 @@ import ManageCouponsNew from '../screens/business/ManageCouponsNew';
 import CouponQRScannerScreen from '../screens/business/CouponQRScannerScreen';
 import MenuManagementScreen from '../screens/business/MenuManagementScreen'; // Phase 1: AI Menu
 
-
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
@@ -63,7 +62,7 @@ function UserStack() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false,  // Hide navigator header, screens have their own
+        headerShown: false, // Hide navigator header, screens have their own
       }}
     >
       <Stack.Screen name="UserHome" component={UserHomeScreen} />
@@ -171,7 +170,7 @@ function BusinessProfileStack() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false,  // Hide navigator header, screens have their own
+        headerShown: false, // Hide navigator header, screens have their own
       }}
     >
       <Stack.Screen name="ProfileHome" component={ProfileScreen} />
@@ -220,7 +219,8 @@ export default function MainNavigator() {
           let iconName;
           if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
           else if (route.name === 'Search') iconName = focused ? 'search' : 'search-outline';
-          else if (route.name === 'QRScanner') return null; // Custom icon for QR Scanner
+          else if (route.name === 'QRScanner')
+            return null; // Custom icon for QR Scanner
           else if (route.name === 'History') iconName = focused ? 'time' : 'time-outline';
           else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
           return <Icon name={iconName} size={size} color={color} />;
@@ -244,19 +244,11 @@ export default function MainNavigator() {
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '600',
-        }
+        },
       })}
     >
-      <Tab.Screen
-        name="Home"
-        component={UserStack}
-        options={{ title: 'Home' }}
-      />
-      <Tab.Screen
-        name="Search"
-        component={SearchScreen}
-        options={{ title: 'Search' }}
-      />
+      <Tab.Screen name="Home" component={UserStack} options={{ title: 'Home' }} />
+      <Tab.Screen name="Search" component={SearchScreen} options={{ title: 'Search' }} />
       <Tab.Screen
         name="QRScanner"
         component={QRScannerScreen}
@@ -264,39 +256,32 @@ export default function MainNavigator() {
           title: 'Scan',
           tabBarLabel: () => null,
           tabBarIcon: ({ focused }) => (
-            <View style={{
-              position: 'absolute',
-              top: -25,
-              width: 65,
-              height: 65,
-              borderRadius: 33,
-              backgroundColor: COLORS.secondary,
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: COLORS.secondary,
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.4,
-              shadowRadius: 12,
-              elevation: 8,
-              borderWidth: 5,
-              borderColor: '#FFF'
-            }}>
+            <View
+              style={{
+                position: 'absolute',
+                top: -25,
+                width: 65,
+                height: 65,
+                borderRadius: 33,
+                backgroundColor: COLORS.secondary,
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: COLORS.secondary,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.4,
+                shadowRadius: 12,
+                elevation: 8,
+                borderWidth: 5,
+                borderColor: '#FFF',
+              }}
+            >
               <Icon name="qr-code" size={32} color="#FFF" />
             </View>
           ),
         }}
       />
-      <Tab.Screen
-        name="History"
-        component={HistoryScreen}
-        options={{ title: 'History' }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{ title: 'Profile' }}
-      />
+      <Tab.Screen name="History" component={HistoryScreen} options={{ title: 'History' }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
     </Tab.Navigator>
   );
 }
-

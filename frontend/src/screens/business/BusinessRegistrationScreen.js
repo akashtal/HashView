@@ -12,7 +12,7 @@ import {
   Platform,
   Switch,
   Modal,
-  Pressable
+  Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Constants from 'expo-constants';
@@ -60,7 +60,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
     website: '',
     tripAdvisorLink: '',
     googleBusinessName: '',
-    category: ''
+    category: '',
   });
 
   const [errors, setErrors] = useState({});
@@ -68,25 +68,25 @@ export default function BusinessRegistrationScreen({ navigation }) {
   const [images, setImages] = useState({
     logo: null,
     coverImage: null,
-    gallery: [] // Gallery images array
+    gallery: [], // Gallery images array
   });
   const [uploadedImages, setUploadedImages] = useState({
     logo: null,
     coverImage: null,
-    gallery: []
+    gallery: [],
   });
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState({
     logo: false,
     coverImage: false,
-    gallery: false
+    gallery: false,
   });
 
   // State for Custom Image Cropper
   const [cropModal, setCropModal] = useState({
     visible: false,
     imageUri: null,
-    type: null // 'logo' or 'coverImage'
+    type: null, // 'logo' or 'coverImage'
   });
 
   const [location, setLocation] = useState({
@@ -94,7 +94,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
     longitude: null,
     address: '',
     loading: true,
-    error: null
+    error: null,
   });
 
   const [showLocationPicker, setShowLocationPicker] = useState(false);
@@ -118,13 +118,13 @@ export default function BusinessRegistrationScreen({ navigation }) {
     thursday: { open: '09:00 AM', close: '05:00 PM', closed: false },
     friday: { open: '09:00 AM', close: '05:00 PM', closed: false },
     saturday: { open: '09:00 AM', close: '05:00 PM', closed: false },
-    sunday: { open: '09:00 AM', close: '05:00 PM', closed: true }
+    sunday: { open: '09:00 AM', close: '05:00 PM', closed: true },
   });
 
   const [timePickerModal, setTimePickerModal] = useState({
     visible: false,
     day: null,
-    field: null // 'open' or 'close'
+    field: null, // 'open' or 'close'
   });
 
   const [applyToAll, setApplyToAll] = useState(false);
@@ -154,7 +154,10 @@ export default function BusinessRegistrationScreen({ navigation }) {
 
       if (!GOOGLE_API_KEY) {
         console.error('❌ Google API key not configured');
-        ToastService.showError('Configuration Error', 'Google API key is missing. Please contact support.');
+        ToastService.showError(
+          'Configuration Error',
+          'Google API key is missing. Please contact support.'
+        );
         setAddressSuggestions([]);
         setShowAddressSuggestions(false);
         return;
@@ -173,7 +176,11 @@ export default function BusinessRegistrationScreen({ navigation }) {
 
       const autocompleteData = await autocompleteResponse.json();
 
-      if (autocompleteData.status !== 'OK' || !autocompleteData.predictions || autocompleteData.predictions.length === 0) {
+      if (
+        autocompleteData.status !== 'OK' ||
+        !autocompleteData.predictions ||
+        autocompleteData.predictions.length === 0
+      ) {
         console.log(`ℹ️ Google Places API returned: ${autocompleteData.status}`);
         setAddressSuggestions([]);
         setShowAddressSuggestions(false);
@@ -182,15 +189,14 @@ export default function BusinessRegistrationScreen({ navigation }) {
 
       // Cost Optimization: Only return predictions here.
       // Detailed info (lat/lng, components) will be fetched only when a user SELECTS a suggestion.
-      const simplifiedSuggestions = autocompleteData.predictions.slice(0, 5).map(prediction => ({
+      const simplifiedSuggestions = autocompleteData.predictions.slice(0, 5).map((prediction) => ({
         id: prediction.place_id,
         description: prediction.description,
-        placeId: prediction.place_id
+        placeId: prediction.place_id,
       }));
 
       setAddressSuggestions(simplifiedSuggestions);
       setShowAddressSuggestions(simplifiedSuggestions.length > 0);
-
 
       if (simplifiedSuggestions.length > 0) {
         console.log(`✅ Found ${simplifiedSuggestions.length} address suggestions`);
@@ -257,7 +263,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
       addressPayload.city,
       addressPayload.county,
       addressPayload.postcode,
-      addressPayload.country || 'United Kingdom'
+      addressPayload.country || 'United Kingdom',
     ]
       .filter(Boolean)
       .join(', ');
@@ -300,7 +306,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
 
     const fullAddress = parts.join(', ');
     if (shouldUpdateState) {
-      setFormData(prev => ({ ...prev, address: fullAddress }));
+      setFormData((prev) => ({ ...prev, address: fullAddress }));
     }
     return fullAddress;
   };
@@ -350,7 +356,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
         longitude: longitude,
         address: formattedAddress,
         loading: false,
-        error: null
+        error: null,
       });
 
       setManualAddressDirty(false);
@@ -370,23 +376,26 @@ export default function BusinessRegistrationScreen({ navigation }) {
   // Function to get location
   const getLocation = useCallback(async () => {
     try {
-      setLocation(prev => ({ ...prev, loading: true, error: null }));
+      setLocation((prev) => ({ ...prev, loading: true, error: null }));
 
       console.log('📍 Requesting location permission...');
       let { status } = await Location.requestForegroundPermissionsAsync();
 
       if (status !== 'granted') {
-        setLocation(prev => ({
+        setLocation((prev) => ({
           ...prev,
           loading: false,
-          error: 'Location permission denied'
+          error: 'Location permission denied',
         }));
         Alert.alert(
           'Location Required',
           'This app needs location permission to register your business. Location is required for the geofencing feature (users can only review within 50 meters).',
           [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Grant Permission', onPress: () => Location.requestForegroundPermissionsAsync().then(getLocation) }
+            {
+              text: 'Grant Permission',
+              onPress: () => Location.requestForegroundPermissionsAsync().then(getLocation),
+            },
           ]
         );
         return;
@@ -396,44 +405,51 @@ export default function BusinessRegistrationScreen({ navigation }) {
       let currentLocation = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
         timeInterval: 15000,
-        distanceInterval: 10
+        distanceInterval: 10,
       });
 
-      console.log('✅ Location obtained:', currentLocation.coords.latitude, currentLocation.coords.longitude);
+      console.log(
+        '✅ Location obtained:',
+        currentLocation.coords.latitude,
+        currentLocation.coords.longitude
+      );
 
       setLocation({
         latitude: currentLocation.coords.latitude,
         longitude: currentLocation.coords.longitude,
         loading: false,
-        error: null
+        error: null,
       });
 
       // Reverse geocode to get address
       const addressData = await Location.reverseGeocodeAsync({
         latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude
+        longitude: currentLocation.coords.longitude,
       });
 
       if (addressData && addressData.length > 0) {
         const addr = addressData[0];
-        const fullAddress = `${addr.name || ''}, ${addr.street || ''}, ${addr.city || ''}, ${addr.region || ''}, ${addr.country || ''}`.replace(/,\s*,/g, ',').trim();
-        setFormData(prev => ({ ...prev, address: fullAddress }));
+        const fullAddress =
+          `${addr.name || ''}, ${addr.street || ''}, ${addr.city || ''}, ${addr.region || ''}, ${addr.country || ''}`
+            .replace(/,\s*,/g, ',')
+            .trim();
+        setFormData((prev) => ({ ...prev, address: fullAddress }));
         setAddressSearchQuery(fullAddress);
-        setLocation(prev => ({ ...prev, address: fullAddress }));
+        setLocation((prev) => ({ ...prev, address: fullAddress }));
       }
     } catch (error) {
       console.error('❌ Error getting location:', error);
-      setLocation(prev => ({
+      setLocation((prev) => ({
         ...prev,
         loading: false,
-        error: error.message
+        error: error.message,
       }));
       Alert.alert(
         'Location Error',
         'Unable to get your current location. Please:\n\n1. Enable Location Services in device settings\n2. Make sure GPS is turned ON\n3. Try going outside or near a window\n\nGo to: Settings → Location → Turn ON',
         [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'Retry', onPress: getLocation }
+          { text: 'Retry', onPress: getLocation },
         ]
       );
     }
@@ -457,7 +473,14 @@ export default function BusinessRegistrationScreen({ navigation }) {
         clearTimeout(manualGeocodeTimeoutRef.current);
       }
     };
-  }, [formData.buildingNumber, formData.street, formData.city, formData.county, formData.postcode, manualAddressDirty]);
+  }, [
+    formData.buildingNumber,
+    formData.street,
+    formData.city,
+    formData.county,
+    formData.postcode,
+    manualAddressDirty,
+  ]);
 
   // Fetch categories from database (admin-managed ONLY)
   useEffect(() => {
@@ -469,10 +492,10 @@ export default function BusinessRegistrationScreen({ navigation }) {
         if (response.success && response.categories) {
           const categoryOptions = [
             { label: 'Select Category', value: '' },
-            ...response.categories.map(cat => ({
+            ...response.categories.map((cat) => ({
               label: cat.name,
-              value: cat.value || cat.name.toLowerCase()
-            }))
+              value: cat.value || cat.name.toLowerCase(),
+            })),
           ];
           setCategories(categoryOptions);
           console.log(`✅ Loaded ${response.categories.length} categories from database`);
@@ -493,7 +516,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
           'Failed to load categories from server. Please check your internet connection and try again.',
           [
             { text: 'Retry', onPress: () => fetchCategories() },
-            { text: 'Cancel', style: 'cancel' }
+            { text: 'Cancel', style: 'cancel' },
           ]
         );
       } finally {
@@ -506,21 +529,61 @@ export default function BusinessRegistrationScreen({ navigation }) {
 
   const timeSlots = [
     'Closed',
-    '12:00 AM', '12:30 AM', '01:00 AM', '01:30 AM', '02:00 AM', '02:30 AM',
-    '03:00 AM', '03:30 AM', '04:00 AM', '04:30 AM', '05:00 AM', '05:30 AM',
-    '06:00 AM', '06:30 AM', '07:00 AM', '07:30 AM', '08:00 AM', '08:30 AM',
-    '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
-    '12:00 PM', '12:30 PM', '01:00 PM', '01:30 PM', '02:00 PM', '02:30 PM',
-    '03:00 PM', '03:30 PM', '04:00 PM', '04:30 PM', '05:00 PM', '05:30 PM',
-    '06:00 PM', '06:30 PM', '07:00 PM', '07:30 PM', '08:00 PM', '08:30 PM',
-    '09:00 PM', '09:30 PM', '10:00 PM', '10:30 PM', '11:00 PM', '11:30 PM'
+    '12:00 AM',
+    '12:30 AM',
+    '01:00 AM',
+    '01:30 AM',
+    '02:00 AM',
+    '02:30 AM',
+    '03:00 AM',
+    '03:30 AM',
+    '04:00 AM',
+    '04:30 AM',
+    '05:00 AM',
+    '05:30 AM',
+    '06:00 AM',
+    '06:30 AM',
+    '07:00 AM',
+    '07:30 AM',
+    '08:00 AM',
+    '08:30 AM',
+    '09:00 AM',
+    '09:30 AM',
+    '10:00 AM',
+    '10:30 AM',
+    '11:00 AM',
+    '11:30 AM',
+    '12:00 PM',
+    '12:30 PM',
+    '01:00 PM',
+    '01:30 PM',
+    '02:00 PM',
+    '02:30 PM',
+    '03:00 PM',
+    '03:30 PM',
+    '04:00 PM',
+    '04:30 PM',
+    '05:00 PM',
+    '05:30 PM',
+    '06:00 PM',
+    '06:30 PM',
+    '07:00 PM',
+    '07:30 PM',
+    '08:00 PM',
+    '08:30 PM',
+    '09:00 PM',
+    '09:30 PM',
+    '10:00 PM',
+    '10:30 PM',
+    '11:00 PM',
+    '11:30 PM',
   ];
 
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
     // Clear error for this field if it exists
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: null }));
+      setErrors((prev) => ({ ...prev, [field]: null }));
     }
   };
 
@@ -543,20 +606,20 @@ export default function BusinessRegistrationScreen({ navigation }) {
         mediaTypes: ['images'],
         allowsEditing: false, // We'll crop manually
         quality: 1, // Get highest quality before crop
-        allowsMultipleSelection: type === 'gallery'
+        allowsMultipleSelection: type === 'gallery',
       });
 
       if (!result.canceled) {
         if (type === 'gallery') {
           // Functional updater avoids stale gallery state
-          setImages(prev => ({ ...prev, gallery: [...prev.gallery, ...result.assets] }));
+          setImages((prev) => ({ ...prev, gallery: [...prev.gallery, ...result.assets] }));
         } else {
           // Capture type in a ref AT PICK TIME
           cropTypeRef.current = type;
           setCropModal({
             visible: true,
             imageUri: result.assets[0].uri,
-            type: type
+            type: type,
           });
         }
       }
@@ -574,7 +637,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
     // Read type from ref (captured at pick time) — never stale
     const type = cropTypeRef.current;
     if (!type) return;
-    setImages(prev => ({ ...prev, [type]: croppedImage }));
+    setImages((prev) => ({ ...prev, [type]: croppedImage }));
     cropTypeRef.current = null;
     setCropModal({ visible: false, imageUri: null, type: null });
   };
@@ -593,12 +656,13 @@ export default function BusinessRegistrationScreen({ navigation }) {
       const extension = match ? match[1].toLowerCase() : 'jpg';
       const mimeType = `image/${extension === 'jpg' ? 'jpeg' : extension}`;
 
-      const fieldName = imageType === 'logo' ? 'logo' : imageType === 'coverImage' ? 'coverImage' : 'images';
+      const fieldName =
+        imageType === 'logo' ? 'logo' : imageType === 'coverImage' ? 'coverImage' : 'images';
 
       formData.append(fieldName, {
         uri: imageUri,
         name: filename,
-        type: mimeType
+        type: mimeType,
       });
 
       let response;
@@ -621,7 +685,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
 
         return {
           url: data.url || data.imageUrl,
-          publicId: data.publicId || data.public_id
+          publicId: data.publicId || data.public_id,
         };
       }
       throw new Error(response.message || 'Upload failed');
@@ -648,7 +712,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
         formData.append('images', {
           uri: img.uri,
           name: filename,
-          type: mimeType
+          type: mimeType,
         });
       });
 
@@ -658,7 +722,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
         return response.images.map((img, index) => ({
           url: img.url,
           publicId: img.publicId,
-          originalUri: galleryImages[index]?.uri // Store original URI for matching
+          originalUri: galleryImages[index]?.uri, // Store original URI for matching
         }));
       }
 
@@ -672,10 +736,10 @@ export default function BusinessRegistrationScreen({ navigation }) {
   const updateOpenHours = (day, field, value) => {
     if (applyToAll) {
       const newOpenHours = {};
-      Object.keys(openHours).forEach(d => {
+      Object.keys(openHours).forEach((d) => {
         newOpenHours[d] = {
           ...openHours[d],
-          [field]: value
+          [field]: value,
         };
       });
       setOpenHours(newOpenHours);
@@ -684,8 +748,8 @@ export default function BusinessRegistrationScreen({ navigation }) {
         ...openHours,
         [day]: {
           ...openHours[day],
-          [field]: value
-        }
+          [field]: value,
+        },
       });
     }
   };
@@ -695,10 +759,10 @@ export default function BusinessRegistrationScreen({ navigation }) {
 
     if (applyToAll) {
       const newOpenHours = {};
-      Object.keys(openHours).forEach(d => {
+      Object.keys(openHours).forEach((d) => {
         newOpenHours[d] = {
           ...openHours[d],
-          closed: isNowClosed
+          closed: isNowClosed,
         };
       });
       setOpenHours(newOpenHours);
@@ -707,8 +771,8 @@ export default function BusinessRegistrationScreen({ navigation }) {
         ...openHours,
         [day]: {
           ...openHours[day],
-          closed: isNowClosed
-        }
+          closed: isNowClosed,
+        },
       });
     }
   };
@@ -717,7 +781,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
     setTimePickerModal({
       visible: true,
       day,
-      field
+      field,
     });
   };
 
@@ -771,7 +835,9 @@ export default function BusinessRegistrationScreen({ navigation }) {
       return false;
     }
     if (!formData.postcode || !formData.postcode.trim()) {
-      showErrorMessage(formData.country === 'India' ? 'Please enter PIN code' : 'Please enter postcode');
+      showErrorMessage(
+        formData.country === 'India' ? 'Please enter PIN code' : 'Please enter postcode'
+      );
       return false;
     }
 
@@ -805,7 +871,8 @@ export default function BusinessRegistrationScreen({ navigation }) {
         email: formData.email?.trim() || '',
         // Phone in E.164 format (e.g., +447123456789) - no spaces for backend validation
         phone: (() => {
-          const phoneNumber = businessPhoneInputRef.current?.getNumberAfterPossiblyEliminatingZero();
+          const phoneNumber =
+            businessPhoneInputRef.current?.getNumberAfterPossiblyEliminatingZero();
           if (phoneNumber && typeof phoneNumber === 'string') {
             return phoneNumber.replace(/\s/g, '');
           }
@@ -826,15 +893,19 @@ export default function BusinessRegistrationScreen({ navigation }) {
         // Optional fields - only include if they have values
         ...(formData.description?.trim() && { description: formData.description.trim() }),
         ...(formData.website?.trim() && { website: formData.website.trim() }),
-        ...(formData.tripAdvisorLink?.trim() && { tripAdvisorLink: formData.tripAdvisorLink.trim() }),
-        ...(formData.googleBusinessName?.trim() && { googleBusinessName: formData.googleBusinessName.trim() }),
+        ...(formData.tripAdvisorLink?.trim() && {
+          tripAdvisorLink: formData.tripAdvisorLink.trim(),
+        }),
+        ...(formData.googleBusinessName?.trim() && {
+          googleBusinessName: formData.googleBusinessName.trim(),
+        }),
         ...(openHours && Object.keys(openHours).length > 0 && { openingHours: openHours }),
         // Images will be null initially, uploaded later
         logo: null,
         logoPublicId: null,
         coverImage: null,
         coverImagePublicId: null,
-        images: []
+        images: [],
       };
 
       console.log('📝 Submitting business registration (images will be uploaded separately)...');
@@ -857,21 +928,23 @@ export default function BusinessRegistrationScreen({ navigation }) {
         if (images.logo) {
           uploadPromises.push(
             Promise.race([
-              uploadImageToCloudinary(images.logo.uri, 'logo', businessId).then(logoData => {
+              uploadImageToCloudinary(images.logo.uri, 'logo', businessId).then((logoData) => {
                 console.log('✅ Logo uploaded:', logoData.url);
                 // Update business with logo
                 return ApiService.updateBusinessImages(businessId, {
                   logo: logoData.url,
-                  logoPublicId: logoData.publicId
-                }).catch(err => {
+                  logoPublicId: logoData.publicId,
+                }).catch((err) => {
                   console.error('Failed to update logo:', err);
                   uploadFailures.push('Logo');
                 });
               }),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Logo upload timeout')), 30000))
-            ]).catch(error => {
+              new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Logo upload timeout')), 30000)
+              ),
+            ]).catch((error) => {
               console.error('⚠️ Logo upload failed or timed out:', error.message);
-              setUploadStatus(prev => ({ ...prev, logo: false }));
+              setUploadStatus((prev) => ({ ...prev, logo: false }));
               uploadFailures.push('Logo');
             })
           );
@@ -881,21 +954,25 @@ export default function BusinessRegistrationScreen({ navigation }) {
         if (images.coverImage) {
           uploadPromises.push(
             Promise.race([
-              uploadImageToCloudinary(images.coverImage.uri, 'coverImage', businessId).then(coverData => {
-                console.log('✅ Cover image uploaded:', coverData.url);
-                // Update business with cover image
-                return ApiService.updateBusinessImages(businessId, {
-                  coverImage: coverData.url,
-                  coverImagePublicId: coverData.publicId
-                }).catch(err => {
-                  console.error('Failed to update cover image:', err);
-                  uploadFailures.push('Cover Image');
-                });
-              }),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Cover upload timeout')), 30000))
-            ]).catch(error => {
+              uploadImageToCloudinary(images.coverImage.uri, 'coverImage', businessId).then(
+                (coverData) => {
+                  console.log('✅ Cover image uploaded:', coverData.url);
+                  // Update business with cover image
+                  return ApiService.updateBusinessImages(businessId, {
+                    coverImage: coverData.url,
+                    coverImagePublicId: coverData.publicId,
+                  }).catch((err) => {
+                    console.error('Failed to update cover image:', err);
+                    uploadFailures.push('Cover Image');
+                  });
+                }
+              ),
+              new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Cover upload timeout')), 30000)
+              ),
+            ]).catch((error) => {
               console.error('⚠️ Cover image upload failed or timed out:', error.message);
-              setUploadStatus(prev => ({ ...prev, coverImage: false }));
+              setUploadStatus((prev) => ({ ...prev, coverImage: false }));
               uploadFailures.push('Cover Image');
             })
           );
@@ -905,24 +982,26 @@ export default function BusinessRegistrationScreen({ navigation }) {
         if (images.gallery && images.gallery.length > 0) {
           uploadPromises.push(
             Promise.race([
-              uploadGalleryImages(images.gallery, businessId).then(uploadedGallery => {
+              uploadGalleryImages(images.gallery, businessId).then((uploadedGallery) => {
                 console.log(`✅ Gallery images uploaded: ${uploadedGallery.length} images`);
                 // Update business with gallery images
-                const galleryUrls = uploadedGallery.map(img => ({
+                const galleryUrls = uploadedGallery.map((img) => ({
                   url: img.url,
-                  publicId: img.publicId
+                  publicId: img.publicId,
                 }));
                 return ApiService.updateBusinessImages(businessId, {
-                  images: galleryUrls
-                }).catch(err => {
+                  images: galleryUrls,
+                }).catch((err) => {
                   console.error('Failed to update gallery images:', err);
                   uploadFailures.push('Gallery Images');
                 });
               }),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Gallery upload timeout')), 60000))
-            ]).catch(error => {
+              new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Gallery upload timeout')), 60000)
+              ),
+            ]).catch((error) => {
               console.error('⚠️ Gallery upload failed or timed out:', error.message);
-              setUploadStatus(prev => ({ ...prev, gallery: false }));
+              setUploadStatus((prev) => ({ ...prev, gallery: false }));
               uploadFailures.push('Gallery Images');
             })
           );
@@ -951,7 +1030,6 @@ export default function BusinessRegistrationScreen({ navigation }) {
       setTimeout(() => {
         navigation.navigate('BusinessKYC', { businessId });
       }, 100);
-
     } catch (error) {
       console.error('❌ Registration failed:', error);
 
@@ -960,7 +1038,6 @@ export default function BusinessRegistrationScreen({ navigation }) {
 
       // Show detailed validation errors using flash message
       showErrorMessage(error, { title: 'Registration Failed' });
-
     } finally {
       setUploading(false);
     }
@@ -971,16 +1048,15 @@ export default function BusinessRegistrationScreen({ navigation }) {
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">
             <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
               <Icon name="arrow-back" size={24} color="#FFF" />
             </TouchableOpacity>
-            <Text className="text-white text-xl font-bold" numberOfLines={1}>Business Registration</Text>
+            <Text className="text-white text-xl font-bold" numberOfLines={1}>
+              Business Registration
+            </Text>
           </View>
           <TouchableOpacity
             onPress={() => setPreviewModalVisible(true)}
@@ -998,7 +1074,9 @@ export default function BusinessRegistrationScreen({ navigation }) {
             activeOpacity={0.75}
           >
             <Icon name="eye-outline" size={16} color="#FFF" />
-            <Text style={{ color: '#FFF', fontSize: 12, fontWeight: '700', marginLeft: 5 }}>Preview</Text>
+            <Text style={{ color: '#FFF', fontSize: 12, fontWeight: '700', marginLeft: 5 }}>
+              Preview
+            </Text>
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -1008,7 +1086,6 @@ export default function BusinessRegistrationScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-
         {/* Location Status */}
         <View className="mb-4 bg-blue-50 rounded-xl p-4">
           <View className="flex-row items-center justify-between">
@@ -1030,10 +1107,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
                 </>
               )}
             </View>
-            <TouchableOpacity
-              onPress={() => setShowLocationPicker(true)}
-              className="ml-2"
-            >
+            <TouchableOpacity onPress={() => setShowLocationPicker(true)} className="ml-2">
               <Icon name="map" size={24} color={COLORS.primary} />
             </TouchableOpacity>
           </View>
@@ -1153,7 +1227,12 @@ export default function BusinessRegistrationScreen({ navigation }) {
               borderTopRightRadius: 12,
               borderBottomRightRadius: 12,
             }}
-            textInputStyle={{ color: '#111827', fontSize: 15, fontWeight: '500', paddingVertical: 4 }}
+            textInputStyle={{
+              color: '#111827',
+              fontSize: 15,
+              fontWeight: '500',
+              paddingVertical: 4,
+            }}
             codeTextStyle={{ color: '#111827', fontWeight: '600' }}
           />
           {businessPhoneError ? (
@@ -1189,8 +1268,16 @@ export default function BusinessRegistrationScreen({ navigation }) {
                     className="flex-row items-start px-3 py-2 border-b border-gray-100"
                     onPress={() => selectAddressSuggestion(suggestion)}
                   >
-                    <Icon name="location-outline" size={18} color={COLORS.primary} style={{ marginTop: 2 }} />
-                    <Text className="flex-1 ml-2 text-black" style={{ color: '#000000', fontWeight: '500' }}>
+                    <Icon
+                      name="location-outline"
+                      size={18}
+                      color={COLORS.primary}
+                      style={{ marginTop: 2 }}
+                    />
+                    <Text
+                      className="flex-1 ml-2 text-black"
+                      style={{ color: '#000000', fontWeight: '500' }}
+                    >
                       {suggestion.description}
                     </Text>
                   </TouchableOpacity>
@@ -1285,7 +1372,9 @@ export default function BusinessRegistrationScreen({ navigation }) {
             </View>
 
             <View className="flex-1 ml-2">
-              <Text className="text-gray-700 font-semibold mb-2 text-sm">{formData.country === 'India' ? 'PIN Code *' : 'Postcode *'}</Text>
+              <Text className="text-gray-700 font-semibold mb-2 text-sm">
+                {formData.country === 'India' ? 'PIN Code *' : 'Postcode *'}
+              </Text>
               <View
                 className="bg-white rounded-xl border flex-row items-center px-3 py-3 shadow-sm"
                 style={{ borderColor: '#E5E7EB' }}
@@ -1297,9 +1386,8 @@ export default function BusinessRegistrationScreen({ navigation }) {
                   placeholderTextColor="#9CA3AF"
                   value={formData.postcode || ''}
                   onChangeText={(value) => {
-                    const formatted = formData.country === 'India'
-                      ? value.replace(/\D/g, '')
-                      : value.toUpperCase();
+                    const formatted =
+                      formData.country === 'India' ? value.replace(/\D/g, '') : value.toUpperCase();
                     const updated = { ...formData, postcode: formatted };
                     setFormData(updated);
                     updateFullAddress(updated);
@@ -1333,7 +1421,13 @@ export default function BusinessRegistrationScreen({ navigation }) {
                     alignItems: 'center',
                   }}
                 >
-                  <Text style={{ fontSize: 13, fontWeight: '700', color: formData.country === c ? '#F97316' : '#6B7280' }}>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: '700',
+                      color: formData.country === c ? '#F97316' : '#6B7280',
+                    }}
+                  >
                     {c === 'United Kingdom' ? '🇬🇧 United Kingdom' : '🇮🇳 India'}
                   </Text>
                 </TouchableOpacity>
@@ -1377,9 +1471,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
             >
               <View className="flex-row items-center">
                 <Icon name="map" size={24} color="#FFF" />
-                <Text className="font-bold text-white ml-2 text-base">
-                  📍 Open Map Picker
-                </Text>
+                <Text className="font-bold text-white ml-2 text-base">📍 Open Map Picker</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -1392,22 +1484,14 @@ export default function BusinessRegistrationScreen({ navigation }) {
                   <Icon name="checkmark-circle" size={24} color="#FFF" />
                 </View>
                 <View className="flex-1 ml-3">
-                  <Text className="text-green-800 font-bold text-base">
-                    Location Confirmed ✓
-                  </Text>
-                  <Text className="text-green-600 text-xs">
-                    Your business location is set
-                  </Text>
+                  <Text className="text-green-800 font-bold text-base">Location Confirmed ✓</Text>
+                  <Text className="text-green-600 text-xs">Your business location is set</Text>
                 </View>
               </View>
               {formData.address && (
                 <View className="bg-white rounded-lg p-2 mt-2">
-                  <Text className="text-gray-900 text-xs font-medium mb-1">
-                    📍 Address:
-                  </Text>
-                  <Text className="text-gray-700 text-xs">
-                    {formData.address}
-                  </Text>
+                  <Text className="text-gray-900 text-xs font-medium mb-1">📍 Address:</Text>
+                  <Text className="text-gray-700 text-xs">{formData.address}</Text>
                 </View>
               )}
               <View className="flex-row items-center mt-2 bg-white rounded-lg p-2">
@@ -1572,7 +1656,9 @@ export default function BusinessRegistrationScreen({ navigation }) {
               activeOpacity={0.8}
             >
               <Icon name="expand-outline" size={13} color="#FFF" />
-              <Text style={{ color: '#FFF', fontSize: 11, fontWeight: '700', marginLeft: 4 }}>Full View</Text>
+              <Text style={{ color: '#FFF', fontSize: 11, fontWeight: '700', marginLeft: 4 }}>
+                Full View
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -1581,7 +1667,9 @@ export default function BusinessRegistrationScreen({ navigation }) {
             name={formData.businessName}
             category={formData.category}
             coverImageUri={images.coverImage?.uri || null}
-            address={formData.city ? [formData.city, formData.country].filter(Boolean).join(', ') : ''}
+            address={
+              formData.city ? [formData.city, formData.country].filter(Boolean).join(', ') : ''
+            }
           />
         </View>
 
@@ -1606,7 +1694,9 @@ export default function BusinessRegistrationScreen({ navigation }) {
           {images.gallery.length > 0 && (
             <View className="flex-row flex-wrap mb-3">
               {images.gallery.map((img, index) => {
-                const isUploaded = uploadedImages.gallery.some(uploaded => uploaded.url === img.uri || uploaded.originalUri === img.uri);
+                const isUploaded = uploadedImages.gallery.some(
+                  (uploaded) => uploaded.url === img.uri || uploaded.originalUri === img.uri
+                );
                 const isUploading = uploadStatus.gallery && !isUploaded;
 
                 return (
@@ -1644,7 +1734,9 @@ export default function BusinessRegistrationScreen({ navigation }) {
           >
             <Icon name="images-outline" size={32} color="#D1D5DB" />
             <Text className="text-gray-500 mt-2">
-              {images.gallery.length > 0 ? `Add More Images (${images.gallery.length} selected)` : 'Add Gallery Images'}
+              {images.gallery.length > 0
+                ? `Add More Images (${images.gallery.length} selected)`
+                : 'Add Gallery Images'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -1665,7 +1757,9 @@ export default function BusinessRegistrationScreen({ navigation }) {
 
         {/* TripAdvisor Profile Link */}
         <View className="mb-4">
-          <Text className="text-gray-900 font-semibold mb-2">TripAdvisor Profile Link (Optional)</Text>
+          <Text className="text-gray-900 font-semibold mb-2">
+            TripAdvisor Profile Link (Optional)
+          </Text>
           <TextInput
             className="bg-white rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
             placeholder="https://www.tripadvisor.com/Restaurant_Review..."
@@ -1705,10 +1799,13 @@ export default function BusinessRegistrationScreen({ navigation }) {
             <TouchableOpacity
               onPress={() => setApplyToAll(!applyToAll)}
               activeOpacity={0.7}
-              className={`flex-row items-center px-3 py-1.5 rounded-full border ${applyToAll ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
-                }`}
+              className={`flex-row items-center px-3 py-1.5 rounded-full border ${
+                applyToAll ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
+              }`}
             >
-              <Text className={`text-[10px] font-bold mr-2 ${applyToAll ? 'text-blue-600' : 'text-gray-500'}`}>
+              <Text
+                className={`text-[10px] font-bold mr-2 ${applyToAll ? 'text-blue-600' : 'text-gray-500'}`}
+              >
                 APPLY TO ALL
               </Text>
               <Switch
@@ -1723,14 +1820,21 @@ export default function BusinessRegistrationScreen({ navigation }) {
           </View>
 
           {Object.keys(openHours).map((day) => (
-            <View key={day} className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
+            <View
+              key={day}
+              className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm"
+            >
               <View className="flex-row items-center justify-between mb-3">
                 <View className="flex-row items-center">
-                  <View className={`w-2 h-2 rounded-full mr-2 ${openHours[day].closed ? 'bg-red-400' : 'bg-green-400'}`} />
+                  <View
+                    className={`w-2 h-2 rounded-full mr-2 ${openHours[day].closed ? 'bg-red-400' : 'bg-green-400'}`}
+                  />
                   <Text className="text-gray-900 font-bold capitalize text-base">{day}</Text>
                 </View>
                 <View className="flex-row items-center">
-                  <Text className={`text-[10px] mr-2 font-bold ${openHours[day].closed ? 'text-red-500' : 'text-green-600'}`}>
+                  <Text
+                    className={`text-[10px] mr-2 font-bold ${openHours[day].closed ? 'text-red-500' : 'text-green-600'}`}
+                  >
                     {openHours[day].closed ? 'CLOSED' : 'OPEN'}
                   </Text>
                   <Switch
@@ -1752,7 +1856,9 @@ export default function BusinessRegistrationScreen({ navigation }) {
                     className="flex-1 bg-gray-50 rounded-xl py-3 px-4 border border-gray-100 flex-row items-center justify-between"
                   >
                     <View>
-                      <Text className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Opens At</Text>
+                      <Text className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">
+                        Opens At
+                      </Text>
                       <Text className="text-gray-900 font-bold">{openHours[day].open}</Text>
                     </View>
                     <Icon name="time-outline" size={18} color={COLORS.secondary} />
@@ -1768,7 +1874,9 @@ export default function BusinessRegistrationScreen({ navigation }) {
                     className="flex-1 bg-gray-50 rounded-xl py-3 px-4 border border-gray-100 flex-row items-center justify-between"
                   >
                     <View>
-                      <Text className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Closes At</Text>
+                      <Text className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">
+                        Closes At
+                      </Text>
                       <Text className="text-gray-900 font-bold">{openHours[day].close}</Text>
                     </View>
                     <Icon name="time-outline" size={18} color={COLORS.secondary} />
@@ -1798,9 +1906,14 @@ export default function BusinessRegistrationScreen({ navigation }) {
                   <Icon name="pricetags-outline" size={20} color={COLORS.secondary} />
                 </View>
                 <View>
-                  <Text className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Category</Text>
-                  <Text className={`text-base font-bold ${formData.category ? 'text-gray-900' : 'text-gray-400'}`}>
-                    {categories.find(c => c.value === formData.category)?.label || 'Select Category'}
+                  <Text className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">
+                    Category
+                  </Text>
+                  <Text
+                    className={`text-base font-bold ${formData.category ? 'text-gray-900' : 'text-gray-400'}`}
+                  >
+                    {categories.find((c) => c.value === formData.category)?.label ||
+                      'Select Category'}
                   </Text>
                 </View>
               </View>
@@ -1820,7 +1933,7 @@ export default function BusinessRegistrationScreen({ navigation }) {
             colors={[COLORS.secondary, COLORS.secondaryDark]}
             className="rounded-xl py-4 items-center"
           >
-            {(loading || uploading) ? (
+            {loading || uploading ? (
               <View className="flex-row items-center">
                 <ActivityIndicator color="#FFF" size="small" />
                 <Text className="text-white font-bold text-lg ml-3">
@@ -1832,7 +1945,6 @@ export default function BusinessRegistrationScreen({ navigation }) {
             )}
           </LinearGradient>
         </TouchableOpacity>
-
       </ScrollView>
 
       {/* Time Picker Modal */}
@@ -1866,23 +1978,29 @@ export default function BusinessRegistrationScreen({ navigation }) {
 
             <ScrollView showsVerticalScrollIndicator={false} className="mb-4">
               <View className="flex-row flex-wrap justify-between">
-                {timeSlots.filter(t => t !== 'Closed').map((time) => (
-                  <TouchableOpacity
-                    key={time}
-                    onPress={() => handleTimeSelect(time)}
-                    className={`w-[31%] py-3 mb-3 rounded-xl items-center border ${openHours[timePickerModal.day]?.[timePickerModal.field] === time
-                      ? 'bg-blue-50 border-blue-600 shadow-sm'
-                      : 'bg-white border-gray-100'
+                {timeSlots
+                  .filter((t) => t !== 'Closed')
+                  .map((time) => (
+                    <TouchableOpacity
+                      key={time}
+                      onPress={() => handleTimeSelect(time)}
+                      className={`w-[31%] py-3 mb-3 rounded-xl items-center border ${
+                        openHours[timePickerModal.day]?.[timePickerModal.field] === time
+                          ? 'bg-blue-50 border-blue-600 shadow-sm'
+                          : 'bg-white border-gray-100'
                       }`}
-                  >
-                    <Text className={`font-bold text-xs ${openHours[timePickerModal.day]?.[timePickerModal.field] === time
-                      ? 'text-blue-700'
-                      : 'text-gray-900'
-                      }`}>
-                      {time}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                    >
+                      <Text
+                        className={`font-bold text-xs ${
+                          openHours[timePickerModal.day]?.[timePickerModal.field] === time
+                            ? 'text-blue-700'
+                            : 'text-gray-900'
+                        }`}
+                      >
+                        {time}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
               </View>
             </ScrollView>
 
@@ -1911,7 +2029,9 @@ export default function BusinessRegistrationScreen({ navigation }) {
             <View className="flex-row justify-between items-center mb-6">
               <View>
                 <Text className="text-2xl font-bold text-gray-900">Select Category</Text>
-                <Text className="text-sm text-gray-500">Pick the best category for your business</Text>
+                <Text className="text-sm text-gray-500">
+                  Pick the best category for your business
+                </Text>
               </View>
               <TouchableOpacity
                 onPress={() => setCategoryModalVisible(false)}
@@ -1923,33 +2043,46 @@ export default function BusinessRegistrationScreen({ navigation }) {
 
             <ScrollView showsVerticalScrollIndicator={false} className="mb-4">
               <View className="space-y-3">
-                {categories.filter(c => c.value !== '').map((cat) => (
-                  <TouchableOpacity
-                    key={cat.value}
-                    onPress={() => {
-                      handleInputChange('category', cat.value);
-                      setCategoryModalVisible(false);
-                    }}
-                    className={`py-4 px-5 rounded-2xl flex-row items-center justify-between border ${formData.category === cat.value
-                      ? 'bg-blue-50 border-blue-600 shadow-sm'
-                      : 'bg-white border-gray-100'
+                {categories
+                  .filter((c) => c.value !== '')
+                  .map((cat) => (
+                    <TouchableOpacity
+                      key={cat.value}
+                      onPress={() => {
+                        handleInputChange('category', cat.value);
+                        setCategoryModalVisible(false);
+                      }}
+                      className={`py-4 px-5 rounded-2xl flex-row items-center justify-between border ${
+                        formData.category === cat.value
+                          ? 'bg-blue-50 border-blue-600 shadow-sm'
+                          : 'bg-white border-gray-100'
                       }`}
-                  >
-                    <View className="flex-row items-center">
-                      <View className={`p-2 rounded-lg mr-4 ${formData.category === cat.value ? 'bg-blue-100' : 'bg-gray-50'
-                        }`}>
-                        <Icon name="pricetag-outline" size={20} color={formData.category === cat.value ? COLORS.secondary : '#9CA3AF'} />
+                    >
+                      <View className="flex-row items-center">
+                        <View
+                          className={`p-2 rounded-lg mr-4 ${
+                            formData.category === cat.value ? 'bg-blue-100' : 'bg-gray-50'
+                          }`}
+                        >
+                          <Icon
+                            name="pricetag-outline"
+                            size={20}
+                            color={formData.category === cat.value ? COLORS.secondary : '#9CA3AF'}
+                          />
+                        </View>
+                        <Text
+                          className={`font-bold text-base ${
+                            formData.category === cat.value ? 'text-blue-700' : 'text-gray-900'
+                          }`}
+                        >
+                          {cat.label}
+                        </Text>
                       </View>
-                      <Text className={`font-bold text-base ${formData.category === cat.value ? 'text-blue-700' : 'text-gray-900'
-                        }`}>
-                        {cat.label}
-                      </Text>
-                    </View>
-                    {formData.category === cat.value && (
-                      <Icon name="checkmark-circle" size={24} color={COLORS.secondary} />
-                    )}
-                  </TouchableOpacity>
-                ))}
+                      {formData.category === cat.value && (
+                        <Icon name="checkmark-circle" size={24} color={COLORS.secondary} />
+                      )}
+                    </TouchableOpacity>
+                  ))}
               </View>
             </ScrollView>
 
@@ -1973,12 +2106,13 @@ export default function BusinessRegistrationScreen({ navigation }) {
             address: selectedLocation.address,
             loading: false,
             error: null,
-            pickerSelected: true // flag so the picker re-opens on this spot next time
+            pickerSelected: true, // flag so the picker re-opens on this spot next time
           });
 
           if (selectedLocation.addressComponents) {
-            const { buildingNumber, street, city, county, postcode, country } = selectedLocation.addressComponents;
-            setFormData(prev => ({
+            const { buildingNumber, street, city, county, postcode, country } =
+              selectedLocation.addressComponents;
+            setFormData((prev) => ({
               ...prev,
               address: selectedLocation.address,
               buildingNumber: buildingNumber || prev.buildingNumber,
@@ -1986,10 +2120,10 @@ export default function BusinessRegistrationScreen({ navigation }) {
               city: city || prev.city,
               county: county || prev.county,
               postcode: postcode || prev.postcode,
-              country: country || prev.country
+              country: country || prev.country,
             }));
           } else {
-            setFormData(prev => ({ ...prev, address: selectedLocation.address }));
+            setFormData((prev) => ({ ...prev, address: selectedLocation.address }));
           }
 
           setAddressSearchQuery(selectedLocation.address);
@@ -1998,11 +2132,11 @@ export default function BusinessRegistrationScreen({ navigation }) {
         initialLocation={
           // Open the map on the previously-picked location if the user already chose one via the picker,
           // otherwise default to the centre of the selected country.
-          (location.latitude && location.pickerSelected)
+          location.latitude && location.pickerSelected
             ? location
             : formData.country === 'India'
-              ? { latitude: 28.6139, longitude: 77.2090 }  // New Delhi, India
-              : { latitude: 51.5072, longitude: -0.1276 }  // London, UK
+              ? { latitude: 28.6139, longitude: 77.209 } // New Delhi, India
+              : { latitude: 51.5072, longitude: -0.1276 } // London, UK
         }
         country={formData.country}
         googleApiKey={GOOGLE_API_KEY}
@@ -2023,13 +2157,15 @@ export default function BusinessRegistrationScreen({ navigation }) {
         transparent={true}
         onRequestClose={() => setPreviewModalVisible(false)}
       >
-        <View style={{
-          flex: 1,
-          backgroundColor: 'rgba(10,0,30,0.92)',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: 16,
-        }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(10,0,30,0.92)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 16,
+          }}
+        >
           {/* Close button */}
           <TouchableOpacity
             onPress={() => setPreviewModalVisible(false)}
@@ -2049,15 +2185,17 @@ export default function BusinessRegistrationScreen({ navigation }) {
 
           {/* Title */}
           <View style={{ alignItems: 'center', marginBottom: 24, paddingTop: 60 }}>
-            <View style={{
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              borderRadius: 12,
-              paddingHorizontal: 16,
-              paddingVertical: 8,
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 8,
-            }}>
+            <View
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                borderRadius: 12,
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 8,
+              }}
+            >
               <Icon name="phone-portrait-outline" size={16} color="#C4B5FD" />
               <Text style={{ color: '#C4B5FD', fontSize: 13, fontWeight: '700', marginLeft: 8 }}>
                 USER HOME SCREEN — AS SEEN BY CUSTOMERS
@@ -2073,13 +2211,22 @@ export default function BusinessRegistrationScreen({ navigation }) {
             name={formData.businessName}
             category={formData.category}
             coverImageUri={images.coverImage?.uri || null}
-            address={formData.city ? [formData.city, formData.country].filter(Boolean).join(', ') : ''}
+            address={
+              formData.city ? [formData.city, formData.country].filter(Boolean).join(', ') : ''
+            }
             isFullScreen
           />
 
           {/* Hint */}
           <View style={{ marginTop: 20, paddingHorizontal: 16 }}>
-            <Text style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, textAlign: 'center', lineHeight: 17 }}>
+            <Text
+              style={{
+                color: 'rgba(255,255,255,0.45)',
+                fontSize: 11,
+                textAlign: 'center',
+                lineHeight: 17,
+              }}
+            >
               The cover image shown is exactly your cropped version.{`\n`}
               Business details and rating will be updated after customers review your listing.
             </Text>

@@ -1,13 +1,33 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { View, Text, ScrollView, TouchableOpacity, FlatList, RefreshControl, ActivityIndicator, Alert, StatusBar, TextInput, Modal, Keyboard, Platform, Animated } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  FlatList,
+  RefreshControl,
+  ActivityIndicator,
+  Alert,
+  StatusBar,
+  TextInput,
+  Modal,
+  Keyboard,
+  Platform,
+  Animated,
+} from 'react-native';
 import { Image } from 'expo-image';
 import ToastService from '../../utils/ToastService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import { getAllActiveBusinesses, getNearbyBusinesses, searchBusinesses, clearBusinesses } from '../../store/slices/businessSlice';
+import {
+  getAllActiveBusinesses,
+  getNearbyBusinesses,
+  searchBusinesses,
+  clearBusinesses,
+} from '../../store/slices/businessSlice';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
 import { FLATLIST_OPTIMIZATIONS, optimizeImageUri } from '../../utils/performanceHelpers';
@@ -18,12 +38,12 @@ const RatingBadge = ({ source, rating, reviews }) => {
   const colors = {
     google: '#3B82F6',
     tripadvisor: '#10B981',
-    default: '#9CA3AF'
+    default: '#9CA3AF',
   };
   const labels = {
     google: 'Google',
     tripadvisor: 'TripAdvisor',
-    default: source
+    default: source,
   };
 
   const color = colors[source] || colors.default;
@@ -49,9 +69,7 @@ const RatingBadge = ({ source, rating, reviews }) => {
             {rating ? rating.toFixed(1) : 'N/A'}
           </Text>
         </View>
-        <Text className="text-xs text-gray-500 ml-2">
-          ({reviews || 0})
-        </Text>
+        <Text className="text-xs text-gray-500 ml-2">({reviews || 0})</Text>
       </View>
     </View>
   );
@@ -82,167 +100,183 @@ const formatLastReview = (dateStr) => {
 };
 
 // BUSINESS CARD RENDER - Memoized to prevent heavy re-renders in FlatList
-const BusinessCard = React.memo(({ item, onPress }) => {
-  const parseRating = (rating) => {
-    const parsed = parseFloat(rating);
-    return !isNaN(parsed) && parsed > 0 ? parsed : null;
-  };
+const BusinessCard = React.memo(
+  ({ item, onPress }) => {
+    const parseRating = (rating) => {
+      const parsed = parseFloat(rating);
+      return !isNaN(parsed) && parsed > 0 ? parsed : null;
+    };
 
-  const googleRatingValue = parseRating(item.externalProfiles?.googleBusiness?.rating);
-  const googleCount = parseInt(item.externalProfiles?.googleBusiness?.reviewCount) || 0;
+    const googleRatingValue = parseRating(item.externalProfiles?.googleBusiness?.rating);
+    const googleCount = parseInt(item.externalProfiles?.googleBusiness?.reviewCount) || 0;
 
-  const hashviewRating = parseRating(item.rating?.average) || 0;
-  const hashviewCount = item.rating?.count || 0;
-  const coverImageUri = item.coverImage?.url || item.images?.[0]?.url || item.logo?.url || null;
-  const categoryLabel = (item.category || 'Business')
-    .replace(/\b\w/g, c => c.toUpperCase());
-  const locationText = item.address?.fullAddress || [item.address?.area, item.address?.city].filter(Boolean).join(', ') || item.address?.city || item.address?.street || 'Location not specified';
+    const hashviewRating = parseRating(item.rating?.average) || 0;
+    const hashviewCount = item.rating?.count || 0;
+    const coverImageUri = item.coverImage?.url || item.images?.[0]?.url || item.logo?.url || null;
+    const categoryLabel = (item.category || 'Business').replace(/\b\w/g, (c) => c.toUpperCase());
+    const locationText =
+      item.address?.fullAddress ||
+      [item.address?.area, item.address?.city].filter(Boolean).join(', ') ||
+      item.address?.city ||
+      item.address?.street ||
+      'Location not specified';
 
-  return (
-    <TouchableOpacity
-      onPress={() => onPress(item._id)}
-      activeOpacity={0.85}
-      className="mb-4"
-    >
-      <View className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
-        {/* Cover Image */}
-        <View className="relative h-36 w-full overflow-hidden">
-          {coverImageUri ? (
-            <Image
-              source={{ uri: optimizeImageUri(coverImageUri, 800, 500) }}
-              style={{ width: '100%', height: '100%' }}
-              contentFit="cover"
-              recyclingKey={item._id}
-              cachePolicy="memory-disk"
-            />
-          ) : (
+    return (
+      <TouchableOpacity onPress={() => onPress(item._id)} activeOpacity={0.85} className="mb-4">
+        <View className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
+          {/* Cover Image */}
+          <View className="relative h-36 w-full overflow-hidden">
+            {coverImageUri ? (
+              <Image
+                source={{ uri: optimizeImageUri(coverImageUri, 800, 500) }}
+                style={{ width: '100%', height: '100%' }}
+                contentFit="cover"
+                recyclingKey={item._id}
+                cachePolicy="memory-disk"
+              />
+            ) : (
+              <LinearGradient
+                colors={[COLORS.primary, COLORS.primaryDark]}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Icon name="business" size={48} color="#FFF" />
+              </LinearGradient>
+            )}
+
             <LinearGradient
-              colors={[COLORS.primary, COLORS.primaryDark]}
-              style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <Icon name="business" size={48} color="#FFF" />
-            </LinearGradient>
-          )}
+              colors={['rgba(0,0,0,0.45)', 'transparent']}
+              className="absolute inset-0"
+            />
 
-          <LinearGradient
-            colors={['rgba(0,0,0,0.45)', 'transparent']}
-            className="absolute inset-0"
-          />
+            {/* Badges — star (when rated) + eye (always) stacked in top-right */}
+            <View className="absolute top-2 right-2" style={{ gap: 5 }}>
+              {hashviewRating > 0 && (
+                <View className="bg-[#5e399e] flex-row items-center px-2.5 py-1 rounded-full shadow border border-[#FDE68A]">
+                  <Icon name="star" size={13} color="#F4B400" />
+                  <Text className="text-[#F4B400] font-semibold text-xs ml-1">
+                    {hashviewRating.toFixed(1)}
+                  </Text>
+                </View>
+              )}
+              <View className="bg-black/50 flex-row items-center px-2.5 py-1 rounded-full shadow border border-white/20">
+                <Icon name="eye-outline" size={13} color="#FFFFFF" />
+                {item.visitCount > 0 && (
+                  <Text className="text-white font-semibold text-xs ml-1">
+                    {formatVisitCount(item.visitCount)}
+                  </Text>
+                )}
+              </View>
+            </View>
 
-          {/* Badges — star (when rated) + eye (always) stacked in top-right */}
-          <View className="absolute top-2 right-2" style={{ gap: 5 }}>
-            {hashviewRating > 0 && (
-              <View className="bg-[#5e399e] flex-row items-center px-2.5 py-1 rounded-full shadow border border-[#FDE68A]">
-                <Icon name="star" size={13} color="#F4B400" />
-                <Text className="text-[#F4B400] font-semibold text-xs ml-1">
-                  {hashviewRating.toFixed(1)}
+            {/* Distance badge */}
+            {item.distance !== undefined && item.distance > 0 && (
+              <View className="absolute top-2 left-2 bg-white rounded-full px-2 py-0.5 flex-row items-center shadow border border-gray-100">
+                <Icon name="navigate" size={11} color={COLORS.secondary} />
+                <Text className="text-gray-800 font-semibold text-[10px] ml-1">
+                  {item.distance < 1
+                    ? `${(item.distance * 1000).toFixed(0)}m away`
+                    : `${item.distance.toFixed(1)}km away`}
                 </Text>
               </View>
             )}
-            <View className="bg-black/50 flex-row items-center px-2.5 py-1 rounded-full shadow border border-white/20">
-              <Icon name="eye-outline" size={13} color="#FFFFFF" />
-              {item.visitCount > 0 && (
-                <Text className="text-white font-semibold text-xs ml-1">
-                  {formatVisitCount(item.visitCount)}
+          </View>
+
+          {/* Header */}
+          <View className="px-4 pt-4 pb-3">
+            <View className="mb-1.5">
+              <Text className="text-[16px] font-bold text-[#5e399e] mb-1" numberOfLines={1}>
+                {item.name}
+              </Text>
+              <View className="flex-row items-center">
+                <Icon name="location-outline" size={12} color="#5e399e" style={{ opacity: 0.7 }} />
+                <Text
+                  className="text-[13px] text-[#5e399e] ml-1 flex-1"
+                  style={{ opacity: 0.8 }}
+                  numberOfLines={1}
+                >
+                  {locationText}
                 </Text>
+              </View>
+            </View>
+            <View className="flex-row items-center gap-1.5">
+              <View className="bg-[#FFF1E6] border border-[#FCD9BD] rounded-full px-2 py-0.5">
+                <Text className="text-[14px] font-semibold text-[#e6ba4c]" numberOfLines={2}>
+                  {categoryLabel}
+                </Text>
+              </View>
+              {/* Claim Status Badge */}
+              {item.owner || item.claimRequest?.status === 'approved' ? (
+                <View className="flex-row items-center bg-green-50 border border-green-200 rounded-full px-1.5 py-0.5">
+                  <Icon name="shield-checkmark" size={10} color="#16A34A" />
+                  <Text className="text-[9px] text-green-700 font-bold ml-0.5">Verified</Text>
+                </View>
+              ) : item.claimRequest?.status === 'pending' ? (
+                <View className="flex-row items-center bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">
+                  <Icon name="time-outline" size={10} color="#D97706" />
+                  <Text className="text-[9px] text-amber-700 font-bold ml-0.5">Pending</Text>
+                </View>
+              ) : (
+                <View className="flex-row items-center bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">
+                  <Icon name="flag-outline" size={10} color="#B45309" />
+                  <Text className="text-[9px] text-amber-700 font-bold ml-0.5">Unclaimed</Text>
+                </View>
               )}
             </View>
           </View>
 
-          {/* Distance badge */}
-          {item.distance !== undefined && item.distance > 0 && (
-            <View className="absolute top-2 left-2 bg-white rounded-full px-2 py-0.5 flex-row items-center shadow border border-gray-100">
-              <Icon name="navigate" size={11} color={COLORS.secondary} />
-              <Text className="text-gray-800 font-semibold text-[10px] ml-1">
-                {item.distance < 1
-                  ? `${(item.distance * 1000).toFixed(0)}m away`
-                  : `${item.distance.toFixed(1)}km away`}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Header */}
-        <View className="px-4 pt-4 pb-3">
-          <View className="mb-1.5">
-            <Text className="text-[16px] font-bold text-[#5e399e] mb-1" numberOfLines={1}>
-              {item.name}
-            </Text>
-            <View className="flex-row items-center">
-              <Icon name="location-outline" size={12} color="#5e399e" style={{ opacity: 0.7 }} />
-              <Text className="text-[13px] text-[#5e399e] ml-1 flex-1" style={{ opacity: 0.8 }} numberOfLines={1}>
-                {locationText}
-              </Text>
-            </View>
-          </View>
-          <View className="flex-row items-center gap-1.5">
-            <View className="bg-[#FFF1E6] border border-[#FCD9BD] rounded-full px-2 py-0.5">
-              <Text className="text-[14px] font-semibold text-[#e6ba4c]" numberOfLines={2}>{categoryLabel}</Text>
-            </View>
-            {/* Claim Status Badge */}
-            {item.owner || item.claimRequest?.status === 'approved' ? (
-              <View className="flex-row items-center bg-green-50 border border-green-200 rounded-full px-1.5 py-0.5">
-                <Icon name="shield-checkmark" size={10} color="#16A34A" />
-                <Text className="text-[9px] text-green-700 font-bold ml-0.5">Verified</Text>
+          {/* Content */}
+          <View className="px-4 pb-4">
+            <View className="flex-row items-center justify-between mb-1.5">
+              <Text className="text-xs font-semibold text-gray-900">Overall Rating</Text>
+              <View className="flex-row items-center gap-2">
+                {/* Visit Count — now shown in the image badge above */}
+                <Text className="text-xs text-gray-500">{hashviewCount} reviews</Text>
               </View>
-            ) : item.claimRequest?.status === 'pending' ? (
-              <View className="flex-row items-center bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">
-                <Icon name="time-outline" size={10} color="#D97706" />
-                <Text className="text-[9px] text-amber-700 font-bold ml-0.5">Pending</Text>
-              </View>
-            ) : (
-              <View className="flex-row items-center bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">
-                <Icon name="flag-outline" size={10} color="#B45309" />
-                <Text className="text-[9px] text-amber-700 font-bold ml-0.5">Unclaimed</Text>
+            </View>
+            {/* Last review timestamp */}
+            {formatLastReview(item.lastReviewAt) && (
+              <View className="flex-row items-center mb-2.5">
+                <Icon name="time-outline" size={11} color="#10B981" />
+                <Text className="text-[11px] text-green-600 font-medium ml-1">
+                  {formatLastReview(item.lastReviewAt)}
+                </Text>
               </View>
             )}
-          </View>
-        </View>
-
-        {/* Content */}
-        <View className="px-4 pb-4">
-          <View className="flex-row items-center justify-between mb-1.5">
-            <Text className="text-xs font-semibold text-gray-900">Overall Rating</Text>
-            <View className="flex-row items-center gap-2">
-              {/* Visit Count — now shown in the image badge above */}
-              <Text className="text-xs text-gray-500">{hashviewCount} reviews</Text>
+            <View className="space-y-1.5">
+              <RatingBadge source="google" rating={googleRatingValue} reviews={googleCount} />
             </View>
           </View>
-          {/* Last review timestamp */}
-          {formatLastReview(item.lastReviewAt) && (
-            <View className="flex-row items-center mb-2.5">
-              <Icon name="time-outline" size={11} color="#10B981" />
-              <Text className="text-[11px] text-green-600 font-medium ml-1">
-                {formatLastReview(item.lastReviewAt)}
-              </Text>
-            </View>
-          )}
-          <View className="space-y-1.5">
-            <RatingBadge source="google" rating={googleRatingValue} reviews={googleCount} />
-          </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
-}, (prevProps, nextProps) => {
-  // Compare ALL fields that affect visual rendering to prevent stale card data on recycled cells
-  const p = prevProps.item;
-  const n = nextProps.item;
-  const prevImage = p.coverImage?.url || p.images?.[0]?.url || p.logo?.url;
-  const nextImage = n.coverImage?.url || n.images?.[0]?.url || n.logo?.url;
-  const prevAddr = p.address?.fullAddress || p.address?.area || p.address?.city;
-  const nextAddr = n.address?.fullAddress || n.address?.area || n.address?.city;
-  return p._id === n._id &&
-    p.distance === n.distance &&
-    p.rating?.average === n.rating?.average &&
-    p.visitCount === n.visitCount &&
-    p.lastReviewAt === n.lastReviewAt &&
-    prevImage === nextImage &&
-    p.name === n.name &&
-    prevAddr === nextAddr &&
-    p.category === n.category &&
-    p.owner === n.owner;
-});
+      </TouchableOpacity>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Compare ALL fields that affect visual rendering to prevent stale card data on recycled cells
+    const p = prevProps.item;
+    const n = nextProps.item;
+    const prevImage = p.coverImage?.url || p.images?.[0]?.url || p.logo?.url;
+    const nextImage = n.coverImage?.url || n.images?.[0]?.url || n.logo?.url;
+    const prevAddr = p.address?.fullAddress || p.address?.area || p.address?.city;
+    const nextAddr = n.address?.fullAddress || n.address?.area || n.address?.city;
+    return (
+      p._id === n._id &&
+      p.distance === n.distance &&
+      p.rating?.average === n.rating?.average &&
+      p.visitCount === n.visitCount &&
+      p.lastReviewAt === n.lastReviewAt &&
+      prevImage === nextImage &&
+      p.name === n.name &&
+      prevAddr === nextAddr &&
+      p.category === n.category &&
+      p.owner === n.owner
+    );
+  }
+);
 
 export default function UserHomeScreen({ navigation }) {
   const dispatch = useDispatch();
@@ -260,14 +294,14 @@ export default function UserHomeScreen({ navigation }) {
 
   const [ratingFilter, setRatingFilter] = useState({
     source: null,
-    stars: null
+    stars: null,
   });
   const [distanceFilter, setDistanceFilter] = useState(null);
 
   const [visibilityModal, setVisibilityModal] = useState({
     visible: false,
     hasOwner: false,
-    businessName: ''
+    businessName: '',
   });
 
   // Active order live tracking
@@ -278,8 +312,8 @@ export default function UserHomeScreen({ navigation }) {
     try {
       const response = await ApiService.getMyOrders();
       if (response.success && response.data?.length > 0) {
-        const inProgress = response.data.find(o =>
-          !['delivered', 'cancelled'].includes(o.status)
+        const inProgress = response.data.find(
+          (o) => !['delivered', 'cancelled'].includes(o.status)
         );
         setActiveOrder(inProgress || null);
       } else {
@@ -290,14 +324,16 @@ export default function UserHomeScreen({ navigation }) {
     }
   }, [user]);
 
-  useFocusEffect(useCallback(() => {
-    fetchActiveOrder();
-  }, [fetchActiveOrder]));
+  useFocusEffect(
+    useCallback(() => {
+      fetchActiveOrder();
+    }, [fetchActiveOrder])
+  );
 
   useOrderSocket({
     customerId: user?._id,
     onOrderStatusUpdated: (updatedOrder) => {
-      setActiveOrder(prev => {
+      setActiveOrder((prev) => {
         if (prev && prev._id === updatedOrder._id) {
           if (['delivered', 'cancelled'].includes(updatedOrder.status)) {
             return null; // Hide banner when done
@@ -306,7 +342,7 @@ export default function UserHomeScreen({ navigation }) {
         }
         return prev;
       });
-    }
+    },
   });
 
   // Track active filters count
@@ -404,29 +440,33 @@ export default function UserHomeScreen({ navigation }) {
 
       const coords = {
         latitude: location.coords.latitude,
-        longitude: location.coords.longitude
+        longitude: location.coords.longitude,
       };
 
       console.log('✅ Location retrieved:', coords);
       setCurrentLocation(coords);
       setHasLocation(true);
 
-      dispatch(getNearbyBusinesses({
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-        // radius: 50000
-        radius: 20000000 // 20,000km (Global) - Show all businesses sorted by distance
-      }));
+      dispatch(
+        getNearbyBusinesses({
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          // radius: 50000
+          radius: 20000000, // 20,000km (Global) - Show all businesses sorted by distance
+        })
+      );
     } catch (error) {
       console.log('⚠️ Could not get current location (services may be disabled):', error.message);
       setHasLocation(false);
 
       // Load businesses without location if it failed
-      dispatch(getNearbyBusinesses({
-        latitude: 51.5283, // Default to London coordinates if location fails
-        longitude: -0.1005,
-        radius: 20000000 // Global
-      }));
+      dispatch(
+        getNearbyBusinesses({
+          latitude: 51.5283, // Default to London coordinates if location fails
+          longitude: -0.1005,
+          radius: 20000000, // Global
+        })
+      );
     }
   };
 
@@ -454,7 +494,11 @@ export default function UserHomeScreen({ navigation }) {
       const params = {};
 
       // Pass category to backend (backend handles case-insensitive matching)
-      if (selectedCategory && typeof selectedCategory === 'string' && selectedCategory.trim() !== '') {
+      if (
+        selectedCategory &&
+        typeof selectedCategory === 'string' &&
+        selectedCategory.trim() !== ''
+      ) {
         params.category = selectedCategory.trim();
       }
 
@@ -503,7 +547,11 @@ export default function UserHomeScreen({ navigation }) {
     const nextPage = currentPagination.currentPage + 1;
     const params = { page: nextPage };
 
-    if (selectedCategory && typeof selectedCategory === 'string' && selectedCategory.trim() !== '') {
+    if (
+      selectedCategory &&
+      typeof selectedCategory === 'string' &&
+      selectedCategory.trim() !== ''
+    ) {
       params.category = selectedCategory.trim();
     }
 
@@ -524,7 +572,15 @@ export default function UserHomeScreen({ navigation }) {
     } else {
       dispatch(getAllActiveBusinesses(params));
     }
-  }, [loading, currentPagination, selectedCategory, ratingFilter, distanceFilter, currentLocation, dispatch]);
+  }, [
+    loading,
+    currentPagination,
+    selectedCategory,
+    ratingFilter,
+    distanceFilter,
+    currentLocation,
+    dispatch,
+  ]);
 
   const renderFooter = () => {
     if (!loading || refreshing) return null;
@@ -621,13 +677,17 @@ export default function UserHomeScreen({ navigation }) {
   const isShowingNearby = hasLocation;
 
   // BUSINESS CARD RENDER - Tailwind CSS Styling
-  const handleBusinessPress = useCallback((businessId) => {
-    navigation.navigate('BusinessDetail', { businessId });
-  }, [navigation]);
+  const handleBusinessPress = useCallback(
+    (businessId) => {
+      navigation.navigate('BusinessDetail', { businessId });
+    },
+    [navigation]
+  );
 
-  const renderBusiness = useCallback(({ item }) => (
-    <BusinessCard item={item} onPress={handleBusinessPress} />
-  ), [handleBusinessPress]);
+  const renderBusiness = useCallback(
+    ({ item }) => <BusinessCard item={item} onPress={handleBusinessPress} />,
+    [handleBusinessPress]
+  );
 
   const keyExtractor = useCallback((item) => item._id, []);
 
@@ -646,9 +706,7 @@ export default function UserHomeScreen({ navigation }) {
             <Text className="text-white text-2xl font-bold">
               Hi {user?.name ? user.name.split(' ')[0] : 'Guest'} 👋
             </Text>
-            <Text className="text-white/80 text-[13px] mt-0.5">
-              Discover amazing businesses
-            </Text>
+            <Text className="text-white/80 text-[13px] mt-0.5">Discover amazing businesses</Text>
           </View>
 
           <View className="flex-row gap-2.5">
@@ -685,19 +743,14 @@ export default function UserHomeScreen({ navigation }) {
                 <Icon name="options-outline" size={20} color={COLORS.primary} />
                 {activeFiltersCount > 0 && (
                   <View className="absolute -top-1 -right-1 bg-red-500 rounded-full w-5 h-5 items-center justify-center border-2 border-white">
-                    <Text className="text-white text-[11px] font-bold">
-                      {activeFiltersCount}
-                    </Text>
+                    <Text className="text-white text-[11px] font-bold">{activeFiltersCount}</Text>
                   </View>
                 )}
               </View>
             </TouchableOpacity>
 
             {/* Cart Button */}
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Cart')}
-              activeOpacity={0.7}
-            >
+            <TouchableOpacity onPress={() => navigation.navigate('Cart')} activeOpacity={0.7}>
               <View className="bg-white rounded-full w-11 h-11 items-center justify-center shadow-md">
                 <Icon name="cart-outline" size={20} color={COLORS.primary} />
               </View>
@@ -722,12 +775,17 @@ export default function UserHomeScreen({ navigation }) {
           }}
         >
           {/* Sparkles icon */}
-          <View style={{
-            width: 34, height: 34, borderRadius: 17,
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            alignItems: 'center', justifyContent: 'center',
-            marginRight: 12,
-          }}>
+          <View
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 17,
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: 12,
+            }}
+          >
             <Icon name="sparkles" size={17} color="#fff" />
           </View>
 
@@ -742,12 +800,14 @@ export default function UserHomeScreen({ navigation }) {
           </View>
 
           {/* AI badge */}
-          <View style={{
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            borderRadius: 10,
-            paddingHorizontal: 8,
-            paddingVertical: 4,
-          }}>
+          <View
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              borderRadius: 10,
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+            }}
+          >
             <Text style={{ fontSize: 10, color: '#E9D5FF', fontWeight: '800', letterSpacing: 0.5 }}>
               AI ✦
             </Text>
@@ -772,47 +832,106 @@ export default function UserHomeScreen({ navigation }) {
         )}
       </LinearGradient>
 
-
       {/* Active Order Live Status Banner */}
-      {activeOrder && !user?.isGuest && (() => {
-        const STATUS_CONFIG = {
-          new:       { label: 'Order Received',   icon: 'time-outline',          bg: ['#3B82F6', '#2563EB'], pulse: true },
-          accepted:  { label: 'Order Confirmed!', icon: 'checkmark-circle',      bg: ['#8B5CF6', '#6D28D9'], pulse: false },
-          preparing: { label: 'Being Prepared 🍳', icon: 'flame',                bg: ['#F59E0B', '#D97706'], pulse: true },
-          ready:     { label: 'Ready for Pickup!', icon: 'fast-food',            bg: ['#10B981', '#059669'], pulse: false },
-          delivered: { label: 'Order Delivered!',  icon: 'happy-outline',        bg: ['#10B981', '#059669'], pulse: false },
-        };
-        const cfg = STATUS_CONFIG[activeOrder.status] || STATUS_CONFIG.new;
-        return (
-          <TouchableOpacity
-            onPress={() => navigation.navigate('OrderTracking')}
-            activeOpacity={0.92}
-            style={{ marginHorizontal: 12, marginTop: 10, marginBottom: 2, borderRadius: 16, overflow: 'hidden', elevation: 4, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8, shadowOffset: { width: 0, height: 3 } }}
-          >
-            <LinearGradient colors={cfg.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 16 }}>
-              <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
-                <Icon name={cfg.icon} size={22} color="#FFF" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: '#FFF', fontWeight: '800', fontSize: 14 }}>{cfg.label}</Text>
-                <Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 12, marginTop: 2 }}>
-                  Table {activeOrder.tableNumber} · {activeOrder.orderNumber} · {activeOrder.items?.length || 0} item{activeOrder.items?.length !== 1 ? 's' : ''}
-                </Text>
-              </View>
-              <View style={{ alignItems: 'flex-end' }}>
-                <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: '600' }}>Track →</Text>
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
-        );
-      })()}
+      {activeOrder &&
+        !user?.isGuest &&
+        (() => {
+          const STATUS_CONFIG = {
+            new: {
+              label: 'Order Received',
+              icon: 'time-outline',
+              bg: ['#3B82F6', '#2563EB'],
+              pulse: true,
+            },
+            accepted: {
+              label: 'Order Confirmed!',
+              icon: 'checkmark-circle',
+              bg: ['#8B5CF6', '#6D28D9'],
+              pulse: false,
+            },
+            preparing: {
+              label: 'Being Prepared 🍳',
+              icon: 'flame',
+              bg: ['#F59E0B', '#D97706'],
+              pulse: true,
+            },
+            ready: {
+              label: 'Ready for Pickup!',
+              icon: 'fast-food',
+              bg: ['#10B981', '#059669'],
+              pulse: false,
+            },
+            delivered: {
+              label: 'Order Delivered!',
+              icon: 'happy-outline',
+              bg: ['#10B981', '#059669'],
+              pulse: false,
+            },
+          };
+          const cfg = STATUS_CONFIG[activeOrder.status] || STATUS_CONFIG.new;
+          return (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('OrderTracking')}
+              activeOpacity={0.92}
+              style={{
+                marginHorizontal: 12,
+                marginTop: 10,
+                marginBottom: 2,
+                borderRadius: 16,
+                overflow: 'hidden',
+                elevation: 4,
+                shadowColor: '#000',
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+                shadowOffset: { width: 0, height: 3 },
+              }}
+            >
+              <LinearGradient
+                colors={cfg.bg}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingVertical: 14,
+                  paddingHorizontal: 16,
+                }}
+              >
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: 12,
+                  }}
+                >
+                  <Icon name={cfg.icon} size={22} color="#FFF" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: '#FFF', fontWeight: '800', fontSize: 14 }}>
+                    {cfg.label}
+                  </Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 12, marginTop: 2 }}>
+                    Table {activeOrder.tableNumber} · {activeOrder.orderNumber} ·{' '}
+                    {activeOrder.items?.length || 0} item
+                    {activeOrder.items?.length !== 1 ? 's' : ''}
+                  </Text>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: '600' }}>
+                    Track →
+                  </Text>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          );
+        })()}
 
       {/* Search Bar Temporarily Disabled */}
-      {false && (
-        <View className="px-5 -mt-5 z-50">
-          {/* Search UI commented out */}
-        </View>
-      )}
+      {false && <View className="px-5 -mt-5 z-50">{/* Search UI commented out */}</View>}
 
       {/* Category Slider */}
       <View className="px-2 mt-2">
@@ -857,9 +976,7 @@ export default function UserHomeScreen({ navigation }) {
                         width: 56,
                         height: 56,
                         borderRadius: 28,
-                        backgroundColor: isSelected
-                          ? '#5e399e'
-                          : '#FFFFFF',
+                        backgroundColor: isSelected ? '#5e399e' : '#FFFFFF',
                         borderWidth: isSelected ? 0 : 1.5,
                         borderColor: '#E5E7EB',
                         shadowColor: '#000',
@@ -880,8 +997,9 @@ export default function UserHomeScreen({ navigation }) {
                     </View>
                     {/* Category Label */}
                     <Text
-                      className={`text-[11px] font-medium text-center pb-1 ${isSelected ? 'text-[#5e399e]' : 'text-gray-700'
-                        }`}
+                      className={`text-[11px] font-medium text-center pb-1 ${
+                        isSelected ? 'text-[#5e399e]' : 'text-gray-700'
+                      }`}
                       numberOfLines={1}
                       style={{ lineHeight: 14 }}
                     >
@@ -907,11 +1025,7 @@ export default function UserHomeScreen({ navigation }) {
             <Text className="text-gray-500 mt-4 text-center">
               {isShowingNearby ? 'No businesses found nearby' : 'No businesses available'}
             </Text>
-            <TouchableOpacity
-              onPress={onRefresh}
-              className="mt-4"
-              activeOpacity={0.8}
-            >
+            <TouchableOpacity onPress={onRefresh} className="mt-4" activeOpacity={0.8}>
               <LinearGradient
                 colors={[COLORS.secondary, COLORS.secondaryDark]}
                 className="rounded-xl px-6 py-3"
@@ -926,9 +1040,7 @@ export default function UserHomeScreen({ navigation }) {
             renderItem={renderBusiness}
             keyExtractor={keyExtractor}
             estimatedItemSize={300}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             showsVerticalScrollIndicator={false}
             onEndReached={handleLoadMore}
             onEndReachedThreshold={0.3}
@@ -954,9 +1066,7 @@ export default function UserHomeScreen({ navigation }) {
             <View className="bg-white rounded-t-3xl max-h-[600px]">
               {/* Modal Header */}
               <View className="flex-row items-center justify-between px-5 py-4 border-b border-gray-100">
-                <Text className="text-xl font-bold text-gray-900">
-                  Filters
-                </Text>
+                <Text className="text-xl font-bold text-gray-900">Filters</Text>
                 <TouchableOpacity
                   onPress={() => setShowFilterModal(false)}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -968,50 +1078,89 @@ export default function UserHomeScreen({ navigation }) {
               <ScrollView className="max-h-[450px] px-5 py-4" showsVerticalScrollIndicator={false}>
                 {/* Rating Filters */}
                 <View className="mb-6">
-                  <Text className="text-lg font-bold text-gray-900 mb-3">
-                    Filter by Rating
-                  </Text>
+                  <Text className="text-lg font-bold text-gray-900 mb-3">Filter by Rating</Text>
 
                   <Text className="text-sm font-semibold text-gray-700 mb-2">
                     Step 1: Select Rating Source
                   </Text>
                   <View className="flex-row flex-wrap mb-4">
                     <TouchableOpacity
-                      onPress={() => setRatingFilter({ source: ratingFilter.source === 'hashview' ? null : 'hashview', stars: null })}
+                      onPress={() =>
+                        setRatingFilter({
+                          source: ratingFilter.source === 'hashview' ? null : 'hashview',
+                          stars: null,
+                        })
+                      }
                       activeOpacity={0.7}
                       className={`flex-row items-center px-4 py-2.5 rounded-xl mr-2 mb-2 border-2 ${ratingFilter.source === 'hashview' ? '' : 'bg-gray-100'}`}
-                      style={ratingFilter.source === 'hashview' ? { backgroundColor: COLORS.secondary, borderColor: COLORS.secondary } : { borderColor: '#E5E7EB' }}
+                      style={
+                        ratingFilter.source === 'hashview'
+                          ? { backgroundColor: COLORS.secondary, borderColor: COLORS.secondary }
+                          : { borderColor: '#E5E7EB' }
+                      }
                     >
-                      <Icon name="star" size={18} color={ratingFilter.source === 'hashview' ? '#FFF' : '#6B7280'} />
-                      <Text className={`ml-2 font-semibold ${ratingFilter.source === 'hashview' ? 'text-white' : 'text-gray-700'}`}>
+                      <Icon
+                        name="star"
+                        size={18}
+                        color={ratingFilter.source === 'hashview' ? '#FFF' : '#6B7280'}
+                      />
+                      <Text
+                        className={`ml-2 font-semibold ${ratingFilter.source === 'hashview' ? 'text-white' : 'text-gray-700'}`}
+                      >
                         HashView
                       </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                      onPress={() => setRatingFilter({ source: ratingFilter.source === 'google' ? null : 'google', stars: null })}
+                      onPress={() =>
+                        setRatingFilter({
+                          source: ratingFilter.source === 'google' ? null : 'google',
+                          stars: null,
+                        })
+                      }
                       activeOpacity={0.7}
                       className={`flex-row items-center px-4 py-2.5 rounded-xl mr-2 mb-2 border-2 ${ratingFilter.source === 'google' ? 'bg-[#4285F4]' : 'bg-gray-100'}`}
-                      style={ratingFilter.source === 'google' ? { borderColor: '#4285F4' } : { borderColor: '#E5E7EB' }}
+                      style={
+                        ratingFilter.source === 'google'
+                          ? { borderColor: '#4285F4' }
+                          : { borderColor: '#E5E7EB' }
+                      }
                     >
-                      <Icon name="logo-google" size={18} color={ratingFilter.source === 'google' ? '#FFF' : '#6B7280'} />
-                      <Text className={`ml-2 font-semibold ${ratingFilter.source === 'google' ? 'text-white' : 'text-gray-700'}`}>
+                      <Icon
+                        name="logo-google"
+                        size={18}
+                        color={ratingFilter.source === 'google' ? '#FFF' : '#6B7280'}
+                      />
+                      <Text
+                        className={`ml-2 font-semibold ${ratingFilter.source === 'google' ? 'text-white' : 'text-gray-700'}`}
+                      >
                         Google
                       </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                      onPress={() => setRatingFilter({ source: ratingFilter.source === 'tripadvisor' ? null : 'tripadvisor', stars: null })}
+                      onPress={() =>
+                        setRatingFilter({
+                          source: ratingFilter.source === 'tripadvisor' ? null : 'tripadvisor',
+                          stars: null,
+                        })
+                      }
                       activeOpacity={0.7}
                       className={`flex-row items-center px-4 py-2.5 rounded-xl mr-2 mb-2 border-2 ${ratingFilter.source === 'tripadvisor' ? 'bg-[#00AA6C]' : 'bg-gray-100'}`}
-                      style={ratingFilter.source === 'tripadvisor' ? { borderColor: '#00AA6C' } : { borderColor: '#E5E7EB' }}
+                      style={
+                        ratingFilter.source === 'tripadvisor'
+                          ? { borderColor: '#00AA6C' }
+                          : { borderColor: '#E5E7EB' }
+                      }
                     >
                       <Image
                         source={require('../../../assets/tripadvisor.png')}
                         className="w-[18px] h-[18px]"
                         resizeMode="contain"
                       />
-                      <Text className={`ml-2 font-semibold ${ratingFilter.source === 'tripadvisor' ? 'text-white' : 'text-gray-700'}`}>
+                      <Text
+                        className={`ml-2 font-semibold ${ratingFilter.source === 'tripadvisor' ? 'text-white' : 'text-gray-700'}`}
+                      >
                         TripAdvisor
                       </Text>
                     </TouchableOpacity>
@@ -1027,10 +1176,19 @@ export default function UserHomeScreen({ navigation }) {
                         {[5, 4, 3].map((starLevel) => (
                           <TouchableOpacity
                             key={starLevel}
-                            onPress={() => setRatingFilter({ ...ratingFilter, stars: ratingFilter.stars === starLevel ? null : starLevel })}
+                            onPress={() =>
+                              setRatingFilter({
+                                ...ratingFilter,
+                                stars: ratingFilter.stars === starLevel ? null : starLevel,
+                              })
+                            }
                             activeOpacity={0.7}
                             className={`flex-row items-center px-4 py-2.5 rounded-xl mr-2 mb-2 border-2 ${ratingFilter.stars === starLevel ? 'bg-amber-400' : 'bg-gray-100'}`}
-                            style={ratingFilter.stars === starLevel ? { borderColor: '#FFC107' } : { borderColor: '#E5E7EB' }}
+                            style={
+                              ratingFilter.stars === starLevel
+                                ? { borderColor: '#FFC107' }
+                                : { borderColor: '#E5E7EB' }
+                            }
                           >
                             {[...Array(starLevel)].map((_, i) => (
                               <Icon
@@ -1040,7 +1198,9 @@ export default function UserHomeScreen({ navigation }) {
                                 color={ratingFilter.stars === starLevel ? '#000' : '#6B7280'}
                               />
                             ))}
-                            <Text className={`ml-2 font-semibold ${ratingFilter.stars === starLevel ? 'text-gray-900' : 'text-gray-700'}`}>
+                            <Text
+                              className={`ml-2 font-semibold ${ratingFilter.stars === starLevel ? 'text-gray-900' : 'text-gray-700'}`}
+                            >
                               {starLevel}+ Stars
                             </Text>
                           </TouchableOpacity>
@@ -1053,18 +1213,28 @@ export default function UserHomeScreen({ navigation }) {
                 {/* Distance Filters */}
                 {hasLocation && (
                   <View className="mb-6">
-                    <Text className="text-lg font-bold text-gray-900 mb-3">
-                      Filter by Distance
-                    </Text>
+                    <Text className="text-lg font-bold text-gray-900 mb-3">Filter by Distance</Text>
                     <View className="flex-row flex-wrap">
                       <TouchableOpacity
-                        onPress={() => setDistanceFilter(distanceFilter === 'nearme' ? null : 'nearme')}
+                        onPress={() =>
+                          setDistanceFilter(distanceFilter === 'nearme' ? null : 'nearme')
+                        }
                         activeOpacity={0.7}
                         className={`flex-row items-center px-4 py-2.5 rounded-xl mr-2 mb-2 border-2 ${distanceFilter === 'nearme' ? 'bg-emerald-500' : 'bg-gray-100'}`}
-                        style={distanceFilter === 'nearme' ? { borderColor: '#10B981' } : { borderColor: '#E5E7EB' }}
+                        style={
+                          distanceFilter === 'nearme'
+                            ? { borderColor: '#10B981' }
+                            : { borderColor: '#E5E7EB' }
+                        }
                       >
-                        <Icon name="navigate" size={18} color={distanceFilter === 'nearme' ? '#FFF' : '#6B7280'} />
-                        <Text className={`ml-2 font-semibold ${distanceFilter === 'nearme' ? 'text-white' : 'text-gray-700'}`}>
+                        <Icon
+                          name="navigate"
+                          size={18}
+                          color={distanceFilter === 'nearme' ? '#FFF' : '#6B7280'}
+                        />
+                        <Text
+                          className={`ml-2 font-semibold ${distanceFilter === 'nearme' ? 'text-white' : 'text-gray-700'}`}
+                        >
                           Near Me
                         </Text>
                       </TouchableOpacity>
@@ -1075,10 +1245,20 @@ export default function UserHomeScreen({ navigation }) {
                           onPress={() => setDistanceFilter(distanceFilter === dist ? null : dist)}
                           activeOpacity={0.7}
                           className={`flex-row items-center px-4 py-2.5 rounded-xl mr-2 mb-2 border-2 ${distanceFilter === dist ? 'bg-blue-500' : 'bg-gray-100'}`}
-                          style={distanceFilter === dist ? { borderColor: '#3B82F6' } : { borderColor: '#E5E7EB' }}
+                          style={
+                            distanceFilter === dist
+                              ? { borderColor: '#3B82F6' }
+                              : { borderColor: '#E5E7EB' }
+                          }
                         >
-                          <Icon name="location" size={18} color={distanceFilter === dist ? '#FFF' : '#6B7280'} />
-                          <Text className={`ml-2 font-semibold ${distanceFilter === dist ? 'text-white' : 'text-gray-700'}`}>
+                          <Icon
+                            name="location"
+                            size={18}
+                            color={distanceFilter === dist ? '#FFF' : '#6B7280'}
+                          />
+                          <Text
+                            className={`ml-2 font-semibold ${distanceFilter === dist ? 'text-white' : 'text-gray-700'}`}
+                          >
                             {dist.toUpperCase()}
                           </Text>
                         </TouchableOpacity>
@@ -1119,23 +1299,15 @@ export default function UserHomeScreen({ navigation }) {
                   activeOpacity={0.7}
                   className="flex-1 py-3.5 rounded-xl border-2 border-gray-300 items-center justify-center"
                 >
-                  <Text className="text-gray-700 font-bold text-[15px]">
-                    Clear All
-                  </Text>
+                  <Text className="text-gray-700 font-bold text-[15px]">Clear All</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={applyFilters}
-                  activeOpacity={0.7}
-                  className="flex-1"
-                >
+                <TouchableOpacity onPress={applyFilters} activeOpacity={0.7} className="flex-1">
                   <LinearGradient
                     colors={[COLORS.secondary, COLORS.secondaryDark]}
                     className="py-3.5 rounded-xl items-center justify-center"
                   >
-                    <Text className="text-white font-bold text-[15px]">
-                      Apply Filters
-                    </Text>
+                    <Text className="text-white font-bold text-[15px]">Apply Filters</Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </View>

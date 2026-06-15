@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions, RefreshControl, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Dimensions,
+  RefreshControl,
+  Alert,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { LineChart, BarChart } from 'react-native-chart-kit';
@@ -48,7 +57,9 @@ export default function OrderAnalyticsScreen({ navigation, route }) {
           onPress={() => setTimeframe(tf)}
           className={`flex-1 py-2 rounded-lg items-center ${timeframe === tf ? 'bg-[#5b21b6]' : 'bg-transparent'}`}
         >
-          <Text className={`font-bold capitalize ${timeframe === tf ? 'text-white' : 'text-gray-500'}`}>
+          <Text
+            className={`font-bold capitalize ${timeframe === tf ? 'text-white' : 'text-gray-500'}`}
+          >
             {tf}
           </Text>
         </TouchableOpacity>
@@ -80,9 +91,7 @@ export default function OrderAnalyticsScreen({ navigation, route }) {
           className="flex-1 rounded-2xl p-4 mx-1 shadow-sm"
         >
           <Text className="text-white/80 text-xs font-semibold mb-1">Total Orders</Text>
-          <Text className="text-white text-xl font-black">
-            {analytics.totalOrders || 0}
-          </Text>
+          <Text className="text-white text-xl font-black">{analytics.totalOrders || 0}</Text>
         </LinearGradient>
 
         <LinearGradient
@@ -110,19 +119,24 @@ export default function OrderAnalyticsScreen({ navigation, route }) {
       );
     }
 
-    const labels = analytics.timeSeries.map(item => {
+    const labels = analytics.timeSeries.map((item) => {
       const d = new Date(item._id);
-      return timeframe === 'monthly' ? `${d.getDate()}/${d.getMonth() + 1}` : `${d.getDate()}/${d.getMonth() + 1}`;
+      return timeframe === 'monthly'
+        ? `${d.getDate()}/${d.getMonth() + 1}`
+        : `${d.getDate()}/${d.getMonth() + 1}`;
     });
-    const data = analytics.timeSeries.map(item => item.revenue);
+    const data = analytics.timeSeries.map((item) => item.revenue);
 
     return (
       <View className="bg-white rounded-2xl p-4 mx-4 mb-6 shadow-sm border border-gray-100">
         <Text className="text-gray-800 font-bold text-lg mb-4">Revenue Trend</Text>
         <LineChart
           data={{
-            labels: labels.length > 7 ? labels.filter((_, i) => i % Math.ceil(labels.length / 7) === 0) : labels, // Max 7 labels
-            datasets: [{ data }]
+            labels:
+              labels.length > 7
+                ? labels.filter((_, i) => i % Math.ceil(labels.length / 7) === 0)
+                : labels, // Max 7 labels
+            datasets: [{ data }],
           }}
           width={screenWidth - 64}
           height={220}
@@ -134,7 +148,7 @@ export default function OrderAnalyticsScreen({ navigation, route }) {
             color: (opacity = 1) => `rgba(109, 40, 217, ${opacity})`,
             labelColor: (opacity = 1) => `rgba(107, 114, 128, ${opacity})`,
             style: { borderRadius: 16 },
-            propsForDots: { r: '4', strokeWidth: '2', stroke: '#4c1d95' }
+            propsForDots: { r: '4', strokeWidth: '2', stroke: '#4c1d95' },
           }}
           bezier
           style={{ marginVertical: 8, borderRadius: 16 }}
@@ -160,9 +174,11 @@ export default function OrderAnalyticsScreen({ navigation, route }) {
       <View className="bg-white rounded-2xl p-4 mx-4 mb-6 shadow-sm border border-gray-100">
         <Text className="text-gray-800 font-bold text-lg mb-4">Order Status Breakdown</Text>
         <View className="flex-row flex-wrap">
-          {statuses.map(s => (
+          {statuses.map((s) => (
             <View key={s.key} className="w-1/3 mb-4 items-center">
-              <View className={`w-12 h-12 rounded-full ${s.color} items-center justify-center mb-2 shadow-sm`}>
+              <View
+                className={`w-12 h-12 rounded-full ${s.color} items-center justify-center mb-2 shadow-sm`}
+              >
                 <Text className="text-white font-bold text-lg">{s.count || 0}</Text>
               </View>
               <Text className="text-gray-600 text-xs font-medium">{s.label}</Text>
@@ -180,7 +196,10 @@ export default function OrderAnalyticsScreen({ navigation, route }) {
       <View className="bg-white rounded-2xl p-4 mx-4 mb-6 shadow-sm border border-gray-100">
         <Text className="text-gray-800 font-bold text-lg mb-4">Popular Items</Text>
         {analytics.popularItems.map((item, index) => (
-          <View key={item._id} className="flex-row justify-between items-center mb-3 border-b border-gray-50 pb-2">
+          <View
+            key={item._id}
+            className="flex-row justify-between items-center mb-3 border-b border-gray-50 pb-2"
+          >
             <View className="flex-row items-center">
               <Text className="text-gray-400 font-bold mr-3">#{index + 1}</Text>
               <Text className="text-gray-700 font-medium">{item._id}</Text>
@@ -200,7 +219,7 @@ export default function OrderAnalyticsScreen({ navigation, route }) {
 
     // Build a simple 24-hour heatmap array
     const hoursArray = Array(24).fill(0);
-    analytics.peakHours.forEach(ph => {
+    analytics.peakHours.forEach((ph) => {
       hoursArray[ph._id] = ph.orderCount;
     });
 
@@ -256,16 +275,19 @@ export default function OrderAnalyticsScreen({ navigation, route }) {
 
   const handleExportCSV = async () => {
     try {
-      Alert.alert("Export CSV", `Exporting ${timeframe} orders to CSV...`);
+      Alert.alert('Export CSV', `Exporting ${timeframe} orders to CSV...`);
       // Since it's React Native, a blob download is tricky directly to file system without expo-file-system.
       // But we can trigger the API call.
       const response = await ApiService.exportOrdersCSV(businessId, timeframe);
       if (response) {
-        Alert.alert("Success", "CSV generated. Check backend server logs or use a browser/Postman to download.");
+        Alert.alert(
+          'Success',
+          'CSV generated. Check backend server logs or use a browser/Postman to download.'
+        );
       }
     } catch (error) {
       console.log('Export error:', error);
-      Alert.alert("Error", "Failed to export CSV.");
+      Alert.alert('Error', 'Failed to export CSV.');
     }
   };
 
@@ -278,7 +300,10 @@ export default function OrderAnalyticsScreen({ navigation, route }) {
           </TouchableOpacity>
           <Text className="text-xl font-bold text-gray-900">Order Analytics</Text>
         </View>
-        <TouchableOpacity onPress={handleExportCSV} className="bg-purple-100 px-3 py-1.5 rounded-lg flex-row items-center">
+        <TouchableOpacity
+          onPress={handleExportCSV}
+          className="bg-purple-100 px-3 py-1.5 rounded-lg flex-row items-center"
+        >
           <Icon name="download-outline" size={18} color="#6d28d9" />
           <Text className="text-purple-700 font-semibold text-xs ml-1">Export</Text>
         </TouchableOpacity>
@@ -291,7 +316,13 @@ export default function OrderAnalyticsScreen({ navigation, route }) {
       ) : (
         <ScrollView
           className="flex-1 pt-6"
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={COLORS.primary}
+            />
+          }
         >
           {renderTimeframeToggle()}
           {renderSummaryCards()}

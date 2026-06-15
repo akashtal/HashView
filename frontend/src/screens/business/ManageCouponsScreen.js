@@ -9,7 +9,7 @@ import {
   Alert,
   Modal,
   TextInput,
-  Platform
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -27,7 +27,7 @@ export default function ManageCouponsScreen({ navigation, route }) {
     discountValue: '',
     minCartValue: '',
     maxDiscount: '',
-    description: ''
+    description: '',
   });
 
   useEffect(() => {
@@ -58,9 +58,11 @@ export default function ManageCouponsScreen({ navigation, route }) {
         businessId,
         rewardType: formData.discountType,
         rewardValue: parseFloat(formData.discountValue),
-        description: formData.description || `${formData.discountValue}${formData.discountType === 'percentage' ? '%' : '£'} off on your next visit`,
+        description:
+          formData.description ||
+          `${formData.discountValue}${formData.discountType === 'percentage' ? '%' : '£'} off on your next visit`,
         minPurchaseAmount: parseFloat(formData.minCartValue) || 0,
-        maxDiscountAmount: parseFloat(formData.maxDiscount) || null
+        maxDiscountAmount: parseFloat(formData.maxDiscount) || null,
       });
 
       ToastService.showSuccess(
@@ -73,7 +75,7 @@ export default function ManageCouponsScreen({ navigation, route }) {
         discountValue: '',
         minCartValue: '',
         maxDiscount: '',
-        description: ''
+        description: '',
       });
       fetchCoupons();
     } catch (error) {
@@ -83,8 +85,10 @@ export default function ManageCouponsScreen({ navigation, route }) {
 
   const getCouponStatus = (coupon) => {
     const now = new Date();
-    if (coupon.status === 'redeemed') return { text: 'Redeemed', color: 'bg-green-100 text-green-700' };
-    if (coupon.validUntil && new Date(coupon.validUntil) < now) return { text: 'Expired', color: 'bg-gray-100 text-gray-700' };
+    if (coupon.status === 'redeemed')
+      return { text: 'Redeemed', color: 'bg-green-100 text-green-700' };
+    if (coupon.validUntil && new Date(coupon.validUntil) < now)
+      return { text: 'Expired', color: 'bg-gray-100 text-gray-700' };
     return { text: 'Active', color: 'bg-blue-100 text-blue-700' };
   };
 
@@ -124,15 +128,22 @@ export default function ManageCouponsScreen({ navigation, route }) {
     // Only calculate time left if coupon has an expiry date
     const hasExpiry = !!coupon.validUntil;
     const validUntil = hasExpiry ? new Date(coupon.validUntil) : null;
-    const hoursLeft = hasExpiry ? Math.max(0, Math.floor((validUntil - now) / (1000 * 60 * 60))) : null;
-    const minutesLeft = hasExpiry ? Math.max(0, Math.floor(((validUntil - now) % (1000 * 60 * 60)) / (1000 * 60))) : null;
+    const hoursLeft = hasExpiry
+      ? Math.max(0, Math.floor((validUntil - now) / (1000 * 60 * 60)))
+      : null;
+    const minutesLeft = hasExpiry
+      ? Math.max(0, Math.floor(((validUntil - now) % (1000 * 60 * 60)) / (1000 * 60)))
+      : null;
 
     return (
       <View key={coupon._id} className="bg-white rounded-2xl p-5 mb-3 shadow-sm">
         <View className="flex-row justify-between items-start mb-3">
           <View className="flex-1">
             <View className="flex-row items-center mb-2 flex-wrap">
-              <View className="rounded-full px-3 py-1 mr-2 mb-2" style={{ backgroundColor: '#FFF9F0' }}>
+              <View
+                className="rounded-full px-3 py-1 mr-2 mb-2"
+                style={{ backgroundColor: '#FFF9F0' }}
+              >
                 <Text className="text-xs font-bold" style={{ color: COLORS.secondary }}>
                   {coupon.code}
                 </Text>
@@ -144,16 +155,12 @@ export default function ManageCouponsScreen({ navigation, route }) {
             <Text className="text-sm text-gray-700 mb-2">{coupon.description}</Text>
             <View className="flex-row items-center mb-1">
               <Icon name="person-outline" size={14} color="#6B7280" />
-              <Text className="text-xs text-gray-500 ml-1">
-                {coupon.user?.name || 'User'}
-              </Text>
+              <Text className="text-xs text-gray-500 ml-1">{coupon.user?.name || 'User'}</Text>
             </View>
             {coupon.minPurchaseAmount > 0 && (
               <View className="flex-row items-center">
                 <Icon name="cart-outline" size={14} color="#6B7280" />
-                <Text className="text-xs text-gray-500 ml-1">
-                  Min. £{coupon.minPurchaseAmount}
-                </Text>
+                <Text className="text-xs text-gray-500 ml-1">Min. £{coupon.minPurchaseAmount}</Text>
               </View>
             )}
             {coupon.redeemedAt && (
@@ -165,7 +172,10 @@ export default function ManageCouponsScreen({ navigation, route }) {
               </View>
             )}
           </View>
-          <View className="w-20 h-20 rounded-2xl items-center justify-center" style={{ backgroundColor: '#FFF9F0' }}>
+          <View
+            className="w-20 h-20 rounded-2xl items-center justify-center"
+            style={{ backgroundColor: '#FFF9F0' }}
+          >
             <Text className="text-2xl font-bold" style={{ color: COLORS.secondary }}>
               {getDiscountDisplay(coupon)}
             </Text>
@@ -179,8 +189,10 @@ export default function ManageCouponsScreen({ navigation, route }) {
           <View className="flex-row items-center">
             <Icon name="time-outline" size={14} color={COLORS.secondary} />
             <Text className="text-xs text-gray-600 ml-1">
-                          {status.text === 'Active'
-                ? (hasExpiry ? `${hoursLeft}h ${minutesLeft}m left` : 'No expiry')
+              {status.text === 'Active'
+                ? hasExpiry
+                  ? `${hoursLeft}h ${minutesLeft}m left`
+                  : 'No expiry'
                 : status.text === 'Expired'
                   ? 'Expired'
                   : 'Redeemed'}
@@ -191,7 +203,7 @@ export default function ManageCouponsScreen({ navigation, route }) {
               month: 'short',
               day: 'numeric',
               hour: '2-digit',
-              minute: '2-digit'
+              minute: '2-digit',
             })}
           </Text>
         </View>
@@ -204,10 +216,7 @@ export default function ManageCouponsScreen({ navigation, route }) {
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">
             <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
@@ -281,15 +290,25 @@ export default function ManageCouponsScreen({ navigation, route }) {
                     <TouchableOpacity
                       key={type}
                       onPress={() => setFormData({ ...formData, discountType: type })}
-                      className={`rounded-xl px-4 py-2 mr-2 mb-2 border-2 ${formData.discountType === type ? 'border-orange-500' : 'border-gray-200'
-                        }`}
-                      style={{ backgroundColor: formData.discountType === type ? '#FFF9F0' : '#F9FAFB' }}
+                      className={`rounded-xl px-4 py-2 mr-2 mb-2 border-2 ${
+                        formData.discountType === type ? 'border-orange-500' : 'border-gray-200'
+                      }`}
+                      style={{
+                        backgroundColor: formData.discountType === type ? '#FFF9F0' : '#F9FAFB',
+                      }}
                     >
-                      <Text className={`font-semibold ${formData.discountType === type ? 'text-orange-600' : 'text-gray-700'
-                        }`}>
-                        {type === 'percentage' ? 'Percentage' :
-                          type === 'fixed' ? 'Fixed' :
-                            type === 'buy1get1' ? 'Buy 1 Get 1' : 'Free Drink'}
+                      <Text
+                        className={`font-semibold ${
+                          formData.discountType === type ? 'text-orange-600' : 'text-gray-700'
+                        }`}
+                      >
+                        {type === 'percentage'
+                          ? 'Percentage'
+                          : type === 'fixed'
+                            ? 'Fixed'
+                            : type === 'buy1get1'
+                              ? 'Buy 1 Get 1'
+                              : 'Free Drink'}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -363,18 +382,14 @@ export default function ManageCouponsScreen({ navigation, route }) {
                   </Text>
                 </View>
                 <Text className="text-xs text-gray-600">
-                  • Create coupon template here{'\n'}
-                  • Customers get this coupon when they review your business{'\n'}
-                  • Coupons are valid until redeemed at the business{'\n'}
-                  • Customers must be within your business radius to review (set by admin)
+                  • Create coupon template here{'\n'}• Customers get this coupon when they review
+                  your business{'\n'}• Coupons are valid until redeemed at the business{'\n'}•
+                  Customers must be within your business radius to review (set by admin)
                 </Text>
               </View>
 
               {/* Create Button */}
-              <TouchableOpacity
-                onPress={handleCreateCoupon}
-                activeOpacity={0.8}
-              >
+              <TouchableOpacity onPress={handleCreateCoupon} activeOpacity={0.8}>
                 <LinearGradient
                   colors={[COLORS.secondary, COLORS.secondaryDark]}
                   className="rounded-xl py-4 items-center"
@@ -389,5 +404,3 @@ export default function ManageCouponsScreen({ navigation, route }) {
     </View>
   );
 }
-
-

@@ -1,5 +1,19 @@
 import React, { useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StatusBar, Modal, TextInput, Alert, Linking, Platform, KeyboardAvoidingView, Image } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  StatusBar,
+  Modal,
+  TextInput,
+  Alert,
+  Linking,
+  Platform,
+  KeyboardAvoidingView,
+  Image,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system';
@@ -83,7 +97,10 @@ export default function BusinessDashboardScreen({ navigation }) {
         await fetchBusinessData();
 
         // Show success message
-        ToastService.showSuccess('Success', `Google ratings synced successfully!\nRating: ${response.data?.rating || 'N/A'}\nReview Count: ${response.data?.reviewCount || 0}`);
+        ToastService.showSuccess(
+          'Success',
+          `Google ratings synced successfully!\nRating: ${response.data?.rating || 'N/A'}\nReview Count: ${response.data?.reviewCount || 0}`
+        );
       }
     } catch (error) {
       console.error('Google sync error:', error);
@@ -95,7 +112,9 @@ export default function BusinessDashboardScreen({ navigation }) {
 
   const downloadQRCode = async () => {
     if (!business?.qrCode) return;
-    const fileUri = FileSystem.documentDirectory + `HashView_QR_${business.name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+    const fileUri =
+      FileSystem.documentDirectory +
+      `HashView_QR_${business.name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
     try {
       if (business.qrCode.startsWith('data:image')) {
         const base64Code = business.qrCode.split(',')[1];
@@ -105,7 +124,7 @@ export default function BusinessDashboardScreen({ navigation }) {
         await Sharing.shareAsync(fileUri, {
           mimeType: 'image/png',
           dialogTitle: 'Share or Save QR Code',
-          UTI: 'public.png'
+          UTI: 'public.png',
         });
       } else {
         const { uri } = await FileSystem.downloadAsync(business.qrCode, fileUri);
@@ -157,20 +176,21 @@ export default function BusinessDashboardScreen({ navigation }) {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-700';
-      case 'pending': return 'bg-yellow-100 text-yellow-700';
-      case 'rejected': return 'bg-red-100 text-red-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case 'active':
+        return 'bg-green-100 text-green-700';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'rejected':
+        return 'bg-red-100 text-red-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
     }
   };
 
   return (
     <View className="flex-1">
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-15 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-15 px-6">
         <View className="flex-row items-center justify-between">
           <Text className="text-white text-2xl font-bold">My Business</Text>
 
@@ -183,30 +203,34 @@ export default function BusinessDashboardScreen({ navigation }) {
             activeOpacity={0.7}
             style={{ position: 'relative' }}
           >
-            <View style={{
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              borderRadius: 50,
-              width: 44,
-              height: 44,
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
+            <View
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderRadius: 50,
+                width: 44,
+                height: 44,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <Icon name="notifications-outline" size={22} color="#FFF" />
               {unreadNotifications > 0 && (
-                <View style={{
-                  position: 'absolute',
-                  top: -4,
-                  right: -4,
-                  backgroundColor: '#EF4444',
-                  borderRadius: 10,
-                  minWidth: 20,
-                  height: 20,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  paddingHorizontal: 5,
-                  borderWidth: 2,
-                  borderColor: COLORS.primary
-                }}>
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: -4,
+                    right: -4,
+                    backgroundColor: '#EF4444',
+                    borderRadius: 10,
+                    minWidth: 20,
+                    height: 20,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingHorizontal: 5,
+                    borderWidth: 2,
+                    borderColor: COLORS.primary,
+                  }}
+                >
                   <Text style={{ color: '#FFF', fontSize: 11, fontWeight: 'bold' }}>
                     {unreadNotifications > 99 ? '99+' : unreadNotifications}
                   </Text>
@@ -215,20 +239,21 @@ export default function BusinessDashboardScreen({ navigation }) {
             </View>
           </TouchableOpacity>
         </View>
-      </LinearGradient >
+      </LinearGradient>
 
       <ScrollView className="flex-1 bg-gray-50">
-
         <View className="px-4 -mt-0 mb-0">
           {/* Pending Admin Approval Banner */}
-          {(business.status === 'pending' || (business.kycStatus !== 'verified' && business.kycStatus !== 'approved')) && (
+          {(business.status === 'pending' ||
+            (business.kycStatus !== 'verified' && business.kycStatus !== 'approved')) && (
             <View className="bg-yellow-50 border-2 border-yellow-300 rounded-2xl p-4 mb-4">
               <View className="flex-row items-start">
                 <Icon name="time" size={22} color="#D97706" />
                 <View className="ml-3 flex-1">
                   <Text className="text-yellow-900 font-semibold">Pending Admin Approval</Text>
                   <Text className="text-yellow-800 text-sm mt-1">
-                    Your business is currently under review by the admin. You will be notified once it is approved.
+                    Your business is currently under review by the admin. You will be notified once
+                    it is approved.
                   </Text>
                 </View>
               </View>
@@ -244,7 +269,9 @@ export default function BusinessDashboardScreen({ navigation }) {
               </View>
             </View>
 
-            <View className={`rounded-full px-4 py-2 self-start mb-4 ${getStatusColor(business.status)}`}>
+            <View
+              className={`rounded-full px-4 py-2 self-start mb-4 ${getStatusColor(business.status)}`}
+            >
               <Text className="text-sm font-semibold capitalize">{business.status}</Text>
             </View>
 
@@ -279,7 +306,10 @@ export default function BusinessDashboardScreen({ navigation }) {
                   </View>
                   {business.externalProfiles?.googleBusiness?.lastSynced && (
                     <Text className="text-xs text-gray-400">
-                      Synced {new Date(business.externalProfiles.googleBusiness.lastSynced).toLocaleDateString()}
+                      Synced{' '}
+                      {new Date(
+                        business.externalProfiles.googleBusiness.lastSynced
+                      ).toLocaleDateString()}
                     </Text>
                   )}
                 </View>
@@ -370,13 +400,18 @@ export default function BusinessDashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('OrdersDashboard', { businessId: business._id })}
               className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3 relative"
             >
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#FEF3C7' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-2"
+                style={{ backgroundColor: '#FEF3C7' }}
+              >
                 <Icon name="receipt" size={24} color="#D97706" />
               </View>
               <Text className="text-sm font-semibold text-gray-900">Live Orders</Text>
               {dashboardStats?.activeOrders > 0 && (
                 <View className="absolute top-2 right-2 bg-red-500 rounded-full h-6 w-6 items-center justify-center border-2 border-white">
-                  <Text className="text-white text-xs font-bold">{dashboardStats.activeOrders}</Text>
+                  <Text className="text-white text-xs font-bold">
+                    {dashboardStats.activeOrders}
+                  </Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -385,7 +420,10 @@ export default function BusinessDashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('KitchenView', { businessId: business._id })}
               className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
             >
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#F3E8FF' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-2"
+                style={{ backgroundColor: '#F3E8FF' }}
+              >
                 <Icon name="restaurant" size={24} color="#9333EA" />
               </View>
               <Text className="text-sm font-semibold text-gray-900">Kitchen Display</Text>
@@ -396,7 +434,10 @@ export default function BusinessDashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('MenuManagement', { businessId: business._id })}
               className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
             >
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#EEF2FF' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-2"
+                style={{ backgroundColor: '#EEF2FF' }}
+              >
                 <Icon name="restaurant-outline" size={24} color="#6366F1" />
               </View>
               <Text className="text-sm font-semibold text-gray-900">Menu & Services</Text>
@@ -406,7 +447,10 @@ export default function BusinessDashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('ManageCouponsNew', { businessId: business._id })}
               className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
             >
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#FFF9F0' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-2"
+                style={{ backgroundColor: '#FFF9F0' }}
+              >
                 <Icon name="ticket" size={24} color={COLORS.secondary} />
               </View>
               <Text className="text-sm font-semibold text-gray-900">Coupons</Text>
@@ -416,7 +460,10 @@ export default function BusinessDashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('CouponQRScanner', { businessId: business._id })}
               className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
             >
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#ECFDF5' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-2"
+                style={{ backgroundColor: '#ECFDF5' }}
+              >
                 <Icon name="qr-code" size={24} color="#10B981" />
               </View>
               <Text className="text-sm font-semibold text-gray-900">Scan QR</Text>
@@ -426,7 +473,10 @@ export default function BusinessDashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('ViewReviews', { businessId: business._id })}
               className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
             >
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#FFF9F0' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-2"
+                style={{ backgroundColor: '#FFF9F0' }}
+              >
                 <Icon name="chatbubbles" size={24} color={COLORS.secondary} />
               </View>
               <Text className="text-sm font-semibold text-gray-900">Reviews</Text>
@@ -436,17 +486,25 @@ export default function BusinessDashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('ManageUpdates', { businessId: business._id })}
               className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
             >
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#ECFDF5' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-2"
+                style={{ backgroundColor: '#ECFDF5' }}
+              >
                 <Icon name="megaphone" size={24} color="#10B981" />
               </View>
               <Text className="text-sm font-semibold text-gray-900">Updates & Offers</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => navigation.navigate('AnalyticsDashboard', { businessId: business._id })}
+              onPress={() =>
+                navigation.navigate('AnalyticsDashboard', { businessId: business._id })
+              }
               className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
             >
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#FFF9F0' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-2"
+                style={{ backgroundColor: '#FFF9F0' }}
+              >
                 <Icon name="bar-chart" size={24} color={COLORS.secondary} />
               </View>
               <Text className="text-sm font-semibold text-gray-900">Analytics</Text>
@@ -456,7 +514,10 @@ export default function BusinessDashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('EditBusinessInfo', { businessId: business._id })}
               className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
             >
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#FFF9F0' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-2"
+                style={{ backgroundColor: '#FFF9F0' }}
+              >
                 <Icon name="create" size={24} color={COLORS.secondary} />
               </View>
               <Text className="text-sm font-semibold text-gray-900">Edit Info</Text>
@@ -466,7 +527,10 @@ export default function BusinessDashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('TaxManagement', { businessId: business._id })}
               className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
             >
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#F3F4F6' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-2"
+                style={{ backgroundColor: '#F3F4F6' }}
+              >
                 <Icon name="receipt-outline" size={24} color="#4B5563" />
               </View>
               <Text className="text-sm font-semibold text-gray-900">Taxes</Text>
@@ -476,7 +540,10 @@ export default function BusinessDashboardScreen({ navigation }) {
               onPress={() => navigation.navigate('ChargeManagement', { businessId: business._id })}
               className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
             >
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#F3F4F6' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-2"
+                style={{ backgroundColor: '#F3F4F6' }}
+              >
                 <Icon name="cash-outline" size={24} color="#4B5563" />
               </View>
               <Text className="text-sm font-semibold text-gray-900">Extra Charges</Text>
@@ -486,7 +553,10 @@ export default function BusinessDashboardScreen({ navigation }) {
               onPress={() => setShowNotificationSettings(true)}
               className="bg-white rounded-2xl p-4 shadow-sm items-center w-[48%] mb-3"
             >
-              <View className="w-12 h-12 rounded-full items-center justify-center mb-2" style={{ backgroundColor: '#FFF0F2' }}>
+              <View
+                className="w-12 h-12 rounded-full items-center justify-center mb-2"
+                style={{ backgroundColor: '#FFF0F2' }}
+              >
                 <Icon name="notifications" size={24} color="#E11D48" />
               </View>
               <Text className="text-sm font-semibold text-gray-900">Alerts & Sounds</Text>
@@ -499,7 +569,11 @@ export default function BusinessDashboardScreen({ navigation }) {
               <View className="flex-row items-center justify-between mb-4">
                 <Text className="text-lg font-bold text-gray-900">Coupon Redemption Stats</Text>
                 <TouchableOpacity onPress={fetchRedemptionStats} disabled={loadingStats}>
-                  <Icon name="refresh" size={20} color={loadingStats ? '#9CA3AF' : COLORS.secondary} />
+                  <Icon
+                    name="refresh"
+                    size={20}
+                    color={loadingStats ? '#9CA3AF' : COLORS.secondary}
+                  />
                 </TouchableOpacity>
               </View>
 
@@ -527,7 +601,7 @@ export default function BusinessDashboardScreen({ navigation }) {
                             <View
                               className="h-full bg-green-500 rounded-full"
                               style={{
-                                width: `${Math.min(100, (redemptionStats.template.redemptionCount / redemptionStats.template.redemptionLimit) * 100)}%`
+                                width: `${Math.min(100, (redemptionStats.template.redemptionCount / redemptionStats.template.redemptionLimit) * 100)}%`,
                               }}
                             />
                           </View>
@@ -539,19 +613,27 @@ export default function BusinessDashboardScreen({ navigation }) {
                   <View className="flex-row flex-wrap justify-between">
                     <View className="w-[48%] bg-green-50 rounded-xl p-3 mb-2">
                       <Text className="text-xs text-gray-600 mb-1">Redeemed</Text>
-                      <Text className="text-2xl font-bold text-green-600">{redemptionStats.redeemed || 0}</Text>
+                      <Text className="text-2xl font-bold text-green-600">
+                        {redemptionStats.redeemed || 0}
+                      </Text>
                     </View>
                     <View className="w-[48%] bg-red-50 rounded-xl p-3 mb-2">
                       <Text className="text-xs text-gray-600 mb-1">Expired</Text>
-                      <Text className="text-2xl font-bold text-red-600">{redemptionStats.expired || 0}</Text>
+                      <Text className="text-2xl font-bold text-red-600">
+                        {redemptionStats.expired || 0}
+                      </Text>
                     </View>
                     <View className="w-[48%] bg-blue-50 rounded-xl p-3">
                       <Text className="text-xs text-gray-600 mb-1">Active</Text>
-                      <Text className="text-2xl font-bold text-blue-600">{redemptionStats.active || 0}</Text>
+                      <Text className="text-2xl font-bold text-blue-600">
+                        {redemptionStats.active || 0}
+                      </Text>
                     </View>
                     <View className="w-[48%] bg-gray-50 rounded-xl p-3">
                       <Text className="text-xs text-gray-600 mb-1">Total Issued</Text>
-                      <Text className="text-2xl font-bold text-gray-700">{redemptionStats.totalIssued || 0}</Text>
+                      <Text className="text-2xl font-bold text-gray-700">
+                        {redemptionStats.totalIssued || 0}
+                      </Text>
                     </View>
                   </View>
                 </>

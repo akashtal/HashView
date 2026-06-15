@@ -7,7 +7,7 @@ import {
   Switch,
   Alert,
   StatusBar,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -44,7 +44,6 @@ export default function AccountSettingsScreen({ navigation }) {
       ToastService.showError('Error', 'Failed to send email');
     }
   };
-
 
   const toggleSetting = async (key) => {
     const newValue = !settings[key];
@@ -85,8 +84,8 @@ export default function AccountSettingsScreen({ navigation }) {
               setLoading(false);
               ToastService.showError('Export Failed', error.message);
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -123,8 +122,8 @@ export default function AccountSettingsScreen({ navigation }) {
               setLoading(false);
               ToastService.showError('Deactivation Failed', error.message);
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -134,10 +133,7 @@ export default function AccountSettingsScreen({ navigation }) {
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.primaryDark]}
-        className="pt-12 pb-6 px-6"
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
         <View className="flex-row items-center">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -153,9 +149,7 @@ export default function AccountSettingsScreen({ navigation }) {
         <View className="px-6 py-4">
           {/* Account Verification */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Account Verification
-            </Text>
+            <Text className="text-lg font-bold text-gray-900 mb-4">Account Verification</Text>
 
             {/* Email Verification */}
             <View className="flex-row items-center justify-between">
@@ -164,11 +158,9 @@ export default function AccountSettingsScreen({ navigation }) {
                   <Icon
                     name="mail-outline"
                     size={20}
-                    color={user?.emailVerified ? "#10B981" : "#9CA3AF"}
+                    color={user?.emailVerified ? '#10B981' : '#9CA3AF'}
                   />
-                  <Text className="text-base font-medium text-gray-900 ml-2">
-                    Email Address
-                  </Text>
+                  <Text className="text-base font-medium text-gray-900 ml-2">Email Address</Text>
                 </View>
                 <Text className="text-sm text-gray-500 ml-7">{user?.email}</Text>
               </View>
@@ -195,14 +187,11 @@ export default function AccountSettingsScreen({ navigation }) {
                 </TouchableOpacity>
               )}
             </View>
-
           </View>
 
           {/* Security Settings */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Security
-            </Text>
+            <Text className="text-lg font-bold text-gray-900 mb-4">Security</Text>
 
             <View className="flex-row items-center justify-between mb-4">
               <View className="flex-1 mr-4">
@@ -226,9 +215,7 @@ export default function AccountSettingsScreen({ navigation }) {
 
             <View className="flex-row items-center justify-between">
               <View className="flex-1 mr-4">
-                <Text className="text-base text-gray-900 font-medium">
-                  Login Alerts
-                </Text>
+                <Text className="text-base text-gray-900 font-medium">Login Alerts</Text>
                 <Text className="text-sm text-gray-500 mt-1">
                   Get notified of new login attempts
                 </Text>
@@ -255,15 +242,11 @@ export default function AccountSettingsScreen({ navigation }) {
 
           {/* Privacy Settings */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Privacy
-            </Text>
+            <Text className="text-lg font-bold text-gray-900 mb-4">Privacy</Text>
 
             <View className="flex-row items-center justify-between mb-4">
               <View className="flex-1 mr-4">
-                <Text className="text-base text-gray-900 font-medium">
-                  Data Sharing
-                </Text>
+                <Text className="text-base text-gray-900 font-medium">Data Sharing</Text>
                 <Text className="text-sm text-gray-500 mt-1">
                   Share anonymous usage data for analytics
                 </Text>
@@ -280,9 +263,7 @@ export default function AccountSettingsScreen({ navigation }) {
 
             <View className="flex-row items-center justify-between">
               <View className="flex-1 mr-4">
-                <Text className="text-base text-gray-900 font-medium">
-                  Marketing Emails
-                </Text>
+                <Text className="text-base text-gray-900 font-medium">Marketing Emails</Text>
                 <Text className="text-sm text-gray-500 mt-1">
                   Receive promotional offers and updates
                 </Text>
@@ -298,9 +279,7 @@ export default function AccountSettingsScreen({ navigation }) {
 
           {/* Data Management */}
           <View className="bg-white rounded-2xl p-6 shadow-sm mb-4">
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Data Management
-            </Text>
+            <Text className="text-lg font-bold text-gray-900 mb-4">Data Management</Text>
 
             <TouchableOpacity
               onPress={handleExportData}
@@ -308,12 +287,8 @@ export default function AccountSettingsScreen({ navigation }) {
             >
               <Icon name="download-outline" size={22} color={COLORS.primary} />
               <View className="flex-1 ml-3">
-                <Text className="text-base text-gray-900 font-medium">
-                  Export Personal Data
-                </Text>
-                <Text className="text-sm text-gray-500 mt-1">
-                  Download a copy of your data
-                </Text>
+                <Text className="text-base text-gray-900 font-medium">Export Personal Data</Text>
+                <Text className="text-sm text-gray-500 mt-1">Download a copy of your data</Text>
               </View>
               <Icon name="chevron-forward" size={20} color="#D1D5DB" />
             </TouchableOpacity>
@@ -324,9 +299,7 @@ export default function AccountSettingsScreen({ navigation }) {
             >
               <Icon name="time-outline" size={22} color={COLORS.primary} />
               <View className="flex-1 ml-3">
-                <Text className="text-base text-gray-900 font-medium">
-                  Activity Log
-                </Text>
+                <Text className="text-base text-gray-900 font-medium">Activity Log</Text>
                 <Text className="text-sm text-gray-500 mt-1">
                   View your account activity (Coming Soon)
                 </Text>
@@ -338,9 +311,7 @@ export default function AccountSettingsScreen({ navigation }) {
           {/* Danger Zone - Only show for customer/admin users, not for business */}
           {user?.role !== 'business' && (
             <View className="bg-white rounded-2xl p-6 shadow-sm mb-6 border-2 border-red-100">
-              <Text className="text-lg font-bold text-red-600 mb-4">
-                Danger Zone
-              </Text>
+              <Text className="text-lg font-bold text-red-600 mb-4">Danger Zone</Text>
 
               <TouchableOpacity
                 onPress={handleDeactivateAccount}
@@ -348,9 +319,7 @@ export default function AccountSettingsScreen({ navigation }) {
               >
                 <Icon name="pause-circle-outline" size={22} color="#F59E0B" />
                 <View className="flex-1 ml-3">
-                  <Text className="text-base text-gray-900 font-medium">
-                    Deactivate Account
-                  </Text>
+                  <Text className="text-base text-gray-900 font-medium">Deactivate Account</Text>
                   <Text className="text-sm text-gray-500 mt-1">
                     Temporarily disable your account
                   </Text>
@@ -364,9 +333,7 @@ export default function AccountSettingsScreen({ navigation }) {
               >
                 <Icon name="trash-outline" size={22} color="#DC2626" />
                 <View className="flex-1 ml-3">
-                  <Text className="text-base text-red-600 font-medium">
-                    Delete Account
-                  </Text>
+                  <Text className="text-base text-red-600 font-medium">Delete Account</Text>
                   <Text className="text-sm text-gray-500 mt-1">
                     Permanently delete your account
                   </Text>

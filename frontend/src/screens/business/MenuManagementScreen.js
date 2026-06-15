@@ -1,7 +1,19 @@
 import React, { useState, useCallback } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator,
-  Alert, Modal, StatusBar, KeyboardAvoidingView, Platform, Switch, Image, FlatList
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+  Switch,
+  Image,
+  FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -13,40 +25,76 @@ import ToastService from '../../utils/ToastService';
 
 // ─── Type options for the Add/Edit form ──────────────────────────────────────
 const ITEM_TYPES = [
-  { value: 'food',    label: 'Food',    icon: 'fast-food' },
-  { value: 'drink',   label: 'Drink',   icon: 'beer' },
+  { value: 'food', label: 'Food', icon: 'fast-food' },
+  { value: 'drink', label: 'Drink', icon: 'beer' },
   { value: 'service', label: 'Service', icon: 'cut' },
   { value: 'product', label: 'Product', icon: 'cube' },
   { value: 'package', label: 'Package', icon: 'gift' },
-  { value: 'room',    label: 'Room',    icon: 'bed' },
+  { value: 'room', label: 'Room', icon: 'bed' },
 ];
 
 const DIETARY_OPTIONS = [
-  'vegetarian', 'vegan', 'halal', 'gluten-free', 'dairy-free', 'nut-free', 'kosher', 'organic'
+  'vegetarian',
+  'vegan',
+  'halal',
+  'gluten-free',
+  'dairy-free',
+  'nut-free',
+  'kosher',
+  'organic',
 ];
 
 const ALLERGEN_OPTIONS = [
-  'celery', 'gluten', 'crustaceans', 'eggs', 'fish', 'lupin',
-  'milk', 'molluscs', 'mustard', 'nuts', 'peanuts', 'sesame',
-  'soybeans', 'sulphites'
+  'celery',
+  'gluten',
+  'crustaceans',
+  'eggs',
+  'fish',
+  'lupin',
+  'milk',
+  'molluscs',
+  'mustard',
+  'nuts',
+  'peanuts',
+  'sesame',
+  'soybeans',
+  'sulphites',
 ];
 
 const BLANK_FORM = {
-  name: '', description: '', price: '',
-  currency: 'GBP', menuCategory: '', type: 'food',
-  tags: '', dietary: [], allergens: [], isAvailable: true,
-  isPopular: false, duration: '',
-  prepTime: '15', calories: '', maxOrdersPerSlot: '',
-  modifiers: [], addOns: []
+  name: '',
+  description: '',
+  price: '',
+  currency: 'GBP',
+  menuCategory: '',
+  type: 'food',
+  tags: '',
+  dietary: [],
+  allergens: [],
+  isAvailable: true,
+  isPopular: false,
+  duration: '',
+  prepTime: '15',
+  calories: '',
+  maxOrdersPerSlot: '',
+  modifiers: [],
+  addOns: [],
 };
 
 // ─── Item Card Component ──────────────────────────────────────────────────────
 const MenuItemCard = ({ item, onEdit, onDelete, onToggle }) => (
   <View
     style={{
-      backgroundColor: '#FFF', borderRadius: 16, marginBottom: 10,
-      shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 },
-      elevation: 2, flexDirection: 'row', overflow: 'hidden'
+      backgroundColor: '#FFF',
+      borderRadius: 16,
+      marginBottom: 10,
+      shadowColor: '#000',
+      shadowOpacity: 0.06,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 2,
+      flexDirection: 'row',
+      overflow: 'hidden',
     }}
   >
     {/* Image */}
@@ -57,38 +105,70 @@ const MenuItemCard = ({ item, onEdit, onDelete, onToggle }) => (
         resizeMode="cover"
       />
     ) : (
-      <View style={{ width: 80, height: 80, backgroundColor: '#F3F4F6', alignItems: 'center', justifyContent: 'center' }}>
+      <View
+        style={{
+          width: 80,
+          height: 80,
+          backgroundColor: '#F3F4F6',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <Icon name="image-outline" size={28} color="#D1D5DB" />
       </View>
     )}
 
     {/* Info */}
     <View style={{ flex: 1, padding: 12 }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <View
+        style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}
+      >
         <View style={{ flex: 1, marginRight: 8 }}>
-          <Text style={{ fontWeight: '700', fontSize: 14, color: '#111827' }} numberOfLines={1}>{item.name}</Text>
+          <Text style={{ fontWeight: '700', fontSize: 14, color: '#111827' }} numberOfLines={1}>
+            {item.name}
+          </Text>
           {item.menuCategory ? (
-            <Text style={{ fontSize: 11, color: '#6B7280', marginTop: 1 }}>{item.menuCategory}</Text>
+            <Text style={{ fontSize: 11, color: '#6B7280', marginTop: 1 }}>
+              {item.menuCategory}
+            </Text>
           ) : null}
         </View>
         <Text style={{ fontWeight: '700', fontSize: 15, color: '#6366F1' }}>
-          {item.currency === 'GBP' ? '£' : item.currency === 'USD' ? '$' : '€'}{item.price.toFixed(2)}
+          {item.currency === 'GBP' ? '£' : item.currency === 'USD' ? '$' : '€'}
+          {item.price.toFixed(2)}
         </Text>
       </View>
 
       {item.description ? (
-        <Text style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }} numberOfLines={2}>{item.description}</Text>
+        <Text style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }} numberOfLines={2}>
+          {item.description}
+        </Text>
       ) : null}
 
       {/* Badges */}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 6, gap: 4 }}>
         {item.isPopular && (
-          <View style={{ backgroundColor: '#FEF3C7', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
+          <View
+            style={{
+              backgroundColor: '#FEF3C7',
+              borderRadius: 6,
+              paddingHorizontal: 6,
+              paddingVertical: 2,
+            }}
+          >
             <Text style={{ fontSize: 10, fontWeight: '600', color: '#92400E' }}>⭐ Popular</Text>
           </View>
         )}
-        {item.dietary?.slice(0, 2).map(d => (
-          <View key={d} style={{ backgroundColor: '#DCFCE7', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
+        {item.dietary?.slice(0, 2).map((d) => (
+          <View
+            key={d}
+            style={{
+              backgroundColor: '#DCFCE7',
+              borderRadius: 6,
+              paddingHorizontal: 6,
+              paddingVertical: 2,
+            }}
+          >
             <Text style={{ fontSize: 10, fontWeight: '600', color: '#166534' }}>{d}</Text>
           </View>
         ))}
@@ -128,10 +208,10 @@ export default function MenuManagementScreen({ route, navigation }) {
   const [saving, setSaving] = useState(false);
 
   // ─── AI Menu Scanner state ─────────────────────────────────────────────────────────────
-  const [aiScanning, setAiScanning] = useState(false);      // true while uploading/AI processing
+  const [aiScanning, setAiScanning] = useState(false); // true while uploading/AI processing
   const [aiScanPickerVisible, setAiScanPickerVisible] = useState(false); // custom source picker
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
-  const [reviewItems, setReviewItems] = useState([]);          // extracted drafts from AI
+  const [reviewItems, setReviewItems] = useState([]); // extracted drafts from AI
   const [savingBatch, setSavingBatch] = useState(false);
 
   // Refresh whenever screen comes into focus
@@ -146,7 +226,7 @@ export default function MenuManagementScreen({ route, navigation }) {
       setLoading(true);
       const [menuRes, statsRes] = await Promise.all([
         ApiService.getMenuItems(businessId),
-        ApiService.getMenuStats(businessId).catch(() => null)
+        ApiService.getMenuStats(businessId).catch(() => null),
       ]);
       setGrouped(menuRes.data || {});
       if (statsRes?.success) setStats(statsRes.data);
@@ -169,13 +249,19 @@ export default function MenuManagementScreen({ route, navigation }) {
       if (source === 'camera') {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
-          return Alert.alert('Permission needed', 'Camera access is required to take a photo of your menu.');
+          return Alert.alert(
+            'Permission needed',
+            'Camera access is required to take a photo of your menu.'
+          );
         }
         result = await ImagePicker.launchCameraAsync({ quality: 0.9, allowsEditing: false });
       } else {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-          return Alert.alert('Permission needed', 'Photo library access is required to upload your menu.');
+          return Alert.alert(
+            'Permission needed',
+            'Photo library access is required to upload your menu.'
+          );
         }
         result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -202,7 +288,10 @@ export default function MenuManagementScreen({ route, navigation }) {
       // NOTE: mobile apiClient interceptor already unwraps response.data,
       // so `res` here IS the JSON body { success, count, data, message }
       if (!res?.success || !res?.data?.length) {
-        ToastService.showError('No items found', 'AI could not extract any items. Try a clearer image.');
+        ToastService.showError(
+          'No items found',
+          'AI could not extract any items. Try a clearer image.'
+        );
         return;
       }
 
@@ -217,14 +306,17 @@ export default function MenuManagementScreen({ route, navigation }) {
       setReviewModalVisible(true);
       ToastService.showSuccess('Scan complete', res.message);
     } catch (err) {
-      ToastService.showError('Scan failed', err.response?.data?.message || err.message || 'Something went wrong');
+      ToastService.showError(
+        'Scan failed',
+        err.response?.data?.message || err.message || 'Something went wrong'
+      );
     } finally {
       setAiScanning(false);
     }
   };
 
   const handleBatchSave = async () => {
-    const selected = reviewItems.filter(i => i._selected);
+    const selected = reviewItems.filter((i) => i._selected);
     if (selected.length === 0) {
       return Alert.alert('Nothing selected', 'Please select at least one item to save.');
     }
@@ -280,15 +372,11 @@ export default function MenuManagementScreen({ route, navigation }) {
 
   // ─── Choose how to add image (Camera vs Gallery) ───────────────────────────
   const handleImageOption = () => {
-    Alert.alert(
-      'Add Item Photo',
-      'Select an option to add an image for this menu item:',
-      [
-        { text: '📷 Take Photo (Camera)', onPress: takePhoto },
-        { text: '🖼️ Choose from Gallery', onPress: pickImage },
-        { text: 'Cancel', style: 'cancel' }
-      ]
-    );
+    Alert.alert('Add Item Photo', 'Select an option to add an image for this menu item:', [
+      { text: '📷 Take Photo (Camera)', onPress: takePhoto },
+      { text: '🖼️ Choose from Gallery', onPress: pickImage },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
   };
 
   const takePhoto = async () => {
@@ -307,7 +395,7 @@ export default function MenuManagementScreen({ route, navigation }) {
       setPickedImage({
         uri: asset.uri,
         type: asset.mimeType || 'image/jpeg',
-        name: `menu-item-${Date.now()}.jpg`
+        name: `menu-item-${Date.now()}.jpg`,
       });
     }
   };
@@ -329,68 +417,79 @@ export default function MenuManagementScreen({ route, navigation }) {
       setPickedImage({
         uri: asset.uri,
         type: asset.mimeType || 'image/jpeg',
-        name: `menu-item-${Date.now()}.jpg`
+        name: `menu-item-${Date.now()}.jpg`,
       });
     }
   };
 
   // ─── Toggle dietary label ──────────────────────────────────────────────────
   const toggleDietary = (label) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       dietary: prev.dietary.includes(label)
-        ? prev.dietary.filter(d => d !== label)
-        : [...prev.dietary, label]
+        ? prev.dietary.filter((d) => d !== label)
+        : [...prev.dietary, label],
     }));
   };
 
   // ─── Toggle allergen label ──────────────────────────────────────────────────
   const toggleAllergen = (label) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       allergens: prev.allergens.includes(label)
-        ? prev.allergens.filter(a => a !== label)
-        : [...prev.allergens, label]
+        ? prev.allergens.filter((a) => a !== label)
+        : [...prev.allergens, label],
     }));
   };
 
   // ─── Add-ons & Modifiers Management ───────────────────────────────────────
-  const addAddOn = () => setForm(prev => ({ ...prev, addOns: [...prev.addOns, { name: '', price: '', maxQuantity: 1 }] }));
-  const removeAddOn = (index) => setForm(prev => ({ ...prev, addOns: prev.addOns.filter((_, i) => i !== index) }));
+  const addAddOn = () =>
+    setForm((prev) => ({
+      ...prev,
+      addOns: [...prev.addOns, { name: '', price: '', maxQuantity: 1 }],
+    }));
+  const removeAddOn = (index) =>
+    setForm((prev) => ({ ...prev, addOns: prev.addOns.filter((_, i) => i !== index) }));
   const updateAddOn = (index, field, value) => {
     const newAddOns = [...form.addOns];
     newAddOns[index][field] = value;
-    setForm(prev => ({ ...prev, addOns: newAddOns }));
+    setForm((prev) => ({ ...prev, addOns: newAddOns }));
   };
 
-  const addModifier = () => setForm(prev => ({ ...prev, modifiers: [...prev.modifiers, { name: '', required: false, maxSelections: 1, options: [] }] }));
-  const removeModifier = (index) => setForm(prev => ({ ...prev, modifiers: prev.modifiers.filter((_, i) => i !== index) }));
+  const addModifier = () =>
+    setForm((prev) => ({
+      ...prev,
+      modifiers: [...prev.modifiers, { name: '', required: false, maxSelections: 1, options: [] }],
+    }));
+  const removeModifier = (index) =>
+    setForm((prev) => ({ ...prev, modifiers: prev.modifiers.filter((_, i) => i !== index) }));
   const updateModifier = (index, field, value) => {
     const newMods = [...form.modifiers];
     newMods[index][field] = value;
-    setForm(prev => ({ ...prev, modifiers: newMods }));
+    setForm((prev) => ({ ...prev, modifiers: newMods }));
   };
 
   const addModifierOption = (modIndex) => {
     const newMods = [...form.modifiers];
     newMods[modIndex].options.push({ name: '', priceAdjustment: '0' });
-    setForm(prev => ({ ...prev, modifiers: newMods }));
+    setForm((prev) => ({ ...prev, modifiers: newMods }));
   };
   const removeModifierOption = (modIndex, optIndex) => {
     const newMods = [...form.modifiers];
     newMods[modIndex].options = newMods[modIndex].options.filter((_, i) => i !== optIndex);
-    setForm(prev => ({ ...prev, modifiers: newMods }));
+    setForm((prev) => ({ ...prev, modifiers: newMods }));
   };
   const updateModifierOption = (modIndex, optIndex, field, value) => {
     const newMods = [...form.modifiers];
     newMods[modIndex].options[optIndex][field] = value;
-    setForm(prev => ({ ...prev, modifiers: newMods }));
+    setForm((prev) => ({ ...prev, modifiers: newMods }));
   };
 
   // ─── Save (create or update) ──────────────────────────────────────────────
   const handleSave = async () => {
     if (!form.name.trim()) return ToastService.showError('Validation', 'Item name is required');
-    if (!form.price || isNaN(parseFloat(form.price))) return ToastService.showError('Validation', 'A valid price is required');
+    if (!form.price || isNaN(parseFloat(form.price)))
+      return ToastService.showError('Validation', 'A valid price is required');
 
     try {
       setSaving(true);
@@ -442,26 +541,22 @@ export default function MenuManagementScreen({ route, navigation }) {
 
   // ─── Delete with confirmation ─────────────────────────────────────────────
   const handleDelete = (item) => {
-    Alert.alert(
-      'Delete Item',
-      `Remove "${item.name}" from your menu? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await ApiService.deleteMenuItem(item._id);
-              ToastService.showSuccess('Deleted', `"${item.name}" removed`);
-              loadData();
-            } catch (e) {
-              ToastService.showError('Error', e.message);
-            }
+    Alert.alert('Delete Item', `Remove "${item.name}" from your menu? This cannot be undone.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await ApiService.deleteMenuItem(item._id);
+            ToastService.showSuccess('Deleted', `"${item.name}" removed`);
+            loadData();
+          } catch (e) {
+            ToastService.showError('Error', e.message);
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   // ─── Toggle availability ──────────────────────────────────────────────────
@@ -481,9 +576,16 @@ export default function MenuManagementScreen({ route, navigation }) {
       <StatusBar barStyle="light-content" backgroundColor="#4F46E5" />
 
       {/* Header */}
-      <LinearGradient colors={['#4F46E5', '#6366F1']} style={{ paddingTop: 52, paddingBottom: 20, paddingHorizontal: 20 }}>
+      <LinearGradient
+        colors={['#4F46E5', '#6366F1']}
+        style={{ paddingTop: 52, paddingBottom: 20, paddingHorizontal: 20 }}
+      >
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 16 }} activeOpacity={0.7}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{ marginRight: 16 }}
+            activeOpacity={0.7}
+          >
             <Icon name="arrow-back" size={24} color="#FFF" />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
@@ -524,27 +626,62 @@ export default function MenuManagementScreen({ route, navigation }) {
           {/* Manual Add Button */}
           <TouchableOpacity
             onPress={openAdd}
-            style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8, flexDirection: 'row', alignItems: 'center' }}
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              borderRadius: 12,
+              paddingHorizontal: 14,
+              paddingVertical: 8,
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
             activeOpacity={0.8}
           >
             <Icon name="add" size={18} color="#FFF" />
-            <Text style={{ color: '#FFF', fontWeight: '600', marginLeft: 4, fontSize: 13 }}>Add</Text>
+            <Text style={{ color: '#FFF', fontWeight: '600', marginLeft: 4, fontSize: 13 }}>
+              Add
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Stats Row */}
         {stats && (
           <View style={{ flexDirection: 'row', gap: 10 }}>
-            <View style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 12, padding: 12, alignItems: 'center' }}>
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: 'rgba(255,255,255,0.15)',
+                borderRadius: 12,
+                padding: 12,
+                alignItems: 'center',
+              }}
+            >
               <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 20 }}>{stats.active}</Text>
               <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11 }}>Active</Text>
             </View>
-            <View style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 12, padding: 12, alignItems: 'center' }}>
-              <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 20 }}>{stats.popular}</Text>
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: 'rgba(255,255,255,0.15)',
+                borderRadius: 12,
+                padding: 12,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 20 }}>
+                {stats.popular}
+              </Text>
               <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11 }}>Popular</Text>
             </View>
             {stats.priceRange && (
-              <View style={{ flex: 2, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 12, padding: 12, alignItems: 'center' }}>
+              <View
+                style={{
+                  flex: 2,
+                  backgroundColor: 'rgba(255,255,255,0.15)',
+                  borderRadius: 12,
+                  padding: 12,
+                  alignItems: 'center',
+                }}
+              >
                 <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 15 }}>
                   £{stats.priceRange.min?.toFixed(0)} – £{stats.priceRange.max?.toFixed(0)}
                 </Text>
@@ -563,24 +700,63 @@ export default function MenuManagementScreen({ route, navigation }) {
         </View>
       ) : totalItems === 0 ? (
         /* Empty State */
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 }}>
-          <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+        <View
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 }}
+        >
+          <View
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              backgroundColor: '#EEF2FF',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 20,
+            }}
+          >
             <Icon name="restaurant-outline" size={36} color="#6366F1" />
           </View>
-          <Text style={{ fontSize: 20, fontWeight: '700', color: '#111827', textAlign: 'center', marginBottom: 8 }}>
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: '700',
+              color: '#111827',
+              textAlign: 'center',
+              marginBottom: 8,
+            }}
+          >
             No items yet
           </Text>
-          <Text style={{ fontSize: 14, color: '#6B7280', textAlign: 'center', marginBottom: 28, lineHeight: 22 }}>
-            Add your menu, services, or products. They'll appear in user listings and power the AI discovery search.
+          <Text
+            style={{
+              fontSize: 14,
+              color: '#6B7280',
+              textAlign: 'center',
+              marginBottom: 28,
+              lineHeight: 22,
+            }}
+          >
+            Add your menu, services, or products. They'll appear in user listings and power the AI
+            discovery search.
           </Text>
           <TouchableOpacity
             onPress={openAdd}
             activeOpacity={0.85}
             style={{ borderRadius: 14, overflow: 'hidden', marginBottom: 12 }}
           >
-            <LinearGradient colors={['#4F46E5', '#6366F1']} style={{ paddingHorizontal: 32, paddingVertical: 14, flexDirection: 'row', alignItems: 'center' }}>
+            <LinearGradient
+              colors={['#4F46E5', '#6366F1']}
+              style={{
+                paddingHorizontal: 32,
+                paddingVertical: 14,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
               <Icon name="add-circle-outline" size={20} color="#FFF" />
-              <Text style={{ color: '#FFF', fontWeight: '700', marginLeft: 8, fontSize: 15 }}>Add First Item</Text>
+              <Text style={{ color: '#FFF', fontWeight: '700', marginLeft: 8, fontSize: 15 }}>
+                Add First Item
+              </Text>
             </LinearGradient>
           </TouchableOpacity>
 
@@ -591,7 +767,15 @@ export default function MenuManagementScreen({ route, navigation }) {
             activeOpacity={0.85}
             style={{ borderRadius: 14, overflow: 'hidden' }}
           >
-            <LinearGradient colors={['#7C3AED', '#6366F1']} style={{ paddingHorizontal: 28, paddingVertical: 13, flexDirection: 'row', alignItems: 'center' }}>
+            <LinearGradient
+              colors={['#7C3AED', '#6366F1']}
+              style={{
+                paddingHorizontal: 28,
+                paddingVertical: 13,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
               {aiScanning ? (
                 <ActivityIndicator size="small" color="#FDE68A" />
               ) : (
@@ -604,12 +788,28 @@ export default function MenuManagementScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+        >
           {/* AI search info banner */}
-          <View style={{ backgroundColor: '#EEF2FF', borderRadius: 12, padding: 14, marginBottom: 18, flexDirection: 'row', alignItems: 'flex-start' }}>
+          <View
+            style={{
+              backgroundColor: '#EEF2FF',
+              borderRadius: 12,
+              padding: 14,
+              marginBottom: 18,
+              flexDirection: 'row',
+              alignItems: 'flex-start',
+            }}
+          >
             <Icon name="sparkles" size={18} color="#6366F1" />
-            <Text style={{ color: '#4338CA', fontSize: 12, marginLeft: 10, flex: 1, lineHeight: 18 }}>
-              <Text style={{ fontWeight: '700' }}>AI Search Ready.</Text> Your items are now searchable by AI — customers can find you by saying "chicken under £15 near me" or "vegan options".
+            <Text
+              style={{ color: '#4338CA', fontSize: 12, marginLeft: 10, flex: 1, lineHeight: 18 }}
+            >
+              <Text style={{ fontWeight: '700' }}>AI Search Ready.</Text> Your items are now
+              searchable by AI — customers can find you by saying "chicken under £15 near me" or
+              "vegan options".
             </Text>
           </View>
 
@@ -617,10 +817,14 @@ export default function MenuManagementScreen({ route, navigation }) {
           {Object.entries(grouped).map(([category, items]) => (
             <View key={category}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                <Text style={{ fontWeight: '700', fontSize: 15, color: '#374151', flex: 1 }}>{category}</Text>
-                <Text style={{ fontSize: 12, color: '#9CA3AF' }}>{items.length} item{items.length !== 1 ? 's' : ''}</Text>
+                <Text style={{ fontWeight: '700', fontSize: 15, color: '#374151', flex: 1 }}>
+                  {category}
+                </Text>
+                <Text style={{ fontSize: 12, color: '#9CA3AF' }}>
+                  {items.length} item{items.length !== 1 ? 's' : ''}
+                </Text>
               </View>
-              {items.map(item => (
+              {items.map((item) => (
                 <MenuItemCard
                   key={item._id}
                   item={item}
@@ -636,12 +840,30 @@ export default function MenuManagementScreen({ route, navigation }) {
       )}
 
       {/* ── Add / Edit Modal ─────────────────────────────────────────────── */}
-      <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setModalVisible(false)}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
           <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
-
             {/* Modal Header */}
-            <View style={{ backgroundColor: '#FFF', borderBottomWidth: 1, borderBottomColor: '#F3F4F6', paddingTop: Platform.OS === 'ios' ? 56 : 20, paddingBottom: 16, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center' }}>
+            <View
+              style={{
+                backgroundColor: '#FFF',
+                borderBottomWidth: 1,
+                borderBottomColor: '#F3F4F6',
+                paddingTop: Platform.OS === 'ios' ? 56 : 20,
+                paddingBottom: 16,
+                paddingHorizontal: 20,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
               <TouchableOpacity onPress={() => setModalVisible(false)} style={{ marginRight: 16 }}>
                 <Icon name="close" size={24} color="#374151" />
               </TouchableOpacity>
@@ -651,7 +873,12 @@ export default function MenuManagementScreen({ route, navigation }) {
               <TouchableOpacity
                 onPress={handleSave}
                 disabled={saving}
-                style={{ backgroundColor: '#6366F1', borderRadius: 10, paddingHorizontal: 18, paddingVertical: 8 }}
+                style={{
+                  backgroundColor: '#6366F1',
+                  borderRadius: 10,
+                  paddingHorizontal: 18,
+                  paddingVertical: 8,
+                }}
               >
                 {saving ? (
                   <ActivityIndicator size="small" color="#FFF" />
@@ -663,19 +890,34 @@ export default function MenuManagementScreen({ route, navigation }) {
               </TouchableOpacity>
             </View>
 
-            <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
-
+            <ScrollView
+              contentContainerStyle={{ padding: 20, paddingBottom: 60 }}
+              showsVerticalScrollIndicator={false}
+            >
               {/* Item Type Selector */}
               <Text style={styles.label}>Item Type</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 18 }}>
-                {ITEM_TYPES.map(t => (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ marginBottom: 18 }}
+              >
+                {ITEM_TYPES.map((t) => (
                   <TouchableOpacity
                     key={t.value}
-                    onPress={() => setForm(prev => ({ ...prev, type: t.value }))}
+                    onPress={() => setForm((prev) => ({ ...prev, type: t.value }))}
                     style={[styles.typeChip, form.type === t.value && styles.typeChipActive]}
                   >
-                    <Icon name={t.icon} size={16} color={form.type === t.value ? '#FFF' : '#6B7280'} />
-                    <Text style={[styles.typeChipText, form.type === t.value && styles.typeChipTextActive]}>
+                    <Icon
+                      name={t.icon}
+                      size={16}
+                      color={form.type === t.value ? '#FFF' : '#6B7280'}
+                    />
+                    <Text
+                      style={[
+                        styles.typeChipText,
+                        form.type === t.value && styles.typeChipTextActive,
+                      ]}
+                    >
                       {t.label}
                     </Text>
                   </TouchableOpacity>
@@ -689,7 +931,7 @@ export default function MenuManagementScreen({ route, navigation }) {
                 placeholder="e.g. Chicken Tikka Masala"
                 placeholderTextColor="#9CA3AF"
                 value={form.name}
-                onChangeText={t => setForm(prev => ({ ...prev, name: t }))}
+                onChangeText={(t) => setForm((prev) => ({ ...prev, name: t }))}
               />
 
               {/* Category within menu */}
@@ -699,7 +941,7 @@ export default function MenuManagementScreen({ route, navigation }) {
                 placeholder="e.g. Starters, Mains, Haircuts, Rooms"
                 placeholderTextColor="#9CA3AF"
                 value={form.menuCategory}
-                onChangeText={t => setForm(prev => ({ ...prev, menuCategory: t }))}
+                onChangeText={(t) => setForm((prev) => ({ ...prev, menuCategory: t }))}
               />
 
               {/* Price */}
@@ -711,11 +953,20 @@ export default function MenuManagementScreen({ route, navigation }) {
                   placeholderTextColor="#9CA3AF"
                   keyboardType="decimal-pad"
                   value={form.price}
-                  onChangeText={t => setForm(prev => ({ ...prev, price: t }))}
+                  onChangeText={(t) => setForm((prev) => ({ ...prev, price: t }))}
                 />
-                <View style={[styles.input, { width: 80, marginBottom: 0, justifyContent: 'center', alignItems: 'center' }]}>
+                <View
+                  style={[
+                    styles.input,
+                    { width: 80, marginBottom: 0, justifyContent: 'center', alignItems: 'center' },
+                  ]}
+                >
                   <Text style={{ color: '#374151', fontWeight: '600' }}>
-                    {form.currency === 'GBP' ? '£ GBP' : form.currency === 'USD' ? '$ USD' : '€ EUR'}
+                    {form.currency === 'GBP'
+                      ? '£ GBP'
+                      : form.currency === 'USD'
+                        ? '$ USD'
+                        : '€ EUR'}
                   </Text>
                 </View>
               </View>
@@ -730,7 +981,7 @@ export default function MenuManagementScreen({ route, navigation }) {
                     placeholderTextColor="#9CA3AF"
                     keyboardType="number-pad"
                     value={form.duration}
-                    onChangeText={t => setForm(prev => ({ ...prev, duration: t }))}
+                    onChangeText={(t) => setForm((prev) => ({ ...prev, duration: t }))}
                   />
                 </>
               )}
@@ -744,26 +995,30 @@ export default function MenuManagementScreen({ route, navigation }) {
                 multiline
                 numberOfLines={3}
                 value={form.description}
-                onChangeText={t => setForm(prev => ({ ...prev, description: t }))}
+                onChangeText={(t) => setForm((prev) => ({ ...prev, description: t }))}
               />
 
               {/* Tags */}
               <Text style={styles.label}>Search Tags</Text>
-              <Text style={styles.hint}>Comma-separated keywords to help AI find this item. e.g. chicken, spicy, curry</Text>
+              <Text style={styles.hint}>
+                Comma-separated keywords to help AI find this item. e.g. chicken, spicy, curry
+              </Text>
               <TextInput
                 style={styles.input}
                 placeholder="chicken, tikka, spicy, curry"
                 placeholderTextColor="#9CA3AF"
                 value={form.tags}
-                onChangeText={t => setForm(prev => ({ ...prev, tags: t }))}
+                onChangeText={(t) => setForm((prev) => ({ ...prev, tags: t }))}
               />
 
               {/* Dietary Labels */}
               {(form.type === 'food' || form.type === 'drink') && (
                 <>
                   <Text style={styles.label}>Dietary Labels</Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
-                    {DIETARY_OPTIONS.map(d => {
+                  <View
+                    style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}
+                  >
+                    {DIETARY_OPTIONS.map((d) => {
                       const active = form.dietary.includes(d);
                       return (
                         <TouchableOpacity
@@ -771,7 +1026,9 @@ export default function MenuManagementScreen({ route, navigation }) {
                           onPress={() => toggleDietary(d)}
                           style={[styles.dietaryChip, active && styles.dietaryChipActive]}
                         >
-                          <Text style={[styles.dietaryChipText, active && styles.dietaryChipTextActive]}>
+                          <Text
+                            style={[styles.dietaryChipText, active && styles.dietaryChipTextActive]}
+                          >
                             {d}
                           </Text>
                         </TouchableOpacity>
@@ -780,14 +1037,19 @@ export default function MenuManagementScreen({ route, navigation }) {
                   </View>
 
                   <Text style={styles.label}>Allergens</Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
-                    {ALLERGEN_OPTIONS.map(a => {
+                  <View
+                    style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}
+                  >
+                    {ALLERGEN_OPTIONS.map((a) => {
                       const active = form.allergens.includes(a);
                       return (
                         <TouchableOpacity
                           key={a}
                           onPress={() => toggleAllergen(a)}
-                          style={[styles.dietaryChip, active && { backgroundColor: '#FEE2E2', borderColor: '#EF4444' }]}
+                          style={[
+                            styles.dietaryChip,
+                            active && { backgroundColor: '#FEE2E2', borderColor: '#EF4444' },
+                          ]}
                         >
                           <Text style={[styles.dietaryChipText, active && { color: '#B91C1C' }]}>
                             {a}
@@ -804,7 +1066,7 @@ export default function MenuManagementScreen({ route, navigation }) {
                     placeholderTextColor="#9CA3AF"
                     keyboardType="number-pad"
                     value={form.prepTime}
-                    onChangeText={t => setForm(prev => ({ ...prev, prepTime: t }))}
+                    onChangeText={(t) => setForm((prev) => ({ ...prev, prepTime: t }))}
                   />
 
                   <Text style={styles.label}>Calories (kcal)</Text>
@@ -814,77 +1076,184 @@ export default function MenuManagementScreen({ route, navigation }) {
                     placeholderTextColor="#9CA3AF"
                     keyboardType="number-pad"
                     value={form.calories}
-                    onChangeText={t => setForm(prev => ({ ...prev, calories: t }))}
+                    onChangeText={(t) => setForm((prev) => ({ ...prev, calories: t }))}
                   />
-                  
+
                   {/* Modifiers UI */}
                   <View style={{ marginBottom: 18 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <Text style={[styles.label, { marginBottom: 0 }]}>Modifier Groups (e.g., Size, Spice Level)</Text>
-                      <TouchableOpacity onPress={addModifier} style={{ backgroundColor: '#EEF2FF', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 }}>
-                        <Text style={{ color: '#4F46E5', fontSize: 12, fontWeight: '600' }}>+ Add Group</Text>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 8,
+                      }}
+                    >
+                      <Text style={[styles.label, { marginBottom: 0 }]}>
+                        Modifier Groups (e.g., Size, Spice Level)
+                      </Text>
+                      <TouchableOpacity
+                        onPress={addModifier}
+                        style={{
+                          backgroundColor: '#EEF2FF',
+                          paddingHorizontal: 10,
+                          paddingVertical: 4,
+                          borderRadius: 6,
+                        }}
+                      >
+                        <Text style={{ color: '#4F46E5', fontSize: 12, fontWeight: '600' }}>
+                          + Add Group
+                        </Text>
                       </TouchableOpacity>
                     </View>
-                    
+
                     {form.modifiers.map((mod, modIdx) => (
-                      <View key={modIdx} style={{ backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, padding: 12, marginBottom: 10 }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <View
+                        key={modIdx}
+                        style={{
+                          backgroundColor: '#F9FAFB',
+                          borderWidth: 1,
+                          borderColor: '#E5E7EB',
+                          borderRadius: 12,
+                          padding: 12,
+                          marginBottom: 10,
+                        }}
+                      >
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: 8,
+                          }}
+                        >
                           <TextInput
-                            style={[styles.input, { flex: 1, marginBottom: 0, paddingVertical: 8, marginRight: 8, backgroundColor: '#FFF' }]}
+                            style={[
+                              styles.input,
+                              {
+                                flex: 1,
+                                marginBottom: 0,
+                                paddingVertical: 8,
+                                marginRight: 8,
+                                backgroundColor: '#FFF',
+                              },
+                            ]}
                             placeholder="e.g. Choose Size"
                             placeholderTextColor="#9CA3AF"
                             value={mod.name}
-                            onChangeText={t => updateModifier(modIdx, 'name', t)}
+                            onChangeText={(t) => updateModifier(modIdx, 'name', t)}
                           />
-                          <TouchableOpacity onPress={() => removeModifier(modIdx)} style={{ padding: 4 }}>
+                          <TouchableOpacity
+                            onPress={() => removeModifier(modIdx)}
+                            style={{ padding: 4 }}
+                          >
                             <Icon name="trash-outline" size={18} color="#EF4444" />
                           </TouchableOpacity>
                         </View>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 12 }}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginBottom: 10,
+                            gap: 12,
+                          }}
+                        >
                           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Switch
                               value={mod.required}
-                              onValueChange={v => updateModifier(modIdx, 'required', v)}
+                              onValueChange={(v) => updateModifier(modIdx, 'required', v)}
                               style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
                             />
                             <Text style={{ fontSize: 12, color: '#374151' }}>Required</Text>
                           </View>
                           <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                            <Text style={{ fontSize: 12, color: '#374151', marginRight: 6 }}>Max Select:</Text>
+                            <Text style={{ fontSize: 12, color: '#374151', marginRight: 6 }}>
+                              Max Select:
+                            </Text>
                             <TextInput
-                              style={[styles.input, { width: 50, marginBottom: 0, paddingVertical: 4, textAlign: 'center', backgroundColor: '#FFF' }]}
+                              style={[
+                                styles.input,
+                                {
+                                  width: 50,
+                                  marginBottom: 0,
+                                  paddingVertical: 4,
+                                  textAlign: 'center',
+                                  backgroundColor: '#FFF',
+                                },
+                              ]}
                               keyboardType="number-pad"
                               value={mod.maxSelections?.toString()}
-                              onChangeText={t => updateModifier(modIdx, 'maxSelections', parseInt(t) || 1)}
+                              onChangeText={(t) =>
+                                updateModifier(modIdx, 'maxSelections', parseInt(t) || 1)
+                              }
                             />
                           </View>
                         </View>
-                        
+
                         {/* Modifier Options */}
                         {mod.options.map((opt, optIdx) => (
-                          <View key={optIdx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6, marginLeft: 16 }}>
+                          <View
+                            key={optIdx}
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              marginBottom: 6,
+                              marginLeft: 16,
+                            }}
+                          >
                             <TextInput
-                              style={[styles.input, { flex: 1, marginBottom: 0, paddingVertical: 6, height: 36, backgroundColor: '#FFF', fontSize: 13 }]}
+                              style={[
+                                styles.input,
+                                {
+                                  flex: 1,
+                                  marginBottom: 0,
+                                  paddingVertical: 6,
+                                  height: 36,
+                                  backgroundColor: '#FFF',
+                                  fontSize: 13,
+                                },
+                              ]}
                               placeholder="e.g. Large"
                               placeholderTextColor="#9CA3AF"
                               value={opt.name}
-                              onChangeText={t => updateModifierOption(modIdx, optIdx, 'name', t)}
+                              onChangeText={(t) => updateModifierOption(modIdx, optIdx, 'name', t)}
                             />
                             <TextInput
-                              style={[styles.input, { width: 70, marginBottom: 0, paddingVertical: 6, height: 36, marginLeft: 6, backgroundColor: '#FFF', fontSize: 13 }]}
+                              style={[
+                                styles.input,
+                                {
+                                  width: 70,
+                                  marginBottom: 0,
+                                  paddingVertical: 6,
+                                  height: 36,
+                                  marginLeft: 6,
+                                  backgroundColor: '#FFF',
+                                  fontSize: 13,
+                                },
+                              ]}
                               placeholder="+£0.00"
                               placeholderTextColor="#9CA3AF"
                               keyboardType="decimal-pad"
                               value={opt.priceAdjustment?.toString()}
-                              onChangeText={t => updateModifierOption(modIdx, optIdx, 'priceAdjustment', t)}
+                              onChangeText={(t) =>
+                                updateModifierOption(modIdx, optIdx, 'priceAdjustment', t)
+                              }
                             />
-                            <TouchableOpacity onPress={() => removeModifierOption(modIdx, optIdx)} style={{ padding: 6, marginLeft: 2 }}>
+                            <TouchableOpacity
+                              onPress={() => removeModifierOption(modIdx, optIdx)}
+                              style={{ padding: 6, marginLeft: 2 }}
+                            >
                               <Icon name="close" size={16} color="#9CA3AF" />
                             </TouchableOpacity>
                           </View>
                         ))}
-                        <TouchableOpacity onPress={() => addModifierOption(modIdx)} style={{ alignSelf: 'flex-start', marginLeft: 16, marginTop: 4 }}>
-                          <Text style={{ color: '#4F46E5', fontSize: 12, fontWeight: '600' }}>+ Add Option</Text>
+                        <TouchableOpacity
+                          onPress={() => addModifierOption(modIdx)}
+                          style={{ alignSelf: 'flex-start', marginLeft: 16, marginTop: 4 }}
+                        >
+                          <Text style={{ color: '#4F46E5', fontSize: 12, fontWeight: '600' }}>
+                            + Add Option
+                          </Text>
                         </TouchableOpacity>
                       </View>
                     ))}
@@ -892,21 +1261,48 @@ export default function MenuManagementScreen({ route, navigation }) {
 
                   {/* Add-Ons UI */}
                   <View style={{ marginBottom: 18 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <Text style={[styles.label, { marginBottom: 0 }]}>Add-Ons (e.g., Extra Cheese)</Text>
-                      <TouchableOpacity onPress={addAddOn} style={{ backgroundColor: '#EEF2FF', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 }}>
-                        <Text style={{ color: '#4F46E5', fontSize: 12, fontWeight: '600' }}>+ Add Add-On</Text>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 8,
+                      }}
+                    >
+                      <Text style={[styles.label, { marginBottom: 0 }]}>
+                        Add-Ons (e.g., Extra Cheese)
+                      </Text>
+                      <TouchableOpacity
+                        onPress={addAddOn}
+                        style={{
+                          backgroundColor: '#EEF2FF',
+                          paddingHorizontal: 10,
+                          paddingVertical: 4,
+                          borderRadius: 6,
+                        }}
+                      >
+                        <Text style={{ color: '#4F46E5', fontSize: 12, fontWeight: '600' }}>
+                          + Add Add-On
+                        </Text>
                       </TouchableOpacity>
                     </View>
-                    
+
                     {form.addOns.map((addon, idx) => (
-                      <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 8 }}>
+                      <View
+                        key={idx}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          marginBottom: 8,
+                          gap: 8,
+                        }}
+                      >
                         <TextInput
                           style={[styles.input, { flex: 2, marginBottom: 0, paddingVertical: 8 }]}
                           placeholder="Name (e.g. Extra Sauce)"
                           placeholderTextColor="#9CA3AF"
                           value={addon.name}
-                          onChangeText={t => updateAddOn(idx, 'name', t)}
+                          onChangeText={(t) => updateAddOn(idx, 'name', t)}
                         />
                         <TextInput
                           style={[styles.input, { flex: 1, marginBottom: 0, paddingVertical: 8 }]}
@@ -914,7 +1310,7 @@ export default function MenuManagementScreen({ route, navigation }) {
                           placeholderTextColor="#9CA3AF"
                           keyboardType="decimal-pad"
                           value={addon.price?.toString()}
-                          onChangeText={t => updateAddOn(idx, 'price', t)}
+                          onChangeText={(t) => updateAddOn(idx, 'price', t)}
                         />
                         <TouchableOpacity onPress={() => removeAddOn(idx)} style={{ padding: 8 }}>
                           <Icon name="trash-outline" size={20} color="#EF4444" />
@@ -927,19 +1323,45 @@ export default function MenuManagementScreen({ route, navigation }) {
 
               {/* Image */}
               <Text style={styles.label}>Item Image</Text>
-              <TouchableOpacity onPress={handleImageOption} style={styles.imagePicker} activeOpacity={0.8}>
+              <TouchableOpacity
+                onPress={handleImageOption}
+                style={styles.imagePicker}
+                activeOpacity={0.8}
+              >
                 {pickedImage ? (
-                  <Image source={{ uri: pickedImage.uri }} style={{ width: '100%', height: 160, borderRadius: 12 }} resizeMode="cover" />
+                  <Image
+                    source={{ uri: pickedImage.uri }}
+                    style={{ width: '100%', height: 160, borderRadius: 12 }}
+                    resizeMode="cover"
+                  />
                 ) : editingItem?.image?.url ? (
                   <View>
-                    <Image source={{ uri: editingItem.image.url }} style={{ width: '100%', height: 160, borderRadius: 12 }} resizeMode="cover" />
-                    <Text style={{ textAlign: 'center', marginTop: 8, color: '#6366F1', fontSize: 13, fontWeight: '600' }}>Tap to replace image</Text>
+                    <Image
+                      source={{ uri: editingItem.image.url }}
+                      style={{ width: '100%', height: 160, borderRadius: 12 }}
+                      resizeMode="cover"
+                    />
+                    <Text
+                      style={{
+                        textAlign: 'center',
+                        marginTop: 8,
+                        color: '#6366F1',
+                        fontSize: 13,
+                        fontWeight: '600',
+                      }}
+                    >
+                      Tap to replace image
+                    </Text>
                   </View>
                 ) : (
                   <View style={{ alignItems: 'center', paddingVertical: 24 }}>
                     <Icon name="camera-outline" size={32} color="#9CA3AF" />
-                    <Text style={{ color: '#6B7280', marginTop: 8, fontWeight: '500' }}>Add a photo</Text>
-                    <Text style={{ color: '#9CA3AF', fontSize: 12, marginTop: 4 }}>JPG, PNG or WebP · Max 8MB</Text>
+                    <Text style={{ color: '#6B7280', marginTop: 8, fontWeight: '500' }}>
+                      Add a photo
+                    </Text>
+                    <Text style={{ color: '#9CA3AF', fontSize: 12, marginTop: 4 }}>
+                      JPG, PNG or WebP · Max 8MB
+                    </Text>
                   </View>
                 )}
               </TouchableOpacity>
@@ -952,7 +1374,7 @@ export default function MenuManagementScreen({ route, navigation }) {
                 </View>
                 <Switch
                   value={form.isAvailable}
-                  onValueChange={v => setForm(prev => ({ ...prev, isAvailable: v }))}
+                  onValueChange={(v) => setForm((prev) => ({ ...prev, isAvailable: v }))}
                   trackColor={{ false: '#E5E7EB', true: '#6366F1' }}
                   thumbColor="#FFF"
                 />
@@ -965,12 +1387,11 @@ export default function MenuManagementScreen({ route, navigation }) {
                 </View>
                 <Switch
                   value={form.isPopular}
-                  onValueChange={v => setForm(prev => ({ ...prev, isPopular: v }))}
+                  onValueChange={(v) => setForm((prev) => ({ ...prev, isPopular: v }))}
                   trackColor={{ false: '#E5E7EB', true: '#F59E0B' }}
                   thumbColor="#FFF"
                 />
               </View>
-
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
@@ -984,11 +1405,14 @@ export default function MenuManagementScreen({ route, navigation }) {
         onRequestClose={() => !savingBatch && setReviewModalVisible(false)}
       >
         <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
-
           {/* Header */}
           <LinearGradient
             colors={['#7C3AED', '#6366F1']}
-            style={{ paddingTop: Platform.OS === 'ios' ? 56 : 24, paddingBottom: 18, paddingHorizontal: 20 }}
+            style={{
+              paddingTop: Platform.OS === 'ios' ? 56 : 24,
+              paddingBottom: 18,
+              paddingHorizontal: 20,
+            }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
@@ -1001,30 +1425,56 @@ export default function MenuManagementScreen({ route, navigation }) {
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Icon name="sparkles" size={18} color="#FDE68A" />
-                  <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '700', marginLeft: 6 }}>AI Scan Results</Text>
+                  <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '700', marginLeft: 6 }}>
+                    AI Scan Results
+                  </Text>
                 </View>
                 <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, marginTop: 3 }}>
-                  {reviewItems.filter(i => i._selected).length} of {reviewItems.length} items selected
+                  {reviewItems.filter((i) => i._selected).length} of {reviewItems.length} items
+                  selected
                 </Text>
               </View>
               <TouchableOpacity
                 onPress={() => {
-                  const allSelected = reviewItems.every(i => i._selected);
-                  setReviewItems(prev => prev.map(i => ({ ...i, _selected: !allSelected })));
+                  const allSelected = reviewItems.every((i) => i._selected);
+                  setReviewItems((prev) => prev.map((i) => ({ ...i, _selected: !allSelected })));
                 }}
-                style={{ backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 7 }}
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.15)',
+                  borderRadius: 10,
+                  paddingHorizontal: 12,
+                  paddingVertical: 7,
+                }}
               >
                 <Text style={{ color: '#FFF', fontWeight: '600', fontSize: 12 }}>
-                  {reviewItems.every(i => i._selected) ? 'Deselect All' : 'Select All'}
+                  {reviewItems.every((i) => i._selected) ? 'Deselect All' : 'Select All'}
                 </Text>
               </TouchableOpacity>
             </View>
 
             {/* Info banner */}
-            <View style={{ marginTop: 14, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 10, padding: 10, flexDirection: 'row', alignItems: 'flex-start' }}>
+            <View
+              style={{
+                marginTop: 14,
+                backgroundColor: 'rgba(255,255,255,0.12)',
+                borderRadius: 10,
+                padding: 10,
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+              }}
+            >
               <Icon name="information-circle-outline" size={16} color="rgba(255,255,255,0.8)" />
-              <Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11, marginLeft: 8, flex: 1, lineHeight: 16 }}>
-                Review each item the AI found. Tap any field to edit it. Uncheck items you don't want to save. Then tap "Save to Menu".
+              <Text
+                style={{
+                  color: 'rgba(255,255,255,0.85)',
+                  fontSize: 11,
+                  marginLeft: 8,
+                  flex: 1,
+                  lineHeight: 16,
+                }}
+              >
+                Review each item the AI found. Tap any field to edit it. Uncheck items you don't
+                want to save. Then tap "Save to Menu".
               </Text>
             </View>
           </LinearGradient>
@@ -1032,26 +1482,29 @@ export default function MenuManagementScreen({ route, navigation }) {
           {/* Items List */}
           <FlatList
             data={reviewItems}
-            keyExtractor={item => item._localId}
+            keyExtractor={(item) => item._localId}
             contentContainerStyle={{ padding: 14, paddingBottom: 120 }}
             ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
             renderItem={({ item, index }) => (
-              <View style={[
-                reviewItemStyles.card,
-                !item._selected && reviewItemStyles.cardDimmed,
-              ]}>
+              <View style={[reviewItemStyles.card, !item._selected && reviewItemStyles.cardDimmed]}>
                 {/* Selection toggle + category badge row */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                   <TouchableOpacity
-                    onPress={() => setReviewItems(prev =>
-                      prev.map(i => i._localId === item._localId ? { ...i, _selected: !i._selected } : i)
-                    )}
+                    onPress={() =>
+                      setReviewItems((prev) =>
+                        prev.map((i) =>
+                          i._localId === item._localId ? { ...i, _selected: !i._selected } : i
+                        )
+                      )
+                    }
                     style={{ marginRight: 10 }}
                   >
-                    <View style={[
-                      reviewItemStyles.checkbox,
-                      item._selected && reviewItemStyles.checkboxChecked,
-                    ]}>
+                    <View
+                      style={[
+                        reviewItemStyles.checkbox,
+                        item._selected && reviewItemStyles.checkboxChecked,
+                      ]}
+                    >
                       {item._selected && <Icon name="checkmark" size={13} color="#FFF" />}
                     </View>
                   </TouchableOpacity>
@@ -1060,17 +1513,29 @@ export default function MenuManagementScreen({ route, navigation }) {
                     <TextInput
                       style={reviewItemStyles.nameInput}
                       value={item.name}
-                      onChangeText={val => setReviewItems(prev =>
-                        prev.map(i => i._localId === item._localId ? { ...i, name: val } : i)
-                      )}
+                      onChangeText={(val) =>
+                        setReviewItems((prev) =>
+                          prev.map((i) => (i._localId === item._localId ? { ...i, name: val } : i))
+                        )
+                      }
                       placeholder="Item name"
                       placeholderTextColor="#9CA3AF"
                     />
                   </View>
                   {/* Popularity badge */}
                   {item.isPopular && (
-                    <View style={{ backgroundColor: '#FEF3C7', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginLeft: 6 }}>
-                      <Text style={{ fontSize: 10, fontWeight: '700', color: '#92400E' }}>⭐ Popular</Text>
+                    <View
+                      style={{
+                        backgroundColor: '#FEF3C7',
+                        borderRadius: 8,
+                        paddingHorizontal: 8,
+                        paddingVertical: 3,
+                        marginLeft: 6,
+                      }}
+                    >
+                      <Text style={{ fontSize: 10, fontWeight: '700', color: '#92400E' }}>
+                        ⭐ Popular
+                      </Text>
                     </View>
                   )}
                 </View>
@@ -1082,9 +1547,13 @@ export default function MenuManagementScreen({ route, navigation }) {
                     <TextInput
                       style={reviewItemStyles.fieldInput}
                       value={item.menuCategory}
-                      onChangeText={val => setReviewItems(prev =>
-                        prev.map(i => i._localId === item._localId ? { ...i, menuCategory: val } : i)
-                      )}
+                      onChangeText={(val) =>
+                        setReviewItems((prev) =>
+                          prev.map((i) =>
+                            i._localId === item._localId ? { ...i, menuCategory: val } : i
+                          )
+                        )
+                      }
                       placeholder="e.g. Mains"
                       placeholderTextColor="#9CA3AF"
                     />
@@ -1094,9 +1563,11 @@ export default function MenuManagementScreen({ route, navigation }) {
                     <TextInput
                       style={reviewItemStyles.fieldInput}
                       value={item.price?.toString()}
-                      onChangeText={val => setReviewItems(prev =>
-                        prev.map(i => i._localId === item._localId ? { ...i, price: val } : i)
-                      )}
+                      onChangeText={(val) =>
+                        setReviewItems((prev) =>
+                          prev.map((i) => (i._localId === item._localId ? { ...i, price: val } : i))
+                        )
+                      }
                       keyboardType="decimal-pad"
                       placeholder="0.00"
                       placeholderTextColor="#9CA3AF"
@@ -1106,7 +1577,10 @@ export default function MenuManagementScreen({ route, navigation }) {
 
                 {/* Description */}
                 {item.description ? (
-                  <Text style={{ fontSize: 12, color: '#6B7280', marginBottom: 8, lineHeight: 17 }} numberOfLines={2}>
+                  <Text
+                    style={{ fontSize: 12, color: '#6B7280', marginBottom: 8, lineHeight: 17 }}
+                    numberOfLines={2}
+                  >
                     {item.description}
                   </Text>
                 ) : null}
@@ -1114,9 +1588,19 @@ export default function MenuManagementScreen({ route, navigation }) {
                 {/* Dietary tags */}
                 {item.dietary?.length > 0 && (
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
-                    {item.dietary.map(d => (
-                      <View key={d} style={{ backgroundColor: '#DCFCE7', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
-                        <Text style={{ fontSize: 10, fontWeight: '600', color: '#166534' }}>{d}</Text>
+                    {item.dietary.map((d) => (
+                      <View
+                        key={d}
+                        style={{
+                          backgroundColor: '#DCFCE7',
+                          borderRadius: 6,
+                          paddingHorizontal: 6,
+                          paddingVertical: 2,
+                        }}
+                      >
+                        <Text style={{ fontSize: 10, fontWeight: '600', color: '#166534' }}>
+                          {d}
+                        </Text>
                       </View>
                     ))}
                   </View>
@@ -1126,25 +1610,38 @@ export default function MenuManagementScreen({ route, navigation }) {
           />
 
           {/* Footer Save Button */}
-          <View style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0,
-            backgroundColor: '#FFF', borderTopWidth: 1, borderTopColor: '#F3F4F6',
-            paddingHorizontal: 20, paddingBottom: Platform.OS === 'ios' ? 36 : 20, paddingTop: 14,
-          }}>
+          <View
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              backgroundColor: '#FFF',
+              borderTopWidth: 1,
+              borderTopColor: '#F3F4F6',
+              paddingHorizontal: 20,
+              paddingBottom: Platform.OS === 'ios' ? 36 : 20,
+              paddingTop: 14,
+            }}
+          >
             <Text style={{ textAlign: 'center', fontSize: 12, color: '#6B7280', marginBottom: 10 }}>
-              {reviewItems.filter(i => i._selected).length} item{reviewItems.filter(i => i._selected).length !== 1 ? 's' : ''} will be added to your menu
+              {reviewItems.filter((i) => i._selected).length} item
+              {reviewItems.filter((i) => i._selected).length !== 1 ? 's' : ''} will be added to your
+              menu
             </Text>
             <TouchableOpacity
               onPress={handleBatchSave}
-              disabled={savingBatch || reviewItems.filter(i => i._selected).length === 0}
+              disabled={savingBatch || reviewItems.filter((i) => i._selected).length === 0}
               activeOpacity={0.85}
               style={{ borderRadius: 14, overflow: 'hidden' }}
             >
               <LinearGradient
                 colors={savingBatch ? ['#A5B4FC', '#C4B5FD'] : ['#7C3AED', '#6366F1']}
                 style={{
-                  paddingVertical: 16, flexDirection: 'row',
-                  alignItems: 'center', justifyContent: 'center',
+                  paddingVertical: 16,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 {savingBatch ? (
@@ -1153,7 +1650,8 @@ export default function MenuManagementScreen({ route, navigation }) {
                   <>
                     <Icon name="checkmark-circle" size={20} color="#FFF" />
                     <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 15, marginLeft: 8 }}>
-                      Save {reviewItems.filter(i => i._selected).length} Item{reviewItems.filter(i => i._selected).length !== 1 ? 's' : ''} to Menu
+                      Save {reviewItems.filter((i) => i._selected).length} Item
+                      {reviewItems.filter((i) => i._selected).length !== 1 ? 's' : ''} to Menu
                     </Text>
                   </>
                 )}
@@ -1178,64 +1676,110 @@ export default function MenuManagementScreen({ route, navigation }) {
         />
 
         {/* Sheet */}
-        <View style={{
-          backgroundColor: '#FFF',
-          borderTopLeftRadius: 28,
-          borderTopRightRadius: 28,
-          overflow: 'hidden',
-          paddingBottom: Platform.OS === 'ios' ? 36 : 24,
-        }}>
-
+        <View
+          style={{
+            backgroundColor: '#FFF',
+            borderTopLeftRadius: 28,
+            borderTopRightRadius: 28,
+            overflow: 'hidden',
+            paddingBottom: Platform.OS === 'ios' ? 36 : 24,
+          }}
+        >
           {/* Gradient header */}
           <LinearGradient
             colors={['#7C3AED', '#4F46E5']}
-            style={{ paddingTop: 24, paddingBottom: 22, paddingHorizontal: 24, alignItems: 'center' }}
+            style={{
+              paddingTop: 24,
+              paddingBottom: 22,
+              paddingHorizontal: 24,
+              alignItems: 'center',
+            }}
           >
             {/* Drag handle */}
-            <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.35)', marginBottom: 18 }} />
+            <View
+              style={{
+                width: 40,
+                height: 4,
+                borderRadius: 2,
+                backgroundColor: 'rgba(255,255,255,0.35)',
+                marginBottom: 18,
+              }}
+            />
 
             {/* Icon ring */}
-            <View style={{
-              width: 64, height: 64, borderRadius: 32,
-              backgroundColor: 'rgba(255,255,255,0.15)',
-              alignItems: 'center', justifyContent: 'center', marginBottom: 14,
-              borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.25)',
-            }}>
+            <View
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 32,
+                backgroundColor: 'rgba(255,255,255,0.15)',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 14,
+                borderWidth: 1.5,
+                borderColor: 'rgba(255,255,255,0.25)',
+              }}
+            >
               <Icon name="sparkles" size={30} color="#FDE68A" />
             </View>
 
-            <Text style={{ color: '#FFF', fontSize: 20, fontWeight: '800', letterSpacing: -0.3, marginBottom: 6 }}>
+            <Text
+              style={{
+                color: '#FFF',
+                fontSize: 20,
+                fontWeight: '800',
+                letterSpacing: -0.3,
+                marginBottom: 6,
+              }}
+            >
               AI Menu Scanner
             </Text>
-            <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, textAlign: 'center', lineHeight: 19, maxWidth: 260 }}>
+            <Text
+              style={{
+                color: 'rgba(255,255,255,0.75)',
+                fontSize: 13,
+                textAlign: 'center',
+                lineHeight: 19,
+                maxWidth: 260,
+              }}
+            >
               Photograph your printed menu and AI will extract every item in seconds
             </Text>
           </LinearGradient>
 
           {/* Options */}
           <View style={{ padding: 20, gap: 12 }}>
-
             {/* Camera option */}
             <TouchableOpacity
               onPress={() => launchAIScan('camera')}
               activeOpacity={0.85}
               style={{
-                flexDirection: 'row', alignItems: 'center',
+                flexDirection: 'row',
+                alignItems: 'center',
                 backgroundColor: '#F5F3FF',
-                borderRadius: 18, padding: 18,
-                borderWidth: 1.5, borderColor: '#DDD6FE',
+                borderRadius: 18,
+                padding: 18,
+                borderWidth: 1.5,
+                borderColor: '#DDD6FE',
               }}
             >
-              <View style={{
-                width: 52, height: 52, borderRadius: 16,
-                backgroundColor: '#7C3AED',
-                alignItems: 'center', justifyContent: 'center',
-                marginRight: 16,
-              }}>
+              <View
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 16,
+                  backgroundColor: '#7C3AED',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: 16,
+                }}
+              >
                 <Icon name="camera" size={24} color="#FFF" />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 16, fontWeight: '700', color: '#1F1235', marginBottom: 3 }}>
+                <Text
+                  style={{ fontSize: 16, fontWeight: '700', color: '#1F1235', marginBottom: 3 }}
+                >
                   Take a Photo
                 </Text>
                 <Text style={{ fontSize: 13, color: '#6B7280', lineHeight: 18 }}>
@@ -1250,22 +1794,32 @@ export default function MenuManagementScreen({ route, navigation }) {
               onPress={() => launchAIScan('gallery')}
               activeOpacity={0.85}
               style={{
-                flexDirection: 'row', alignItems: 'center',
+                flexDirection: 'row',
+                alignItems: 'center',
                 backgroundColor: '#EFF6FF',
-                borderRadius: 18, padding: 18,
-                borderWidth: 1.5, borderColor: '#BFDBFE',
+                borderRadius: 18,
+                padding: 18,
+                borderWidth: 1.5,
+                borderColor: '#BFDBFE',
               }}
             >
-              <View style={{
-                width: 52, height: 52, borderRadius: 16,
-                backgroundColor: '#3B82F6',
-                alignItems: 'center', justifyContent: 'center',
-                marginRight: 16,
-              }}>
+              <View
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 16,
+                  backgroundColor: '#3B82F6',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: 16,
+                }}
+              >
                 <Icon name="images" size={24} color="#FFF" />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 16, fontWeight: '700', color: '#1F2937', marginBottom: 3 }}>
+                <Text
+                  style={{ fontSize: 16, fontWeight: '700', color: '#1F2937', marginBottom: 3 }}
+                >
                   Choose from Gallery
                 </Text>
                 <Text style={{ fontSize: 13, color: '#6B7280', lineHeight: 18 }}>
@@ -1276,12 +1830,24 @@ export default function MenuManagementScreen({ route, navigation }) {
             </TouchableOpacity>
 
             {/* Tip strip */}
-            <View style={{
-              flexDirection: 'row', alignItems: 'flex-start',
-              backgroundColor: '#FFFBEB', borderRadius: 12, padding: 12,
-              borderWidth: 1, borderColor: '#FDE68A', marginTop: 4,
-            }}>
-              <Icon name="bulb-outline" size={16} color="#D97706" style={{ marginRight: 8, marginTop: 1 }} />
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                backgroundColor: '#FFFBEB',
+                borderRadius: 12,
+                padding: 12,
+                borderWidth: 1,
+                borderColor: '#FDE68A',
+                marginTop: 4,
+              }}
+            >
+              <Icon
+                name="bulb-outline"
+                size={16}
+                color="#D97706"
+                style={{ marginRight: 8, marginTop: 1 }}
+              />
               <Text style={{ flex: 1, fontSize: 12, color: '#92400E', lineHeight: 17 }}>
                 <Text style={{ fontWeight: '700' }}>Tip: </Text>
                 Ensure the menu is flat, well-lit and all text is visible for the best results.
@@ -1293,14 +1859,15 @@ export default function MenuManagementScreen({ route, navigation }) {
               onPress={() => setAiScanPickerVisible(false)}
               activeOpacity={0.7}
               style={{
-                alignItems: 'center', paddingVertical: 14,
-                borderRadius: 14, backgroundColor: '#F3F4F6',
+                alignItems: 'center',
+                paddingVertical: 14,
+                borderRadius: 14,
+                backgroundColor: '#F3F4F6',
                 marginTop: 2,
               }}
             >
               <Text style={{ fontSize: 15, fontWeight: '700', color: '#6B7280' }}>Cancel</Text>
             </TouchableOpacity>
-
           </View>
         </View>
       </Modal>
@@ -1313,33 +1880,60 @@ const styles = {
   label: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 6 },
   hint: { fontSize: 12, color: '#6B7280', marginBottom: 6, marginTop: -4 },
   input: {
-    backgroundColor: '#FFF', borderWidth: 1, borderColor: '#E5E7EB',
-    borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12,
-    fontSize: 14, color: '#111827', marginBottom: 18
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 14,
+    color: '#111827',
+    marginBottom: 18,
   },
   typeChip: {
-    flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#E5E7EB',
-    borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, marginRight: 8,
-    backgroundColor: '#FFF'
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginRight: 8,
+    backgroundColor: '#FFF',
   },
   typeChipActive: { backgroundColor: '#6366F1', borderColor: '#6366F1' },
   typeChipText: { color: '#6B7280', fontSize: 13, fontWeight: '500', marginLeft: 5 },
   typeChipTextActive: { color: '#FFF' },
   dietaryChip: {
-    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 20,
-    paddingHorizontal: 12, paddingVertical: 6, backgroundColor: '#FFF'
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#FFF',
   },
   dietaryChipActive: { backgroundColor: '#DCFCE7', borderColor: '#16A34A' },
   dietaryChipText: { fontSize: 12, fontWeight: '500', color: '#6B7280' },
   dietaryChipTextActive: { color: '#15803D' },
   imagePicker: {
-    backgroundColor: '#F9FAFB', borderWidth: 1.5, borderColor: '#E5E7EB',
-    borderStyle: 'dashed', borderRadius: 14, marginBottom: 20, overflow: 'hidden'
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
+    borderStyle: 'dashed',
+    borderRadius: 14,
+    marginBottom: 20,
+    overflow: 'hidden',
   },
   toggleRow: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: '#FFF', borderRadius: 14, padding: 16,
-    marginBottom: 12, borderWidth: 1, borderColor: '#F3F4F6'
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFF',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   toggleLabel: { fontSize: 14, fontWeight: '600', color: '#111827' },
   toggleHint: { fontSize: 12, color: '#6B7280', marginTop: 2 },

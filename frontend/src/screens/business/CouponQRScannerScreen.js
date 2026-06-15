@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   StatusBar,
-  Modal
+  Modal,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -96,10 +96,7 @@ export default function CouponQRScannerScreen({ navigation, route }) {
 
   if (!permission.granted) {
     return (
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.secondary]}
-        style={styles.container}
-      >
+      <LinearGradient colors={[COLORS.primary, COLORS.secondary]} style={styles.container}>
         <StatusBar barStyle="light-content" />
         <View style={styles.permissionContainer}>
           <Icon name="camera-outline" size={80} color="#fff" />
@@ -107,16 +104,10 @@ export default function CouponQRScannerScreen({ navigation, route }) {
           <Text style={styles.permissionText}>
             We need access to your camera to scan coupon QR codes
           </Text>
-          <TouchableOpacity
-            style={styles.permissionButton}
-            onPress={requestPermission}
-          >
+          <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
             <Text style={styles.permissionButtonText}>Grant Permission</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Text style={styles.backButtonText}>Go Back</Text>
           </TouchableOpacity>
         </View>
@@ -136,15 +127,9 @@ export default function CouponQRScannerScreen({ navigation, route }) {
             barcodeTypes: ['qr'],
           }}
         >
-          <LinearGradient
-            colors={['transparent', 'rgba(0,0,0,0.7)']}
-            style={styles.overlay}
-          >
+          <LinearGradient colors={['transparent', 'rgba(0,0,0,0.7)']} style={styles.overlay}>
             <View style={styles.header}>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => navigation.goBack()}
-              >
+              <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
                 <Icon name="close" size={28} color="#fff" />
               </TouchableOpacity>
               <Text style={styles.headerTitle}>Scan Coupon QR</Text>
@@ -171,9 +156,7 @@ export default function CouponQRScannerScreen({ navigation, route }) {
             )}
 
             <View style={styles.footer}>
-              <Text style={styles.footerText}>
-                Scan a customer's coupon QR code to redeem it
-              </Text>
+              <Text style={styles.footerText}>Scan a customer's coupon QR code to redeem it</Text>
             </View>
           </LinearGradient>
         </CameraView>
@@ -194,26 +177,17 @@ export default function CouponQRScannerScreen({ navigation, route }) {
             <Text style={styles.modalTitle}>Coupon Redeemed!</Text>
             {redeemedCoupon && (
               <>
-                <Text style={styles.modalSubtitle}>
-                  Coupon Code: {redeemedCoupon.code}
-                </Text>
+                <Text style={styles.modalSubtitle}>Coupon Code: {redeemedCoupon.code}</Text>
                 {redeemedCoupon.user && (
                   <View style={styles.userInfo}>
                     <Icon name="person" size={20} color={COLORS.secondary} />
-                    <Text style={styles.userName}>
-                      {redeemedCoupon.user.name}
-                    </Text>
+                    <Text style={styles.userName}>{redeemedCoupon.user.name}</Text>
                   </View>
                 )}
-                <Text style={styles.modalMessage}>
-                  This coupon has been successfully redeemed.
-                </Text>
+                <Text style={styles.modalMessage}>This coupon has been successfully redeemed.</Text>
               </>
             )}
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={handleScanAgain}
-            >
+            <TouchableOpacity style={styles.modalButton} onPress={handleScanAgain}>
               <Text style={styles.modalButtonText}>Scan Another</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -458,4 +432,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-

@@ -69,14 +69,14 @@ const notificationSlice = createSlice({
         state.error = action.payload;
       })
       .addCase(markAsRead.fulfilled, (state, action) => {
-        const notification = state.notifications.find(n => n._id === action.payload);
+        const notification = state.notifications.find((n) => n._id === action.payload);
         if (notification && notification.status !== 'read') {
           notification.status = 'read';
           state.unreadCount = Math.max(0, state.unreadCount - 1);
         }
       })
       .addCase(markAllRead.fulfilled, (state) => {
-        state.notifications.forEach(n => n.status = 'read');
+        state.notifications.forEach((n) => (n.status = 'read'));
         state.unreadCount = 0;
       });
   },
@@ -84,4 +84,3 @@ const notificationSlice = createSlice({
 
 export const { clearError, addNotification } = notificationSlice.actions;
 export default notificationSlice.reducer;
-

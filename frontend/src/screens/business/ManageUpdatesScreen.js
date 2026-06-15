@@ -10,7 +10,7 @@ import {
   Modal,
   StatusBar,
   Image,
-  Platform
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
@@ -38,7 +38,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
     discountType: 'percentage',
     discountValue: '',
     validUntil: new Date(),
-    image: null
+    image: null,
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -73,7 +73,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
         discountType: update.discountType || 'percentage',
         discountValue: update.discountValue?.toString() || '',
         validUntil: update.validUntil ? new Date(update.validUntil) : new Date(),
-        image: update.image
+        image: update.image,
       });
     } else {
       setEditingUpdate(null);
@@ -84,7 +84,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
         discountType: 'percentage',
         discountValue: '',
         validUntil: new Date(),
-        image: null
+        image: null,
       });
     }
     setModalVisible(true);
@@ -143,7 +143,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
         discountType: formData.discountType,
         discountValue: formData.discountValue ? parseFloat(formData.discountValue) : 0,
         validUntil: formData.validUntil.toISOString(),
-        image: formData.image?.url || null
+        image: formData.image?.url || null,
       };
 
       const url = editingUpdate
@@ -159,15 +159,18 @@ export default function ManageUpdatesScreen({ navigation, route }) {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        ToastService.showSuccess('Success', editingUpdate ? 'Update saved successfully' : 'Update created successfully');
+        ToastService.showSuccess(
+          'Success',
+          editingUpdate ? 'Update saved successfully' : 'Update created successfully'
+        );
         setModalVisible(false);
         fetchUpdates();
       } else {
@@ -182,45 +185,41 @@ export default function ManageUpdatesScreen({ navigation, route }) {
   };
 
   const handleDelete = (update) => {
-    Alert.alert(
-      'Delete Update',
-      'Are you sure you want to delete this update?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const token = await AsyncStorage.getItem('token');
-              if (!token) {
-                ToastService.showError('Error', 'You are not logged in. Please log in again.');
-                return;
-              }
+    Alert.alert('Delete Update', 'Are you sure you want to delete this update?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+              ToastService.showError('Error', 'You are not logged in. Please log in again.');
+              return;
+            }
 
-              const response = await fetch(`${API_CONFIG.BASE_URL}/updates/${update._id}`, {
-                method: 'DELETE',
-                headers: {
-                  'Authorization': `Bearer ${token}`
-                }
-              });
+            const response = await fetch(`${API_CONFIG.BASE_URL}/updates/${update._id}`, {
+              method: 'DELETE',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
 
-              const data = await response.json();
+            const data = await response.json();
 
-              if (data.success) {
-                ToastService.showSuccess('Deleted', 'Update deleted successfully');
-                fetchUpdates();
-              } else {
-                ToastService.showError('Delete Failed', 'Failed to delete update');
-              }
-            } catch (error) {
-              console.error('Error deleting update:', error);
+            if (data.success) {
+              ToastService.showSuccess('Deleted', 'Update deleted successfully');
+              fetchUpdates();
+            } else {
               ToastService.showError('Delete Failed', 'Failed to delete update');
             }
+          } catch (error) {
+            console.error('Error deleting update:', error);
+            ToastService.showError('Delete Failed', 'Failed to delete update');
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const handleToggleActive = async (update) => {
@@ -235,9 +234,9 @@ export default function ManageUpdatesScreen({ navigation, route }) {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ isActive: !update.isActive })
+        body: JSON.stringify({ isActive: !update.isActive }),
       });
 
       const data = await response.json();
@@ -259,10 +258,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
         <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
         {/* Header */}
-        <LinearGradient
-          colors={[COLORS.primary, COLORS.primaryDark]}
-          className="pt-12 pb-6 px-6"
-        >
+        <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} className="pt-12 pb-6 px-6">
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center flex-1">
               <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
@@ -299,38 +295,37 @@ export default function ManageUpdatesScreen({ navigation, route }) {
                   )}
 
                   <View className="flex-row items-center justify-between mb-2">
-                    <View style={{
-                      backgroundColor: update.type === 'offer' ? COLORS.secondary + '20' : COLORS.primary + '20',
-                      paddingHorizontal: 10,
-                      paddingVertical: 4,
-                      borderRadius: 12
-                    }}>
-                      <Text style={{
-                        color: update.type === 'offer' ? COLORS.secondary : COLORS.primary,
-                        fontSize: 11,
-                        fontWeight: 'bold',
-                        textTransform: 'uppercase'
-                      }}>
+                    <View
+                      style={{
+                        backgroundColor:
+                          update.type === 'offer' ? COLORS.secondary + '20' : COLORS.primary + '20',
+                        paddingHorizontal: 10,
+                        paddingVertical: 4,
+                        borderRadius: 12,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: update.type === 'offer' ? COLORS.secondary : COLORS.primary,
+                          fontSize: 11,
+                          fontWeight: 'bold',
+                          textTransform: 'uppercase',
+                        }}
+                      >
                         {update.type}
                       </Text>
                     </View>
 
                     <View className="flex-row items-center">
-                      <TouchableOpacity
-                        onPress={() => handleToggleActive(update)}
-                        className="mr-3"
-                      >
+                      <TouchableOpacity onPress={() => handleToggleActive(update)} className="mr-3">
                         <Icon
-                          name={update.isActive ? "eye" : "eye-off"}
+                          name={update.isActive ? 'eye' : 'eye-off'}
                           size={22}
                           color={update.isActive ? COLORS.primary : '#9CA3AF'}
                         />
                       </TouchableOpacity>
 
-                      <TouchableOpacity
-                        onPress={() => handleOpenModal(update)}
-                        className="mr-3"
-                      >
+                      <TouchableOpacity onPress={() => handleOpenModal(update)} className="mr-3">
                         <Icon name="pencil" size={22} color={COLORS.primary} />
                       </TouchableOpacity>
 
@@ -344,21 +339,27 @@ export default function ManageUpdatesScreen({ navigation, route }) {
                   <Text className="text-sm text-gray-600 mb-3">{update.description}</Text>
 
                   {update.type === 'offer' && update.discountValue > 0 && (
-                    <View style={{
-                      backgroundColor: COLORS.secondary + '10',
-                      padding: 10,
-                      borderRadius: 8,
-                      flexDirection: 'row',
-                      alignItems: 'center'
-                    }}>
+                    <View
+                      style={{
+                        backgroundColor: COLORS.secondary + '10',
+                        padding: 10,
+                        borderRadius: 8,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                      }}
+                    >
                       <Icon name="pricetag" size={16} color={COLORS.secondary} />
-                      <Text style={{
-                        fontSize: 13,
-                        fontWeight: 'bold',
-                        color: COLORS.secondary,
-                        marginLeft: 6
-                      }}>
-                        {update.discountType === 'percentage' ? `${update.discountValue}% OFF` : `£${update.discountValue} OFF`}
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 'bold',
+                          color: COLORS.secondary,
+                          marginLeft: 6,
+                        }}
+                      >
+                        {update.discountType === 'percentage'
+                          ? `${update.discountValue}% OFF`
+                          : `£${update.discountValue} OFF`}
                       </Text>
                       {update.validUntil && (
                         <Text className="text-xs text-gray-600 ml-auto">
@@ -373,21 +374,28 @@ export default function ManageUpdatesScreen({ navigation, route }) {
                     <Text className="text-xs text-gray-500 ml-1">
                       Created: {new Date(update.createdAt).toLocaleDateString()}
                     </Text>
-                    <View style={{
-                      marginLeft: 'auto',
-                      flexDirection: 'row',
-                      alignItems: 'center'
-                    }}>
-                      <View style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: 4,
-                        backgroundColor: update.isActive ? '#10B981' : '#EF4444',
-                        marginRight: 6
-                      }} />
-                      <Text className="text-xs font-semibold" style={{
-                        color: update.isActive ? '#10B981' : '#EF4444'
-                      }}>
+                    <View
+                      style={{
+                        marginLeft: 'auto',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <View
+                        style={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: 4,
+                          backgroundColor: update.isActive ? '#10B981' : '#EF4444',
+                          marginRight: 6,
+                        }}
+                      />
+                      <Text
+                        className="text-xs font-semibold"
+                        style={{
+                          color: update.isActive ? '#10B981' : '#EF4444',
+                        }}
+                      >
                         {update.isActive ? 'Active' : 'Inactive'}
                       </Text>
                     </View>
@@ -412,7 +420,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.3,
             shadowRadius: 8,
-            elevation: 8
+            elevation: 8,
           }}
         >
           <LinearGradient
@@ -422,7 +430,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
               height: '100%',
               borderRadius: 30,
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
             }}
           >
             <Icon name="add" size={32} color="#FFF" />
@@ -461,13 +469,17 @@ export default function ManageUpdatesScreen({ navigation, route }) {
                     <TouchableOpacity
                       key={type}
                       onPress={() => setFormData({ ...formData, type })}
-                      className={`px-4 py-3 rounded-xl border ${formData.type === type
-                        ? 'bg-purple-600 border-purple-600'
-                        : 'bg-white border-gray-200'
-                        }`}
+                      className={`px-4 py-3 rounded-xl border ${
+                        formData.type === type
+                          ? 'bg-purple-600 border-purple-600'
+                          : 'bg-white border-gray-200'
+                      }`}
                     >
-                      <Text className={`font-semibold capitalize ${formData.type === type ? 'text-white' : 'text-gray-600'
-                        }`}>
+                      <Text
+                        className={`font-semibold capitalize ${
+                          formData.type === type ? 'text-white' : 'text-gray-600'
+                        }`}
+                      >
                         {type}
                       </Text>
                     </TouchableOpacity>
@@ -512,18 +524,24 @@ export default function ManageUpdatesScreen({ navigation, route }) {
                     <View className="flex-row items-center gap-2">
                       {[
                         { label: 'Percentage (%)', value: 'percentage' },
-                        { label: 'Fixed Amount (£)', value: 'fixed' }
+                        { label: 'Fixed Amount (£)', value: 'fixed' },
                       ].map((option) => (
                         <TouchableOpacity
                           key={option.value}
                           onPress={() => setFormData({ ...formData, discountType: option.value })}
-                          className={`flex-1 px-4 py-3 rounded-xl border items-center ${formData.discountType === option.value
-                            ? 'bg-purple-600 border-purple-600'
-                            : 'bg-white border-gray-200'
-                            }`}
+                          className={`flex-1 px-4 py-3 rounded-xl border items-center ${
+                            formData.discountType === option.value
+                              ? 'bg-purple-600 border-purple-600'
+                              : 'bg-white border-gray-200'
+                          }`}
                         >
-                          <Text className={`font-bold ${formData.discountType === option.value ? 'text-white' : 'text-gray-600'
-                            }`}>
+                          <Text
+                            className={`font-bold ${
+                              formData.discountType === option.value
+                                ? 'text-white'
+                                : 'text-gray-600'
+                            }`}
+                          >
                             {option.label}
                           </Text>
                         </TouchableOpacity>
@@ -535,7 +553,9 @@ export default function ManageUpdatesScreen({ navigation, route }) {
                     <Text className="text-gray-900 font-semibold mb-2">Discount Value</Text>
                     <TextInput
                       className="bg-gray-100 rounded-xl px-4 py-3 text-gray-900 border border-gray-200"
-                      placeholder={formData.discountType === 'percentage' ? "e.g., 50" : "e.g., 100"}
+                      placeholder={
+                        formData.discountType === 'percentage' ? 'e.g., 50' : 'e.g., 100'
+                      }
                       placeholderTextColor="#9CA3AF"
                       keyboardType="numeric"
                       value={formData.discountValue}
@@ -554,7 +574,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
                           weekday: 'short',
                           year: 'numeric',
                           month: 'short',
-                          day: 'numeric'
+                          day: 'numeric',
                         })}
                       </Text>
                       <Icon name="calendar-outline" size={20} color="#6B7280" />
@@ -611,11 +631,7 @@ export default function ManageUpdatesScreen({ navigation, route }) {
               </View>
 
               {/* Save Button */}
-              <TouchableOpacity
-                onPress={handleSave}
-                disabled={submitting}
-                className="mb-8"
-              >
+              <TouchableOpacity onPress={handleSave} disabled={submitting} className="mb-8">
                 <LinearGradient
                   colors={[COLORS.secondary, COLORS.secondaryDark]}
                   className="rounded-xl py-4 items-center"

@@ -248,100 +248,102 @@ const dns = require('dns');
 dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(async () => {
-    logger.info('✅ MongoDB Connected Successfully');
-    console.log('✅ MongoDB Connected Successfully');
-
-    // Initialize Redis and configure Socket.IO Redis Adapter
-    await initializeRedis();
-    const { redisClient } = require('./config/redis');
-    if (redisClient && redisClient.isOpen) {
-      try {
-        const { createAdapter } = require('@socket.io/redis-adapter');
-        const pubClient = redisClient.duplicate();
-        const subClient = redisClient.duplicate();
-        await Promise.all([pubClient.connect(), subClient.connect()]);
-        io.adapter(createAdapter(pubClient, subClient));
-        logger.info('✅ Socket.IO Redis adapter configured for horizontal scaling');
-
-        // Warm up cache for top restaurants
-        const { warmMenuCache } = require('./utils/cacheWarming');
-        warmMenuCache(); // Fire and forget
-      } catch (err) {
-        logger.error('❌ Error configuring Socket.IO Redis adapter:', err);
-      }
-    }
-
-    // CRM-123 FIX: Ensure users.phone_1 index is sparse so multiple users can register without a phone.
-    // This check replaces the old "always drop" approach which was destroying the correct sparse index on every boot.
-    try {
-      const userIndexes = await mongoose.connection.collection('users').indexes();
-      const phoneIdx = userIndexes.find(i => i.name === 'phone_1');
-      if (phoneIdx && !phoneIdx.sparse) {
-        // Old non-sparse index found — drop and recreate as sparse
-        await mongoose.connection.collection('users').dropIndex('phone_1');
-        await mongoose.connection.collection('users').createIndex(
-          { phone: 1 },
-          { unique: true, sparse: true, name: 'phone_1' }
-        );
-        console.log('✅ CRM-123: Rebuilt users.phone_1 as sparse unique index.');
-      } else if (!phoneIdx) {
-        // Index missing entirely — create it
-        await mongoose.connection.collection('users').createIndex(
-          { phone: 1 },
-          { unique: true, sparse: true, name: 'phone_1' }
-        );
-        console.log('✅ CRM-123: Created users.phone_1 sparse unique index.');
-      } else {
-        console.log('✅ CRM-123: users.phone_1 is already sparse — no action needed.');
-      }
-    } catch (e) {
-      console.log('ℹ️  CRM-123 index check: ' + e.message);
-    }
-
-    // Create default admin account
-    await createDefaultAdmin();
-
-    // RBAC MIGRATION: Clear any stale 'SUPER_ADMIN' adminRole values left from
-    // a previous development session. Existing admin accounts with adminRole=null
-    // automatically get full access via the ROLE_PERMISSIONS['admin'] mapping.
-    try {
-      const result = await User.updateMany(
-        { role: 'admin', adminRole: 'SUPER_ADMIN' },
-        { $set: { adminRole: null } }
-      );
-      if (result.modifiedCount > 0) {
-        console.log(`✅ RBAC MIGRATION: Cleared ${result.modifiedCount} stale SUPER_ADMIN adminRole(s) → null`);
-      }
-    } catch (e) {
-      console.log('ℹ️  RBAC migration check: ' + e.message);
-    }
+if (process.env.NODE_ENV !== 'test') {
+  mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
   })
-  .catch((err) => {
-    logger.error('❌ MongoDB Connection Error:', err);
-    console.error('❌ MongoDB Connection Error:', err);
-    process.exit(1);
+    .then(async () => {
+      logger.info('✅ MongoDB Connected Successfully');
+      console.log('✅ MongoDB Connected Successfully');
+
+      // Initialize Redis and configure Socket.IO Redis Adapter
+      await initializeRedis();
+      const { redisClient } = require('./config/redis');
+      if (redisClient && redisClient.isOpen) {
+        try {
+          const { createAdapter } = require('@socket.io/redis-adapter');
+          const pubClient = redisClient.duplicate();
+          const subClient = redisClient.duplicate();
+          await Promise.all([pubClient.connect(), subClient.connect()]);
+          io.adapter(createAdapter(pubClient, subClient));
+          logger.info('✅ Socket.IO Redis adapter configured for horizontal scaling');
+
+          // Warm up cache for top restaurants
+          const { warmMenuCache } = require('./utils/cacheWarming');
+          warmMenuCache(); // Fire and forget
+        } catch (err) {
+          logger.error('❌ Error configuring Socket.IO Redis adapter:', err);
+        }
+      }
+
+      // CRM-123 FIX: Ensure users.phone_1 index is sparse so multiple users can register without a phone.
+      // This check replaces the old "always drop" approach which was destroying the correct sparse index on every boot.
+      try {
+        const userIndexes = await mongoose.connection.collection('users').indexes();
+        const phoneIdx = userIndexes.find(i => i.name === 'phone_1');
+        if (phoneIdx && !phoneIdx.sparse) {
+          // Old non-sparse index found — drop and recreate as sparse
+          await mongoose.connection.collection('users').dropIndex('phone_1');
+          await mongoose.connection.collection('users').createIndex(
+            { phone: 1 },
+            { unique: true, sparse: true, name: 'phone_1' }
+          );
+          console.log('✅ CRM-123: Rebuilt users.phone_1 as sparse unique index.');
+        } else if (!phoneIdx) {
+          // Index missing entirely — create it
+          await mongoose.connection.collection('users').createIndex(
+            { phone: 1 },
+            { unique: true, sparse: true, name: 'phone_1' }
+          );
+          console.log('✅ CRM-123: Created users.phone_1 sparse unique index.');
+        } else {
+          console.log('✅ CRM-123: users.phone_1 is already sparse — no action needed.');
+        }
+      } catch (e) {
+        console.log('ℹ️  CRM-123 index check: ' + e.message);
+      }
+
+      // Create default admin account
+      await createDefaultAdmin();
+
+      // RBAC MIGRATION: Clear any stale 'SUPER_ADMIN' adminRole values left from
+      // a previous development session. Existing admin accounts with adminRole=null
+      // automatically get full access via the ROLE_PERMISSIONS['admin'] mapping.
+      try {
+        const result = await User.updateMany(
+          { role: 'admin', adminRole: 'SUPER_ADMIN' },
+          { $set: { adminRole: null } }
+        );
+        if (result.modifiedCount > 0) {
+          console.log(`✅ RBAC MIGRATION: Cleared ${result.modifiedCount} stale SUPER_ADMIN adminRole(s) → null`);
+        }
+      } catch (e) {
+        console.log('ℹ️  RBAC migration check: ' + e.message);
+      }
+    })
+    .catch((err) => {
+      logger.error('❌ MongoDB Connection Error:', err);
+      console.error('❌ MongoDB Connection Error:', err);
+      process.exit(1);
+    });
+
+  // Start Server
+  const PORT = process.env.PORT || 5001;
+  server.listen(PORT, '0.0.0.0', () => {
+    logger.info(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+    console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+    console.log(`📡 Server accessible at http://localhost:${PORT} and https://api.hashview.co.uk`);
   });
 
-// Start Server
-const PORT = process.env.PORT || 5001;
-server.listen(PORT, '0.0.0.0', () => {
-  logger.info(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
-  console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
-  console.log(`📡 Server accessible at http://localhost:${PORT} and https://api.hashview.co.uk`);
-});
-
-cron.schedule('*/15 * * * *', async () => {
-  try {
-    await checkNotificationReceipts();
-  } catch (error) {
-    logger.error('[Push] Scheduled receipt check failed:', error.message);
-  }
-});
+  cron.schedule('*/15 * * * *', async () => {
+    try {
+      await checkNotificationReceipts();
+    } catch (error) {
+      logger.error('[Push] Scheduled receipt check failed:', error.message);
+    }
+  });
+}
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
