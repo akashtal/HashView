@@ -28,7 +28,11 @@ exports.createOrderSchema = Joi.object({
       itemTotal: Joi.number().required()
     })
   ).min(1).required(),
-  specialInstructions: Joi.string().max(500).optional().allow('')
+  specialInstructions: Joi.string().max(500).optional().allow(''),
+  userLocation: Joi.object({
+    latitude: Joi.number().required(),
+    longitude: Joi.number().required()
+  }).optional().allow(null)
 });
 
 exports.updateOrderStatusSchema = Joi.object({
