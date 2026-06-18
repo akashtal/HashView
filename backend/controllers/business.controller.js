@@ -905,7 +905,7 @@ function checkIfBusinessIsOpen(openingHours) {
     return { isOpen: false, status: 'Closed today', nextChange: null };
   }
 
-  // Parse time strings (e.g., "09:00 AM")
+  // Parse time strings (e.g., "09:00 AM" or "23:00")
   const parseTime = (timeStr) => {
     if (!timeStr || timeStr === 'Closed') return null;
     const [time, period] = timeStr.split(' ');
@@ -915,6 +915,18 @@ function checkIfBusinessIsOpen(openingHours) {
     if (period === 'AM' && hours === 12) hours = 0;
 
     return hours * 60 + minutes; // Return minutes since midnight
+  };
+
+  const format12h = (timeStr) => {
+    if (!timeStr || timeStr === 'Closed') return timeStr;
+    const parts = timeStr.split(' ');
+    if (parts.length > 1) return timeStr; // Already has AM/PM
+    const [hoursStr, minutesStr] = timeStr.split(':');
+    let hours = parseInt(hoursStr, 10);
+    const minutes = minutesStr || '00';
+    const period = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${hours}:${minutes} ${period}`;
   };
 
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
@@ -927,13 +939,16 @@ function checkIfBusinessIsOpen(openingHours) {
 
   const isOpen = currentMinutes >= openMinutes && currentMinutes < closeMinutes;
 
+  const formattedClose = format12h(todayHours.close);
+  const formattedOpen = format12h(todayHours.open);
+
   let status, nextChange;
   if (isOpen) {
-    status = `Open • Closes at ${todayHours.close}`;
-    nextChange = todayHours.close;
+    status = `Open • Closes at ${formattedClose}`;
+    nextChange = formattedClose;
   } else if (currentMinutes < openMinutes) {
-    status = `Closed • Opens at ${todayHours.open}`;
-    nextChange = todayHours.open;
+    status = `Closed • Opens at ${formattedOpen}`;
+    nextChange = formattedOpen;
   } else {
     status = 'Closed';
     // Find next opening day
@@ -943,7 +958,8 @@ function checkIfBusinessIsOpen(openingHours) {
       const nextDayHours = openingHours[nextDay];
 
       if (nextDayHours && !nextDayHours.closed && nextDayHours.open !== 'Closed') {
-        status = `Closed • Opens ${nextDay.charAt(0).toUpperCase() + nextDay.slice(1)} at ${nextDayHours.open}`;
+        const nextDayFormattedOpen = format12h(nextDayHours.open);
+        status = `Closed • Opens ${nextDay.charAt(0).toUpperCase() + nextDay.slice(1)} at ${nextDayFormattedOpen}`;
         break;
       }
     }
