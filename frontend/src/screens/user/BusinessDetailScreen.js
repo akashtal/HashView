@@ -505,7 +505,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
 
   const handleDirectAdd = useCallback(
     (item) => {
-      if (item.modifiers?.length > 0 || item.addOns?.length > 0) {
+      if (item.customizationGroups?.length > 0) {
         handleMenuItemPress(item);
         return;
       }
@@ -522,8 +522,7 @@ export default function BusinessDetailScreen({ navigation, route }) {
             cartItemId,
             menuItem: item,
             quantity: 1,
-            selectedModifiers: [],
-            selectedAddOns: [],
+            customizationSelections: [],
             itemNotes: '',
             itemTotal: item.price,
           },

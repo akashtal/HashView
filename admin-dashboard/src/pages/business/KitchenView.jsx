@@ -101,7 +101,16 @@ export default function KitchenView() {
                       <div className="space-y-1 mb-3">
                         {order.items?.map((item, i) => (
                           <div key={i} className="flex justify-between text-sm">
-                            <span className="text-gray-700"><span className="font-bold">{item.quantity}×</span> {item.name}</span>
+                            <span className="text-gray-700">
+                              <span className="font-bold">{item.quantity}×</span> {item.name}
+                              {item.customizationSelections?.length > 0 && (
+                                <span className="block text-xs text-gray-500 mt-0.5 ml-4">
+                                  {item.customizationSelections.map(c => `${c.groupName}: ${c.optionName}`).join(', ')}
+                                </span>
+                              )}
+                              {item.modifiers?.length > 0 && <span className="block text-xs text-gray-500 mt-0.5 ml-4">{item.modifiers.map(m => m.name).join(', ')}</span>}
+                              {item.addOns?.length > 0 && <span className="block text-xs text-gray-500 mt-0.5 ml-4">+ {item.addOns.map(a => a.name).join(', ')}</span>}
+                            </span>
                           </div>
                         ))}
                       </div>

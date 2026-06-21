@@ -290,13 +290,9 @@ export default function CheckoutScreen({ navigation, route }) {
                 <Text className="font-bold text-gray-900 mr-2">{cartItem.quantity}x</Text>
                 <View>
                   <Text className="font-semibold text-gray-800">{cartItem.menuItem.name}</Text>
-                  {(cartItem.selectedModifiers?.length > 0 ||
-                    cartItem.selectedAddOns?.length > 0) && (
+                  {(cartItem.customizationSelections?.length > 0) && (
                     <Text className="text-xs text-gray-500 mt-0.5">
-                      {cartItem.selectedModifiers
-                        .map((m) => m.name)
-                        .concat(cartItem.selectedAddOns.map((a) => a.name))
-                        .join(', ')}
+                      {cartItem.customizationSelections.map((c) => c.optionName).join(', ')}
                     </Text>
                   )}
                 </View>

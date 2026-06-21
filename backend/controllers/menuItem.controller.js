@@ -3,6 +3,7 @@ const Business = require('../models/Business.model');
 const BusinessOwner = require('../models/BusinessOwner.model');
 const { cloudinary } = require('../config/cloudinary');
 const { getCache, setCache, deleteCachePattern } = require('../config/redis');
+const CustomizationOption = require('../models/CustomizationOption.model');
 
 const CircuitBreaker = require('../utils/circuitBreaker');
 const cloudinaryBreaker = new CircuitBreaker('Cloudinary Upload', 5, 30000);
@@ -61,8 +62,36 @@ exports.getMenuItems = async (req, res) => {
     }
 
     const items = await MenuItem.find(filter)
+      .populate('customizationGroups')
       .sort({ menuCategory: 1, sortOrder: 1, name: 1 })
       .lean();
+
+    // Hydrate options
+    const groupIds = [];
+    items.forEach(item => {
+      if (item.customizationGroups) {
+        item.customizationGroups.forEach(g => {
+          if (g && g._id) groupIds.push(g._id);
+        });
+      }
+    });
+
+    if (groupIds.length > 0) {
+      const options = await CustomizationOption.find({ group: { $in: groupIds }, isActive: true }).sort({ sortOrder: 1 }).lean();
+      const optionsByGroup = {};
+      options.forEach(opt => {
+        const gid = opt.group.toString();
+        if (!optionsByGroup[gid]) optionsByGroup[gid] = [];
+        optionsByGroup[gid].push(opt);
+      });
+      items.forEach(item => {
+        if (item.customizationGroups) {
+          item.customizationGroups.forEach(g => {
+            if (g && g._id) g.options = optionsByGroup[g._id.toString()] || [];
+          });
+        }
+      });
+    }
 
     // Group by menuCategory for the UI
     const grouped = {};
@@ -125,8 +154,39 @@ exports.getOrderingMenu = async (req, res) => {
 
     // 2. Fetch from DB
     const items = await MenuItem.find({ business: businessId, status: 'active', isAvailable: true })
+      .populate({
+        path: 'customizationGroups',
+        match: { isActive: true }
+      })
       .sort({ menuCategory: 1, sortOrder: 1, name: 1 })
       .lean();
+
+    // Hydrate options
+    const groupIds = [];
+    items.forEach(item => {
+      if (item.customizationGroups) {
+        item.customizationGroups.forEach(g => {
+          if (g && g._id) groupIds.push(g._id);
+        });
+      }
+    });
+
+    if (groupIds.length > 0) {
+      const options = await CustomizationOption.find({ group: { $in: groupIds }, isActive: true }).sort({ sortOrder: 1 }).lean();
+      const optionsByGroup = {};
+      options.forEach(opt => {
+        const gid = opt.group.toString();
+        if (!optionsByGroup[gid]) optionsByGroup[gid] = [];
+        optionsByGroup[gid].push(opt);
+      });
+      items.forEach(item => {
+        if (item.customizationGroups) {
+          item.customizationGroups.forEach(g => {
+            if (g && g._id) g.options = optionsByGroup[g._id.toString()] || [];
+          });
+        }
+      });
+    }
 
     // 3. Group by menuCategory
     const grouped = {};

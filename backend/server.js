@@ -141,6 +141,7 @@ app.use('/api', apiVersioning);
 
 // API Routes
 const supportRoutes = require('./routes/support.routes');
+const customizationRoutes = require('./routes/customization.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/auth/oauth', oauthRoutes);
@@ -162,6 +163,7 @@ app.use('/api/verification', require('./routes/verification.routes'));
 app.use('/api/support', supportRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 app.use('/api/menu-items', menuItemRoutes); // Phase 1: Menu & Services system
+app.use('/api/customizations', customizationRoutes); // Phase 2: Menu customizations
 app.use('/api/orders', orderRoutes); // Phase 5: Order routes
 app.use('/api/billing-rules', billingRulesRoutes); // Phase 6: Tax/Charge rules
 app.use('/api/business/:businessId/billing', billingRoutes); // Phase 4: Billing preview routes

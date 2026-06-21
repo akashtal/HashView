@@ -126,6 +126,12 @@ const menuItemSchema = new mongoose.Schema({
     default: []
   },
 
+  // ─── Customization Groups (New Architecture) ──────────────────────────────────
+  customizationGroups: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CustomizationGroup'
+  }],
+
   // ─── Ordering-Specific Fields (Phase 2) ───────────────────────────────────────
   modifiers: [{
     name: { type: String, required: true },      // e.g., "Size", "Spice Level"

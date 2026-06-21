@@ -17,42 +17,50 @@ import COLORS from '../config/colors';
 export default function MenuItemModal({ visible, onClose, item, business }) {
   const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
-  const [selectedModifiers, setSelectedModifiers] = useState({});
-  const [selectedAddOns, setSelectedAddOns] = useState({});
+  const [selectedCustomizations, setSelectedCustomizations] = useState({}); // { groupId: [optionId, ...] }
   const [totalPrice, setTotalPrice] = useState(0);
 
   useEffect(() => {
     if (visible && item) {
       setQuantity(1);
 
-      // Initialize required modifiers with their default options
-      const initialModifiers = {};
-      if (item.modifiers && item.modifiers.length > 0) {
-        item.modifiers.forEach((mod) => {
-          if (mod.isRequired && mod.options && mod.options.length > 0) {
-            initialModifiers[mod.name] = mod.options[0];
+      // Initialize default selections
+      const initialSelections = {};
+      if (item.customizationGroups && item.customizationGroups.length > 0) {
+        item.customizationGroups.forEach((group) => {
+          initialSelections[group._id] = [];
+          if (group.options) {
+            group.options.forEach(opt => {
+              if (opt.isDefault && opt.isActive) {
+                // If maxSelections is 1 and we already have a default, don't add more
+                if (group.maxSelections === 1 && initialSelections[group._id].length > 0) {
+                  return;
+                }
+                initialSelections[group._id].push(opt._id);
+              }
+            });
           }
         });
       }
-      setSelectedModifiers(initialModifiers);
-      setSelectedAddOns({});
-      calculateTotal(1, initialModifiers, {});
+      setSelectedCustomizations(initialSelections);
+      calculateTotal(1, initialSelections);
     }
   }, [visible, item]);
 
-  const calculateTotal = (qty, mods, addons) => {
+  const calculateTotal = (qty, selections) => {
     if (!item) return;
     let basePrice = item.price;
 
-    // Add modifier prices
-    Object.values(mods).forEach((opt) => {
-      if (opt && opt.price > 0) basePrice += opt.price;
-    });
-
-    // Add addon prices
-    Object.values(addons).forEach((addon) => {
-      if (addon && addon.price > 0) basePrice += addon.price;
-    });
+    if (item.customizationGroups) {
+      item.customizationGroups.forEach(group => {
+        const selectedIds = selections[group._id] || [];
+        group.options?.forEach(opt => {
+          if (selectedIds.includes(opt._id) && opt.additionalPrice > 0) {
+            basePrice += opt.additionalPrice;
+          }
+        });
+      });
+    }
 
     setTotalPrice(basePrice * qty);
   };
@@ -60,43 +68,76 @@ export default function MenuItemModal({ visible, onClose, item, business }) {
   const handleQuantityChange = (delta) => {
     const newQty = Math.max(1, quantity + delta);
     setQuantity(newQty);
-    calculateTotal(newQty, selectedModifiers, selectedAddOns);
+    calculateTotal(newQty, selectedCustomizations);
   };
 
-  const handleModifierSelect = (modName, option) => {
-    const newMods = { ...selectedModifiers, [modName]: option };
-    setSelectedModifiers(newMods);
-    calculateTotal(quantity, newMods, selectedAddOns);
-  };
+  const handleCustomizationSelect = (group, option) => {
+    const currentSelections = selectedCustomizations[group._id] || [];
+    let newSelections = [...currentSelections];
+    const isCurrentlySelected = newSelections.includes(option._id);
 
-  const handleAddOnToggle = (addon) => {
-    const newAddOns = { ...selectedAddOns };
-    if (newAddOns[addon.name]) {
-      delete newAddOns[addon.name];
+    if (group.maxSelections === 1) {
+      // Radio button behavior
+      newSelections = [option._id];
     } else {
-      newAddOns[addon.name] = addon;
-    }
-    setSelectedAddOns(newAddOns);
-    calculateTotal(quantity, selectedModifiers, newAddOns);
-  };
-
-  const handleAddToCart = () => {
-    // Validate required modifiers
-    if (item.modifiers) {
-      for (const mod of item.modifiers) {
-        if (mod.isRequired && !selectedModifiers[mod.name]) {
-          ToastService.showError('Required', `Please select an option for ${mod.name}`);
+      // Checkbox behavior
+      if (isCurrentlySelected) {
+        newSelections = newSelections.filter(id => id !== option._id);
+      } else {
+        if (!group.maxSelections || newSelections.length < group.maxSelections) {
+          newSelections.push(option._id);
+        } else {
+          ToastService.showError('Maximum reached', `You can only select up to ${group.maxSelections} options for ${group.name}`);
           return;
         }
       }
+    }
+
+    const nextSelections = { ...selectedCustomizations, [group._id]: newSelections };
+    setSelectedCustomizations(nextSelections);
+    calculateTotal(quantity, nextSelections);
+  };
+
+  const handleAddToCart = () => {
+    // Validate minSelections and isRequired
+    if (item.customizationGroups) {
+      for (const group of item.customizationGroups) {
+        const selectedCount = (selectedCustomizations[group._id] || []).length;
+        if (group.isRequired && selectedCount === 0) {
+          ToastService.showError('Required', `Please select at least 1 option for ${group.name}`);
+          return;
+        }
+        if (group.minSelections > 0 && selectedCount < group.minSelections) {
+          ToastService.showError('Required', `Please select at least ${group.minSelections} options for ${group.name}`);
+          return;
+        }
+      }
+    }
+
+    // Format selections for the cart/backend
+    const customizationSelections = [];
+    if (item.customizationGroups) {
+      item.customizationGroups.forEach(group => {
+        const selectedIds = selectedCustomizations[group._id] || [];
+        group.options?.forEach(opt => {
+          if (selectedIds.includes(opt._id)) {
+            customizationSelections.push({
+              groupId: group._id,
+              groupName: group.name,
+              optionId: opt._id,
+              optionName: opt.name,
+              priceAdjustment: opt.additionalPrice || 0
+            });
+          }
+        });
+      });
     }
 
     const cartItem = {
       cartItemId: Date.now().toString(), // Unique ID for this cart entry
       menuItem: item,
       quantity,
-      selectedModifiers: Object.values(selectedModifiers),
-      selectedAddOns: Object.values(selectedAddOns),
+      customizationSelections,
       itemTotal: totalPrice / quantity, // Price for one unit including selected options
     };
 
@@ -196,143 +237,77 @@ export default function MenuItemModal({ visible, onClose, item, business }) {
               ) : null}
             </View>
 
-            {/* Modifiers */}
-            {item.modifiers &&
-              item.modifiers.map((mod, index) => (
+            {/* Customizations */}
+            {item.customizationGroups && item.customizationGroups.map((group, index) => (
                 <View key={index} style={{ marginBottom: 20 }}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 10,
-                    }}
-                  >
-                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#374151' }}>
-                      {mod.name}
-                    </Text>
-                    {mod.isRequired && (
-                      <Text
-                        style={{
-                          fontSize: 12,
-                          color: '#EF4444',
-                          fontWeight: '600',
-                          backgroundColor: '#FEF2F2',
-                          paddingHorizontal: 8,
-                          paddingVertical: 2,
-                          borderRadius: 10,
-                        }}
-                      >
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <View>
+                      <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#374151' }}>
+                        {group.name}
+                      </Text>
+                      {group.minSelections > 0 && group.maxSelections > 0 && (
+                        <Text style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>
+                          Select {group.minSelections === group.maxSelections ? group.minSelections : `${group.minSelections} to ${group.maxSelections}`}
+                        </Text>
+                      )}
+                    </View>
+                    {group.isRequired && (
+                      <Text style={{ fontSize: 12, color: '#EF4444', fontWeight: '600', backgroundColor: '#FEF2F2', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 }}>
                         Required
                       </Text>
                     )}
                   </View>
-                  {mod.options &&
-                    mod.options.map((opt, optIndex) => {
-                      const isSelected = selectedModifiers[mod.name]?.name === opt.name;
-                      return (
-                        <TouchableOpacity
-                          key={optIndex}
-                          onPress={() => handleModifierSelect(mod.name, opt)}
-                          style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            paddingVertical: 12,
-                            borderBottomWidth: 1,
-                            borderBottomColor: '#F3F4F6',
-                          }}
-                        >
-                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <View
-                              style={{
-                                width: 20,
-                                height: 20,
-                                borderRadius: 10,
-                                borderWidth: 2,
-                                borderColor: isSelected ? COLORS.secondary : '#D1D5DB',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginRight: 12,
-                              }}
-                            >
-                              {isSelected && (
-                                <View
-                                  style={{
-                                    width: 10,
-                                    height: 10,
-                                    borderRadius: 5,
-                                    backgroundColor: COLORS.secondary,
-                                  }}
-                                />
-                              )}
-                            </View>
-                            <Text style={{ fontSize: 15, color: '#111827' }}>{opt.name}</Text>
+                  {group.options && group.options.filter(o => o.isActive).map((opt, optIndex) => {
+                    const isSelected = (selectedCustomizations[group._id] || []).includes(opt._id);
+                    const isRadio = group.maxSelections === 1;
+
+                    return (
+                      <TouchableOpacity
+                        key={optIndex}
+                        onPress={() => handleCustomizationSelect(group, opt)}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          paddingVertical: 12,
+                          borderBottomWidth: 1,
+                          borderBottomColor: '#F3F4F6',
+                        }}
+                      >
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                          <View
+                            style={{
+                              width: 20,
+                              height: 20,
+                              borderRadius: isRadio ? 10 : 4,
+                              borderWidth: 2,
+                              borderColor: isSelected ? COLORS.secondary : '#D1D5DB',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              marginRight: 12,
+                              backgroundColor: (isSelected && !isRadio) ? COLORS.secondary : 'transparent',
+                            }}
+                          >
+                            {isSelected && isRadio && (
+                              <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: COLORS.secondary }} />
+                            )}
+                            {isSelected && !isRadio && (
+                              <Icon name="checkmark" size={14} color="#FFF" />
+                            )}
                           </View>
-                          {opt.price > 0 && (
-                            <Text style={{ fontSize: 14, color: '#6B7280' }}>
-                              +{item.currency === 'GBP' ? '£' : item.currency === 'USD' ? '$' : '€'}
-                              {opt.price.toFixed(2)}
-                            </Text>
-                          )}
-                        </TouchableOpacity>
-                      );
-                    })}
+                          <Text style={{ fontSize: 15, color: '#111827' }}>{opt.name}</Text>
+                        </View>
+                        {opt.additionalPrice > 0 && (
+                          <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                            +{item.currency === 'GBP' ? '£' : item.currency === 'USD' ? '$' : '€'}
+                            {opt.additionalPrice.toFixed(2)}
+                          </Text>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               ))}
-
-            {/* Add-Ons */}
-            {item.addOns && item.addOns.length > 0 && (
-              <View style={{ marginBottom: 20 }}>
-                <Text
-                  style={{ fontSize: 16, fontWeight: 'bold', color: '#374151', marginBottom: 10 }}
-                >
-                  Optional Extras
-                </Text>
-                {item.addOns.map((addon, index) => {
-                  const isSelected = !!selectedAddOns[addon.name];
-                  return (
-                    <TouchableOpacity
-                      key={index}
-                      onPress={() => handleAddOnToggle(addon)}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        paddingVertical: 12,
-                        borderBottomWidth: 1,
-                        borderBottomColor: '#F3F4F6',
-                      }}
-                    >
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <View
-                          style={{
-                            width: 20,
-                            height: 20,
-                            borderRadius: 4,
-                            borderWidth: 2,
-                            borderColor: isSelected ? COLORS.secondary : '#D1D5DB',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            marginRight: 12,
-                            backgroundColor: isSelected ? COLORS.secondary : 'transparent',
-                          }}
-                        >
-                          {isSelected && <Icon name="checkmark" size={14} color="#FFF" />}
-                        </View>
-                        <Text style={{ fontSize: 15, color: '#111827' }}>{addon.name}</Text>
-                      </View>
-                      {addon.price > 0 && (
-                        <Text style={{ fontSize: 14, color: '#6B7280' }}>
-                          +{item.currency === 'GBP' ? '£' : item.currency === 'USD' ? '$' : '€'}
-                          {addon.price.toFixed(2)}
-                        </Text>
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            )}
 
             {/* Quantity Selector */}
             <View

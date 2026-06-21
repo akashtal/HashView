@@ -81,6 +81,7 @@ exports.createOrder = async (req, res) => {
       price: item.menuItem.price,
       currency: item.menuItem.currency,
       quantity: item.quantity,
+      customizationSelections: item.customizationSelections || [],
       modifiers: item.selectedModifiers || [],
       addOns: item.selectedAddOns || [],
       itemNotes: item.itemNotes || '',

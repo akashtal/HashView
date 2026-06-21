@@ -45,6 +45,11 @@ const orderSchema = new mongoose.Schema({
     price: Number,
     currency: String,
     quantity: { type: Number, min: 1 },
+    customizationSelections: [{
+      groupName: String,
+      optionName: String,
+      priceAdjustment: Number
+    }],
     modifiers: [{
       name: String,
       selectedOption: String,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Pencil, Trash2, X, ToggleLeft, ToggleRight, CheckCircle, XCircle, Plus, Image as ImageIcon, Upload } from 'lucide-react';
+import { Search, Pencil, Trash2, X, ToggleLeft, ToggleRight, CheckCircle, XCircle, Plus, Image as ImageIcon, Upload, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useBusinessAuth } from '../../context/BusinessAuthContext';
 import biz from '../../api/businessApi';
 
@@ -258,6 +259,11 @@ export default function MenuManagement() {
                       >
                         {isActive ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
                       </button>
+
+                      {/* Customizations */}
+                      <Link to={`/business/menu/${item._id}/customizations`} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Manage Customizations">
+                        <Settings size={16} />
+                      </Link>
 
                       {/* Edit */}
                       <button onClick={() => setEditItem(item)} className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition" title="Edit">

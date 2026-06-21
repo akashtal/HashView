@@ -28,6 +28,7 @@ import OrderDetail from './pages/business/OrderDetail';
 import KitchenView from './pages/business/KitchenView';
 import OrderAnalytics from './pages/business/OrderAnalytics';
 import MenuManagement from './pages/business/MenuManagement';
+import CustomizationBuilder from './pages/business/CustomizationBuilder';
 import BusinessReviews from './pages/business/BusinessReviews';
 import ManageCoupons from './pages/business/ManageCoupons';
 import TaxManagement from './pages/business/TaxManagement';
@@ -93,6 +94,7 @@ function BusinessPortalGuard() {
         <Route path="/kitchen" element={<KitchenView />} />
         <Route path="/order-analytics" element={<OrderAnalytics />} />
         <Route path="/menu" element={<MenuManagement />} />
+        <Route path="/menu/:id/customizations" element={<CustomizationBuilder />} />
         <Route path="/reviews" element={<BusinessReviews />} />
         <Route path="/coupons" element={<ManageCoupons />} />
         <Route path="/tax" element={<TaxManagement />} />

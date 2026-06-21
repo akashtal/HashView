@@ -53,6 +53,7 @@ import CouponManagementScreen from '../screens/business/CouponManagementScreen';
 import ManageCouponsNew from '../screens/business/ManageCouponsNew';
 import CouponQRScannerScreen from '../screens/business/CouponQRScannerScreen';
 import MenuManagementScreen from '../screens/business/MenuManagementScreen'; // Phase 1: AI Menu
+import MenuCustomizationScreen from '../screens/business/MenuCustomizationScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -158,6 +159,7 @@ function BusinessStack() {
       <Stack.Screen name="ManageCouponsNew" component={ManageCouponsNew} />
       <Stack.Screen name="CouponQRScanner" component={CouponQRScannerScreen} />
       <Stack.Screen name="MenuManagement" component={MenuManagementScreen} />
+      <Stack.Screen name="MenuCustomization" component={MenuCustomizationScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
       <Stack.Screen name="Favorites" component={FavoritesScreen} />

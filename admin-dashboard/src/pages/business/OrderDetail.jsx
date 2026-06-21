@@ -158,8 +158,17 @@ export default function OrderDetail() {
             <div key={i} className="flex justify-between items-start pb-3 border-b border-gray-50 last:border-0 last:pb-0">
               <div>
                 <p className="font-semibold text-gray-900">{item.quantity}× {item.name}</p>
+                {item.customizationSelections?.length > 0 && (
+                  <div className="mt-1 space-y-0.5">
+                    {item.customizationSelections.map((c, idx) => (
+                      <p key={idx} className="text-xs text-gray-500">
+                        <span className="font-medium text-gray-600">{c.groupName}:</span> {c.optionName} {c.priceAdjustment > 0 && `(+${currency}${c.priceAdjustment.toFixed(2)})`}
+                      </p>
+                    ))}
+                  </div>
+                )}
                 {item.modifiers?.length > 0 && <p className="text-xs text-gray-500 mt-0.5">{item.modifiers.map(m => m.name).join(', ')}</p>}
-                {item.addOns?.length > 0 && <p className="text-xs text-gray-500">+ {item.addOns.map(a => a.name).join(', ')}</p>}
+                {item.addOns?.length > 0 && <p className="text-xs text-gray-500 mt-0.5">+ {item.addOns.map(a => a.name).join(', ')}</p>}
               </div>
               <p className="font-semibold text-gray-900">{currency}{item.itemTotal?.toFixed(2)}</p>
             </div>

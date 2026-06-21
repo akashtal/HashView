@@ -106,14 +106,9 @@ export default function KitchenViewScreen({ navigation, route }) {
             <Text className="text-lg font-bold text-gray-900">
               {orderItem.quantity}x {orderItem.name}
             </Text>
-            {orderItem.modifiers.map((m, i) => (
-              <Text key={`m-${i}`} className="text-sm text-gray-600 ml-4">
-                • {m.name}
-              </Text>
-            ))}
-            {orderItem.addOns.map((a, i) => (
-              <Text key={`a-${i}`} className="text-sm text-gray-600 ml-4">
-                + {a.name}
+            {orderItem.customizationSelections?.map((c, i) => (
+              <Text key={`c-${i}`} className="text-sm text-gray-600 ml-4">
+                • {c.groupName}: {c.optionName}
               </Text>
             ))}
             {orderItem.itemNotes && (

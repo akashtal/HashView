@@ -37,6 +37,20 @@ const biz = {
   deleteMenuItem: (id) => businessApi.delete(`/menu-items/${id}`),
   toggleMenuItemAvailability: (id) => businessApi.patch(`/menu-items/${id}/toggle`),
 
+  // ── Customizations ────────────────────────────────────────────────────────
+  getCustomizationGroups: (menuItemId) => businessApi.get(`/customizations/groups/menu-item/${menuItemId}`),
+  createCustomizationGroup: (data) => businessApi.post('/customizations/groups', data),
+  updateCustomizationGroup: (id, data) => businessApi.put(`/customizations/groups/${id}`, data),
+  deleteCustomizationGroup: (id) => businessApi.delete(`/customizations/groups/${id}`),
+  reorderCustomizationGroups: (data) => businessApi.put('/customizations/groups/reorder', data),
+  cloneCustomizationGroup: (id, data) => businessApi.post(`/customizations/groups/${id}/clone`, data),
+  
+  getCustomizationOptions: (groupId) => businessApi.get(`/customizations/options/${groupId}`),
+  createCustomizationOption: (data) => businessApi.post('/customizations/options', data),
+  updateCustomizationOption: (id, data) => businessApi.put(`/customizations/options/${id}`, data),
+  deleteCustomizationOption: (id) => businessApi.delete(`/customizations/options/${id}`),
+  reorderCustomizationOptions: (data) => businessApi.put('/customizations/options/reorder', data),
+
   // ── Reviews ───────────────────────────────────────────────────────────────
   getBusinessReviews: (businessId, params) =>
     businessApi.get(`/reviews/business/${businessId}`, { params }),

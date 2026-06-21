@@ -1,0 +1,54 @@
+# ----------------------------------------
+# Monorepo ignore rules
+# ----------------------------------------
+
+# Exclude other monorepo projects
+backend/
+website/
+admin-dashboard/
+docs/
+graphify-out/
+.agents/
+.github/
+
+# Exclude root files
+/*.md
+/*.json
+/*.yml
+/*.zip
+/*.keystore
+
+# Dependencies
+**/node_modules/
+node_modules/
+
+# Native folders (managed expo project)
+**/android/
+**/ios/
+
+# Expo / build artifacts
+**/.expo/
+**/.expo-shared/
+**/dist/
+**/build/
+**/web-build/
+**/.next/
+
+# IDE
+**/.idea/
+**/.vscode/
+
+# Git
+.git/
+
+# OS
+**/.DS_Store
+**/Thumbs.db
+
+# Env
+**/.env*
+
+# App artifacts
+**/*.apk
+**/*.aab
+**/*.ipa

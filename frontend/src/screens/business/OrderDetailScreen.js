@@ -148,14 +148,9 @@ export default function OrderDetailScreen({ navigation, route }) {
                 <Text className="font-semibold text-gray-900">
                   {item.quantity}x {item.name}
                 </Text>
-                {item.modifiers.length > 0 && (
+                {item.customizationSelections?.length > 0 && (
                   <Text className="text-xs text-gray-500 mt-1">
-                    {item.modifiers.map((m) => m.name).join(', ')}
-                  </Text>
-                )}
-                {item.addOns.length > 0 && (
-                  <Text className="text-xs text-gray-500 mt-0.5">
-                    + {item.addOns.map((a) => a.name).join(', ')}
+                    {item.customizationSelections.map((c) => c.optionName).join(', ')}
                   </Text>
                 )}
               </View>

@@ -21,31 +21,35 @@ const redisOptions = {
  * - Push tokens for customers are stored on User.pushTokens[]
  */
 
-const notificationWorker = new Worker('notifications', async (job) => {
-  console.log(`[NotificationWorker] Processing job ${job.id} of type ${job.name}`);
-  const { type, payload } = job.data;
+let notificationWorker = null;
 
-  try {
-    if (type === 'order.created') {
-      await handleOrderCreatedPush(payload);
-    } else if (type === 'order.status_changed') {
-      await handleOrderStatusPush(payload);
-    } else {
-      console.log(`[NotificationWorker] Unknown job type: ${type}`);
+if (process.env.DISABLE_REDIS_QUEUES !== 'true') {
+  notificationWorker = new Worker('notifications', async (job) => {
+    console.log(`[NotificationWorker] Processing job ${job.id} of type ${job.name}`);
+    const { type, payload } = job.data;
+
+    try {
+      if (type === 'order.created') {
+        await handleOrderCreatedPush(payload);
+      } else if (type === 'order.status_changed') {
+        await handleOrderStatusPush(payload);
+      } else {
+        console.log(`[NotificationWorker] Unknown job type: ${type}`);
+      }
+    } catch (error) {
+      console.error(`[NotificationWorker] Error processing job ${job.id}:`, error);
+      throw error;
     }
-  } catch (error) {
-    console.error(`[NotificationWorker] Error processing job ${job.id}:`, error);
-    throw error;
-  }
-}, { connection: redisOptions });
+  }, { connection: redisOptions });
 
-notificationWorker.on('completed', job => {
-  console.log(`[NotificationWorker] Job ${job.id} completed!`);
-});
+  notificationWorker.on('completed', job => {
+    console.log(`[NotificationWorker] Job ${job.id} completed!`);
+  });
 
-notificationWorker.on('failed', (job, err) => {
-  console.error(`[NotificationWorker] Job ${job.id} failed:`, err);
-});
+  notificationWorker.on('failed', (job, err) => {
+    console.error(`[NotificationWorker] Job ${job.id} failed:`, err);
+  });
+}
 
 // ── Handler: New order placed — notify the business owner ──────────────────
 async function handleOrderCreatedPush(payload) {

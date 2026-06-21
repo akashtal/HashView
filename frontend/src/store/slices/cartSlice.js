@@ -27,8 +27,7 @@ const cartSlice = createSlice({
         const existingItemIndex = state.items.findIndex(
           (i) =>
             i.menuItem._id === item.menuItem._id &&
-            JSON.stringify(i.selectedModifiers) === JSON.stringify(item.selectedModifiers) &&
-            JSON.stringify(i.selectedAddOns) === JSON.stringify(item.selectedAddOns)
+            JSON.stringify(i.customizationSelections) === JSON.stringify(item.customizationSelections)
         );
 
         if (existingItemIndex >= 0) {

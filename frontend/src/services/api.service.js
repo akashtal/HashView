@@ -428,6 +428,16 @@ const ApiService = {
   createMenuItemsBatch: (businessId, items, skipDuplicates = true) =>
     apiClient.post('/menu-items/batch', { businessId, items, skipDuplicates }),
 
+  // ─── Customizations (Groups & Options) ─────────────────────────────────────
+  getCustomizationGroups: (menuItemId) => apiClient.get(`/customizations/groups/menu-item/${menuItemId}`),
+  createCustomizationGroup: (data) => apiClient.post('/customizations/groups', data),
+  updateCustomizationGroup: (id, data) => apiClient.put(`/customizations/groups/${id}`, data),
+  deleteCustomizationGroup: (id) => apiClient.delete(`/customizations/groups/${id}`),
+  
+  createCustomizationOption: (data) => apiClient.post('/customizations/options', data),
+  updateCustomizationOption: (id, data) => apiClient.put(`/customizations/options/${id}`, data),
+  deleteCustomizationOption: (id) => apiClient.delete(`/customizations/options/${id}`),
+
   // ─── Phase 5: Order Management APIs ────────────────────────────────────────
 
   createOrder: (data) =>

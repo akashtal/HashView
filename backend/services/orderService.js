@@ -1,6 +1,8 @@
 const Order = require('../models/Order.model');
 const OrderStatusHistory = require('../models/OrderStatusHistory.model');
 const MenuItem = require('../models/MenuItem.model');
+const CustomizationGroup = require('../models/CustomizationGroup.model');
+const CustomizationOption = require('../models/CustomizationOption.model');
 const crypto = require('crypto');
 
 /**
@@ -34,7 +36,7 @@ exports.validateItems = async (cartItems) => {
   let validatedSubtotal = 0;
 
   for (const item of cartItems) {
-    const dbItem = await MenuItem.findById(item.menuItem._id);
+    const dbItem = await MenuItem.findById(item.menuItem._id).populate('customizationGroups');
     
     if (!dbItem) {
       return { isValid: false, errorMessage: `Item ${item.menuItem.name} no longer exists.` };
@@ -47,9 +49,8 @@ exports.validateItems = async (cartItems) => {
     // Verify base price
     let itemTotal = dbItem.price;
 
-    // Verify modifiers
+    // Verify modifiers (Legacy)
     for (const mod of item.selectedModifiers || []) {
-      // Find the modifier in DB
       const dbModGroup = dbItem.modifiers.find(m => 
         m.options.some(opt => opt.name === mod.name && opt.price === mod.price)
       );
@@ -59,13 +60,65 @@ exports.validateItems = async (cartItems) => {
       itemTotal += mod.price || 0;
     }
 
-    // Verify addons
+    // Verify addons (Legacy)
     for (const addon of item.selectedAddOns || []) {
       const dbAddon = dbItem.addOns.find(a => a.name === addon.name && a.price === addon.price);
       if (!dbAddon) {
         return { isValid: false, errorMessage: `Invalid add-on ${addon.name} for item ${dbItem.name}` };
       }
       itemTotal += addon.price || 0;
+    }
+
+    // Verify Customizations (New Architecture)
+    if (item.customizationSelections && item.customizationSelections.length > 0) {
+      const selectionsByGroup = {};
+      
+      for (const sel of item.customizationSelections) {
+        const group = dbItem.customizationGroups.find(g => g.name === sel.groupName);
+        if (!group) {
+          return { isValid: false, errorMessage: `Invalid customization group ${sel.groupName} for item ${dbItem.name}` };
+        }
+        
+        const dbOption = await CustomizationOption.findOne({ group: group._id, name: sel.optionName });
+        if (!dbOption) {
+          return { isValid: false, errorMessage: `Invalid option ${sel.optionName} for group ${group.name}` };
+        }
+        
+        // Ensure price is exact float match
+        if (Math.abs(dbOption.additionalPrice - sel.priceAdjustment) > 0.01) {
+          return { isValid: false, errorMessage: `Price mismatch for option ${sel.optionName}` };
+        }
+
+        itemTotal += dbOption.additionalPrice;
+        
+        if (!selectionsByGroup[group._id]) {
+          selectionsByGroup[group._id] = { group, count: 0 };
+        }
+        selectionsByGroup[group._id].count += 1;
+      }
+      
+      // Validate Min/Max and Required
+      for (const group of dbItem.customizationGroups) {
+        const stats = selectionsByGroup[group._id] || { count: 0 };
+        if (group.isRequired && stats.count === 0) {
+          return { isValid: false, errorMessage: `Missing required selection for ${group.name}` };
+        }
+        if (group.minSelections > 0 && stats.count < group.minSelections) {
+          return { isValid: false, errorMessage: `Please select at least ${group.minSelections} for ${group.name}` };
+        }
+        if (group.maxSelections && stats.count > group.maxSelections) {
+          return { isValid: false, errorMessage: `Maximum selections exceeded for ${group.name}` };
+        }
+      }
+    } else {
+      // Validate required groups when no selections are provided
+      if (dbItem.customizationGroups) {
+        for (const group of dbItem.customizationGroups) {
+          if (group.isRequired || group.minSelections > 0) {
+            return { isValid: false, errorMessage: `Missing required selection for ${group.name}` };
+          }
+        }
+      }
     }
 
     // Compare with client's itemTotal (allowing tiny float rounding differences)

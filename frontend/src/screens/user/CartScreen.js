@@ -150,27 +150,18 @@ export default function CartScreen({ navigation }) {
               </View>
             </View>
 
-            {/* Modifiers & Add-ons */}
-            {(cartItem.selectedModifiers?.length > 0 || cartItem.selectedAddOns?.length > 0) && (
+            {/* Customizations */}
+            {(cartItem.customizationSelections?.length > 0) && (
               <View className="bg-gray-50 p-3 rounded-xl mb-3">
-                {cartItem.selectedModifiers?.map((mod, i) => (
-                  <View key={`mod-${i}`} className="flex-row justify-between items-center mb-1">
-                    <Text className="text-xs text-gray-600 font-medium flex-1">• {mod.name}</Text>
-                    {mod.price > 0 && (
+                {cartItem.customizationSelections?.map((selection, i) => (
+                  <View key={`cust-${i}`} className="flex-row justify-between items-center mb-1">
+                    <Text className="text-xs text-gray-600 font-medium flex-1">
+                      <Text className="font-bold">{selection.groupName}:</Text> {selection.optionName}
+                    </Text>
+                    {selection.priceAdjustment > 0 && (
                       <Text className="text-xs text-gray-500">
                         +{currencySymbol}
-                        {mod.price.toFixed(2)}
-                      </Text>
-                    )}
-                  </View>
-                ))}
-                {cartItem.selectedAddOns?.map((addon, i) => (
-                  <View key={`addon-${i}`} className="flex-row justify-between items-center mb-1">
-                    <Text className="text-xs text-gray-600 font-medium flex-1">+ {addon.name}</Text>
-                    {addon.price > 0 && (
-                      <Text className="text-xs text-gray-500">
-                        +{currencySymbol}
-                        {addon.price.toFixed(2)}
+                        {selection.priceAdjustment.toFixed(2)}
                       </Text>
                     )}
                   </View>
