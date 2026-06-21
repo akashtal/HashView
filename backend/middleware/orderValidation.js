@@ -12,6 +12,15 @@ exports.createOrderSchema = Joi.object({
         _id: Joi.string().required()
       }).unknown(true).required(),
       quantity: Joi.number().min(1).required(),
+      customizationSelections: Joi.array().items(
+        Joi.object({
+          groupId: Joi.string().required(),
+          groupName: Joi.string().required(),
+          optionId: Joi.string().required(),
+          optionName: Joi.string().required(),
+          priceAdjustment: Joi.number().optional()
+        }).unknown(true)
+      ).optional(),
       selectedModifiers: Joi.array().items(
         Joi.object({
           name: Joi.string().required(),
