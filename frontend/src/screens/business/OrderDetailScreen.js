@@ -81,8 +81,7 @@ export default function OrderDetailScreen({ navigation, route }) {
     );
   }
 
-  const currencySymbol =
-    order.items[0]?.currency === 'GBP' ? '£' : order.items[0]?.currency === 'USD' ? '$' : '€';
+  const currencySymbol = '£';
 
   return (
     <View className="flex-1 bg-gray-50">

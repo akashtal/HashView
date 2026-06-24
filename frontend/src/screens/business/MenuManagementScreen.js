@@ -18,10 +18,26 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import * as ImagePicker from 'expo-image-picker';
 import ApiService from '../../services/api.service';
 import COLORS from '../../config/colors';
+import { API_CONFIG } from '../../config/api.config';
 import ToastService from '../../utils/ToastService';
+
+const PREDEFINED_ORDER = [
+  'starter',
+  'appetizer',
+  'soup',
+  'chinese',
+  'curry',
+  'main',
+  'pizza',
+  'burger',
+  'side',
+  'dessert',
+  'sweet',
+  'drink',
+  'beverage'
+];
 
 // ─── Type options for the Add/Edit form ──────────────────────────────────────
 const ITEM_TYPES = [
@@ -132,8 +148,7 @@ const MenuItemCard = ({ item, onEdit, onDelete, onToggle }) => (
           ) : null}
         </View>
         <Text style={{ fontWeight: '700', fontSize: 15, color: '#6366F1' }}>
-          {item.currency === 'GBP' ? '£' : item.currency === 'USD' ? '$' : '€'}
-          {item.price.toFixed(2)}
+          £{item.price.toFixed(2)}
         </Text>
       </View>
 
@@ -211,6 +226,9 @@ export default function MenuManagementScreen({ route, navigation }) {
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [reviewItems, setReviewItems] = useState([]); // extracted drafts from AI
   const [savingBatch, setSavingBatch] = useState(false);
+  
+  // Custom Category Order
+  const [menuCategoryOrder, setMenuCategoryOrder] = useState([]);
 
   // Refresh whenever screen comes into focus
   useFocusEffect(
@@ -222,12 +240,16 @@ export default function MenuManagementScreen({ route, navigation }) {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [menuRes, statsRes] = await Promise.all([
+      const [menuRes, statsRes, businessRes] = await Promise.all([
         ApiService.getMenuItems(businessId),
         ApiService.getMenuStats(businessId).catch(() => null),
+        ApiService.getBusiness(businessId).catch(() => null)
       ]);
       setGrouped(menuRes.data || {});
       if (statsRes?.success) setStats(statsRes.data);
+      if (businessRes?.data?.data?.menuCategoryOrder) {
+        setMenuCategoryOrder(businessRes.data.data.menuCategoryOrder);
+      }
     } catch (e) {
       ToastService.showError('Error', 'Could not load menu items');
     } finally {
@@ -522,6 +544,50 @@ export default function MenuManagementScreen({ route, navigation }) {
 
   const totalItems = Object.values(grouped).flat().length;
 
+  const handleMoveCategory = async (category, direction) => {
+    let currentOrder = [...menuCategoryOrder];
+    // Ensure all categories currently present are in the array
+    Object.keys(grouped).forEach(cat => {
+      if(!currentOrder.includes(cat)) {
+        currentOrder.push(cat);
+      }
+    });
+
+    const index = currentOrder.indexOf(category);
+    if (direction === 'up' && index > 0) {
+      [currentOrder[index - 1], currentOrder[index]] = [currentOrder[index], currentOrder[index - 1]];
+    } else if (direction === 'down' && index < currentOrder.length - 1) {
+      [currentOrder[index + 1], currentOrder[index]] = [currentOrder[index], currentOrder[index + 1]];
+    } else {
+      return; // Cannot move further
+    }
+
+    setMenuCategoryOrder(currentOrder);
+    try {
+      await ApiService.updateBusiness(businessId, { menuCategoryOrder: currentOrder });
+    } catch (e) {
+      ToastService.showError('Error', 'Failed to save category order');
+    }
+  };
+
+  const getWeight = (cat) => {
+    // 1. Check dynamic DB order first
+    if (menuCategoryOrder && menuCategoryOrder.length > 0) {
+      const idx = menuCategoryOrder.indexOf(cat);
+      if (idx !== -1) return idx;
+      return 999;
+    }
+    
+    // 2. Fallback to hardcoded predefined order for old menus
+    const catLower = cat.toLowerCase();
+    for (let i = 0; i < PREDEFINED_ORDER.length; i++) {
+      if (catLower.includes(PREDEFINED_ORDER[i])) return i;
+    }
+    
+    // 3. Alphabetical fallback
+    return 999;
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
       <StatusBar barStyle="light-content" backgroundColor="#4F46E5" />
@@ -765,12 +831,39 @@ export default function MenuManagementScreen({ route, navigation }) {
           </View>
 
           {/* Grouped sections */}
-          {Object.entries(grouped).map(([category, items]) => (
+          {Object.entries(grouped)
+            .sort(([catA], [catB]) => {
+              const weightA = getWeight(catA);
+              const weightB = getWeight(catB);
+              if (weightA !== weightB) return weightA - weightB;
+              return catA.localeCompare(catB);
+            })
+            .map(([category, items], index, array) => (
             <View key={category}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                 <Text style={{ fontWeight: '700', fontSize: 15, color: '#374151', flex: 1 }}>
                   {category}
                 </Text>
+                
+                {/* Reordering Controls */}
+                <View style={{ flexDirection: 'row', marginRight: 10, backgroundColor: '#F3F4F6', borderRadius: 8, padding: 2 }}>
+                  <TouchableOpacity 
+                    onPress={() => handleMoveCategory(category, 'up')}
+                    style={{ padding: 4, opacity: index === 0 ? 0.3 : 1 }}
+                    disabled={index === 0}
+                  >
+                    <Icon name="arrow-up" size={16} color="#4B5563" />
+                  </TouchableOpacity>
+                  <View style={{ width: 1, backgroundColor: '#D1D5DB', marginVertical: 4 }} />
+                  <TouchableOpacity 
+                    onPress={() => handleMoveCategory(category, 'down')}
+                    style={{ padding: 4, opacity: index === array.length - 1 ? 0.3 : 1 }}
+                    disabled={index === array.length - 1}
+                  >
+                    <Icon name="arrow-down" size={16} color="#4B5563" />
+                  </TouchableOpacity>
+                </View>
+
                 <Text style={{ fontSize: 12, color: '#9CA3AF' }}>
                   {items.length} item{items.length !== 1 ? 's' : ''}
                 </Text>
@@ -913,11 +1006,7 @@ export default function MenuManagementScreen({ route, navigation }) {
                   ]}
                 >
                   <Text style={{ color: '#374151', fontWeight: '600' }}>
-                    {form.currency === 'GBP'
-                      ? '£ GBP'
-                      : form.currency === 'USD'
-                        ? '$ USD'
-                        : '€ EUR'}
+                    £ GBP
                   </Text>
                 </View>
               </View>

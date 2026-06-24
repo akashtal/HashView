@@ -44,12 +44,7 @@ export default function CheckoutScreen({ navigation, route }) {
   });
 
   // Get currency from the first item
-  const currencySymbol =
-    cart.items[0]?.menuItem?.currency === 'GBP'
-      ? '£'
-      : cart.items[0]?.menuItem?.currency === 'USD'
-        ? '$'
-        : '€';
+  const currencySymbol = '£';
 
   // Guard: redirect guest users to login immediately
   useEffect(() => {

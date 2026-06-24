@@ -251,6 +251,11 @@ const businessSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  
+  // Custom display order for menu categories
+  menuCategoryOrder: [{
+    type: String
+  }],
 
   // Profile Visit Analytics
   visitCount: {

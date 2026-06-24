@@ -226,8 +226,7 @@ export default function MenuItemModal({ visible, onClose, item, business }) {
                   {item.name}
                 </Text>
                 <Text style={{ fontSize: 20, fontWeight: 'bold', color: COLORS.secondary }}>
-                  {item.currency === 'GBP' ? '£' : item.currency === 'USD' ? '$' : '€'}
-                  {item.price.toFixed(2)}
+                  £{item.price.toFixed(2)}
                 </Text>
               </View>
               {item.description ? (
@@ -299,8 +298,7 @@ export default function MenuItemModal({ visible, onClose, item, business }) {
                         </View>
                         {opt.additionalPrice > 0 && (
                           <Text style={{ fontSize: 14, color: '#6B7280' }}>
-                            +{item.currency === 'GBP' ? '£' : item.currency === 'USD' ? '$' : '€'}
-                            {opt.additionalPrice.toFixed(2)}
+                            +£{opt.additionalPrice.toFixed(2)}
                           </Text>
                         )}
                       </TouchableOpacity>
@@ -377,8 +375,7 @@ export default function MenuItemModal({ visible, onClose, item, business }) {
                 Add {quantity} to Cart
               </Text>
               <Text style={{ color: '#FFF', fontSize: 16, fontWeight: 'bold' }}>
-                {item.currency === 'GBP' ? '£' : item.currency === 'USD' ? '$' : '€'}
-                {totalPrice.toFixed(2)}
+                £{totalPrice.toFixed(2)}
               </Text>
             </TouchableOpacity>
           </View>

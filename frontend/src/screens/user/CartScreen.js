@@ -82,12 +82,7 @@ export default function CartScreen({ navigation }) {
   }
 
   // Get currency from the first item (assuming all items in cart have same currency)
-  const currencySymbol =
-    cart.items[0]?.menuItem?.currency === 'GBP'
-      ? '£'
-      : cart.items[0]?.menuItem?.currency === 'USD'
-        ? '$'
-        : '€';
+  const currencySymbol = '£';
 
   return (
     <View className="flex-1 bg-gray-50">

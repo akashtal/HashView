@@ -19,8 +19,7 @@ import COLORS from '../../config/colors';
 
 // ── Order History Card ────────────────────────────────────────────────────────
 function OrderHistoryCard({ item, onRepeat }) {
-  const currency =
-    item.items?.[0]?.currency === 'GBP' ? '£' : item.items?.[0]?.currency === 'USD' ? '$' : '₹';
+  const currency = '£';
 
   const statusStyle = {
     delivered: { bg: '#D1FAE5', text: '#065F46', icon: 'checkmark-circle' },

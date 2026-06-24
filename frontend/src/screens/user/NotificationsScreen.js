@@ -79,6 +79,7 @@ export default function NotificationsScreen({ navigation }) {
 
   const getNotificationIcon = (type) => {
     switch (type) {
+      case 'new_order':
       case 'order_placed':
         return { icon: 'restaurant', color: '#F59E0B' };
       case 'order_status':
@@ -107,20 +108,65 @@ export default function NotificationsScreen({ navigation }) {
     if (notification.status !== 'read') {
       await markAsRead(notification._id);
     }
-    // Navigate based on type
+
     const type = (notification.type || '').toLowerCase();
     const data = notification.data || {};
-    if (type === 'order_placed' || type === 'order_status') {
-      if (data.orderId) {
-        navigation.navigate('OrderTracking', { orderId: data.orderId });
-      } else if (data.screen === 'OrdersDashboard') {
+
+    // ── Business Owner: New Order Notification ─────────────────────────────
+    // Backend sends type: 'new_order' with data.screen: 'OrdersDashboard'
+    if (type === 'new_order' || data.screen === 'OrdersDashboard') {
+      try {
+        if (data.orderId) {
+          navigation.navigate('OrderDetail', { orderId: data.orderId });
+        } else {
+          navigation.navigate('OrdersDashboard');
+        }
+      } catch {
+        // If screen is not in current stack (e.g. user viewing from profile tab),
+        // navigate to the business tab root first
         navigation.navigate('OrdersDashboard');
       }
-    } else if (data.businessId) {
-      navigation.navigate('Home', {
-        screen: 'BusinessDetail',
-        params: { businessId: data.businessId },
-      });
+      return;
+    }
+
+    // ── Customer: Order Status Update Notification ─────────────────────────
+    // Backend sends type: 'order_status' with data.screen: 'OrderTracking'
+    if (type === 'order_status' || type === 'order_placed' || data.screen === 'OrderTracking') {
+      try {
+        if (data.orderId) {
+          navigation.navigate('OrderTracking', { orderId: data.orderId });
+        }
+      } catch {
+        // already on OrderTracking or unavailable
+      }
+      return;
+    }
+
+    // ── Business Verification / Business Update ────────────────────────────
+    if (type === 'business_verification' || type === 'kyc' || type === 'business_update' || type === 'business') {
+      navigation.navigate('BusinessDashboard');
+      return;
+    }
+
+    // ── Coupon ─────────────────────────────────────────────────────────────
+    if (type === 'coupon' || type === 'promotion') {
+      if (data.businessId) {
+        navigation.navigate('BusinessDetail', { businessId: data.businessId });
+      }
+      return;
+    }
+
+    // ── Review ─────────────────────────────────────────────────────────────
+    if (type === 'review') {
+      if (data.businessId) {
+        navigation.navigate('BusinessDetail', { businessId: data.businessId });
+      }
+      return;
+    }
+
+    // ── Generic: Navigate to business if businessId present ───────────────
+    if (data.businessId) {
+      navigation.navigate('BusinessDetail', { businessId: data.businessId });
     }
   };
 
@@ -268,7 +314,21 @@ export default function NotificationsScreen({ navigation }) {
                           {formatTimestamp(notification.createdAt)}
                         </Text>
 
-                        {notification.data?.type && (
+                        {/* Show actionable hint for order notifications */}
+                        {(notification.type === 'new_order' || notification.type === 'order_placed' || notification.type === 'order_status') ? (
+                          <View
+                            className="flex-row items-center px-2 py-1 rounded-full"
+                            style={{ backgroundColor: `${iconData.color}15` }}
+                          >
+                            <Text
+                              className="text-xs font-semibold mr-1"
+                              style={{ color: iconData.color }}
+                            >
+                              Tap to view
+                            </Text>
+                            <Icon name="chevron-forward" size={12} color={iconData.color} />
+                          </View>
+                        ) : notification.data?.type ? (
                           <View
                             className="px-2 py-1 rounded-full"
                             style={{ backgroundColor: `${iconData.color}15` }}
@@ -280,7 +340,7 @@ export default function NotificationsScreen({ navigation }) {
                               {notification.data.type}
                             </Text>
                           </View>
-                        )}
+                        ) : null}
                       </View>
                     </View>
                   </View>

@@ -63,8 +63,7 @@ function LiveTracker({ order }) {
   const currentIdx = STATUS_INDEX[order.status] ?? 0;
   const isCancelled = order.status === 'cancelled';
 
-  const currency =
-    order.items?.[0]?.currency === 'GBP' ? '£' : order.items?.[0]?.currency === 'USD' ? '$' : '₹';
+  const currency = '£';
 
   return (
     <View
@@ -251,8 +250,7 @@ function LiveTracker({ order }) {
 
 // ── Past order card with Repeat Order ───────────────────────────────────────
 function PastOrderCard({ item, onRepeat }) {
-  const currency =
-    item.items?.[0]?.currency === 'GBP' ? '£' : item.items?.[0]?.currency === 'USD' ? '$' : '₹';
+  const currency = '£';
 
   const statusColors = {
     delivered: { bg: '#D1FAE5', text: '#065F46', icon: 'checkmark-circle' },

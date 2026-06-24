@@ -1380,7 +1380,7 @@ exports.updateBusiness = async (req, res, next) => {
       });
     }
 
-    const allowedUpdates = ['name', 'description', 'email', 'phone', 'address', 'category', 'openingHours', 'socialMedia', 'website', 'radius', 'orderRadius'];
+    const allowedUpdates = ['name', 'description', 'email', 'phone', 'address', 'category', 'openingHours', 'socialMedia', 'website', 'radius', 'orderRadius', 'menuCategoryOrder'];
     const updates = {};
 
     allowedUpdates.forEach(field => {
