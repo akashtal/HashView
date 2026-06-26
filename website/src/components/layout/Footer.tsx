@@ -24,10 +24,8 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { icon: Facebook, href: "#", label: "Facebook" },
-  { icon: Twitter, href: "#", label: "Twitter" },
-  { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: Linkedin, href: "#", label: "LinkedIn" },
+  { icon: Facebook, href: "https://www.facebook.com/profile.php?id=61587124713605", label: "Facebook" },
+  { icon: Linkedin, href: "https://www.linkedin.com/company/hashview/posts/?feedView=all", label: "LinkedIn" },
 ];
 
 export const Footer = () => {
