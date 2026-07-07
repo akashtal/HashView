@@ -140,6 +140,16 @@ export const adminApi = {
   // Batch create: save AI-reviewed items in one request
   createMenuItemsBatch: (businessId, items, skipDuplicates = true) =>
     api.post('/menu-items/batch', { businessId, items, skipDuplicates }),
+
+  // ── Customizations (Groups & Options) ────────────────────────────────────────
+  getCustomizationGroups: (menuItemId) =>
+    api.get(`/customizations/groups/menu-item/${menuItemId}`),
+  createCustomizationGroup: (data) => api.post('/customizations/groups', data),
+  updateCustomizationGroup: (id, data) => api.put(`/customizations/groups/${id}`, data),
+  deleteCustomizationGroup: (id) => api.delete(`/customizations/groups/${id}`),
+  createCustomizationOption: (data) => api.post('/customizations/options', data),
+  updateCustomizationOption: (id, data) => api.put(`/customizations/options/${id}`, data),
+  deleteCustomizationOption: (id) => api.delete(`/customizations/options/${id}`),
 };
 
 export default adminApi;
