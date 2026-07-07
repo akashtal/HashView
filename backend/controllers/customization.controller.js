@@ -138,7 +138,7 @@ exports.deleteGroup = async (req, res) => {
     
     // Delete group
     const businessId = group.business;
-    await group.remove();
+    await group.deleteOne();
     await clearMenuCacheForBusiness(businessId);
 
     res.status(200).json({ success: true, data: {} });
@@ -237,7 +237,7 @@ exports.deleteOption = async (req, res) => {
     const option = await CustomizationOption.findById(req.params.id);
     if (!option) return res.status(404).json({ success: false, message: 'Option not found' });
     const groupId = option.group;
-    await option.remove();
+    await option.deleteOne();
     await clearMenuCacheForGroup(groupId);
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
