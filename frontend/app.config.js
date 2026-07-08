@@ -181,6 +181,7 @@ export default {
           organization: 'hashview-qr',
         },
       ],
+      './plugins/withFmtFix.js',
     ],
 
     extra: {
