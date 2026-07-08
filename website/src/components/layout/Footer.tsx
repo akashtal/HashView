@@ -11,9 +11,11 @@ const footerLinks = {
     { name: "Contact", path: "/contact" },
   ],
   product: [
+    { name: "How It Works", path: "/how-it-works" },
     { name: "Features", path: "/#features" },
     { name: "Pricing", path: "/pricing" },
-    { name: "FAQs", path: "#" },
+    { name: "Blog", path: "/blog" },
+    { name: "FAQs", path: "/how-it-works#faq" },
     { name: "Support", path: "#" },
   ],
   legal: [

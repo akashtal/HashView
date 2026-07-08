@@ -17,8 +17,8 @@ import type { FeatureGateKey } from "@/lib/feature-gates";
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "About", path: "/about" },
+  { name: "How It Works", path: "/how-it-works" },
   { name: "Pricing", path: "/pricing" },
-  { name: "Blog", path: "/blog" },
   { name: "Contact", path: "/contact" },
   { name: "Browse Businesses", path: "/explore" },
 ];
@@ -78,8 +78,9 @@ export const Navbar = () => {
             ))}
           </div>
 
-          {/* Theme Toggle & CTA Button */}
+          {/* Theme Toggle & CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
+            <ThemeToggle />
             <Button variant="default" asChild>
               <Link href="/login">Log In</Link>
             </Button>
@@ -145,6 +146,7 @@ export const Navbar = () => {
                     <Link href="/login" onClick={() => setIsOpen(false)}>Log In</Link>
                   </Button>
                   <div className="flex gap-3">
+                    <ThemeToggle />
                     <Button 
                       variant="outline" 
                       className="flex-1 flex items-center justify-center"
