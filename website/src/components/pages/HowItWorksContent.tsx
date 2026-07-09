@@ -175,11 +175,10 @@ const businessSteps = [
     icon: Package,
     title: "Manage Everything from One Place",
     description:
-      "Your comprehensive CRM dashboard handles orders, table management, customer database, menu updates, analytics, invoices, bills, payments, staff, and full business reports.",
+      "Your comprehensive CRM dashboard handles orders, table management, customer database, menu updates, analytics, payments, staff, and full business reports.",
     benefits: [
       "Orders & tables",
       "Customer database",
-      "Invoices & billing",
       "Analytics & reports",
     ],
   },
@@ -227,8 +226,6 @@ const businessBenefits = [
   { icon: Package, title: "Order Management" },
   { icon: Users, title: "Customer Database" },
   { icon: BarChart3, title: "Analytics" },
-  { icon: Receipt, title: "Invoice Management" },
-  { icon: CreditCard, title: "Billing" },
   { icon: Tag, title: "Coupons & Offers" },
   { icon: Bell, title: "Push Notifications" },
   { icon: Gift, title: "Loyalty Programs" },
@@ -244,7 +241,6 @@ const comparisons = [
   { traditional: "No Order Tracking", modern: "Real-Time Order Status" },
   { traditional: "No Analytics", modern: "Full Business Dashboard" },
   { traditional: "No Customer Loyalty", modern: "Cashback & Rewards System" },
-  { traditional: "Handwritten Bills", modern: "Digital Invoicing & Billing" },
   { traditional: "No Push Marketing", modern: "Direct Customer Notifications" },
   { traditional: "Unverified Reviews", modern: "Real-Time Verified Reviews" },
   { traditional: "Manual Menu Updates", modern: "AI-Powered Menu Upload" },
@@ -282,7 +278,7 @@ const faqs = [
   },
   {
     q: "What does the CRM dashboard include for restaurants?",
-    a: "The full CRM dashboard includes: live order management, table management, customer database, menu editing, analytics and reporting, invoice and billing management, staff management, coupon and offer creation, push notification campaigns, and complete business profile control.",
+    a: "The full CRM dashboard includes: live order management, table management, customer database, menu editing, analytics and reporting, staff management, coupon and offer creation, push notification campaigns, and complete business profile control.",
   },
   {
     q: "Are the customer reviews verified?",
@@ -399,20 +395,18 @@ function TimelineStep({
       {/* Vertical connector line */}
       {!isLast && (
         <div
-          className={`absolute left-[27px] md:left-1/2 top-14 bottom-0 w-0.5 bg-gradient-to-b ${
-            variant === "customer"
-              ? "from-hashview-purple/60 to-hashview-orange/30"
-              : "from-hashview-orange/60 to-hashview-purple/30"
-          } -translate-x-1/2 md:translate-x-0 z-0`}
+          className={`absolute left-[27px] md:left-1/2 top-14 bottom-0 w-0.5 bg-gradient-to-b ${variant === "customer"
+            ? "from-hashview-purple/60 to-hashview-orange/30"
+            : "from-hashview-orange/60 to-hashview-purple/30"
+            } -translate-x-1/2 md:translate-x-0 z-0`}
           style={{ height: "calc(100% + 2rem)" }}
         />
       )}
 
       {/* Mobile: always left-aligned. Desktop: alternating */}
       <div
-        className={`w-full flex flex-row md:flex-row items-start md:items-center gap-4 md:gap-0 ${
-          isEven ? "md:flex-row" : "md:flex-row-reverse"
-        }`}
+        className={`w-full flex flex-row md:flex-row items-start md:items-center gap-4 md:gap-0 ${isEven ? "md:flex-row" : "md:flex-row-reverse"
+          }`}
       >
         {/* Step number + icon — center column on desktop */}
         <div className="relative flex-shrink-0 z-10 md:absolute md:left-1/2 md:-translate-x-1/2">
@@ -440,9 +434,8 @@ function TimelineStep({
           animate={isInView ? "visible" : "hidden"}
           variants={isEven ? fadeLeft : fadeRight}
           custom={0.1}
-          className={`flex-1 md:w-[calc(50%-3rem)] ${
-            isEven ? "md:mr-auto md:pr-16" : "md:ml-auto md:pl-16"
-          } ml-4 md:ml-0`}
+          className={`flex-1 md:w-[calc(50%-3rem)] ${isEven ? "md:mr-auto md:pr-16" : "md:ml-auto md:pl-16"
+            } ml-4 md:ml-0`}
         >
           <div className="group p-6 rounded-2xl bg-card border border-border hover:border-hashview-purple/40 transition-all duration-500 hover:shadow-lg hover:shadow-hashview-purple/10">
             {/* Hover gradient overlay */}
@@ -906,22 +899,20 @@ function SplitTabView() {
       <div className="flex gap-2 p-1 rounded-2xl bg-card border border-border mb-6">
         <button
           onClick={() => setActiveTab("customer")}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-display font-semibold text-sm transition-all duration-300 ${
-            activeTab === "customer"
-              ? "bg-gradient-to-r from-hashview-purple to-hashview-orange text-primary-foreground shadow-md"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-display font-semibold text-sm transition-all duration-300 ${activeTab === "customer"
+            ? "bg-gradient-to-r from-hashview-purple to-hashview-orange text-primary-foreground shadow-md"
+            : "text-muted-foreground hover:text-foreground"
+            }`}
         >
           <Smartphone className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
           <span>For Customers</span>
         </button>
         <button
           onClick={() => setActiveTab("business")}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-display font-semibold text-sm transition-all duration-300 ${
-            activeTab === "business"
-              ? "bg-gradient-to-r from-hashview-orange to-hashview-purple text-primary-foreground shadow-md"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-display font-semibold text-sm transition-all duration-300 ${activeTab === "business"
+            ? "bg-gradient-to-r from-hashview-orange to-hashview-purple text-primary-foreground shadow-md"
+            : "text-muted-foreground hover:text-foreground"
+            }`}
         >
           <Building2 className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
           <span>For Businesses</span>
@@ -938,18 +929,16 @@ function SplitTabView() {
       >
         {/* Content header */}
         <div
-          className={`px-4 sm:px-6 py-4 border-b border-border ${
-            activeTab === "customer"
-              ? "bg-gradient-to-r from-hashview-purple/10 to-transparent"
-              : "bg-gradient-to-r from-hashview-orange/10 to-transparent"
-          }`}
+          className={`px-4 sm:px-6 py-4 border-b border-border ${activeTab === "customer"
+            ? "bg-gradient-to-r from-hashview-purple/10 to-transparent"
+            : "bg-gradient-to-r from-hashview-orange/10 to-transparent"
+            }`}
         >
           <span
-            className={`inline-block px-3 py-0.5 rounded-full text-xs font-semibold mb-1 ${
-              activeTab === "customer"
-                ? "bg-hashview-purple/15 text-hashview-purple"
-                : "bg-hashview-orange/15 text-hashview-orange"
-            }`}
+            className={`inline-block px-3 py-0.5 rounded-full text-xs font-semibold mb-1 ${activeTab === "customer"
+              ? "bg-hashview-purple/15 text-hashview-purple"
+              : "bg-hashview-orange/15 text-hashview-orange"
+              }`}
           >
             {activeTab === "customer" ? "For Customers" : "For Businesses"}
           </span>
@@ -1026,11 +1015,10 @@ function TimelineStepSimple({
         {/* Vertical line */}
         {!isLast && (
           <div
-            className={`w-0.5 flex-1 mt-2 bg-gradient-to-b ${
-              variant === "customer"
-                ? "from-hashview-purple/40 to-hashview-orange/20"
-                : "from-hashview-orange/40 to-hashview-purple/20"
-            } min-h-[1.5rem]`}
+            className={`w-0.5 flex-1 mt-2 bg-gradient-to-b ${variant === "customer"
+              ? "from-hashview-purple/40 to-hashview-orange/20"
+              : "from-hashview-orange/40 to-hashview-purple/20"
+              } min-h-[1.5rem]`}
           />
         )}
       </div>
@@ -1055,9 +1043,8 @@ function TimelineStepSimple({
               className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground"
             >
               <CheckCircle2
-                className={`w-2.5 h-2.5 flex-shrink-0 ${
-                  variant === "customer" ? "text-hashview-purple" : "text-hashview-orange"
-                }`}
+                className={`w-2.5 h-2.5 flex-shrink-0 ${variant === "customer" ? "text-hashview-purple" : "text-hashview-orange"
+                  }`}
                 aria-hidden="true"
               />
               {b}
