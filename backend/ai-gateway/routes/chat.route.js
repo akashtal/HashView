@@ -1,48 +1,43 @@
 /**
- * AI Gateway — Chat Route
+ * AI Gateway — Chat Route (v2)
  * POST /ai/chat
- * GET  /ai/chat/:sessionId  (fetch history)
- * DELETE /ai/chat/:sessionId (clear session)
+ * GET  /ai/chat/:sessionId
+ * DELETE /ai/chat/:sessionId
  *
- * Streaming: Uses Server-Sent Events (SSE).
- * The client receives tokens one-by-one as the AI generates them.
+ * Streaming via Server-Sent Events (SSE).
+ *
+ * Key upgrades from v1:
+ *  - Accepts `rankedBusinessList` from the frontend (full ranked list with positions)
+ *  - Ordinal resolution step before context loading
+ *  - Cumulative intent merging (filters stack across turns)
+ *  - Comparison mode detection
+ *  - Removed SEARCH_TRIGGER mechanic (context_loader now handles new search detection)
+ *  - Uses chat_engine v2 with strict system prompt
  *
  * SSE event format:
  *   data: {"type":"token","token":"Hello"}\n\n
  *   data: {"type":"done","fullText":"...","sessionId":"...","suggestedFollowUps":[]}\n\n
- *   data: {"type":"businesses","businesses":[...]}\n\n   (when a new search is triggered)
+ *   data: {"type":"businesses","businesses":[...]}\n\n  (when context_loader triggers new search)
  *   data: {"type":"error","error":"..."}\n\n
- *
- * New search mid-chat:
- *   If the AI response contains SEARCH_TRIGGER:{query}, this route runs
- *   the full AI search pipeline and streams business results back alongside
- *   the chat response.
  */
 
 const express  = require('express');
 const router   = express.Router();
-const mongoose = require('mongoose');
 
 const {
   getSession, saveSession, deleteSession,
   createSession, appendMessage, getRecentHistory,
-  focusBusiness, updateSearchContext,
+  focusBusiness, updateSearchContext, mergeCumulativeIntent,
+  detectOrdinal, detectComparisonTargets,
 } = require('../pipeline/session_manager');
 
 const { loadContext }         = require('../pipeline/context_loader');
 const { streamChatResponse }  = require('../pipeline/chat_engine');
+const { parseIntent }         = require('../pipeline/intent_parser');
+const { buildQuery }          = require('../pipeline/query_builder');
+const { rankResults }         = require('../pipeline/ranker');
 
-// Lazy-load the search pipeline for mid-chat new searches
-function getSearchPipeline() {
-  return {
-    buildQuery:      require('../pipeline/query_builder').buildQuery,
-    executeQuery:    require('../pipeline/retriever').executeQuery,
-    rankResults:     require('../pipeline/ranker').rankResults,
-    parseIntent:     require('../pipeline/intent_parser').parseIntent,
-  };
-}
-
-// ─── POST /ai/chat — Send a message (streaming SSE) ──────────────────────────
+// ─── POST /ai/chat — Send a message (streaming SSE) ───────────────────────────
 
 router.post('/', async (req, res) => {
   const {
@@ -50,15 +45,17 @@ router.post('/', async (req, res) => {
     sessionId,
     latitude,
     longitude,
-    // Context hints passed from the search screen
-    searchBusinessIds,  // IDs of businesses from the last search
-    searchQuery,        // The original search query
-    searchIntent,       // The extracted intent from the last search
+    // Context hints passed from the search screen (v1 compat)
+    searchBusinessIds,
+    searchQuery,
+    searchIntent,
+    // v2: Full ranked list with positions (NEW)
+    rankedBusinessList,
   } = req.body;
 
   const userId = req.user?._id?.toString() || null;
 
-  // ─── Validate ─────────────────────────────────────────────────────────────
+  // ─── Validate ──────────────────────────────────────────────────────────────
   if (!message || !message.trim()) {
     return res.status(400).json({ success: false, error: 'Message is required' });
   }
@@ -70,7 +67,7 @@ router.post('/', async (req, res) => {
   res.setHeader('Content-Type',  'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection',    'keep-alive');
-  res.setHeader('X-Accel-Buffering', 'no'); // Disable Nginx buffering for streaming
+  res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders();
 
   const send = (obj) => {
@@ -82,7 +79,7 @@ router.post('/', async (req, res) => {
     : null;
 
   try {
-    // ─── Load or create session ─────────────────────────────────────────────
+    // ─── Load or create session ──────────────────────────────────────────────
     let session = sessionId ? await getSession(sessionId) : null;
     const activeSessionId = sessionId || `chat_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
@@ -90,15 +87,94 @@ router.post('/', async (req, res) => {
       session = createSession({ userId, location });
     }
 
-    // ─── Inject search context if provided ─────────────────────────────────
-    // (Happens when the user opens chat right after a search)
-    if (searchBusinessIds?.length > 0 && session.messages.length === 0) {
+    // ─── Inject search context (happens when user opens chat after search) ───
+    // Inject on the first message OR whenever the session's rankedBusinessList is
+    // empty (safety net: ensures ordinal resolution works even if the greeting
+    // message didn't carry the list).
+    const isFirstMessage = session.messages.length === 0;
+    const sessionNeedsRankedList = (session.rankedBusinessList || []).length === 0;
+    if ((isFirstMessage || sessionNeedsRankedList) && (searchBusinessIds?.length > 0 || rankedBusinessList?.length > 0)) {
+      // Build ranked list with positions from v2 data or fall back to v1 IDs
+      const list = rankedBusinessList && rankedBusinessList.length > 0
+        ? rankedBusinessList
+        : (searchBusinessIds || []).map((id, idx) => ({ _id: id, position: idx + 1, name: null }));
+
       session = updateSearchContext(session, {
-        businessIds: searchBusinessIds,
+        businessIds: list.map(b => b._id?.toString() || b._id),
+        rankedList:  list,
         query:       searchQuery || '',
         intent:      searchIntent || null,
       });
+
       if (location) session.location = location;
+    }
+
+    // ─── Cumulative Intent Merging ────────────────────────────────────────────
+    // If the user's message contains refinement keywords, try to extract intent
+    // and merge it with the cumulative session intent.
+    const REFINEMENT_PATTERNS = /\b(only|just|show me|filter|with|halal|vegan|vegetarian|gluten|open now|under £|rating|star|parking|wifi|outdoor|delivery|takeaway)\b/i;
+    if (REFINEMENT_PATTERNS.test(message) && !isFirstMessage && session.lastSearchIntent) {
+      try {
+        const intentResult = await parseIntent(message.trim());
+        const newIntent = intentResult.intent;
+
+        // Only merge if meaningful filters were extracted (not just ordinal or off_topic)
+        const hasMeaningfulFilters = newIntent.dietary || newIntent.facility_filters ||
+          newIntent.price_max || newIntent.min_rating || newIntent.is_open_now ||
+          newIntent.has_coupons || newIntent.meal_time;
+
+        if (hasMeaningfulFilters && !newIntent.is_off_topic) {
+          const mergedIntent = mergeCumulativeIntent(session, newIntent);
+
+          // If there are significant filter changes, trigger a refined search
+          if (newIntent.dietary || newIntent.facility_filters || newIntent.price_max !== null) {
+            try {
+              const { executeQuery } = require('../pipeline/retriever');
+              const pipeline = buildQuery(mergedIntent, location || session.location, {
+                limit: 8,
+                page:  1,
+              });
+              const { businesses, totalCount } = await executeQuery(pipeline);
+              const ranked = rankResults(businesses, mergedIntent, location || session.location);
+
+              const newRankedList = ranked.map((b, idx) => ({
+                position:          idx + 1,
+                _id:               b._id,
+                name:              b.name,
+                category:          b.category,
+                rating:            b.rating,
+                distanceKm:        b._distance ? Math.round(b._distance / 100) / 10 : null,
+                matchingMenuItems: (b._menuItems || []).slice(0, 3).map(i => ({
+                  name: i.name, price: i.price, currency: i.currency || 'GBP',
+                })),
+                reasons:           b._reasons || [],
+              }));
+
+              session = updateSearchContext(session, {
+                businessIds: newRankedList.map(b => b._id?.toString()),
+                rankedList:  newRankedList,
+                query:       session.lastSearchQuery,
+                intent:      mergedIntent,
+              });
+
+              // Send updated results to client
+              const cleanedForChat = newRankedList.slice(0, 6).map(cleanBusinessForChat);
+              send({
+                type:        'businesses',
+                businesses:  cleanedForChat,
+                totalCount,
+                query:       session.lastSearchQuery,
+                isRefinement: true,
+              });
+            } catch (searchErr) {
+              console.warn('[Chat Route] Refinement search failed:', searchErr.message);
+            }
+          }
+        }
+      } catch (intentErr) {
+        // Non-fatal — continue with existing context
+        console.warn('[Chat Route] Intent extraction for refinement failed:', intentErr.message);
+      }
     }
 
     // ─── Load RAG context ──────────────────────────────────────────────────
@@ -107,66 +183,71 @@ router.post('/', async (req, res) => {
 
     session = updatedSession;
 
-    // ─── Append user message to history ───────────────────────────────────
+    // ─── Handle new search triggered by context_loader ───────────────────
+    if (needsNewSearch) {
+      try {
+        send({ type: 'searching', query: message.trim() });
+
+        const intentResult = await parseIntent(message.trim());
+        const intent       = intentResult.intent;
+        const pipeline     = buildQuery(intent, location || session.location, { limit: 6, page: 1 });
+        const { executeQuery } = require('../pipeline/retriever');
+        const { businesses, totalCount } = await executeQuery(pipeline);
+        const ranked = rankResults(businesses, intent, location || session.location);
+
+        const newRankedList = ranked.map((b, idx) => ({
+          position:          idx + 1,
+          _id:               b._id,
+          name:              b.name,
+          category:          b.category,
+          rating:            b.rating,
+          distanceKm:        b._distance ? Math.round(b._distance / 100) / 10 : null,
+          matchingMenuItems: (b._menuItems || []).slice(0, 3).map(i => ({
+            name: i.name, price: i.price, currency: i.currency || 'GBP',
+          })),
+          reasons:           b._reasons || [],
+        }));
+
+        session = updateSearchContext(session, {
+          businessIds: newRankedList.map(b => b._id?.toString()),
+          rankedList:  newRankedList,
+          query:       message.trim(),
+          intent,
+        });
+
+        const cleanedForChat = newRankedList.slice(0, 6).map(cleanBusinessForChat);
+        send({ type: 'businesses', businesses: cleanedForChat, totalCount, query: message.trim() });
+      } catch (searchErr) {
+        console.warn('[Chat Route] New search failed:', searchErr.message);
+      }
+    }
+
+    // ─── Append user message ──────────────────────────────────────────────
     session = appendMessage(session, 'user', message.trim());
 
-    // ─── Get recent history for LangChain (excluding the message just added) ──
-    const history = getRecentHistory(session, 8).slice(0, -1); // exclude last (current user msg)
+    // ─── Get history for LangChain (excluding current message) ───────────
+    const history = getRecentHistory(session, 10).slice(0, -1);
 
-    // ─── Stream the AI response ────────────────────────────────────────────
-    let fullAssistantText = '';
-    let searchWasTriggered = false;
-
+    // ─── Stream AI response ────────────────────────────────────────────────
     await streamChatResponse({
       userMessage:  message.trim(),
       history,
       contextText,
       contextType,
+      session,
+      location,
       onToken: (token) => {
         send({ type: 'token', token });
-        fullAssistantText += token;
       },
-      onDone: async ({ fullText, searchQuery: newSearchQuery, suggestedFollowUps }) => {
-        fullAssistantText = fullText;
-
-        // ─── Handle new search trigger ─────────────────────────────────
-        let newBusinesses = null;
-        if (newSearchQuery && !searchWasTriggered) {
-          searchWasTriggered = true;
-          try {
-            send({ type: 'searching', query: newSearchQuery });
-
-            const { parseIntent, buildQuery, executeQuery, rankResults } = getSearchPipeline();
-            const intentResult = await parseIntent(newSearchQuery);
-            const pipeline     = buildQuery(intentResult.intent, location, { limit: 6, page: 1 });
-            const { businesses, totalCount } = await executeQuery(pipeline);
-            const ranked = rankResults(businesses, intentResult.intent, location);
-
-            newBusinesses = ranked.slice(0, 6).map(cleanBusinessForChat);
-
-            // Update session with new search context
-            session = updateSearchContext(session, {
-              businessIds: newBusinesses.map(b => b._id),
-              query:       newSearchQuery,
-              intent:      intentResult.intent,
-            });
-
-            send({ type: 'businesses', businesses: newBusinesses, totalCount, query: newSearchQuery });
-          } catch (searchErr) {
-            console.warn('[Chat Route] Mid-chat search failed:', searchErr.message);
-          }
-        }
-
-        // ─── Save assistant message ───────────────────────────────────
+      onDone: async ({ fullText, suggestedFollowUps }) => {
+        // Save assistant message
         session = appendMessage(session, 'assistant', fullText, {
           suggestedFollowUps,
           contextType,
-          businessIds: newBusinesses?.map(b => b._id),
         });
 
         await saveSession(activeSessionId, session);
 
-        // ─── Send done event ──────────────────────────────────────────
         send({
           type: 'done',
           sessionId: activeSessionId,
@@ -206,10 +287,11 @@ router.get('/:sessionId', async (req, res) => {
     messages: session.messages,
     focusedBusinessId:   session.focusedBusinessId,
     focusedBusinessName: session.focusedBusinessName,
+    rankedBusinessList:  session.rankedBusinessList || [],
   });
 });
 
-// ─── DELETE /ai/chat/:sessionId — Clear session ───────────────────────────────
+// ─── DELETE /ai/chat/:sessionId — Clear session ────────────────────────────────
 
 router.delete('/:sessionId', async (req, res) => {
   await deleteSession(req.params.sessionId);
@@ -224,16 +306,12 @@ function cleanBusinessForChat(biz) {
     name:       biz.name,
     category:   biz.category,
     rating:     biz.rating,
-    address:    biz.address,
-    logo:       biz.logo,
-    coverImage: biz.coverImage,
-    distanceKm: biz._distance ? Math.round(biz._distance / 100) / 10 : null,
-    hasActiveDeals: (biz._coupons || []).length > 0,
-    matchingMenuItems: (biz._menuItems || []).slice(0, 2).map(i => ({
-      name:     i.name,
-      price:    i.price,
-      currency: i.currency || 'GBP',
-    })),
+    address:    null, // Don't expose full address in chat cards
+    distanceKm: biz.distanceKm,
+    position:   biz.position,
+    reasons:    biz.reasons || [],
+    hasActiveDeals: false,
+    matchingMenuItems: (biz.matchingMenuItems || []).slice(0, 2),
   };
 }
 

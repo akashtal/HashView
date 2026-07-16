@@ -45,7 +45,7 @@ const initialState = {
   hasMore: false,
 
   // AI metadata
-  message: '', // AI-generated summary, e.g. "Found 4 restaurants near you 🍗"
+  message: '', // AI-generated summary, e.g. "Found 4 restaurants near you "
   intent: null, // Extracted intent filters (also passed to chat for context)
   appliedFilters: [], // Filter chips for UI
   provider: null, // Which AI provider was used
@@ -53,6 +53,11 @@ const initialState = {
   searchAccuracy: 'exact', // 'exact' | 'partial' | 'related' | 'none'
   matchNote: null, // Shown when fuzzy matching was used
   correctedQuery: null, // Set when the AI corrected a spelling mistake
+
+  // v2: Confidence & explainability
+  confidenceScore: null,        // 'high' | 'medium' | 'low'
+  clarificationQuestion: null,  // Shown when confidence is low
+  rankedBusinessList: [],       // Full list with positions + reasons (for chat ordinal)
 
   // UI state
   loading: false,
@@ -83,6 +88,9 @@ const aiSearchSlice = createSlice({
       state.searchAccuracy = 'exact';
       state.matchNote = null;
       state.correctedQuery = null;
+      state.confidenceScore = null;
+      state.clarificationQuestion = null;
+      state.rankedBusinessList = [];
     },
     setSessionId(state, action) {
       state.sessionId = action.payload;
@@ -134,6 +142,10 @@ const aiSearchSlice = createSlice({
           state.correctedQuery = intent?.corrected_query || null;
           state.isAIAvailable = true;
           state.lastSearchAt = Date.now();
+          // v2: new fields
+          state.confidenceScore       = action.payload.confidenceScore || null;
+          state.clarificationQuestion = action.payload.clarificationQuestion || null;
+          state.rankedBusinessList    = action.payload.rankedBusinessList || [];
         }
 
         state.totalCount = pagination?.total || 0;

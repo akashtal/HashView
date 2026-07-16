@@ -47,18 +47,22 @@ function getSearchLog() {
 function buildCacheKey(query, locationGrid, intent) {
   const normalizedQuery = (query || '').toLowerCase().trim().replace(/\s+/g, ' ');
 
-  // Include key intent fields that affect results
+  // Include ALL intent fields that affect results (v4: added menu_category, meal_time, budget_total)
   const intentKey = [
     intent?.category || '',
     intent?.menu_keyword || '',
+    intent?.menu_category || '',      // v4: starters/mains/desserts/kids/sharing
+    intent?.meal_time || '',          // v4: breakfast/lunch/dinner
     intent?.price_max || '',
+    intent?.budget_total || '',       // v4: 3-course budget
     intent?.sort_by || '',
     intent?.has_coupons ? '1' : '0',
     intent?.is_open_now ? '1' : '0',
+    intent?.city || '',
     (intent?.dietary || []).join(','),
   ].join(':');
 
-  return `ai:search:${normalizedQuery}:${locationGrid || 'noloc'}:${intentKey}`;
+  return `ai:search:v4:${normalizedQuery}:${locationGrid || 'noloc'}:${intentKey}`;
 }
 
 // ─── Main Layer Functions ─────────────────────────────────────────────────────

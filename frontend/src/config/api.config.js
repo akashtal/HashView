@@ -1,8 +1,8 @@
 // For EAS builds, set EXPO_PUBLIC_API_BASE_URL in eas.json
 export const API_CONFIG = {
   // Local development server (ACTIVE - connecting to local backend)
-  // BASE_URL: 'http://192.168.1.4:5001/api',
-  // SOCKET_URL: 'http://192.168.1.4:5001',
+  // BASE_URL: 'http://192.168.1.3:5001/api',
+  // SOCKET_URL: 'http://192.168.1.3:5001',
 
   // Production URLs (commented out for now)
   BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://api.hashview.co.uk/api',

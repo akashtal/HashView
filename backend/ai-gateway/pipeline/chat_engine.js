@@ -1,58 +1,74 @@
 /**
- * AI Chat Engine — LangChain + Streaming
+ * AI Chat Engine — LangChain + Streaming (v2)
  *
- * Uses LangChain's ChatGroq (or any OpenAI-compatible provider) with
- * streaming enabled so tokens arrive word-by-word in real time.
+ * Updated to use chat_system_v2.js (strict anti-hallucination prompt)
+ * and removed SEARCH_TRIGGER mechanic (context_loader + chat.route.js handle
+ * new search needs directly).
  *
  * Streaming delivery:
- *   Tokens are emitted via the `onToken` callback → the route handler
- *   writes them to the SSE response stream → the frontend renders them
- *   progressively, like ChatGPT.
+ *   Tokens are emitted via onToken → route handler → SSE → frontend renders
+ *   progressively like ChatGPT.
  *
- * New search detection:
- *   If the AI's full response contains SEARCH_TRIGGER:{query}, the engine
- *   extracts the query, runs the existing AI search pipeline, and returns
- *   the results alongside the chat response.
+ * Fallback chain:
+ *   1. Groq (llama-3.3-70b-versatile) — primary
+ *   2. Gemini (gemini-2.0-flash) — fallback if Groq fails
+ *   3. Template response — if all providers fail
  */
 
 const { ChatGroq }   = require('@langchain/groq');
 const { HumanMessage, SystemMessage, AIMessage } = require('@langchain/core/messages');
 
 const settings = require('../config/settings');
-const { CHAT_SYSTEM_PROMPT } = require('../prompts/chat_system_v1');
+const { buildChatSystemPrompt } = require('../prompts/chat_system_v2');
 
-// ─── Build LangChain model ────────────────────────────────────────────────────
+// ─── Build LangChain Model ────────────────────────────────────────────────────
 
 function buildChatModel(streaming = true) {
-  // Primary: use Groq if configured
+  // Primary: Groq
   if (settings.groq?.apiKey) {
     return new ChatGroq({
       apiKey:      settings.groq.apiKey,
       model:       settings.groq.model || 'llama-3.3-70b-versatile',
-      temperature: 0.6,
-      maxTokens:   600,
+      temperature: 0.3,  // Lowered from 0.6 to reduce hallucination risk
+      maxTokens:   800,  // Increased from 600 for richer comparison answers
       streaming,
     });
   }
 
-  // Fallback: try OpenAI-compatible (Gemini, HF, etc.) via raw fetch
-  // The chat route falls back to non-streaming in this case
   return null;
 }
 
-// ─── Format LangChain Messages ────────────────────────────────────────────────
+function buildFallbackModel(streaming = true) {
+  // Fallback: Gemini via OpenAI-compatible API
+  if (settings.gemini?.apiKey) {
+    try {
+      const { ChatOpenAI } = require('@langchain/openai');
+      return new ChatOpenAI({
+        apiKey:   settings.gemini.apiKey,
+        model:    settings.gemini.model || 'gemini-2.0-flash',
+        baseURL:  'https://generativelanguage.googleapis.com/v1beta/openai/',
+        temperature: 0.3,
+        maxTokens:   800,
+        streaming,
+      });
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+// ─── Build Message Array ──────────────────────────────────────────────────────
 
 /**
- * Build the message array for LangChain from session history + context.
+ * Build the LangChain message array from session history + context.
+ * Uses the v2 system prompt (database-grounded).
  */
-function buildMessages(userMessage, history, contextText) {
+function buildMessages(userMessage, history, contextText, contextType, session, location) {
   const messages = [];
 
-  // System prompt — always first
-  let systemContent = CHAT_SYSTEM_PROMPT;
-  if (contextText) {
-    systemContent += `\n\n──────────────────────────────\nCURRENT CONTEXT (use this data to answer):\n${contextText}\n──────────────────────────────`;
-  }
+  // System prompt — uses v2 (strict anti-hallucination)
+  const systemContent = buildChatSystemPrompt(contextText, contextType, session, location);
   messages.push(new SystemMessage(systemContent));
 
   // Conversation history (last N turns)
@@ -70,128 +86,138 @@ function buildMessages(userMessage, history, contextText) {
   return messages;
 }
 
-// ─── Suggested Follow-Up Generator ───────────────────────────────────────────
+// ─── Follow-Up Suggestion Generator ──────────────────────────────────────────
 
-function generateSuggestedFollowUps(contextType, assistantResponse) {
-  const suggestions = [];
-
-  if (contextType === 'business_menu' || contextType === 'business_menu_reviews') {
-    suggestions.push("What do reviews say?", "Is anything halal/vegan?", "How far is it from me?");
-  } else if (contextType === 'business_reviews') {
-    suggestions.push("What's on the menu?", "What are the prices?", "What are the opening hours?");
-  } else if (contextType === 'search_results') {
-    suggestions.push("Tell me more about the first one", "Which has the best reviews?", "Show me cheaper options");
-  } else if (contextType === 'business') {
-    suggestions.push("Show me the menu", "What do people say about it?", "Are they open now?");
-  } else {
-    suggestions.push("Find restaurants near me", "Show me top rated cafes", "Any deals nearby?");
+function generateSuggestedFollowUps(contextType, assistantResponse, hasComparison = false) {
+  if (hasComparison) {
+    return ['Which one should I visit first?', 'What are the prices at both?', 'Which has better reviews?'];
   }
 
-  // Trim to 3 and ensure they're short
-  return suggestions.slice(0, 3);
-}
+  switch (contextType) {
+    case 'business_menu':
+    case 'business_menu_reviews':
+      return ['What do reviews say?', 'Is anything halal or vegan?', 'Are they open now?'];
 
-// ─── Search Trigger Extractor ─────────────────────────────────────────────────
+    case 'business_reviews':
+      return ["What's on the menu?", 'What are the prices?', 'How far is it?'];
 
-/**
- * Check if the AI response contains a SEARCH_TRIGGER directive.
- * Returns { cleanText, searchQuery } — cleanText has the trigger removed.
- */
-function extractSearchTrigger(text) {
-  const triggerMatch = text.match(/SEARCH_TRIGGER:([^\n]+)/i);
-  if (!triggerMatch) return { cleanText: text, searchQuery: null };
+    case 'comparison':
+      return ['Which one should I visit?', 'What are the price differences?', 'Which has better reviews?'];
 
-  const searchQuery = triggerMatch[1].trim();
-  const cleanText   = text.replace(/SEARCH_TRIGGER:[^\n]+/i, '').trim();
-  return { cleanText, searchQuery };
+    case 'search_results':
+      return ['Tell me more about the first one', 'Which has the best reviews?', 'Compare the first and second'];
+
+    case 'menu_search':
+      return ['Which is cheapest?', 'Any halal/vegan options?', 'Tell me about the top result'];
+
+    case 'business':
+      return ['Show me the menu', 'What do people say?', 'Are they open now?'];
+
+    default:
+      return ['Find restaurants near me', 'Show me top rated cafes', 'Any deals nearby?'];
+  }
 }
 
 // ─── Main: Stream Chat Response ───────────────────────────────────────────────
 
 /**
- * Stream a chat response using LangChain + Groq.
+ * Stream a chat response using LangChain.
  *
  * @param {Object} params
- * @param {string}   params.userMessage    - The user's current message
- * @param {Array}    params.history        - Recent conversation history [{ role, content }]
- * @param {string}   params.contextText    - RAG context string injected into prompt
- * @param {string}   params.contextType    - What context was loaded (for follow-up suggestions)
- * @param {Function} params.onToken        - Callback called for each streamed token: onToken(token)
- * @param {Function} params.onDone         - Callback called when streaming completes: onDone({ fullText, searchQuery, suggestedFollowUps })
- * @param {Function} params.onError        - Callback called on error: onError(err)
+ * @param {string}   params.userMessage   - The user's current message
+ * @param {Array}    params.history       - Recent conversation history [{ role, content }]
+ * @param {string}   params.contextText   - RAG context string from context_loader.js
+ * @param {string}   params.contextType   - Type of context loaded
+ * @param {Object}   params.session       - Current session (for system prompt building)
+ * @param {Object}   [params.location]    - { latitude, longitude }
+ * @param {Function} params.onToken       - Called for each streamed token: onToken(token)
+ * @param {Function} params.onDone        - Called when complete: onDone({ fullText, suggestedFollowUps })
+ * @param {Function} params.onError       - Called on error: onError(err)
  */
 async function streamChatResponse({
   userMessage,
   history,
   contextText,
   contextType,
+  session,
+  location,
   onToken,
   onDone,
   onError,
 }) {
-  const model = buildChatModel(true);
+  // Try primary model first, then fallback
+  let model = buildChatModel(true);
+  if (!model) {
+    model = buildFallbackModel(true);
+  }
 
   if (!model) {
-    // No streaming provider configured — fall back to template response
-    const fallback = "I'm currently unable to process chat requests. Please try the search bar to find businesses near you.";
+    const fallback = "I'm currently unable to process chat requests. Please use the search bar to find businesses near you.";
     onToken(fallback);
     onDone({
-      fullText:           fallback,
-      searchQuery:        null,
-      suggestedFollowUps: ["Find restaurants near me", "Search for cafes", "Show halal food"],
+      fullText: fallback,
+      suggestedFollowUps: ['Find restaurants near me', 'Search for cafes', 'Show halal food'],
     });
     return;
   }
 
-  const messages = buildMessages(userMessage, history, contextText);
+  const messages = buildMessages(userMessage, history, contextText, contextType, session, location);
+  const isComparison = contextType === 'comparison';
 
   try {
     let fullText = '';
 
-    const stream = await model.stream(messages);
-
-    for await (const chunk of stream) {
-      const token = chunk.content;
-      if (token) {
-        fullText += token;
-        onToken(token);
+    // Try streaming
+    try {
+      const stream = await model.stream(messages);
+      for await (const chunk of stream) {
+        const token = chunk.content;
+        if (token) {
+          fullText += token;
+          onToken(token);
+        }
+      }
+    } catch (streamErr) {
+      // If streaming fails, try non-streaming fallback
+      console.warn('[Chat Engine] Streaming failed, trying non-streaming:', streamErr.message);
+      const nonStreamModel = buildChatModel(false) || buildFallbackModel(false);
+      if (nonStreamModel) {
+        const response = await nonStreamModel.invoke(messages);
+        fullText = typeof response.content === 'string' ? response.content : '';
+        onToken(fullText); // Send all at once
+      } else {
+        throw streamErr;
       }
     }
 
-    // Post-process: extract search trigger if present
-    const { cleanText, searchQuery } = extractSearchTrigger(fullText);
-    const suggestedFollowUps = generateSuggestedFollowUps(contextType, cleanText);
-
-    onDone({ fullText: cleanText, searchQuery, suggestedFollowUps });
+    const suggestedFollowUps = generateSuggestedFollowUps(contextType, fullText, isComparison);
+    onDone({ fullText, suggestedFollowUps });
 
   } catch (err) {
-    console.error('[Chat Engine] Streaming error:', err.message);
+    console.error('[Chat Engine] Error:', err.message);
     onError(err);
   }
 }
 
 /**
- * Non-streaming fallback (for testing or when streaming isn't needed).
+ * Non-streaming fallback for testing.
  */
-async function getChatResponse({ userMessage, history, contextText, contextType }) {
-  const model = buildChatModel(false);
+async function getChatResponse({ userMessage, history, contextText, contextType, session, location }) {
+  const model = buildChatModel(false) || buildFallbackModel(false);
   if (!model) {
     return {
-      fullText:           'AI chat is temporarily unavailable. Please use the search bar.',
-      searchQuery:        null,
+      fullText: 'AI chat is temporarily unavailable. Please use the search bar.',
       suggestedFollowUps: ['Find restaurants near me'],
     };
   }
 
-  const messages = buildMessages(userMessage, history, contextText);
+  const messages = buildMessages(userMessage, history, contextText, contextType, session, location);
   const response  = await model.invoke(messages);
-  const text       = typeof response.content === 'string' ? response.content : JSON.stringify(response.content);
+  const fullText  = typeof response.content === 'string' ? response.content : '';
 
-  const { cleanText, searchQuery } = extractSearchTrigger(text);
   return {
-    fullText:           cleanText,
-    searchQuery,
-    suggestedFollowUps: generateSuggestedFollowUps(contextType, cleanText),
+    fullText,
+    suggestedFollowUps: generateSuggestedFollowUps(contextType, fullText),
   };
 }
 

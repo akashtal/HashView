@@ -63,7 +63,8 @@ router.post('/', async (req, res) => {
 
     // ─── Layer 7 (early): Check cache ─────────────────────────────────────────
     // We pre-check cache with a query-only key before even calling the AI
-    const roughCacheKey = `ai:search:rough:${query.toLowerCase()}:${locationGrid || 'noloc'}`;
+    // v4: versioned key busts old cache entries that predate menu_category support
+    const roughCacheKey = `ai:search:v4:rough:${query.toLowerCase()}:${locationGrid || 'noloc'}`;
     const cachedResponse = await getCachedResponse(roughCacheKey);
     if (cachedResponse) {
       // Log the cache hit and return immediately
@@ -186,7 +187,7 @@ router.post('/', async (req, res) => {
     const rankMs = Date.now() - rankStart;
 
     // ─── Layer 6: Composition ─────────────────────────────────────────────────
-    const response = await composeResponse(
+    const response = composeResponse(
       rankedBusinesses,
       intent,
       query,
@@ -200,8 +201,22 @@ router.post('/', async (req, res) => {
     const totalMs = Date.now() - requestStart;
     response.meta = { ...response.meta, model: intentMeta.model };
 
+    // ─── Build rankedBusinessList for chat session ─────────────────────────────
+    // This enables ordinal resolution ("tell me about the second one") in chat
+    const rankedBusinessList = rankedBusinesses.map((b, idx) => ({
+      position:          idx + 1,
+      _id:               b._id,
+      name:              b.name,
+      category:          b.category,
+      rating:            b.rating,
+      distanceKm:        b._distance ? Math.round(b._distance / 100) / 10 : null,
+      matchingMenuItems: (b._menuItems || []).slice(0, 3).map(i => ({
+        name: i.name, price: i.price, currency: i.currency || 'GBP',
+      })),
+      reasons:           b._reasons || [],
+    }));
+
     // ─── Layer 7: Cache + Log + Return ────────────────────────────────────────
-    // Fire cache + log async (don't block the response)
     setImmediate(async () => {
       await Promise.all([
         cacheResponse(refinedCacheKey, response),
@@ -224,12 +239,15 @@ router.post('/', async (req, res) => {
       ]);
     });
 
-    // Include sessionId and intent in response so the chat feature
-    // can immediately pick up context when the user opens chat after a search.
     return res.json({
       ...response,
       sessionId,
-      intent,  // expose the extracted intent for the chat to use as context
+      intent,
+      // v2: Full ranked list for chat ordinal resolution
+      rankedBusinessList,
+      // v2: Confidence + clarification (from composer)
+      confidenceScore:       response.confidenceScore,
+      clarificationQuestion: response.clarificationQuestion,
     });
 
   } catch (err) {

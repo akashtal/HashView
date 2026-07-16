@@ -55,7 +55,7 @@ class GroqAdapter extends OpenAIAdapter {
             { role: 'user',   content: query },
           ],
           temperature: 0.1,
-          max_tokens: 400,
+          max_tokens: 600,
         }),
       }
     );

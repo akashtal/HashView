@@ -47,6 +47,7 @@ import {
   setChatError,
   setSessionId,
   clearChat,
+  updateRankedList,
   selectChatIsStreaming,
   selectChatMessages,
   selectChatFollowUps,
@@ -120,6 +121,12 @@ const InlineBusinessCard = React.memo(({ biz, onPress }) => {
 
   return (
     <TouchableOpacity style={styles.inlineBizCard} onPress={onPress} activeOpacity={0.9}>
+      {/* Position badge (v2) — enables user to say "ask about #1" */}
+      {biz.position && (
+        <View style={styles.positionBadge}>
+          <Text style={styles.positionBadgeText}>#{biz.position}</Text>
+        </View>
+      )}
       {imgUri ? (
         <Image source={{ uri: imgUri }} style={styles.inlineBizImage} contentFit="cover" />
       ) : (
@@ -240,6 +247,7 @@ export default function ChatPanel({
   // Context passed from the search screen
   searchSessionId,
   searchBusinessIds,
+  rankedBusinessList,   // v2: Full ranked list with positions
   searchQuery,
   searchIntent,
 
@@ -307,7 +315,12 @@ export default function ChatPanel({
         sessionId: sessionId || searchSessionId,
         latitude,
         longitude,
-        searchBusinessIds: sessionId ? undefined : searchBusinessIds, // Only pass on first message
+        searchBusinessIds: sessionId ? undefined : searchBusinessIds,
+        // Always pass rankedBusinessList if session doesn't yet have one.
+        // sessionId existing doesn't mean the session already has rankedBusinessList —
+        // the greeting message creates the session, but rankedBusinessList must also
+        // be sent on that first user message to ensure the context is populated.
+        rankedBusinessList: rankedBusinessList?.length > 0 ? rankedBusinessList : undefined,
         searchQuery: sessionId ? undefined : searchQuery,
         searchIntent: sessionId ? undefined : searchIntent,
 
@@ -321,6 +334,10 @@ export default function ChatPanel({
 
         onBusinessResults: ({ businesses, totalCount, query: q }) => {
           dispatch(addInlineBusinessResults({ businesses, totalCount, query: q }));
+          // Update rankedList in store if new results arrive
+          if (businesses?.length > 0) {
+            dispatch(updateRankedList(businesses));
+          }
         },
 
         onDone: ({ fullText, sessionId: newSessionId, suggestedFollowUps }) => {
@@ -355,6 +372,9 @@ export default function ChatPanel({
   useEffect(() => {
     if (visible && messages.length === 0 && searchBusinessIds?.length > 0) {
       // Auto-send a greeting to establish context
+      // IMPORTANT: rankedBusinessList MUST be included here — this is the first
+      // message that creates the session. If omitted, the session has no
+      // position/name data and ordinal questions ("tell me about the 2nd one") fail.
       setTimeout(() => {
         dispatch(startStreaming());
         AIChatService.streamChat({
@@ -363,6 +383,7 @@ export default function ChatPanel({
           latitude,
           longitude,
           searchBusinessIds,
+          rankedBusinessList,   // ← CRITICAL: must be here to populate session.rankedBusinessList
           searchQuery,
           searchIntent,
           onToken: (tok) => dispatch(appendToken(tok)),
@@ -802,5 +823,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: ACCENT,
     fontWeight: '500',
+  },
+
+  // v2: Position badge on inline business cards
+  positionBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: ACCENT,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    zIndex: 10,
+  },
+  positionBadgeText: {
+    fontSize: 10,
+    color: '#fff',
+    fontWeight: '800',
   },
 });

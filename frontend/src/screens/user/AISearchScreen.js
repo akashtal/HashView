@@ -31,7 +31,13 @@ import {
   selectAIError,
   selectAISearchState,
 } from '../../store/slices/aiSearchSlice';
-import { openChat, closeChat, clearChat, selectChatIsOpen } from '../../store/slices/aiChatSlice';
+import {
+  openChat,
+  closeChat,
+  clearChat,
+  selectChatIsOpen,
+  setSearchContext,
+} from '../../store/slices/aiChatSlice';
 import { logout } from '../../store/slices/authSlice';
 import ChatPanel from '../../components/ai/ChatPanel';
 
@@ -96,6 +102,95 @@ const AIMessageBanner = ({ message, provider, fallbackUsed }) => {
   );
 };
 
+// ─── Confidence Banner (new) ─────────────────────────────────────────────────────
+
+const ConfidenceBanner = ({ confidenceScore, clarificationQuestion }) => {
+  if (!confidenceScore || confidenceScore === 'high') return null;
+
+  const isLow = confidenceScore === 'low';
+  const bgColor = isLow ? '#FFF7ED' : '#FEFCE8';
+  const borderColor = isLow ? '#FED7AA' : '#FDE68A';
+  const textColor = isLow ? '#92400E' : '#78350F';
+  const iconColor = isLow ? '#F97316' : '#F59E0B';
+  const iconName = isLow ? 'warning-outline' : 'information-circle-outline';
+  const label = isLow ? 'Low confidence' : 'Approximate match';
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        backgroundColor: bgColor,
+        borderRadius: 14,
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor,
+        borderLeftWidth: 4,
+        borderLeftColor: iconColor,
+      }}
+    >
+      <Icon name={iconName} size={16} color={iconColor} style={{ marginRight: 8, marginTop: 1 }} />
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontSize: 12, fontWeight: '700', color: textColor, marginBottom: 2 }}>
+          {label}
+        </Text>
+        {clarificationQuestion && (
+          <Text style={{ fontSize: 12, color: textColor, lineHeight: 18 }}>
+            {clarificationQuestion}
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+};
+
+// ─── Reasons Chips (new) ────────────────────────────────────────────────────────────
+// Shows why each business was recommended (from ranker explainability)
+
+const ReasonsChips = ({ reasons }) => {
+  if (!reasons || reasons.length === 0) return null;
+  // Only show top 3 reasons
+  const displayReasons = reasons.slice(0, 3);
+  return (
+    <View
+      style={{
+        marginTop: 8,
+        paddingTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: '#F3F4F6',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 6,
+      }}
+    >
+      {displayReasons.map((reason, idx) => {
+        const isPositive = reason.startsWith('✓');
+        const isNegative = reason.startsWith('✗');
+        const chipBg    = isNegative ? '#FFF7F7' : '#F0FDF4';
+        const chipBorder = isNegative ? '#FECACA' : '#BBF7D0';
+        const chipText  = isNegative ? '#B91C1C' : '#15803D';
+        return (
+          <View
+            key={idx}
+            style={{
+              backgroundColor: chipBg,
+              borderRadius: 20,
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderWidth: 1,
+              borderColor: chipBorder,
+            }}
+          >
+            <Text style={{ fontSize: 11, color: chipText, fontWeight: '600' }}>{reason}</Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+};
+
 // ─── Filter Chip ──────────────────────────────────────────────────────────────
 
 const FilterChip = ({ filter }) => (
@@ -117,7 +212,7 @@ const FilterChip = ({ filter }) => (
 
 // ─── Business Card ────────────────────────────────────────────────────────────
 
-const BusinessCard = React.memo(({ item, onPress }) => {
+  const BusinessCard = React.memo(({ item, onPress }) => {
   const hashviewRating = item.rating?.average?.toFixed(1) || '0.0';
   const googleRating = item.externalProfiles?.googleBusiness?.rating;
   const coverImageUri = item.coverImage?.url || item.images?.[0]?.url || item.logo?.url || null;
@@ -298,7 +393,7 @@ const BusinessCard = React.memo(({ item, onPress }) => {
           </Text>
         </View>
 
-        {/* Matching menu items — label changes based on search accuracy */}
+        {/* Matching menu items */}
         {item.matchingMenuItems && item.matchingMenuItems.length > 0 && (
           <View
             style={{
@@ -345,6 +440,9 @@ const BusinessCard = React.memo(({ item, onPress }) => {
             ))}
           </View>
         )}
+
+        {/* Explainability reasons (NEW) */}
+        <ReasonsChips reasons={item.reasons} />
       </View>
     </TouchableOpacity>
   );
@@ -376,6 +474,10 @@ export default function AISearchScreen({ navigation }) {
     searchAccuracy,
     matchNote,
     correctedQuery,
+    // v2: new fields
+    confidenceScore,
+    clarificationQuestion,
+    rankedBusinessList,
   } = useSelector(selectAISearchState);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -525,6 +627,14 @@ export default function AISearchScreen({ navigation }) {
           <AIMessageBanner message={message} provider={provider} fallbackUsed={fallbackUsed} />
         )}
 
+        {/* Confidence / clarification banner (v2) */}
+        {hasSearched && !loading && (
+          <ConfidenceBanner
+            confidenceScore={confidenceScore}
+            clarificationQuestion={clarificationQuestion}
+          />
+        )}
+
         {/* Spell-correction chip */}
         {correctedQuery && hasSearched && !loading && (
           <View
@@ -611,6 +721,8 @@ export default function AISearchScreen({ navigation }) {
       matchNote,
       searchAccuracy,
       correctedQuery,
+      confidenceScore,
+      clarificationQuestion,
     ]
   );
 
@@ -1098,6 +1210,7 @@ export default function AISearchScreen({ navigation }) {
         }}
         searchSessionId={searchSessionId}
         searchBusinessIds={businesses.map((b) => b._id)}
+        rankedBusinessList={rankedBusinessList}
         searchQuery={searchQuery}
         searchIntent={searchIntent}
         latitude={currentLocation?.latitude}

@@ -46,6 +46,7 @@ async function streamChat({
   latitude,
   longitude,
   searchBusinessIds,
+  rankedBusinessList,  // v2: Full ranked list for ordinal resolution
   searchQuery,
   searchIntent,
   onToken,
@@ -136,6 +137,7 @@ async function streamChat({
         latitude,
         longitude,
         searchBusinessIds,
+        rankedBusinessList,  // v2
         searchQuery,
         searchIntent,
       })

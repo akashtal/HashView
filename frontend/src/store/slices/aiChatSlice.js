@@ -35,6 +35,11 @@ const initialState = {
   // Suggested follow-up chips
   suggestedFollowUps: [],
 
+  // v2: Conversational context for backend
+  rankedBusinessList: [],    // Full list with positions for ordinal resolution
+  cumulativeIntent: null,    // Merged intent across turns
+  isComparisonMode: false,   // True when user is comparing two businesses
+
   // Error
   error: null,
 };
@@ -54,9 +59,18 @@ const aiChatSlice = createSlice({
       state.isOpen = !state.isOpen;
     },
 
-    // ─── Session ────────────────────────────────────────────────────────────────
+    // ─── Session ───────────────────────────────────────────────────────────
     setSessionId(state, action) {
-      state.sessionId = action.payload;
+      const { sessionId, rankedBusinessList } = action.payload || {};
+      if (sessionId) state.sessionId = sessionId;
+      if (rankedBusinessList) state.rankedBusinessList = rankedBusinessList;
+    },
+
+    // Set full context from a search (rankedList + intent) for ordinal resolution
+    setSearchContext(state, action) {
+      const { rankedBusinessList, intent } = action.payload || {};
+      if (rankedBusinessList) state.rankedBusinessList = rankedBusinessList;
+      if (intent) state.cumulativeIntent = intent;
     },
 
     // ─── User Message ───────────────────────────────────────────────────────────
@@ -190,6 +204,16 @@ const aiChatSlice = createSlice({
         isOpen: state.isOpen,
       };
     },
+
+    // v2: Set comparison mode
+    setComparisonMode(state, action) {
+      state.isComparisonMode = action.payload === true;
+    },
+
+    // v2: Update rankedBusinessList when chat triggers a new search
+    updateRankedList(state, action) {
+      if (action.payload) state.rankedBusinessList = action.payload;
+    },
   },
 });
 
@@ -198,6 +222,7 @@ export const {
   closeChat,
   toggleChat,
   setSessionId,
+  setSearchContext,
   addUserMessage,
   startStreaming,
   appendToken,
@@ -207,15 +232,20 @@ export const {
   setChatError,
   clearChat,
   clearAndResetSession,
+  setComparisonMode,
+  updateRankedList,
 } = aiChatSlice.actions;
 
 // ─── Selectors ─────────────────────────────────────────────────────────────────
 
-export const selectChatIsOpen = (state) => state.aiChat.isOpen;
-export const selectChatMessages = (state) => state.aiChat.messages;
-export const selectChatIsStreaming = (state) => state.aiChat.isStreaming;
-export const selectChatSessionId = (state) => state.aiChat.sessionId;
-export const selectChatFollowUps = (state) => state.aiChat.suggestedFollowUps;
-export const selectChatError = (state) => state.aiChat.error;
+export const selectChatIsOpen         = (state) => state.aiChat.isOpen;
+export const selectChatMessages       = (state) => state.aiChat.messages;
+export const selectChatIsStreaming    = (state) => state.aiChat.isStreaming;
+export const selectChatSessionId      = (state) => state.aiChat.sessionId;
+export const selectChatFollowUps      = (state) => state.aiChat.suggestedFollowUps;
+export const selectChatError          = (state) => state.aiChat.error;
+export const selectRankedBusinessList = (state) => state.aiChat.rankedBusinessList;
+export const selectCumulativeIntent   = (state) => state.aiChat.cumulativeIntent;
+export const selectIsComparisonMode   = (state) => state.aiChat.isComparisonMode;
 
 export default aiChatSlice.reducer;
