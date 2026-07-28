@@ -118,8 +118,8 @@ export default {
           },
           android: {
             minSdkVersion: 24,
-            compileSdkVersion: 35,
-            targetSdkVersion: 35,
+            compileSdkVersion: 36,
+            targetSdkVersion: 36,
             buildToolsVersion: '35.0.0',
             extraGradleProps: {
               ndkVersion: '27.1.12297006',

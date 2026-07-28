@@ -96,6 +96,18 @@ app.use(morgan('combined', { stream: { write: message => logger.info(message.tri
 app.use('/uploads', express.static('uploads'));
 app.use('/public', express.static('public'));
 
+// Android App Links verification
+app.get('/.well-known/assetlinks.json', (req, res) => {
+  res.json([{
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.hashview.apps",
+      "sha256_cert_fingerprints": ["FC:B5:77:A4:78:90:DB:A8:53:93:31:53:AE:15:30:44:83:03:A6:1C:31:25:62:A7:D6:80:00:C2:27:C8:D4:94"]
+    }
+  }]);
+});
+
 // ── Metrics collection middleware (must be early, before routes) ───────────────────
 // Tracks request count, latency, errors, and active users for Grafana Cloud.
 app.use(metricsMiddleware);
