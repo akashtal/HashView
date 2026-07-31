@@ -62,7 +62,7 @@ export function PricingContent() {
             </p>
 
             {/* Billing Toggle */}
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-4 mb-6">
               <span className={`text-sm font-medium ${!isAnnual ? "text-foreground" : "text-muted-foreground"}`}>Monthly</span>
               <Switch checked={isAnnual} onCheckedChange={setIsAnnual} className="data-[state=checked]:bg-hashview-purple" />
               <span className={`text-sm font-medium flex items-center gap-2 ${isAnnual ? "text-foreground" : "text-muted-foreground"}`}>
@@ -70,6 +70,13 @@ export function PricingContent() {
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-hashview-orange/20 text-hashview-orange">
                   {/*          Save 20% */}
                 </span>
+              </span>
+            </div>
+
+            {/* Free Trial Banner */}
+            <div className="flex justify-center">
+              <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-green-100 text-green-700 text-sm font-bold shadow-sm border border-green-200">
+                🎁 30 Days Free Trial on all paid plans!
               </span>
             </div>
           </motion.div>
@@ -88,11 +95,18 @@ export function PricingContent() {
                 <p className="text-muted-foreground text-sm">For small businesses ready to grow.</p>
               </div>
               <div className="mb-6">
-                <span className="text-4xl font-bold">£0</span>
-                <span className="text-muted-foreground">/mo</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold">£0</span>
+                </div>
+                <div className="flex flex-col gap-2 mt-1">
+                  <span className="text-muted-foreground text-sm">/mo</span>
+                  <span className="text-sm font-bold text-green-600 bg-green-50 self-start px-2 py-0.5 rounded border border-green-100">
+                    + 30 Days Free Trial
+                  </span>
+                </div>
               </div>
               <Button onClick={() => setSurveyOpen(true)} className="w-full mb-8" variant="outline">
-                Get Started Free
+                Start 30-Day Free Trial
               </Button>
               <div className="space-y-4 flex-grow">
                 <p className="text-sm font-medium text-foreground mb-4">Features Include:</p>
@@ -131,10 +145,15 @@ export function PricingContent() {
                   <span className="text-4xl font-bold">£{isAnnual ? "228" : "19"}</span>
                   <span className="text-xl text-muted-foreground line-through decoration-hashview-orange/50">£{isAnnual ? "468" : "39"}</span>
                 </div>
-                <span className="text-muted-foreground text-sm">/mo {isAnnual ? "billed annually" : "per location"}</span>
+                <div className="flex flex-col gap-2 mt-1">
+                  <span className="text-muted-foreground text-sm">/mo {isAnnual ? "billed annually" : "per location"}</span>
+                  <span className="text-sm font-bold text-green-600 bg-green-50 self-start px-2 py-0.5 rounded border border-green-100">
+                    + 30 Days Free Trial
+                  </span>
+                </div>
               </div>
               <Button onClick={() => setSurveyOpen(true)} className="w-full mb-8 relative z-10" variant="hero">
-                Upgrade to Growth
+                Start 30-Day Free Trial
               </Button>
               <div className="space-y-4 flex-grow relative z-10">
                 <p className="text-sm font-medium text-foreground mb-4">Everything in Starter, plus:</p>
@@ -166,9 +185,14 @@ export function PricingContent() {
               </div>
               <div className="mb-6">
                 <span className="text-4xl font-bold">Custom</span>
+                <div className="flex flex-col gap-2 mt-1">
+                  <span className="text-sm font-bold text-green-600 bg-green-50 self-start px-2 py-0.5 rounded border border-green-100 mt-2">
+                    + 30 Days Free Trial
+                  </span>
+                </div>
               </div>
               <Button onClick={() => setPartnerSurveyOpen(true)} className="w-full mb-8" variant="outline">
-                Contact Sales
+                Start 30-Day Free Trial
               </Button>
 
             </motion.div>
