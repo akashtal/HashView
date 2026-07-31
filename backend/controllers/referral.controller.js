@@ -17,7 +17,7 @@ const logger   = require('../utils/logger');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const BASE_URL = process.env.REFERRAL_BASE_URL || 'https://hashview.app/invite';
+const BASE_URL = process.env.REFERRAL_BASE_URL || 'https://hashview.co.uk/invite';
 
 /**
  * Generate a referral code from the user's name + 4 random digits.

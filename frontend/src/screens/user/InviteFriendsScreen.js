@@ -131,7 +131,8 @@ export default function InviteFriendsScreen({ navigation }) {
       setLoading(true);
       setError(null);
       const res = await ReferralService.getMyReferral();
-      setReferral(res.referral);
+      // Dynamically override the link using the current INVITE_BASE to prevent old database entries from using hashview.app
+      setReferral({ ...res.referral, link: `${INVITE_BASE}/${res.referral.code}` });
     } catch (err) {
       // If backend doesn't have the route yet (404 / network), fall back gracefully
       // to a locally-generated code so the screen is still fully usable
