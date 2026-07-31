@@ -52,7 +52,7 @@ export default {
           process.env.GOOGLE_MAPS_API_KEY ||
           'AIzaSyCgafT4Tw62CuxxN5DwbkqWIK9pVflKEXI',
       },
-      associatedDomains: ['applinks:hashview-backend.onrender.com', 'applinks:hashview.app'],
+      associatedDomains: ['applinks:hashview-backend.onrender.com', 'applinks:hashview.co.uk'],
     },
 
     android: {
@@ -95,13 +95,13 @@ export default {
             },
             {
               scheme: 'https',
-              host: 'hashview.app',
+              host: 'hashview.co.uk',
               pathPrefix: '/business',
             },
             // ─── Referral deep links ─────────────────────────────────────────
             {
               scheme: 'https',
-              host: 'hashview.app',
+              host: 'hashview.co.uk',
               pathPrefix: '/invite',
             },
             {

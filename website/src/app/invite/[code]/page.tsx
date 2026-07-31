@@ -16,12 +16,23 @@ export default function InvitePage() {
     
     if (/android/i.test(userAgent)) {
       setDevice('android');
-      // Redirect to Android Play Store
-      window.location.href = PLAY_STORE_URL;
+      // Force native Google Play Store app using market:// scheme
+      window.location.href = 'market://details?id=com.hashview.apps';
+      
+      // Fallback to web link if market scheme fails (runs after 1 second if app didn't close)
+      setTimeout(() => {
+        window.location.href = PLAY_STORE_URL;
+      }, 1000);
+      
     } else if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
       setDevice('ios');
-      // Redirect to iOS App Store
-      window.location.href = APP_STORE_URL;
+      // Force native iOS App Store app using itms-apps:// scheme
+      window.location.href = 'itms-apps://itunes.apple.com/app/id6756681321';
+      
+      // Fallback
+      setTimeout(() => {
+        window.location.href = APP_STORE_URL;
+      }, 1000);
     } else {
       setDevice('desktop');
     }

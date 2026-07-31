@@ -114,7 +114,7 @@ export default function InviteFriendsScreen({ navigation }) {
     loadReferral();
   }, []);
 
-  const INVITE_BASE = 'https://hashview.app/invite';
+  const INVITE_BASE = 'https://hashview.co.uk/invite';
 
   // Generate a local referral code from the user's name (fallback if backend not deployed)
   const generateLocalCode = useCallback(() => {
