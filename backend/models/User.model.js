@@ -194,7 +194,44 @@ const userSchema = new mongoose.Schema({
       type: Boolean,
       default: true
     }
+  },
+
+  // ─── Referral ─────────────────────────────────────────────────────────────
+  // Stores this user's outbound referral info + who invited them.
+  // Future reward/campaign fields should be added HERE (not a separate collection)
+  // so they stay co-located with the user record.
+  referral: {
+    // This user's unique code — generated once at registration, never changes.
+    code: {
+      type: String,
+      default: null,
+      uppercase: true,
+      trim: true
+    },
+    // Pre-computed invite link (avoids constructing it on every request).
+    link: {
+      type: String,
+      default: null
+    },
+    // Who referred THIS user (null if they signed up organically).
+    invitedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
+    // When THIS user was referred (set at registration if code was used).
+    invitedAt: {
+      type: Date,
+      default: null
+    }
+    // ──────────────────────────────────────────────────────────────────────
+    // Future reward fields — add here when implementing reward engine:
+    // totalInvites:  { type: Number, default: 0 }
+    // rewardBalance: { type: Number, default: 0 }
+    // campaign:      { type: String, default: null }
+    // ──────────────────────────────────────────────────────────────────────
   }
+
 }, {
   timestamps: true
 });
@@ -202,6 +239,8 @@ const userSchema = new mongoose.Schema({
 // Index for geospatial queries
 userSchema.index({ location: '2dsphere' });
 userSchema.index({ 'pushTokens.token': 1 });
+// Referral code lookup — sparse so users without a code don't consume index space
+userSchema.index({ 'referral.code': 1 }, { unique: true, sparse: true });
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {

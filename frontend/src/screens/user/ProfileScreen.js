@@ -140,6 +140,11 @@ export default function ProfileScreen({ navigation }) {
           onPress: () => navigation.navigate('Favorites'),
         },
         {
+          title: 'Invite Friends',
+          icon: 'people-outline',
+          onPress: () => navigation.navigate('InviteFriends'),
+        },
+        {
           title: 'Notifications',
           icon: 'notifications-outline',
           onPress: () => navigation.navigate('Notifications'),

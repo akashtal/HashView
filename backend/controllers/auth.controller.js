@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const logger = require('../utils/logger');
 const { sendOTPEmail, sendPasswordResetEmail } = require('../utils/emailService');
 const { registerDevicePushToken } = require('../utils/pushTokenRegistry');
+const referralController = require('./referral.controller');
 
 // In-memory OTP storage (in production, use Redis)
 const otpStore = new Map();
@@ -22,6 +23,7 @@ exports.register = async (req, res, next) => {
       phone,
       password,
       role,
+      referralCode,   // Optional — referral code entered during sign-up
       address: addressInput,
       buildingNumber,
       street,
@@ -315,6 +317,15 @@ exports.register = async (req, res, next) => {
 
       user = await User.create(userCreatePayload);
       console.log('✅ Customer created successfully:', user._id);
+
+      // ── Referral: generate a unique code for this new user ────────────────
+      // Non-blocking — runs in background, won't delay the response
+      referralController.generateCodeForNewUser(user).catch(() => {});
+
+      // ── Referral: apply an incoming referral code if provided ─────────────
+      if (referralCode) {
+        referralController.applyReferralCode(user._id, referralCode).catch(() => {});
+      }
 
       // Generate token with userType
       token = generateToken(user._id, 'customer');

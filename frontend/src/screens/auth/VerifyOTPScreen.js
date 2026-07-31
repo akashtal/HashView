@@ -104,6 +104,8 @@ export default function VerifyOTPScreen({ navigation, route }) {
             password: userData.password,
             phone: userData.phone,
             role: userData.role || 'customer',
+            // Referral code — passed in if user came via an invite link or entered it manually
+            ...(userData.referralCode && { referralCode: userData.referralCode }),
             ...(addressPayload && {
               address: addressPayload,
               buildingNumber: addressPayload.buildingNumber,

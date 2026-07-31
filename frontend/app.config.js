@@ -98,6 +98,16 @@ export default {
               host: 'hashview.app',
               pathPrefix: '/business',
             },
+            // ─── Referral deep links ─────────────────────────────────────────
+            {
+              scheme: 'https',
+              host: 'hashview.app',
+              pathPrefix: '/invite',
+            },
+            {
+              scheme: 'hashview',
+              host: 'invite',
+            },
           ],
           category: ['BROWSABLE', 'DEFAULT'],
         },

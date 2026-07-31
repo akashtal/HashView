@@ -9,6 +9,7 @@ import { loadUser } from '../store/slices/authSlice';
 import * as Linking from 'expo-linking';
 import NotificationService from '../services/notification.service';
 import NotificationPermissionBanner from '../components/NotificationPermissionBanner';
+import ReferralService from '../services/referral.service';
 
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
@@ -37,6 +38,9 @@ const mainLinking = {
         screens: {
           BusinessDetail: {
             path: 'business/:businessId/:section?',
+          },
+          InviteFriends: {
+            path: 'invite/:code',
           },
         },
       },
@@ -132,8 +136,28 @@ export default function AppNavigator() {
 
     initializeApp();
 
+    // ── Deep link: capture referral code on cold start ──────────────────────
+    // When the app is opened via https://hashview.app/invite/CODE (not installed)
+    // or hashview://invite/CODE (installed), we capture and store the code so
+    // the registration screen can pre-fill it automatically.
+    const handleReferralUrl = (url) => {
+      if (!url) return;
+      const code = ReferralService.extractCodeFromUrl(url);
+      if (code) {
+        console.log('[Referral] Deep link detected — storing code:', code);
+        ReferralService.storePendingCode(code);
+      }
+    };
+
+    // Check initial URL (cold start / killed)
+    Linking.getInitialURL().then(handleReferralUrl).catch(() => {});
+
+    // Also listen for URLs while app is in background/foreground
+    const linkingSub = Linking.addEventListener('url', ({ url }) => handleReferralUrl(url));
+
     return () => {
       isMounted = false;
+      linkingSub?.remove();
     };
   }, [dispatch]);
 

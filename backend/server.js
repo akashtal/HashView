@@ -180,6 +180,7 @@ app.use('/api/orders', orderRoutes); // Phase 5: Order routes
 app.use('/api/billing-rules', billingRulesRoutes); // Phase 6: Tax/Charge rules
 app.use('/api/business/:businessId/billing', billingRoutes); // Phase 4: Billing preview routes
 app.use('/api/health', healthRoutes);
+app.use('/api/referral', require('./routes/referral.routes')); // Referral / Invite system
 app.use('/ai', aiGateway);                 // Phase 2: AI-powered search gateway
 
 

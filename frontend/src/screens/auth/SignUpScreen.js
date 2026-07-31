@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import COLORS from '../../config/colors';
 import GoogleSignInButton from '../../components/auth/GoogleSignInButton';
 import AppleSignInButton from '../../components/auth/AppleSignInButton';
+import ReferralService from '../../services/referral.service';
 
 export default function SignUpScreen({ navigation, route }) {
   const dispatch = useDispatch();
@@ -49,6 +50,17 @@ export default function SignUpScreen({ navigation, route }) {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const phoneInputRef = useRef(null);
   const [rawPhoneValue, setRawPhoneValue] = useState('');
+  const [referralCode, setReferralCode] = useState(route.params?.referralCode || '');
+
+  // Auto-fill referral code from deep link (if user tapped an invite URL)
+  useEffect(() => {
+    if (!referralCode) {
+      ReferralService.consumePendingCode().then((code) => {
+        if (code) setReferralCode(code);
+      }).catch(() => {});
+    }
+  }, []);
+
 
   const roleConfig = {
     customer: {
@@ -172,6 +184,8 @@ export default function SignUpScreen({ navigation, route }) {
         phone: formData.phone.trim() || '', // Optional - empty string if not provided
         password: formData.password,
         role: role,
+        // Referral code (optional)
+        ...(referralCode.trim() && { referralCode: referralCode.trim().toUpperCase() }),
         // Address fields - only include if address was provided
         ...(formattedAddress && {
           buildingNumber: formData.buildingNumber.trim() || '',
@@ -677,6 +691,49 @@ export default function SignUpScreen({ navigation, route }) {
                   {errors.terms}
                 </Text>
               )}
+            </View>
+
+            {/* Referral Code (optional) */}
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 6 }}>
+                Referral Code <Text style={{ color: '#9CA3AF', fontWeight: '400' }}>(optional)</Text>
+              </Text>
+              <View style={{
+                flexDirection: 'row', alignItems: 'center',
+                backgroundColor: referralCode ? '#F0FDF4' : '#F9FAFB',
+                borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12,
+                borderWidth: 1, borderColor: referralCode ? '#86EFAC' : '#E5E7EB',
+              }}>
+                <Icon
+                  name={referralCode ? 'gift' : 'gift-outline'}
+                  size={20}
+                  color={referralCode ? COLORS.success : COLORS.gray400}
+                  style={{ marginRight: 10 }}
+                />
+                <TextInput
+                  style={{ flex: 1, fontSize: 15, color: '#111827', letterSpacing: 1 }}
+                  placeholder="Enter invite code"
+                  placeholderTextColor="#9CA3AF"
+                  value={referralCode}
+                  onChangeText={(t) => setReferralCode(t.toUpperCase())}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  returnKeyType="done"
+                />
+                {referralCode ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Icon name="checkmark-circle" size={18} color={COLORS.success} />
+                    <TouchableOpacity onPress={() => setReferralCode('')}>
+                      <Icon name="close-circle" size={18} color={COLORS.gray300} />
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
+              </View>
+              {referralCode ? (
+                <Text style={{ fontSize: 12, color: COLORS.success, marginTop: 4, marginLeft: 2 }}>
+                  ✓ Invite code applied
+                </Text>
+              ) : null}
             </View>
 
             {/* Sign Up Button */}

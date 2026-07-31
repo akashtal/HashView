@@ -109,6 +109,11 @@ const ApiService = {
   sendEmailOTP: (data) => apiClient.post(API_CONFIG.ENDPOINTS.SEND_EMAIL_OTP, data),
   verifyEmailOTP: (data) => apiClient.post(API_CONFIG.ENDPOINTS.VERIFY_EMAIL_OTP, data),
 
+  // Referral APIs
+  getReferral: () => apiClient.get('/referral/me'),
+  validateReferralCode: (code) => apiClient.post('/referral/validate', { code }),
+  regenerateReferralCode: () => apiClient.post('/referral/generate'),
+
   // User APIs
   getProfile: () => apiClient.get(API_CONFIG.ENDPOINTS.GET_PROFILE),
   updateProfile: (data) => apiClient.put(API_CONFIG.ENDPOINTS.UPDATE_PROFILE, data),

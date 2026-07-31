@@ -28,6 +28,7 @@ import FavoritesScreen from '../screens/user/FavoritesScreen';
 import ClaimBusinessScreen from '../screens/user/ClaimBusinessScreen';
 import TermsAndConditionsScreen from '../screens/auth/TermsAndConditionsScreen';
 import OrderTrackingScreen from '../screens/user/OrderTrackingScreen';
+import InviteFriendsScreen from '../screens/user/InviteFriendsScreen';
 
 // Business Screens
 import BusinessDashboardScreen from '../screens/business/BusinessDashboardScreen';
@@ -84,6 +85,7 @@ function UserStack() {
       <Stack.Screen name="TermsAndConditions" component={TermsAndConditionsScreen} />
       <Stack.Screen name="AISearch" component={AISearchScreen} />
       <Stack.Screen name="OrderTracking" component={OrderTrackingScreen} />
+      <Stack.Screen name="InviteFriends" component={InviteFriendsScreen} />
     </Stack.Navigator>
   );
 }
@@ -184,6 +186,7 @@ function BusinessProfileStack() {
       <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
       <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
       <Stack.Screen name="Favorites" component={FavoritesScreen} />
+      <Stack.Screen name="InviteFriends" component={InviteFriendsScreen} />
     </Stack.Navigator>
   );
 }
