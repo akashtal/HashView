@@ -319,6 +319,19 @@ if (process.env.NODE_ENV !== 'test') {
         console.log('ℹ️  CRM-123 index check: ' + e.message);
       }
 
+      // Automatically migrate referral.code_1 index from sparse to partialFilterExpression
+      try {
+        const userIndexes = await mongoose.connection.collection('users').indexes();
+        const refIdx = userIndexes.find(i => i.name === 'referral.code_1' || i.name === 'referral.code_1_sparse');
+        if (refIdx && !refIdx.partialFilterExpression) {
+          console.log('🔄 Old referral.code_1 sparse index found, dropping...');
+          await mongoose.connection.collection('users').dropIndex(refIdx.name);
+          console.log('✅ Dropped old referral.code_1 index. Mongoose will auto-recreate the new partial index.');
+        }
+      } catch (e) {
+        console.log('ℹ️  Referral index check: ' + e.message);
+      }
+
       // Create default admin account
       await createDefaultAdmin();
 

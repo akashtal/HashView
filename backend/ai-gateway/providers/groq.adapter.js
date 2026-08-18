@@ -24,11 +24,11 @@ const { MENU_EXTRACTION_SYSTEM_PROMPT } = require('../prompts/menu_extraction_v1
 class GroqAdapter extends OpenAIAdapter {
   constructor(config = {}) {
     super({
-      apiKey:      config.apiKey      || '',
-      model:       config.model       || 'gpt-oss-120b',
+      apiKey: config.apiKey || '',
+      model: config.model || 'gpt-oss-120b',
       visionModel: config.visionModel || 'meta-llama/llama-4-scout-17b-16e-instruct',
-      baseUrl:     config.baseUrl     || 'https://api.groq.com/openai/v1',
-      timeout:     config.timeout     || 30000,
+      baseUrl: config.baseUrl || 'https://api.groq.com/openai/v1',
+      timeout: config.timeout || 30000,
     });
     this.providerName = 'groq';
   }
@@ -52,7 +52,7 @@ class GroqAdapter extends OpenAIAdapter {
           model: this.modelName,
           messages: [
             { role: 'system', content: systemPrompt },
-            { role: 'user',   content: query },
+            { role: 'user', content: query },
           ],
           temperature: 0.1,
           max_tokens: 600,
