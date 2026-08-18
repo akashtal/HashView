@@ -587,11 +587,11 @@ exports.deleteAccount = async (req, res, next) => {
     }
 
     // Find user (check both models)
-    let user = await User.findById(req.user.id);
+    let user = await User.findById(req.user.id).select('+passwordHash');
     let isBusinessOwner = false;
 
     if (!user) {
-      user = await BusinessOwner.findById(req.user.id);
+      user = await BusinessOwner.findById(req.user.id).select('+passwordHash');
       isBusinessOwner = true;
     }
 
