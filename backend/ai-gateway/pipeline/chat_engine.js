@@ -10,7 +10,7 @@
  *   progressively like ChatGPT.
  *
  * Fallback chain:
- *   1. Groq (gpt-oss-120b) — primary
+ *   1. Groq (openai/gpt-oss-120b) — primary
  *   2. Gemini (gemini-2.0-flash) — fallback if Groq fails
  *   3. Template response — if all providers fail
  */
@@ -28,7 +28,7 @@ function buildChatModel(streaming = true) {
   if (settings.groq?.apiKey) {
     return new ChatGroq({
       apiKey: settings.groq.apiKey,
-      model: settings.groq.model || 'gpt-oss-120b',
+      model: settings.groq.model || 'openai/gpt-oss-120b',
       temperature: 0.3,  // Lowered from 0.6 to reduce hallucination risk
       maxTokens: 800,  // Increased from 600 for richer comparison answers
       streaming,

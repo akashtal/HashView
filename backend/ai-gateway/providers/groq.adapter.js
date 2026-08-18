@@ -9,7 +9,7 @@
  *   Extremely fast inference (1000+ tokens/second)
  *
  * ─── Models ──────────────────────────────────────────────────────────────────
- *   Text: gpt-oss-120b, llama-3.1-8b-instant
+ *   Text: openai/gpt-oss-120b, llama-3.1-8b-instant
  *   Vision: meta-llama/llama-4-scout-17b-16e-instruct (Llama 4 with vision ✓)
  *
  * ─── Endpoint ────────────────────────────────────────────────────────────────
@@ -25,7 +25,7 @@ class GroqAdapter extends OpenAIAdapter {
   constructor(config = {}) {
     super({
       apiKey: config.apiKey || '',
-      model: config.model || 'gpt-oss-120b',
+      model: config.model || 'openai/gpt-oss-120b',
       visionModel: config.visionModel || 'meta-llama/llama-4-scout-17b-16e-instruct',
       baseUrl: config.baseUrl || 'https://api.groq.com/openai/v1',
       timeout: config.timeout || 30000,

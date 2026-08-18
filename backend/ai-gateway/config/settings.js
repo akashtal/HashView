@@ -45,7 +45,7 @@ const settings = {
   // 100% free — 14,400 req/day, no billing. Sign up at https://console.groq.com
   groq: {
     apiKey: process.env.AI_GROQ_API_KEY || '',
-    model: process.env.AI_GROQ_MODEL || 'gpt-oss-120b',
+    model: process.env.AI_GROQ_MODEL || 'openai/gpt-oss-120b',
     visionModel: process.env.AI_GROQ_VISION_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct',
     baseUrl: process.env.AI_GROQ_BASE_URL || 'https://api.groq.com/openai/v1',
   },
