@@ -10,12 +10,12 @@
  *   progressively like ChatGPT.
  *
  * Fallback chain:
- *   1. Groq (llama-3.3-70b-versatile) — primary
+ *   1. Groq (gpt-oss-120b) — primary
  *   2. Gemini (gemini-2.0-flash) — fallback if Groq fails
  *   3. Template response — if all providers fail
  */
 
-const { ChatGroq }   = require('@langchain/groq');
+const { ChatGroq } = require('@langchain/groq');
 const { HumanMessage, SystemMessage, AIMessage } = require('@langchain/core/messages');
 
 const settings = require('../config/settings');
@@ -27,10 +27,10 @@ function buildChatModel(streaming = true) {
   // Primary: Groq
   if (settings.groq?.apiKey) {
     return new ChatGroq({
-      apiKey:      settings.groq.apiKey,
-      model:       settings.groq.model || 'llama-3.3-70b-versatile',
+      apiKey: settings.groq.apiKey,
+      model: settings.groq.model || 'gpt-oss-120b',
       temperature: 0.3,  // Lowered from 0.6 to reduce hallucination risk
-      maxTokens:   800,  // Increased from 600 for richer comparison answers
+      maxTokens: 800,  // Increased from 600 for richer comparison answers
       streaming,
     });
   }
@@ -44,11 +44,11 @@ function buildFallbackModel(streaming = true) {
     try {
       const { ChatOpenAI } = require('@langchain/openai');
       return new ChatOpenAI({
-        apiKey:   settings.gemini.apiKey,
-        model:    settings.gemini.model || 'gemini-2.0-flash',
-        baseURL:  'https://generativelanguage.googleapis.com/v1beta/openai/',
+        apiKey: settings.gemini.apiKey,
+        model: settings.gemini.model || 'gemini-2.0-flash',
+        baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
         temperature: 0.3,
-        maxTokens:   800,
+        maxTokens: 800,
         streaming,
       });
     } catch {
@@ -212,8 +212,8 @@ async function getChatResponse({ userMessage, history, contextText, contextType,
   }
 
   const messages = buildMessages(userMessage, history, contextText, contextType, session, location);
-  const response  = await model.invoke(messages);
-  const fullText  = typeof response.content === 'string' ? response.content : '';
+  const response = await model.invoke(messages);
+  const fullText = typeof response.content === 'string' ? response.content : '';
 
   return {
     fullText,

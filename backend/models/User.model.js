@@ -240,7 +240,7 @@ const userSchema = new mongoose.Schema({
 userSchema.index({ location: '2dsphere' });
 userSchema.index({ 'pushTokens.token': 1 });
 // Referral code lookup — sparse so users without a code don't consume index space
-userSchema.index({ 'referral.code': 1 }, { unique: true, sparse: true });
+userSchema.index({ 'referral.code': 1 }, { unique: true, partialFilterExpression: { 'referral.code': { $type: 'string' } } });
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {
