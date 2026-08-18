@@ -45,6 +45,7 @@ const schemas = {
     phone: Joi.string().allow('', null).pattern(/^\+?[0-9]{7,15}$/).optional(),
     password: Joi.string().min(6).required(),
     role: Joi.string().valid('customer', 'business').default('customer'),
+    referralCode: Joi.string().allow('', null).optional(),
     address: Joi.object({
       buildingNumber: Joi.string().allow('', null),
       street: Joi.string().allow('', null),
