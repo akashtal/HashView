@@ -3,7 +3,7 @@ export default {
     name: 'HashView',
     slug: 'hashview',
     scheme: 'hashview',
-    version: '1.1.16',
+    version: '1.1.17',
     orientation: 'portrait',
     icon: './assets/HashViewlogo-01.png',
     userInterfaceStyle: 'automatic',
@@ -58,7 +58,7 @@ export default {
     android: {
       package: 'com.hashview.apps',
       googleServicesFile: './google-services.json',
-      versionCode: 36,
+      versionCode: 37,
       usesCleartextTraffic: true,
       adaptiveIcon: {
         foregroundImage: './assets/HashViewlogo-01.png',
