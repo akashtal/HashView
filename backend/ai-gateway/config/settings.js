@@ -46,7 +46,7 @@ const settings = {
   groq: {
     apiKey: process.env.AI_GROQ_API_KEY || '',
     model: process.env.AI_GROQ_MODEL || 'openai/gpt-oss-120b',
-    visionModel: process.env.AI_GROQ_VISION_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct',
+    visionModel: process.env.AI_GROQ_VISION_MODEL || 'qwen/qwen3.6-27b',
     baseUrl: process.env.AI_GROQ_BASE_URL || 'https://api.groq.com/openai/v1',
   },
 

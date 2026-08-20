@@ -10,7 +10,7 @@
  *
  * ─── Models ──────────────────────────────────────────────────────────────────
  *   Text: openai/gpt-oss-120b, llama-3.1-8b-instant
- *   Vision: meta-llama/llama-4-scout-17b-16e-instruct (Llama 4 with vision ✓)
+ *   Vision: qwen/qwen3.6-27b (Qwen with vision ✓)
  *
  * ─── Endpoint ────────────────────────────────────────────────────────────────
  *   https://api.groq.com/openai/v1  (100% OpenAI-compatible)
@@ -26,7 +26,7 @@ class GroqAdapter extends OpenAIAdapter {
     super({
       apiKey: config.apiKey || '',
       model: config.model || 'openai/gpt-oss-120b',
-      visionModel: config.visionModel || 'meta-llama/llama-4-scout-17b-16e-instruct',
+      visionModel: config.visionModel || 'qwen/qwen3.6-27b',
       baseUrl: config.baseUrl || 'https://api.groq.com/openai/v1',
       timeout: config.timeout || 30000,
     });
@@ -91,8 +91,7 @@ class GroqAdapter extends OpenAIAdapter {
     // Groq vision-capable models — tried in order
     const candidates = [
       this.visionModelName,
-      'meta-llama/llama-4-scout-17b-16e-instruct',
-      'meta-llama/llama-4-maverick-17b-128e-instruct',
+      'qwen/qwen3.6-27b',
     ].filter((m, i, arr) => arr.indexOf(m) === i);
 
     const buildMessages = () => ([
