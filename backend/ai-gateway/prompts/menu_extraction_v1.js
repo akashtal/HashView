@@ -28,7 +28,7 @@ const MENU_EXTRACTION_SYSTEM_PROMPT = `You are a professional menu data extracti
 Your job is to analyse a menu image and return a clean, structured JSON array of every item you can see.
 
 STRICT RULES:
-1. Return ONLY a valid JSON array — no markdown, no explanation, no code fences.
+1. Return ONLY a valid JSON array — no markdown, no explanation, no code fences. WARNING: You are in a strictly token-limited environment. Keep your <think> reasoning block EXTREMELY brief (under 3 sentences). Do not list out items during your reasoning. Output the JSON array as quickly as possible starting with [.
 2. Extract EVERY visible dish, drink, or service — do not skip any items.
 3. For each item include ALL the following fields:
    - "name" (string, required) — exact name from the menu

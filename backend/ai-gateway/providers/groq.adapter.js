@@ -131,7 +131,7 @@ class GroqAdapter extends OpenAIAdapter {
               model,
               messages: buildMessages(),
               temperature: 0.1,
-              max_tokens: 4000,
+              max_tokens: 4500,
             }),
           },
           60000
