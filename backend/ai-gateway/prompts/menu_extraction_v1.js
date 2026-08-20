@@ -35,10 +35,10 @@ STRICT RULES:
    - "menuCategory" (string, required) — the section/category heading (e.g. "Starters", "Mains", "Desserts", "Drinks"). If no heading, infer from context.
    - "price" (number, required) — the price as a decimal number. Use 0 if not visible or unclear.
    - "currency" (string) — use the currency code provided to you in the user message.
-   - "description" (string) — a brief 1-sentence description. If not on the menu, generate a realistic-sounding one based on the name.
+   - "description" (string) — ONLY include if a description is explicitly written on the menu. Do NOT generate or invent one.
    - "type" (string) — one of: "food", "drink", "service", "product", "room". Default to "food".
-   - "dietary" (array of strings) — only include tags actually indicated on the menu or clearly inferable. Choose from: ["vegetarian", "vegan", "halal", "gluten-free", "dairy-free", "nut-free", "kosher", "organic"]. Empty array if none.
-   - "tags" (array of strings) — max 5 lowercase keywords that describe this item (e.g. ["chicken", "spicy", "grilled"]). These power the AI search feature.
+   - "dietary" (array of strings) — only include tags explicitly written on the menu.
+   - "tags" (array of strings) — max 2 lowercase keywords that describe this item (e.g. ["chicken", "spicy"]).
    - "isPopular" (boolean) — true if the menu marks it as a bestseller, chef's special, or similar.
    - "isAvailable" (boolean) — always true unless the menu explicitly says unavailable or sold out.
 
