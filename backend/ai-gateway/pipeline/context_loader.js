@@ -307,6 +307,21 @@ async function loadContext(message, session, location = null) {
     } catch { /* non-fatal */ }
   }
 
+  // ─── Step 7: Inject Ideas Fest 2026 Context (TEMPORARY DEMO) ────────────────
+  const isIdeasFestExplicit = message.toLowerCase().includes('ideas fest');
+  const isIdeasFestFocused = updatedSession.focusedBusinessName?.toLowerCase().includes('ideas fest');
+  const isIdeasFestInSearch = updatedSession.rankedBusinessList?.some(b => b.name.toLowerCase().includes('ideas fest'));
+
+  if (isIdeasFestExplicit || isIdeasFestFocused || isIdeasFestInSearch) {
+    try {
+      const { buildIdeasFestAIContext } = require('./ideasFestContext');
+      contextParts.push(buildIdeasFestAIContext(location?.latitude, location?.longitude));
+      if (contextType === 'conversation') contextType = 'business'; // Ensure the UI understands it's discussing an entity
+    } catch (err) {
+      console.warn('[Context Loader] Failed to inject Ideas Fest Context:', err.message);
+    }
+  }
+
   return {
     contextText:    contextParts.join('\n\n'),
     contextType,
