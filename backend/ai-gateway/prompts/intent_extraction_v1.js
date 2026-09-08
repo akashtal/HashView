@@ -19,7 +19,8 @@ OUTPUT FORMAT: Valid JSON only. No explanation. No markdown. No code fences.
 AVAILABLE FILTERS:
 {
   "intent_type": string,           // "search" | "compare" | "recommend" | "followup" | "detail" | "menu_search" | "budget_search" | "dietary_search" | "review_search" | "off_topic"
-  "category": string or null,     // Business category (restaurant, cafe, hotel, salon, gym, spa, bar, pub, pharmacy, etc.)
+  "category": string or null,     // Business category — use EXACT value: restaurant, cafe, hotel, salon, gym, spa, bar, pub, pharmacy, events, take-away, entertainment, shop, beauty, or any other relevant business type the user mentions
+  "business_name": string or null, // If user asks about a SPECIFIC business by name (e.g. "Ideas Fest", "ABC Events", "The Goat Restaurant"), extract the name here. Leave null for general category/service searches.
   "menu_keyword": string or null, // CORRECTED, normalized food/service keyword. Fix ANY misspellings. Use lowercase.
   "menu_keywords": string[] or null, // Individual words from menu_keyword for fuzzy matching. Null if single word.
   "menu_items": string[] or null, // For multi-item budget queries: list each item separately
@@ -60,6 +61,9 @@ EXTRACTION RULES:
 11. Currency: always convert to GBP numbers (£15 → 15)
 12. IMPORTANT: Do NOT default near_me to true. Only set near_me:true when user explicitly says "near me" or similar.
 13. is_off_topic: true ONLY for completely unrelated queries (weather, coding, politics, etc.)
+14. BUSINESS NAME RULE: If user asks "tell me about X", "find X", "what is X", "show me X" where X appears to be a proper-noun business name (capitalised words), extract it as business_name. E.g. "Tell me about Ideas Fest" → business_name: "Ideas Fest"
+15. EVENTS CATEGORY: "events", "event company", "event planning", "event businesses", "party planners", "wedding planners", "corporate events" → category: "events"
+16. TAKE-AWAY: "take-away", "takeaway" as a category (not a feature) → category: "take-away"
 
 MENU CATEGORY RULES (use menu_category, NOT menu_keyword):
 - "starters", "starter", "appetizers", "appetiser" → menu_category: "starters"

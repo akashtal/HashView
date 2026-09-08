@@ -178,6 +178,27 @@ function applyDeterministicRules(query, llmIntent) {
     }
   }
 
+  // 8. is_off_topic safety override
+  // The LLM sometimes wrongly marks queries like "Ideas Fest" or business names
+  // as off-topic. We override this if the query doesn't match any known off-topic
+  // pattern — it's safer to search and return 0 results than to block a valid query.
+  if (intent.is_off_topic) {
+    const KNOWN_OFF_TOPIC = [
+      /\b(weather|temperature|forecast|rain|sunny|snow|wind)\b/i,
+      /\b(code|programming|python|javascript|software|algorithm|debug)\b/i,
+      /\b(politics|government|election|vote|parliament|president|minister)\b/i,
+      /\b(sports score|football result|cricket score|match result|score line)\b/i,
+      /\b(news|headline|breaking news|newspaper)\b/i,
+      /\b(stock|shares|crypto|bitcoin|market cap|nasdaq|trading)\b/i,
+      /\b(recipe|how to cook|cooking instructions|ingredients for)\b/i,
+    ];
+    const isGenuinelyOffTopic = KNOWN_OFF_TOPIC.some(p => p.test(query));
+    if (!isGenuinelyOffTopic) {
+      // Override — treat this as a business name / general search
+      intent.is_off_topic = false;
+    }
+  }
+
   return intent;
 }
 
@@ -196,6 +217,10 @@ async function parseIntent(query) {
 
   // Apply deterministic overrides — catch anything the LLM missed or got wrong
   const intent = applyDeterministicRules(query, normalizedIntent);
+
+  // Always pass through the raw query text so the query builder can use it
+  // for business-name search (Stage 2b) when no category was identified
+  intent.query_text = query;
 
   return {
     intent,
@@ -350,6 +375,10 @@ function normalizeIntent(raw = {}) {
     comparison_targets,
     ordinal_reference,
     is_off_topic:       raw.is_off_topic === true,
+    // New: optional business name extracted by LLM for entity resolution
+    business_name:      typeof raw.business_name === 'string' && raw.business_name.trim()
+                          ? raw.business_name.trim()
+                          : null,
   };
 }
 

@@ -144,7 +144,7 @@ async function logSearch({
 }
 
 function sanitizeIntentForLog(intent) {
-  const { _meta, ...clean } = intent;
+  const { _meta, query_text, ...clean } = intent;
   return clean;
 }
 

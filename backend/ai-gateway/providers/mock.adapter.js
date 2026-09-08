@@ -20,7 +20,7 @@ const { INTENT_EXTRACTION_VERSION } = require('../prompts/intent_extraction_v1')
 const CATEGORY_PATTERNS = [
   { pattern: /\b(restaurant|restaurants|diner|eatery|takeaway|takeout|food)\b/i, value: 'restaurant' },
   { pattern: /\b(cafe|cafes|coffee|coffee shop|coffeehouse)\b/i,                value: 'cafe' },
-  { pattern: /\b(hotel|hotels|accommodation|b&b|bed and breakfast|motel)\b/i,   value: 'hotel' },
+  { pattern: /\b(hotel|hotels|accommodation|b&b|bed and breakfast|motel|guest house|guesthouse)\b/i, value: 'hotel' },
   { pattern: /\b(salon|salons|hairdresser|barber|hair|beauty)\b/i,              value: 'salon' },
   { pattern: /\b(gym|gyms|fitness|workout|sport|sports centre)\b/i,             value: 'gym' },
   { pattern: /\b(spa|spas|massage|wellness|relaxation)\b/i,                     value: 'spa' },
@@ -28,6 +28,12 @@ const CATEGORY_PATTERNS = [
   { pattern: /\b(pharmacy|pharmacies|chemist|chemists|drugstore)\b/i,           value: 'pharmacy' },
   { pattern: /\b(supermarket|supermarkets|grocery|groceries|market)\b/i,        value: 'supermarket' },
   { pattern: /\b(clinic|clinics|doctor|dentist|medical|hospital)\b/i,           value: 'clinic' },
+  // Custom categories that may be created by admin
+  { pattern: /\b(event|events|event planning|event company|event organis|event organiz|party planner|wedding planner|corporate event)\b/i, value: 'events' },
+  { pattern: /\b(take-away|take away|takeaway food|fast food|fast-food|delivery food)\b/i, value: 'take-away' },
+  { pattern: /\b(entertainment|cinema|theatre|theater|bowling|arcade|gaming centre)\b/i, value: 'entertainment' },
+  { pattern: /\b(shop|shops|store|stores|boutique|retail)\b/i,                  value: 'shop' },
+  { pattern: /\b(beauty salon|nail|nail salon|manicure|pedicure)\b/i,           value: 'beauty' },
 ];
 
 const DIETARY_PATTERNS = [

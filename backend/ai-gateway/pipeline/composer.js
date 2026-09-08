@@ -168,7 +168,11 @@ function buildDatabaseFirstMessage(businesses, intent, totalCount, searchAccurac
  * low    — related/no match, zero results, or very poor quality
  */
 function computeConfidenceScore(totalCount, searchAccuracy, businesses, intent) {
-  if (totalCount === 0) return 'low';
+  // When there are 0 results: don't show a confidence banner at all.
+  // The empty state UI already handles the "nothing found" message.
+  // Showing "Low confidence" alongside "No results found" is confusing and redundant.
+  if (totalCount === 0) return null;
+
   if (searchAccuracy === 'none' || searchAccuracy === 'related') return 'low';
   if (searchAccuracy === 'partial') return 'medium';
 
@@ -334,7 +338,8 @@ const FACILITY_LABELS = {
 };
 
 function sanitizeIntentForClient(intent) {
-  const { _meta, ...clean } = intent;
+  // Strip internal pipeline fields that clients don't need to see
+  const { _meta, query_text, ...clean } = intent;
   return clean;
 }
 

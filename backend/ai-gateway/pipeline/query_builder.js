@@ -7,6 +7,7 @@
  * Strategy:
  *  - If location is available → use $geoNear to sort by distance first
  *  - $match filters by category, rating, dietary, city, open-now, coupons, facilities
+ *  - Stage 2b: Business name/text search — allows finding businesses by name
  *  - $lookup joins MenuItem collection for menu keyword + price filtering
  *  - Meal-time awareness: filters menu items to appropriate categories
  *  - All joins are intentional LEFT-OUTER so businesses without menu data still appear
@@ -251,6 +252,51 @@ function buildQuery(intent, location, options = {}, matchTier = 'exact') {
 
   if (Object.keys(matchFilters).length > 0) {
     pipeline.push({ $match: matchFilters });
+  }
+
+  // ─── Stage 2b: Business Name / Text Search ────────────────────────────────────
+  // This enables finding a specific business by name (e.g. "Ideas Fest", "ABC Events").
+  // It runs when:
+  //   (a) The raw query contains a business_name intent field set by the intent parser, OR
+  //   (b) No category was identified (broad/name-only queries) and query has ≥2 significant words
+  // We search business name, description, and tags with a case-insensitive regex.
+  // This does NOT block other filters — it's additive (ANDed with category/rating filters above).
+  if (intent.business_name) {
+    // Explicit business name match — highest priority, use exact name regex
+    const nameRegex = new RegExp(escapeRegex(intent.business_name), 'i');
+    pipeline.push({
+      $match: {
+        $or: [
+          { name:        { $regex: nameRegex } },
+          { description: { $regex: nameRegex } },
+        ],
+      },
+    });
+  } else if (!intent.category && intent.query_text) {
+    // No category detected — try name search with the raw query text
+    // Split into meaningful words (≥3 chars) for partial matching
+    const stopWords = new Set(['the', 'and', 'for', 'near', 'me', 'find', 'show', 'tell', 'about', 'any', 'some', 'are', 'there', 'can', 'you', 'what', 'is', 'give', 'me', 'do', 'know']);
+    const queryWords = intent.query_text
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(w => w.length >= 3 && !stopWords.has(w));
+
+    if (queryWords.length > 0) {
+      // At least one word must match business name OR description
+      const wordRegexes = queryWords.map(w => new RegExp(escapeRegex(w), 'i'));
+      pipeline.push({
+        $match: {
+          $or: [
+            // All words appear in the name (strongest signal)
+            { $and: wordRegexes.map(r => ({ name: { $regex: r } })) },
+            // Any word appears in the name
+            { name: { $regex: new RegExp(queryWords.map(escapeRegex).join('|'), 'i') } },
+            // Full phrase in description
+            { description: { $regex: new RegExp(queryWords.map(escapeRegex).join('|'), 'i') } },
+          ],
+        },
+      });
+    }
   }
 
   // ─── Stage 3: Join with MenuItem ─────────────────────────────────────────────

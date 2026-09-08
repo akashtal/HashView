@@ -165,4 +165,45 @@ router.get('/classify-menu-items/preview', async (req, res) => {
   }
 });
 
+/**
+ * DELETE /ai/admin/cache
+ * Flush all AI search Redis cache entries (ai:search:v4:*).
+ * Call this after creating new businesses or categories to make them
+ * immediately discoverable without waiting for the 5-minute TTL.
+ */
+router.delete('/cache', async (req, res) => {
+  if (!checkAdminSecret(req, res)) return;
+
+  try {
+    let redis;
+    try {
+      redis = require('../../config/redis');
+    } catch {
+      return res.json({ success: true, deleted: 0, message: 'Redis not configured — no cache to clear' });
+    }
+
+    // Use SCAN to find all ai:search:v4:* keys without blocking
+    const client = redis._client || redis.client;
+    if (!client || typeof client.scan !== 'function') {
+      return res.json({ success: true, deleted: 0, message: 'Redis scan not available — cache will expire in ≤5 minutes' });
+    }
+
+    let cursor = '0';
+    let deleted = 0;
+    do {
+      const [nextCursor, keys] = await client.scan(cursor, 'MATCH', 'ai:search:v4:*', 'COUNT', 200);
+      cursor = nextCursor;
+      if (keys.length > 0) {
+        await client.del(...keys);
+        deleted += keys.length;
+      }
+    } while (cursor !== '0');
+
+    return res.json({ success: true, deleted, message: `Cleared ${deleted} AI search cache entries` });
+
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;
