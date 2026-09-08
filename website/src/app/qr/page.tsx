@@ -14,6 +14,7 @@ import {
   Mail,
   Instagram,
   Linkedin,
+  Sparkles,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { qrLinks } from "@/lib/qr-links";
@@ -185,6 +186,13 @@ function QRPageContent() {
             label="Contact Us"
             eventName="contact_click"
             delay={0.7}
+          />
+          <QRLinkCard
+            href={attachParams(qrLinks.ideasFest)}
+            icon={Sparkles}
+            label="Ideas Fest"
+            eventName="ideas_fest_click"
+            delay={0.8}
           />
         </div>
 
