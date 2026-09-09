@@ -154,7 +154,7 @@ export default function BusinessDetailPage(_props?: { params?: Promise<{ id: str
           category={business.category}
         />
       )}
-      <DownloadAppModal feature={gateFeature} onClose={() => setGateFeature(null)} />
+      <DownloadAppModal feature={gateFeature} onClose={() => setGateFeature(null)} businessId={id} />
 
       <div className="min-h-full pb-10">
         {/* Hero */}
@@ -402,7 +402,7 @@ export default function BusinessDetailPage(_props?: { params?: Promise<{ id: str
 
               {/* Download App CTA for reviews */}
               <div className="mt-6">
-                <DownloadAppBanner feature="SUBMIT_REVIEW" />
+                <DownloadAppBanner feature="SUBMIT_REVIEW" businessId={id} />
               </div>
             </div>
           )}
