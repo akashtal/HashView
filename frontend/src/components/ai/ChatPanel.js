@@ -256,6 +256,7 @@ export default function ChatPanel({
 }) {
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const listRef = useRef(null);
   const inputRef = useRef(null);
   const abortRef = useRef(null); // Holds the stream abort function
@@ -266,6 +267,22 @@ export default function ChatPanel({
   const sessionId = useSelector(selectChatSessionId);
 
   const [inputText, setInputText] = useState('');
+
+  // ─── Keyboard height tracking (fix for iOS physical devices) ────────────────
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => setKeyboardHeight(e.endCoordinates.height - insets.bottom)
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardHeight(0)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [insets.bottom]);
 
   // ─── Slide animation ────────────────────────────────────────────────────────
   const slideAnim = useRef(new Animated.Value(PANEL_HEIGHT)).current;
@@ -460,58 +477,53 @@ export default function ChatPanel({
         </View>
 
         {/* ── Messages ── */}
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? (SCREEN_HEIGHT - PANEL_HEIGHT) : 0}
-        >
-          <FlatList
-            ref={listRef}
-            data={messages}
-            keyExtractor={(m) => m.id}
-            renderItem={({ item }) => (
-              <MessageBubble
-                msg={item}
-                onBusinessPress={onBusinessPress}
-                onFollowUp={handleFollowUp}
-              />
-            )}
-            contentContainerStyle={styles.messageList}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            ListEmptyComponent={<EmptyState />}
-            ListFooterComponent={isStreaming && messages.length === 0 ? <TypingIndicator /> : null}
-          />
-
-          {/* ── Input Bar ── */}
-          <View style={styles.inputBar}>
-            <TextInput
-              ref={inputRef}
-              style={styles.input}
-              placeholder="Ask about menus, prices, reviews..."
-              placeholderTextColor="#C4B5FD"
-              value={inputText}
-              onChangeText={setInputText}
-              onSubmitEditing={() => sendMessage()}
-              returnKeyType="send"
-              multiline
-              maxLength={500}
-              editable={!isStreaming}
-              selectionColor={ACCENT}
+        <FlatList
+          ref={listRef}
+          data={messages}
+          keyExtractor={(m) => m.id}
+          renderItem={({ item }) => (
+            <MessageBubble
+              msg={item}
+              onBusinessPress={onBusinessPress}
+              onFollowUp={handleFollowUp}
             />
-            <TouchableOpacity
-              style={[styles.sendBtn, (!inputText.trim() || isStreaming) && styles.sendBtnDisabled]}
-              onPress={() => sendMessage()}
-              disabled={!inputText.trim() || isStreaming}
-            >
-              {isStreaming ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Icon name="send" size={16} color="#fff" />
-              )}
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
+          )}
+          contentContainerStyle={styles.messageList}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          ListEmptyComponent={<EmptyState />}
+          ListFooterComponent={isStreaming && messages.length === 0 ? <TypingIndicator /> : null}
+          style={{ flex: 1 }}
+        />
+
+        {/* ── Input Bar ── */}
+        <View style={[styles.inputBar, { marginBottom: keyboardHeight }]}>
+          <TextInput
+            ref={inputRef}
+            style={styles.input}
+            placeholder="Ask about menus, prices, reviews..."
+            placeholderTextColor="#C4B5FD"
+            value={inputText}
+            onChangeText={setInputText}
+            onSubmitEditing={() => sendMessage()}
+            returnKeyType="send"
+            multiline
+            maxLength={500}
+            editable={!isStreaming}
+            selectionColor={ACCENT}
+          />
+          <TouchableOpacity
+            style={[styles.sendBtn, (!inputText.trim() || isStreaming) && styles.sendBtnDisabled]}
+            onPress={() => sendMessage()}
+            disabled={!inputText.trim() || isStreaming}
+          >
+            {isStreaming ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Icon name="send" size={16} color="#fff" />
+            )}
+          </TouchableOpacity>
+        </View>
       </Animated.View>
     </View>
   );

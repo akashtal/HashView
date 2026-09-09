@@ -3,7 +3,7 @@ export default {
     name: 'HashView',
     slug: 'hashview',
     scheme: 'hashview',
-    version: '1.1.17',
+    version: '1.1.16',
     orientation: 'portrait',
     icon: './assets/HashViewlogo-01.png',
     userInterfaceStyle: 'automatic',

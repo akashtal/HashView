@@ -26,7 +26,12 @@ import OrderTrackingScreen from '../screens/user/OrderTrackingScreen';
 const Stack = createStackNavigator();
 
 // Deep Linking Configuration
-const prefixes = [Linking.createURL('/'), 'hashview://'];
+const prefixes = [
+  Linking.createURL('/'),
+  'hashview://',
+  'https://hashview.co.uk',
+  'https://www.hashview.co.uk',
+];
 
 const mainLinking = {
   prefixes,
