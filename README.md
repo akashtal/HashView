@@ -4,4 +4,4 @@ pm2 restart all
 pm2 logs
 cd HashView/backend
 nano .env
-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
+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
