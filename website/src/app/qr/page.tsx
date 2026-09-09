@@ -139,6 +139,13 @@ function QRPageContent() {
         {/* Links Column */}
         <div className="w-full space-y-4 mb-12">
           <QRLinkCard
+            href={attachParams(qrLinks.ideasFest)}
+            icon={Sparkles}
+            label="Ideas Fest"
+            eventName="ideas_fest_click"
+            delay={0.8}
+          />
+          <QRLinkCard
             href={attachParams(qrLinks.website)}
             icon={Globe}
             label="HashView Website"
@@ -186,13 +193,6 @@ function QRPageContent() {
             label="Contact Us"
             eventName="contact_click"
             delay={0.7}
-          />
-          <QRLinkCard
-            href={attachParams(qrLinks.ideasFest)}
-            icon={Sparkles}
-            label="Ideas Fest"
-            eventName="ideas_fest_click"
-            delay={0.8}
           />
         </div>
 
