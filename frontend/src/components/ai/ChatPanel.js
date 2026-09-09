@@ -463,7 +463,7 @@ export default function ChatPanel({
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? (SCREEN_HEIGHT - PANEL_HEIGHT) : 0}
         >
           <FlatList
             ref={listRef}
