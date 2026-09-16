@@ -22,6 +22,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   getAllActiveBusinesses,
   getNearbyBusinesses,
@@ -304,6 +305,8 @@ export default function UserHomeScreen({ navigation }) {
     businessName: '',
   });
 
+  const [showScratchAwareness, setShowScratchAwareness] = useState(false);
+
   // Active order live tracking
   const [activeOrder, setActiveOrder] = useState(null);
 
@@ -359,7 +362,30 @@ export default function UserHomeScreen({ navigation }) {
       fetchUnreadNotifications();
     }
     loadCategories();
+    checkDailyAwareness();
   }, [user]);
+
+  const checkDailyAwareness = async () => {
+    try {
+      const lastShownDate = await AsyncStorage.getItem('@last_scratch_awareness');
+      const today = new Date().toDateString();
+      if (lastShownDate !== today) {
+        setShowScratchAwareness(true);
+      }
+    } catch (error) {
+      console.log('Error reading awareness state:', error);
+    }
+  };
+
+  const closeAwarenessModal = async () => {
+    setShowScratchAwareness(false);
+    try {
+      const today = new Date().toDateString();
+      await AsyncStorage.setItem('@last_scratch_awareness', today);
+    } catch (error) {
+      console.log('Error setting awareness state:', error);
+    }
+  };
 
   const initializeScreen = async () => {
     // Always fetch on mount (do not skip even if Redux already has data)
@@ -1314,6 +1340,63 @@ export default function UserHomeScreen({ navigation }) {
             </View>
           </TouchableOpacity>
         </TouchableOpacity>
+      </Modal>
+
+      {/* Daily Scratch Card Awareness Modal */}
+      <Modal
+        visible={showScratchAwareness}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={closeAwarenessModal}
+      >
+        <View className="flex-1 bg-black/60 justify-center items-center px-6">
+          <View className="bg-white rounded-3xl w-full p-6 items-center overflow-hidden">
+            {/* Background Decoration */}
+            <View className="absolute top-0 w-full h-32 bg-amber-50" />
+            
+            {/* UI Graphic / Illustration */}
+            <View className="w-24 h-24 bg-white rounded-full items-center justify-center shadow-lg border-4 border-amber-100 mt-2 mb-6">
+              <Icon name="ticket" size={48} color="#F59E0B" />
+              <View className="absolute -bottom-2 -right-2 bg-green-500 w-10 h-10 rounded-full items-center justify-center border-2 border-white">
+                <Text className="text-white font-bold text-lg">£</Text>
+              </View>
+            </View>
+
+            <Text className="text-2xl font-black text-gray-900 text-center mb-3">
+              Did you know?
+            </Text>
+            
+            <Text className="text-base text-gray-600 text-center mb-6 leading-relaxed">
+              Every time you write a <Text className="font-bold text-gray-800">Verified Review</Text> for a business, you earn a <Text className="font-bold text-amber-600">Scratch Card (£)</Text> with real rewards!
+            </Text>
+
+            <View className="flex-row items-center bg-gray-50 p-4 rounded-xl mb-8 w-full border border-gray-100">
+              <Icon name="star" size={24} color="#F4B400" />
+              <Icon name="arrow-forward" size={16} color="#9CA3AF" className="mx-2" />
+              <Icon name="ticket" size={24} color="#F59E0B" />
+              <Icon name="arrow-forward" size={16} color="#9CA3AF" className="mx-2" />
+              <Icon name="cash" size={24} color="#10B981" />
+              <Text className="ml-auto text-xs font-semibold text-gray-500 uppercase tracking-widest">
+                Simple
+              </Text>
+            </View>
+
+            <TouchableOpacity 
+              onPress={closeAwarenessModal} 
+              activeOpacity={0.8}
+              className="w-full"
+            >
+              <LinearGradient
+                colors={['#F59E0B', '#D97706']}
+                className="py-4 rounded-xl items-center justify-center w-full"
+              >
+                <Text className="text-white font-bold text-[16px] tracking-wide">
+                  Awesome, got it!
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
     </View>
   );
