@@ -161,7 +161,9 @@ const AwarenessScratchCardModal = ({ visible, onClose }) => {
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
       onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
       onPanResponderGrant: (evt) => {
         if (revealedRef.current) return;
         const { localX, localY } = getLocalCoords(evt);
@@ -271,7 +273,7 @@ const AwarenessScratchCardModal = ({ visible, onClose }) => {
 
             {/* ── SCRATCH COVER (SVG MASK) ── */}
             {!revealed && (
-              <Animated.View style={[styles.scratchLayer, { opacity: coverOpacity }]} {...panResponder.panHandlers}>
+              <Animated.View style={[styles.scratchLayer, { opacity: coverOpacity }]}>
                 <Svg width={CARD_WIDTH} height={CARD_HEIGHT}>
                   <Defs>
                     <Mask id="scratchMask">
@@ -347,6 +349,12 @@ const AwarenessScratchCardModal = ({ visible, onClose }) => {
                     ))}
                   </View>
                 )}
+
+                {/* Touch Catcher Overlay (Fixes real device locationX/Y bugs) */}
+                <View 
+                  style={{ position: 'absolute', top: 0, left: 0, width: CARD_WIDTH, height: CARD_HEIGHT }} 
+                  {...panResponder.panHandlers} 
+                />
               </Animated.View>
             )}
           </View>

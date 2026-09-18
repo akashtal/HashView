@@ -33,6 +33,7 @@ export const login = createAsyncThunk('auth/login', async (credentials, { reject
 
     await AsyncStorage.setItem('token', response.token);
     await AsyncStorage.setItem('user', JSON.stringify(response.user));
+    await AsyncStorage.removeItem('@last_scratch_awareness');
 
     // Register push token with backend
     try {
@@ -79,6 +80,7 @@ export const register = createAsyncThunk('auth/register', async (userData, { rej
     const response = await ApiService.register(userData);
     await AsyncStorage.setItem('token', response.token);
     await AsyncStorage.setItem('user', JSON.stringify(response.user));
+    await AsyncStorage.removeItem('@last_scratch_awareness');
 
     // Register push token with backend
     try {
@@ -105,6 +107,7 @@ export const loginWithPhone = createAsyncThunk(
       const response = await ApiService.loginWithPhone(data);
       await AsyncStorage.setItem('token', response.token);
       await AsyncStorage.setItem('user', JSON.stringify(response.user));
+      await AsyncStorage.removeItem('@last_scratch_awareness');
 
       // Register push token with backend
       try {
@@ -214,6 +217,7 @@ const authSlice = createSlice({
       // Store in AsyncStorage + identify in monitoring
       AsyncStorage.setItem('token', action.payload.token);
       AsyncStorage.setItem('user', JSON.stringify(action.payload.user));
+      AsyncStorage.removeItem('@last_scratch_awareness');
       Monitoring.Events.loginSuccess(action.payload.user, 'oauth');
     },
   },
