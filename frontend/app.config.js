@@ -191,6 +191,10 @@ export default {
           organization: 'hashview-qr',
         },
       ],
+      '@react-native-community/datetimepicker',
+      'expo-image',
+      'expo-sharing',
+      'expo-status-bar',
       './plugins/withFmtFix.js',
     ],
 
@@ -202,3 +206,4 @@ export default {
     owner: 'hashview',
   },
 };
+

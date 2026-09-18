@@ -29,7 +29,7 @@ const withFmtFix = (config) => {
       // Insert the code right after react_native_post_install
       if (!contents.includes("target.name == 'fmt'")) {
         contents = contents.replace(
-          /(react_native_post_install\([^)]+\))/s,
+          /(react_native_post_install\([\s\S]*?^\s*\))/m,
           `$1\n${fixCode}`
         );
         fs.writeFileSync(file, contents);

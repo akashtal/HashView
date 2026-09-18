@@ -15,7 +15,7 @@ import {
   Animated,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { Video, ResizeMode } from 'expo-av';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import ToastService from '../../utils/ToastService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
@@ -61,6 +61,11 @@ export default function BusinessDetailScreen({ navigation, route }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  
+  const videoPlayer = useVideoPlayer(selectedVideo, player => {
+    player.loop = true;
+    if (selectedVideo) player.play();
+  });
   const [videoViewerVisible, setVideoViewerVisible] = useState(false);
   const [showOldReviews, setShowOldReviews] = useState(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState(null);
@@ -945,13 +950,11 @@ export default function BusinessDetailScreen({ navigation, route }) {
           {/* Video Player */}
           <View className="flex-1 items-center justify-center">
             {selectedVideo && (
-              <Video
-                source={{ uri: selectedVideo }}
+              <VideoView
+                player={videoPlayer}
                 style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.5 }}
-                useNativeControls
-                resizeMode={ResizeMode.CONTAIN}
-                shouldPlay
-                isLooping
+                allowsFullscreen
+                allowsPictureInPicture
               />
             )}
           </View>
