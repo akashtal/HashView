@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
 COPY package*.json ./
 
 # Install dependencies (ignoring scripts temporarily if canvas tries to build from source)
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 
 # Copy project files
