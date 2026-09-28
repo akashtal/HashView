@@ -3,7 +3,7 @@ export default {
     name: 'HashView',
     slug: 'hashview',
     scheme: 'hashview',
-    version: '1.1.17',
+    version: '1.1.18',
     orientation: 'portrait',
     icon: './assets/HashViewlogo-01.png',
     userInterfaceStyle: 'automatic',
@@ -45,7 +45,7 @@ export default {
           NSAllowsArbitraryLoads: true,
         },
       },
-      buildNumber: '28',
+      buildNumber: '29',
       config: {
         // googleMapsApiKey is now handled by the react-native-maps plugin to avoid legacy pod injection errors
       },
@@ -55,7 +55,7 @@ export default {
     android: {
       package: 'com.hashview.apps',
       googleServicesFile: './google-services.json',
-      versionCode: 38,
+      versionCode: 39,
       usesCleartextTraffic: true,
       adaptiveIcon: {
         foregroundImage: './assets/HashViewlogo-01.png',
