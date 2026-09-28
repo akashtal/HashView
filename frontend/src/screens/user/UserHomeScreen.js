@@ -367,25 +367,15 @@ export default function UserHomeScreen({ navigation }) {
   }, [user]);
 
   const checkDailyAwareness = async () => {
-    try {
-      const lastShownDate = await AsyncStorage.getItem('@last_scratch_awareness');
-      const today = new Date().toDateString();
-      if (lastShownDate !== today) {
-        setShowScratchAwareness(true);
-      }
-    } catch (error) {
-      console.log('Error reading awareness state:', error);
-    }
+    // Show every time the screen mounts as requested
+    // Added a small delay to avoid "detached view controller" warnings during app launch/navigation
+    setTimeout(() => {
+      setShowScratchAwareness(true);
+    }, 1000);
   };
 
-  const closeAwarenessModal = async () => {
+  const closeAwarenessModal = () => {
     setShowScratchAwareness(false);
-    try {
-      const today = new Date().toDateString();
-      await AsyncStorage.setItem('@last_scratch_awareness', today);
-    } catch (error) {
-      console.log('Error setting awareness state:', error);
-    }
   };
 
   const initializeScreen = async () => {

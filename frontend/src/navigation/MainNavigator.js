@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useSelector, shallowEqual } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { COLORS } from '../config/colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // User Screens
 import UserHomeScreen from '../screens/user/UserHomeScreen';
@@ -192,6 +193,7 @@ function BusinessProfileStack() {
 }
 
 export default function MainNavigator() {
+  const insets = useSafeAreaInsets();
   // Only subscribe to role — prevents re-render on favoritePlaces changes
   const userRole = useSelector((state) => state.auth.user?.role);
 
@@ -234,8 +236,8 @@ export default function MainNavigator() {
         tabBarInactiveTintColor: 'gray',
         headerShown: false,
         tabBarStyle: {
-          height: 70,
-          paddingBottom: 10,
+          height: 60 + Math.max(insets.bottom, 10),
+          paddingBottom: Math.max(insets.bottom, 10),
           paddingTop: 10,
           backgroundColor: '#FFF',
           borderTopWidth: 1,

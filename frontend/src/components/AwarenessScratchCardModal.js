@@ -65,7 +65,31 @@ const DECOR_DOTS = [
 const TICKET_PATH =
   'M22 6h-4.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.07 0-2.06.5-2.65 1.25C11.89 2.5 10.9 2 9.83 2 8.17 2 6.83 3.34 6.83 5c0 .35.07.69.18 1H3c-1.11 0-2 .89-2 2v3c0 1.11.89 2 2 2v9c0 1.11.89 2 2 2h14c1.11 0 2-.89 2-2v-9c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-7 0c.55 0 1-.45 1-1s-.45-1-1-1-1 .45-1 1 .45 1 1 1zm-6 0c.55 0 1-.45 1-1s-.45-1-1-1-1 .45-1 1 .45 1 1 1zM3 8h7v3H3V8zm2 13v-9h5v9H5zm14 0h-5v-9h5v9zm0-11h-7V8h7v3z';
 
+const REWARD_MESSAGES = [
+  {
+    title: 'Did you know?',
+    desc: 'You win a scratch card on every review you write!',
+  },
+  {
+    title: 'Free Coffee? ☕️',
+    desc: 'Review now and you could win a free coffee today!',
+  },
+  {
+    title: 'Free Drink Today! 🥤',
+    desc: 'Share your experience to unlock a free drink.',
+  },
+  {
+    title: 'Surprise Dinner! 🍽',
+    desc: 'Review your favorite spot to win a surprise dinner.',
+  },
+  {
+    title: 'Unlock Rewards 🎁',
+    desc: 'Every review gets you closer to exclusive local rewards.',
+  }
+];
+
 const AwarenessScratchCardModal = ({ visible, onClose }) => {
+  const [rewardMsg, setRewardMsg] = useState(REWARD_MESSAGES[0]);
   const [revealed, setRevealed] = useState(false);
   const [scratchProgress, setScratchProgress] = useState(0);
   const [pathData, setPathData] = useState('');
@@ -143,6 +167,10 @@ const AwarenessScratchCardModal = ({ visible, onClose }) => {
     shineOpacity.setValue(1);
     hintOpacity.setValue(1);
     hintPulse.setValue(1);
+
+    // Randomize the message each time the card resets
+    const randomMsg = REWARD_MESSAGES[Math.floor(Math.random() * REWARD_MESSAGES.length)];
+    setRewardMsg(randomMsg);
   };
 
   const runRevealAnimation = () => {
@@ -256,10 +284,10 @@ const AwarenessScratchCardModal = ({ visible, onClose }) => {
                 </View>
               </View>
 
-              <Text style={styles.rewardTitle}>Did you know?</Text>
+              <Text style={styles.rewardTitle}>{rewardMsg.title}</Text>
               
               <Text style={styles.rewardDesc}>
-                You win a scratch card on every review
+                {rewardMsg.desc}
               </Text>
 
               <View style={styles.flowRow}>
