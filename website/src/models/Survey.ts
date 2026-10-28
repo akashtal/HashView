@@ -7,6 +7,8 @@ export interface ISurvey extends Document {
     name: string;
     email: string;
     phone: string;
+    businessName?: string;
+    businessAddress?: string;
   };
   read: boolean;
   createdAt: Date;
@@ -21,6 +23,8 @@ const SurveySchema: Schema = new Schema(
       name: { type: String, required: true },
       email: { type: String, required: true },
       phone: { type: String, required: true },
+      businessName: { type: String, trim: true },
+      businessAddress: { type: String, trim: true },
     },
     read: { type: Boolean, default: false },
   },
@@ -32,4 +36,3 @@ const SurveySchema: Schema = new Schema(
 const Survey: Model<ISurvey> = mongoose.models.Survey || mongoose.model<ISurvey>("Survey", SurveySchema);
 
 export default Survey;
-

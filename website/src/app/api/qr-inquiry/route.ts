@@ -5,10 +5,11 @@ import { sendQrInquiryNotification } from "@/lib/email";
 import { z } from "zod";
 
 const schema = z.object({
-  name:           z.string().min(1, "Name is required").max(100),
+  businessName:   z.string().min(1, "Business name is required").max(150),
+  address:        z.string().min(1, "Business address is required").max(300),
+  name:           z.string().min(1, "Contact name is required").max(100),
   email:          z.string().email("Invalid email address"),
   phone:          z.string().min(5, "Phone is required").max(30),
-  address:        z.string().max(300).optional(),
   referralSource: z.string().max(50).optional(),
 });
 
@@ -21,10 +22,11 @@ export async function POST(request: NextRequest) {
 
     // Save to MongoDB
     const inquiry = new QrInquiry({
+      businessName:   data.businessName,
+      address:        data.address,
       name:           data.name,
       email:          data.email,
       phone:          data.phone,
-      address:        data.address || "",
       referralSource: data.referralSource || "",
     });
     await inquiry.save();
@@ -32,10 +34,11 @@ export async function POST(request: NextRequest) {
 
     // Fire email notifications (non-blocking — don't fail the request if email fails)
     sendQrInquiryNotification({
+      businessName:   data.businessName,
+      address:        data.address,
       name:           data.name,
       email:          data.email,
       phone:          data.phone,
-      address:        data.address,
       referralSource: data.referralSource,
     }).catch((err) =>
       console.error("⚠️ [QR INQUIRY API] Email error (non-fatal):", err)

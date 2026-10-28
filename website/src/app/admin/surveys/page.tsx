@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2, CheckCircle2, Users, Briefcase } from "lucide-react";
+import { Trash2, CheckCircle2, Users, Briefcase, Building2, MapPin, Mail, Phone, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -11,6 +11,13 @@ interface Survey {
   _id: string;
   type: "customer" | "partner";
   answers: Record<string, string>;
+  contactDetails?: {
+    name: string;
+    email: string;
+    phone: string;
+    businessName?: string;
+    businessAddress?: string;
+  };
   read: boolean;
   createdAt: string;
 }
@@ -154,7 +161,11 @@ export default function AdminSurveysPage() {
                         ) : (
                           <Briefcase className="inline h-4 w-4 mr-2" />
                         )}
-                        {survey.type} Survey
+                        {survey.contactDetails?.businessName ? (
+                          <span>{survey.contactDetails.businessName} <span className="text-sm font-normal text-muted-foreground">({survey.type} Survey)</span></span>
+                        ) : (
+                          <span>{survey.type} Survey</span>
+                        )}
                       </CardTitle>
                       {!survey.read && (
                         <span className="text-xs bg-hashview-purple/20 text-hashview-purple px-2 py-1 rounded">
@@ -188,9 +199,59 @@ export default function AdminSurveysPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                {survey.contactDetails && (
+                  <div className="p-3.5 rounded-lg bg-muted/40 border border-border/60 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {survey.contactDetails.businessName && (
+                        <div className="flex items-start gap-2">
+                          <Building2 className="w-4 h-4 text-hashview-purple mt-0.5 flex-shrink-0" />
+                          <div>
+                            <span className="text-xs text-muted-foreground block font-medium">Business Name</span>
+                            <span className="font-semibold text-foreground">{survey.contactDetails.businessName}</span>
+                          </div>
+                        </div>
+                      )}
+                      {survey.contactDetails.businessAddress && (
+                        <div className="flex items-start gap-2">
+                          <MapPin className="w-4 h-4 text-hashview-orange mt-0.5 flex-shrink-0" />
+                          <div>
+                            <span className="text-xs text-muted-foreground block font-medium">Business Address</span>
+                            <span className="font-medium text-foreground">{survey.contactDetails.businessAddress}</span>
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex items-start gap-2">
+                        <User className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                        <div>
+                          <span className="text-xs text-muted-foreground block font-medium">Contact Person</span>
+                          <span className="font-medium text-foreground">{survey.contactDetails.name}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Mail className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                        <div>
+                          <span className="text-xs text-muted-foreground block font-medium">Email</span>
+                          <a href={`mailto:${survey.contactDetails.email}`} className="text-hashview-purple hover:underline">
+                            {survey.contactDetails.email}
+                          </a>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Phone className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                        <div>
+                          <span className="text-xs text-muted-foreground block font-medium">Phone</span>
+                          <a href={`tel:${survey.contactDetails.phone}`} className="hover:underline">
+                            {survey.contactDetails.phone}
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-3">
-                  {Object.entries(survey.answers).map(([questionId, answer], index) => (
+                  {Object.entries(survey.answers).map(([questionId, answer]) => (
                     <div key={questionId} className="border-l-2 border-hashview-purple pl-4">
                       <p className="text-sm font-medium text-muted-foreground mb-1">
                         {questions[parseInt(questionId) - 1] || `Question ${questionId}`}
@@ -207,4 +268,3 @@ export default function AdminSurveysPage() {
     </div>
   );
 }
-

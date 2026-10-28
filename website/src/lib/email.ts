@@ -1,4 +1,4 @@
-﻿import nodemailer from "nodemailer";
+import nodemailer from "nodemailer";
 
 const SMTP_HOST = process.env.SMTP_HOST || "smtp.gmail.com";
 const SMTP_PORT = parseInt(process.env.SMTP_PORT || "587");
@@ -9,12 +9,12 @@ const FROM_EMAIL = process.env.FROM_EMAIL || SMTP_USER;
 
 // Log configuration on module load (for debugging)
 if (typeof window === "undefined") {
-  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [EMAIL INIT] SMTP Configuration loaded:", {
+  console.log("[EMAIL INIT] SMTP Configuration loaded:", {
     host: SMTP_HOST,
     port: SMTP_PORT,
-    user: SMTP_USER || "ÃƒÂ¢Ã‚ÂÃ…â€™ NOT SET",
-    passConfigured: SMTP_PASS ? `ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ ${SMTP_PASS.length} chars` : "ÃƒÂ¢Ã‚ÂÃ…â€™ NOT SET",
-    from: FROM_EMAIL || "ÃƒÂ¢Ã‚ÂÃ…â€™ NOT SET",
+    user: SMTP_USER || "NOT SET",
+    passConfigured: SMTP_PASS ? `SET (${SMTP_PASS.length} chars)` : "NOT SET",
+    from: FROM_EMAIL || "NOT SET",
   });
 }
 
@@ -40,24 +40,24 @@ interface EmailOptions {
 }
 
 export async function sendEmail(options: EmailOptions) {
-  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [EMAIL] Attempting to send email...");
-  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [EMAIL] SMTP Config Check:", {
+  console.log("[EMAIL] Attempting to send email...");
+  console.log("[EMAIL] SMTP Config Check:", {
     host: SMTP_HOST,
     port: SMTP_PORT,
-    user: SMTP_USER || "ÃƒÂ¢Ã‚ÂÃ…â€™ NOT SET",
+    user: SMTP_USER || "NOT SET",
     passLength: SMTP_PASS?.length || 0,
-    passSet: SMTP_PASS ? "ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ SET" : "ÃƒÂ¢Ã‚ÂÃ…â€™ NOT SET",
-    from: FROM_EMAIL || "ÃƒÂ¢Ã‚ÂÃ…â€™ NOT SET",
+    passSet: SMTP_PASS ? "SET" : "NOT SET",
+    from: FROM_EMAIL || "NOT SET",
   });
 
   try {
     // Skip email if credentials are not configured
     if (!SMTP_USER || !SMTP_PASS || SMTP_USER === "" || SMTP_PASS === "") {
-      console.log("ÃƒÂ¢Ã‚ÂÃ…â€™ [EMAIL] SMTP credentials not configured - skipping email");
+      console.log("[EMAIL] SMTP credentials not configured - skipping email");
       return { success: false, error: "SMTP not configured", skipped: true };
     }
 
-    console.log("ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ [EMAIL] SMTP credentials found, proceeding with email send...");
+    console.log("[EMAIL] SMTP credentials found, proceeding with email send...");
 
     const mailOptions = {
       from: `"HashView" <${FROM_EMAIL}>`,
@@ -67,23 +67,23 @@ export async function sendEmail(options: EmailOptions) {
       html: options.html,
     };
 
-    console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [EMAIL] Sending email to:", mailOptions.to);
-    console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [EMAIL] Subject:", mailOptions.subject);
+    console.log("[EMAIL] Sending email to:", mailOptions.to);
+    console.log("[EMAIL] Subject:", mailOptions.subject);
 
     const info = await transporter.sendMail(mailOptions);
-    console.log("ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ [EMAIL] Email sent successfully!");
-    console.log("ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ [EMAIL] Message ID:", info.messageId);
+    console.log("[EMAIL] Email sent successfully!");
+    console.log("[EMAIL] Message ID:", info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("ÃƒÂ¢Ã‚ÂÃ…â€™ [EMAIL] Error sending email:");
-    console.error("ÃƒÂ¢Ã‚ÂÃ…â€™ [EMAIL] Error type:", error instanceof Error ? error.constructor.name : typeof error);
-    console.error("ÃƒÂ¢Ã‚ÂÃ…â€™ [EMAIL] Error message:", error instanceof Error ? error.message : String(error));
+    console.error("[EMAIL] Error sending email:");
+    console.error("[EMAIL] Error type:", error instanceof Error ? error.constructor.name : typeof error);
+    console.error("[EMAIL] Error message:", error instanceof Error ? error.message : String(error));
 
     // Check for Gmail-specific errors
     if (error instanceof Error && error.message.includes("BadCredentials")) {
-      console.error("ÃƒÂ¢Ã‚ÂÃ…â€™ [EMAIL] GMAIL AUTHENTICATION ERROR!");
-      console.error("ÃƒÂ¢Ã‚ÂÃ…â€™ [EMAIL] The password is incorrect or you need to use a Gmail App Password.");
-      console.error("ÃƒÂ¢Ã‚ÂÃ…â€™ [EMAIL] See SETUP_EMAIL.md for instructions on how to get a Gmail App Password.");
+      console.error("[EMAIL] GMAIL AUTHENTICATION ERROR!");
+      console.error("[EMAIL] The password is incorrect or you need to use a Gmail App Password.");
+      console.error("[EMAIL] See SETUP_EMAIL.md for instructions on how to get a Gmail App Password.");
     }
 
     return { success: false, error: error instanceof Error ? error.message : "Unknown error", skipped: false };
@@ -96,13 +96,14 @@ export async function sendContactNotification(contactData: {
   subject: string;
   message: string;
 }) {
-  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [CONTACT EMAIL] Preparing contact form email notification...");
-  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [CONTACT EMAIL] Contact data:", {
+  console.log("[CONTACT EMAIL] Preparing contact form email notification...");
+  console.log("[CONTACT EMAIL] Contact data:", {
     name: contactData.name,
     email: contactData.email,
     subject: contactData.subject,
     messageLength: contactData.message.length,
   });
+
   const adminHtml = `
     <!DOCTYPE html>
     <html>
@@ -135,25 +136,25 @@ export async function sendContactNotification(contactData: {
       <body>
         <div class="email-container">
           <div class="header">
-            <h1>ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ New Contact Form Submission</h1>
+            <h1>&#128231; New Contact Form Submission</h1>
             <p>You have received a new message from your website</p>
           </div>
           <div class="content">
             <div class="field">
-              <div class="label">ÃƒÂ°Ã…Â¸Ã¢â‚¬ËœÃ‚Â¤ Name</div>
+              <div class="label">&#128100; Name</div>
               <div class="value">${contactData.name}</div>
             </div>
             <div class="field">
-              <div class="label">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â® Email Address</div>
+              <div class="label">&#128231; Email Address</div>
               <div class="value email">${contactData.email}</div>
             </div>
             <div class="field">
-              <div class="label">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã…â€™ Subject</div>
+              <div class="label">&#128204; Subject</div>
               <div class="value">${contactData.subject}</div>
             </div>
             <div class="field">
-              <div class="label">ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¬ Message</div>
-              <div class="message-box">${contactData.message.replace(/\n/g, "\n")}</div>
+              <div class="label">&#128172; Message</div>
+              <div class="message-box">${contactData.message}</div>
             </div>
           </div>
           <div class="footer">
@@ -165,20 +166,36 @@ export async function sendContactNotification(contactData: {
     </html>
   `;
 
-  // Send to admin (optional - silent if fails)
-  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [CONTACT EMAIL] Sending admin notification email...");
+  const adminText = `New Contact Form Submission
+You have received a new message from your website
+
+Name: ${contactData.name}
+Email: ${contactData.email}
+Subject: ${contactData.subject}
+
+Message:
+${contactData.message}
+
+---
+This email was sent from your HashView website contact form
+Reply directly to: ${contactData.email}
+`;
+
+  // Send to admin
+  console.log("[CONTACT EMAIL] Sending admin notification email...");
   const adminResult = await sendEmail({
     to: FROM_EMAIL,
-    subject: `ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â New Contact: ${contactData.subject}`,
+    subject: `New Contact: ${contactData.subject}`,
     html: adminHtml,
+    text: adminText,
   });
 
   if (adminResult.success) {
-    console.log("ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ [CONTACT EMAIL] Admin notification sent successfully");
+    console.log("[CONTACT EMAIL] Admin notification sent successfully");
   } else if (adminResult.skipped) {
-    console.log("ÃƒÂ¢Ã‚ÂÃ‚Â­ÃƒÂ¯Ã‚Â¸Ã‚Â [CONTACT EMAIL] Admin notification skipped (SMTP not configured)");
+    console.log("[CONTACT EMAIL] Admin notification skipped (SMTP not configured)");
   } else {
-    console.log("ÃƒÂ¢Ã‚ÂÃ…â€™ [CONTACT EMAIL] Admin notification failed:", adminResult.error);
+    console.log("[CONTACT EMAIL] Admin notification failed:", adminResult.error);
   }
 
   // Send confirmation to user
@@ -186,6 +203,8 @@ export async function sendContactNotification(contactData: {
     <!DOCTYPE html>
     <html>
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -212,20 +231,32 @@ export async function sendContactNotification(contactData: {
     </html>
   `;
 
+  const confirmationText = `Hi ${contactData.name},
+
+Thank you for contacting HashView! We've received your message and will get back to you as soon as possible.
+
+Your message:
+${contactData.message}
+
+Best regards,
+The HashView Team
+`;
+
   // Send confirmation to user (optional - fails silently if email not configured)
-  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [CONTACT EMAIL] Sending user confirmation email...");
+  console.log("[CONTACT EMAIL] Sending user confirmation email...");
   const userResult = await sendEmail({
     to: contactData.email,
     subject: "We've Received Your Message - HashView",
     html: confirmationHtml,
+    text: confirmationText,
   });
 
   if (userResult.success) {
-    console.log("ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ [CONTACT EMAIL] User confirmation sent successfully");
+    console.log("[CONTACT EMAIL] User confirmation sent successfully");
   } else if (userResult.skipped) {
-    console.log("ÃƒÂ¢Ã‚ÂÃ‚Â­ÃƒÂ¯Ã‚Â¸Ã‚Â [CONTACT EMAIL] User confirmation skipped (SMTP not configured)");
+    console.log("[CONTACT EMAIL] User confirmation skipped (SMTP not configured)");
   } else {
-    console.log("ÃƒÂ¢Ã‚ÂÃ…â€™ [CONTACT EMAIL] User confirmation failed:", userResult.error);
+    console.log("[CONTACT EMAIL] User confirmation failed:", userResult.error);
   }
 }
 
@@ -236,13 +267,16 @@ export async function sendSurveyNotification(surveyData: {
     name: string;
     email: string;
     phone: string;
+    businessName?: string;
+    businessAddress?: string;
   };
 }) {
-  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [SURVEY EMAIL] Preparing survey email notification...");
-  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [SURVEY EMAIL] Survey data:", {
+  console.log("[SURVEY EMAIL] Preparing survey email notification...");
+  console.log("[SURVEY EMAIL] Survey data:", {
     type: surveyData.type,
     answerCount: Object.keys(surveyData.answers).length,
     contactName: surveyData.contactDetails.name,
+    businessName: surveyData.contactDetails.businessName,
   });
 
   const surveyType = surveyData.type === "customer" ? "Customer" : "Partner";
@@ -274,6 +308,15 @@ export async function sendSurveyNotification(surveyData: {
     })
     .join("");
 
+  const answersText = Object.entries(surveyData.answers)
+    .map(([questionId, answer], index) => {
+      const question = questions[parseInt(questionId) - 1] || `Question ${questionId}`;
+      return `${index + 1}. ${question}\n${answer}\n`;
+    })
+    .join("\n");
+
+  // NOTE: All emojis inside HTML use decimal HTML entities (e.g. &#128203;)
+  // to avoid UTF-8 / Windows-1252 encoding corruption across different email clients.
   const html = `
     <!DOCTYPE html>
     <html>
@@ -291,6 +334,7 @@ export async function sendSurveyNotification(surveyData: {
           .field { margin-bottom: 25px; }
           .label { font-weight: 600; color: #7C3AED; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
           .value { padding: 12px 15px; background: #f9f9f9; border-radius: 6px; border-left: 4px solid #7C3AED; font-size: 15px; color: #333; word-wrap: break-word; }
+          .value.email { color: #7C3AED; font-weight: 500; }
           .footer { background: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #e0e0e0; }
           .footer p { font-size: 12px; color: #666; }
           @media only screen and (max-width: 600px) {
@@ -303,21 +347,31 @@ export async function sendSurveyNotification(surveyData: {
       <body>
         <div class="email-container">
           <div class="header">
-            <h1>ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã…Â  New ${surveyType} Survey Submission</h1>
+            <h1>&#128203; New ${surveyType} Survey Submission</h1>
             <p>You have received a new ${surveyType.toLowerCase()} survey response from <strong>${surveyData.contactDetails.name}</strong></p>
           </div>
           <div class="content">
             <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
-               <div class="field">
-                <div class="label">ÃƒÂ°Ã…Â¸Ã¢â‚¬ËœÃ‚Â¤ Name</div>
+              ${surveyData.contactDetails.businessName ? `
+              <div class="field">
+                <div class="label">&#127970; Business Name</div>
+                <div class="value" style="font-weight: 700; color: #7C3AED;">${surveyData.contactDetails.businessName}</div>
+              </div>` : ""}
+              ${surveyData.contactDetails.businessAddress ? `
+              <div class="field">
+                <div class="label">&#128205; Business Address</div>
+                <div class="value">${surveyData.contactDetails.businessAddress}</div>
+              </div>` : ""}
+              <div class="field">
+                <div class="label">&#128100; Contact Person</div>
                 <div class="value">${surveyData.contactDetails.name}</div>
               </div>
               <div class="field">
-                <div class="label">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â® Email</div>
+                <div class="label">&#128231; Email</div>
                 <div class="value email">${surveyData.contactDetails.email}</div>
               </div>
               <div class="field">
-                <div class="label">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã…Â¾ Phone</div>
+                <div class="label">&#128222; Phone</div>
                 <div class="value">${surveyData.contactDetails.phone}</div>
               </div>
             </div>
@@ -331,20 +385,37 @@ export async function sendSurveyNotification(surveyData: {
     </html>
   `;
 
-  console.log("ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â§ [SURVEY EMAIL] Sending survey notification email...");
+  const text = `New ${surveyType} Survey Submission
+You have received a new ${surveyType.toLowerCase()} survey response from ${surveyData.contactDetails.name}
+
+${surveyData.contactDetails.businessName ? `Business Name: ${surveyData.contactDetails.businessName}\n` : ""}${surveyData.contactDetails.businessAddress ? `Business Address: ${surveyData.contactDetails.businessAddress}\n` : ""}Contact Person: ${surveyData.contactDetails.name}
+Email: ${surveyData.contactDetails.email}
+Phone: ${surveyData.contactDetails.phone}
+
+Survey Responses:
+${answersText}
+---
+This email was sent from your HashView website survey form
+`;
+
+  const subject = surveyData.contactDetails.businessName
+    ? `New ${surveyType} Survey: ${surveyData.contactDetails.businessName} (${surveyData.contactDetails.name}) - HashView`
+    : `New ${surveyType} Survey Submission - HashView`;
+
+  console.log("[SURVEY EMAIL] Sending survey notification email...");
   const surveyResult = await sendEmail({
     to: FROM_EMAIL,
-    subject: `New ${surveyType} Survey Submission - HashView`,
+    subject,
     html,
+    text,
   });
 
   if (surveyResult.success) {
-    console.log("ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ [SURVEY EMAIL] Survey notification sent successfully");
+    console.log("[SURVEY EMAIL] Survey notification sent successfully");
   } else if (surveyResult.skipped) {
-    console.log("ÃƒÂ¢Ã‚ÂÃ‚Â­ÃƒÂ¯Ã‚Â¸Ã‚Â [SURVEY EMAIL] Survey notification skipped (SMTP not configured)");
-    console.log("ÃƒÂ¢ Ã‚Â­ÃƒÂ¯Ã‚Â¸  [SURVEY EMAIL] Survey notification skipped (SMTP not configured)");
+    console.log("[SURVEY EMAIL] Survey notification skipped (SMTP not configured)");
   } else {
-    console.log("ÃƒÂ¢ Ã…â€™ [SURVEY EMAIL] Survey notification failed:", surveyResult.error);
+    console.log("[SURVEY EMAIL] Survey notification failed:", surveyResult.error);
   }
 }
 
@@ -352,6 +423,7 @@ export async function sendSurveyNotification(surveyData: {
 // -- QR Inquiry Email ----------------------------------------------------------
 
 export async function sendQrInquiryNotification(data: {
+  businessName?: string;
   name: string;
   email: string;
   phone: string;
@@ -380,7 +452,7 @@ export async function sendQrInquiryNotification(data: {
     hour: "2-digit", minute: "2-digit",
   });
 
-  const initials = data.name
+  const initials = (data.businessName || data.name)
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -446,7 +518,8 @@ export async function sendQrInquiryNotification(data: {
                             <div style="width:52px;height:52px;background:linear-gradient(135deg,#7C3AED,#F97316);border-radius:50%;text-align:center;line-height:52px;font-size:18px;font-weight:800;color:#fff;">${initials}</div>
                           </td>
                           <td style="vertical-align:top;">
-                            <div style="font-size:20px;font-weight:800;color:#ffffff;margin-bottom:4px;">${data.name}</div>
+                            <div style="font-size:20px;font-weight:800;color:#ffffff;margin-bottom:4px;">${data.businessName || data.name}</div>
+                            ${data.businessName ? `<div style="color:#c4b5fd;font-size:14px;font-weight:600;margin-bottom:3px;">Contact: ${data.name}</div>` : ""}
                             <a href="mailto:${data.email}" style="color:#a78bfa;font-size:14px;text-decoration:none;">${data.email}</a>
                             <div style="color:#94a3b8;font-size:13px;margin-top:3px;">${data.phone}</div>
                           </td>
@@ -461,7 +534,33 @@ export async function sendQrInquiryNotification(data: {
 
           <!-- DETAILS -->
           <table width="100%" cellpadding="0" cellspacing="0">
+            <!-- Business Info Section -->
             <tr><td style="padding:20px 32px 0;">
+              <p style="color:#64748b;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin:0 0 12px;">Business Details</p>
+            </td></tr>
+
+            ${data.businessName ? `
+            <tr><td style="padding:0 32px 12px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#252535;border-radius:12px;border:1px solid #32324a;">
+                <tr><td style="padding:16px 18px;">
+                  <div style="color:#7C3AED;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">Business Name</div>
+                  <div style="color:#e2e8f0;font-size:16px;font-weight:700;">${data.businessName}</div>
+                </td></tr>
+              </table>
+            </td></tr>` : ""}
+
+            ${data.address ? `
+            <tr><td style="padding:0 32px 12px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#252535;border-radius:12px;border:1px solid #32324a;">
+                <tr><td style="padding:16px 18px;">
+                  <div style="color:#7C3AED;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">Business Address</div>
+                  <div style="color:#e2e8f0;font-size:15px;">${data.address}</div>
+                </td></tr>
+              </table>
+            </td></tr>` : ""}
+
+            <!-- Contact Info Section -->
+            <tr><td style="padding:12px 32px 0;">
               <p style="color:#64748b;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin:0 0 12px;">Contact Details</p>
             </td></tr>
 
@@ -472,7 +571,7 @@ export async function sendQrInquiryNotification(data: {
                   <td width="48%" style="vertical-align:top;padding-right:8px;">
                     <table width="100%" cellpadding="0" cellspacing="0" style="background:#252535;border-radius:12px;border:1px solid #32324a;">
                       <tr><td style="padding:16px 18px;">
-                        <div style="color:#7C3AED;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">Full Name</div>
+                        <div style="color:#7C3AED;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">Contact Person</div>
                         <div style="color:#e2e8f0;font-size:15px;font-weight:600;">${data.name}</div>
                       </td></tr>
                     </table>
@@ -499,17 +598,6 @@ export async function sendQrInquiryNotification(data: {
                 </td></tr>
               </table>
             </td></tr>
-
-            ${data.address ? `
-            <!-- Address -->
-            <tr><td style="padding:12px 32px 0;">
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:#252535;border-radius:12px;border:1px solid #32324a;">
-                <tr><td style="padding:16px 18px;">
-                  <div style="color:#7C3AED;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">Business Address</div>
-                  <div style="color:#e2e8f0;font-size:15px;">${data.address}</div>
-                </td></tr>
-              </table>
-            </td></tr>` : ""}
 
             <!-- Referral Source -->
             <tr><td style="padding:12px 32px 0;">
@@ -581,7 +669,7 @@ export async function sendQrInquiryNotification(data: {
             <tr><td style="padding:32px;">
               <p style="color:#1e293b;font-size:16px;margin:0 0 8px;">Hi <strong>${data.name}</strong>,</p>
               <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 24px;">
-                Thank you for your interest in <strong>HashView</strong>! We have received your request and our team will be in touch within <strong style="color:#7C3AED;">24 hours</strong>.
+                Thank you for your interest in <strong>HashView</strong>! We have received your request${data.businessName ? ` for <strong style="color:#7C3AED;">${data.businessName}</strong>` : ""} and our team will be in touch within <strong style="color:#7C3AED;">24 hours</strong>.
               </p>
 
               <!-- Steps timeline -->
@@ -651,11 +739,38 @@ export async function sendQrInquiryNotification(data: {
 </body>
 </html>`;
 
+  const adminText = `New QR Code Inquiry
+${data.businessName ? `Business Name: ${data.businessName}\n` : ""}Business Address: ${data.address || "Not specified"}
+Contact Name: ${data.name}
+Phone: ${data.phone}
+Email: ${data.email}
+How They Found Us: ${referralLabel}
+Received: ${now} IST
+`;
+
+  const confirmationText = `Hi ${data.name},
+
+Thank you for your interest in HashView! We have received your request${data.businessName ? ` for ${data.businessName}` : ""} and our team will be in touch within 24 hours.
+
+What happens next:
+1. Our team reviews your business details
+2. We will contact you on ${data.phone} or reply to ${data.email}
+3. Your QR code gets set up - completely free!
+
+Best regards,
+The HashView Team
+`;
+
   // Admin alert
+  const adminSubject = data.businessName
+    ? `[HashView] New QR Lead: ${data.businessName} (${data.name} - ${data.phone})`
+    : `[HashView] New QR Lead: ${data.name} (${data.phone})`;
+
   const adminResult = await sendEmail({
     to: FROM_EMAIL,
-    subject: `[HashView] New QR Lead: ${data.name} (${data.phone})`,
+    subject: adminSubject,
     html: adminHtml,
+    text: adminText,
   });
   console.log(
     adminResult.success
@@ -670,6 +785,7 @@ export async function sendQrInquiryNotification(data: {
     to: data.email,
     subject: `[HashView] We have received your QR Code request!`,
     html: confirmationHtml,
+    text: confirmationText,
   });
   console.log(
     userResult.success

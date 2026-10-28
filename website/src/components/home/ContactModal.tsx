@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, User, Mail, Phone, MapPin, QrCode, ChevronDown } from "lucide-react";
+import { CheckCircle2, User, Mail, Phone, MapPin, QrCode, ChevronDown, Building2 } from "lucide-react";
 
 // ── Brand SVG Logos ─────────────────────────────────────────────────────────────
 const BrandIcons: Record<string, JSX.Element> = {
@@ -85,7 +85,14 @@ const REFERRAL_SOURCES = [
   { value: "other",     label: "Other" },
 ];
 
-const INITIAL_FORM = { name: "", email: "", phone: "", address: "", referralSource: "" };
+const INITIAL_FORM = {
+  businessName: "",
+  address: "",
+  name: "",
+  email: "",
+  phone: "",
+  referralSource: "",
+};
 
 interface ContactModalProps {
   open: boolean;
@@ -181,10 +188,12 @@ export const ContactModal = ({ open, onOpenChange }: ContactModalProps) => {
 
   const validate = () => {
     const e: Partial<typeof INITIAL_FORM> = {};
-    if (!form.name.trim()) e.name = "Name is required";
+    if (!form.businessName.trim()) e.businessName = "Business name is required";
+    if (!form.address.trim()) e.address = "Business address is required";
+    if (!form.name.trim()) e.name = "Full name is required";
     if (!form.email.trim()) e.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Enter a valid email";
-    if (!form.phone.trim()) e.phone = "Phone is required";
+    if (!form.phone.trim()) e.phone = "Phone number is required";
     return e;
   };
 
@@ -269,7 +278,8 @@ export const ContactModal = ({ open, onOpenChange }: ContactModalProps) => {
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.28 }}
                   className="text-muted-foreground text-sm max-w-xs mx-auto"
                 >
-                  Our team will reach out within 24 hours to get everything set up for you.
+                  Our team will reach out within 24 hours to get everything set up for{" "}
+                  <strong className="text-foreground">{form.businessName || "your business"}</strong>.
                 </motion.p>
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                   <Button onClick={handleClose} variant="hero" size="lg" className="px-10 mt-1">
@@ -289,84 +299,119 @@ export const ContactModal = ({ open, onOpenChange }: ContactModalProps) => {
                 noValidate
                 className="space-y-4"
               >
-                {/* Name + Phone — 2 col on sm+ */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Name */}
-                  <div className="space-y-1.5">
-                    <Label htmlFor="cf-name" className="text-sm font-medium">
-                      Full Name <span className="text-hashview-orange">*</span>
-                    </Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                      <Input
-                        id="cf-name"
-                        value={form.name}
-                        onChange={field("name")}
-                        placeholder="John Smith"
-                        autoComplete="name"
-                        className={`pl-9 h-10 text-sm ${errors.name ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
-                      />
-                    </div>
-                    {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+                {/* ── Business Details ── */}
+                <div className="space-y-3 p-3.5 rounded-xl bg-muted/40 border border-border/60">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-hashview-purple flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5" />
+                    <span>Business Details</span>
                   </div>
 
-                  {/* Phone */}
+                  {/* Business Name */}
                   <div className="space-y-1.5">
-                    <Label htmlFor="cf-phone" className="text-sm font-medium">
-                      Phone <span className="text-hashview-orange">*</span>
+                    <Label htmlFor="cf-business-name" className="text-sm font-medium">
+                      Business Name <span className="text-hashview-orange">*</span>
                     </Label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                       <Input
-                        id="cf-phone"
-                        type="tel"
-                        value={form.phone}
-                        onChange={field("phone")}
-                        placeholder="+44 7700 900000"
-                        autoComplete="tel"
-                        className={`pl-9 h-10 text-sm ${errors.phone ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
+                        id="cf-business-name"
+                        value={form.businessName}
+                        onChange={field("businessName")}
+                        placeholder="e.g. Royal Oak Cafe, Bella Salon"
+                        autoComplete="organization"
+                        className={`pl-9 h-10 text-sm ${errors.businessName ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
                       />
                     </div>
-                    {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
+                    {errors.businessName && <p className="text-xs text-destructive">{errors.businessName}</p>}
+                  </div>
+
+                  {/* Business Address */}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="cf-address" className="text-sm font-medium">
+                      Business Address <span className="text-hashview-orange">*</span>
+                    </Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                      <Input
+                        id="cf-address"
+                        value={form.address}
+                        onChange={field("address")}
+                        placeholder="e.g. 123 High Street, London, EC1A 1BB"
+                        autoComplete="street-address"
+                        className={`pl-9 h-10 text-sm ${errors.address ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
+                      />
+                    </div>
+                    {errors.address && <p className="text-xs text-destructive">{errors.address}</p>}
                   </div>
                 </div>
 
-                {/* Email */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="cf-email" className="text-sm font-medium">
-                    Email Address <span className="text-hashview-orange">*</span>
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                    <Input
-                      id="cf-email"
-                      type="email"
-                      value={form.email}
-                      onChange={field("email")}
-                      placeholder="john@example.com"
-                      autoComplete="email"
-                      className={`pl-9 h-10 text-sm ${errors.email ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
-                    />
+                {/* ── Contact Details ── */}
+                <div className="space-y-3 p-3.5 rounded-xl bg-muted/40 border border-border/60">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-hashview-purple flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5" />
+                    <span>Contact Details</span>
                   </div>
-                  {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
-                </div>
 
-                {/* Business Address */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="cf-address" className="text-sm font-medium">
-                    Business Address{" "}
-                    <span className="text-muted-foreground font-normal text-xs">(optional)</span>
-                  </Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                    <Input
-                      id="cf-address"
-                      value={form.address}
-                      onChange={field("address")}
-                      placeholder="123 High Street, London"
-                      autoComplete="street-address"
-                      className="pl-9 h-10 text-sm"
-                    />
+                  {/* Name + Phone — 2 col on sm+ */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Name */}
+                    <div className="space-y-1.5">
+                      <Label htmlFor="cf-name" className="text-sm font-medium">
+                        Full Name <span className="text-hashview-orange">*</span>
+                      </Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                        <Input
+                          id="cf-name"
+                          value={form.name}
+                          onChange={field("name")}
+                          placeholder="John Smith"
+                          autoComplete="name"
+                          className={`pl-9 h-10 text-sm ${errors.name ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
+                        />
+                      </div>
+                      {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+                    </div>
+
+                    {/* Phone */}
+                    <div className="space-y-1.5">
+                      <Label htmlFor="cf-phone" className="text-sm font-medium">
+                        Phone <span className="text-hashview-orange">*</span>
+                      </Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                        <Input
+                          id="cf-phone"
+                          type="tel"
+                          value={form.phone}
+                          onChange={field("phone")}
+                          placeholder="+44 7700 900000"
+                          autoComplete="tel"
+                          className={`pl-9 h-10 text-sm ${errors.phone ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
+                        />
+                      </div>
+                      {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
+                    </div>
+                  </div>
+
+                  {/* Email */}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="cf-email" className="text-sm font-medium">
+                      Email Address <span className="text-hashview-orange">*</span>
+                    </Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                      <Input
+                        id="cf-email"
+                        type="email"
+                        value={form.email}
+                        onChange={field("email")}
+                        placeholder="john@example.com"
+                        autoComplete="email"
+                        className={`pl-9 h-10 text-sm ${errors.email ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
+                      />
+                    </div>
+                    {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                   </div>
                 </div>
 

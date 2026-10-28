@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, User, Mail, Phone } from "lucide-react";
+import { CheckCircle2, User, Mail, Phone, Building2, MapPin } from "lucide-react";
 
 interface PartnerSurveyModalProps {
   open: boolean;
@@ -70,6 +70,8 @@ export const PartnerSurveyModal = ({ open, onOpenChange }: PartnerSurveyModalPro
   const [isComplete, setIsComplete] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
   const [contactDetails, setContactDetails] = useState({
+    businessName: "",
+    businessAddress: "",
     name: "",
     email: "",
     phone: "",
@@ -120,7 +122,13 @@ export const PartnerSurveyModal = ({ open, onOpenChange }: PartnerSurveyModalPro
   const handleClose = () => {
     setCurrentQuestion(0);
     setAnswers({});
-    setContactDetails({ name: "", email: "", phone: "" });
+    setContactDetails({
+      businessName: "",
+      businessAddress: "",
+      name: "",
+      email: "",
+      phone: "",
+    });
     setShowContactForm(false);
     setIsComplete(false);
     onOpenChange(false);
@@ -130,11 +138,11 @@ export const PartnerSurveyModal = ({ open, onOpenChange }: PartnerSurveyModalPro
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-xl p-0 overflow-hidden">
-        <div className="relative">
+      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-xl p-0 overflow-hidden max-h-[92vh] flex flex-col">
+        <div className="relative flex flex-col h-full overflow-hidden">
           {/* Progress Bar */}
           {!isComplete && !showContactForm && (
-            <div className="absolute top-0 left-0 right-0 h-1 bg-secondary">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-secondary z-10">
               <motion.div
                 className="h-full bg-gradient-to-r from-hashview-purple to-hashview-orange"
                 initial={{ width: "0%" }}
@@ -146,20 +154,20 @@ export const PartnerSurveyModal = ({ open, onOpenChange }: PartnerSurveyModalPro
             </div>
           )}
 
-          <DialogHeader className="p-6 pb-4">
+          <DialogHeader className="p-6 pb-4 flex-shrink-0">
             <DialogTitle className="text-2xl font-bold text-center">
-              {isComplete ? "Thank You!" : showContactForm ? "Final Step" : "Partner Survey"}
+              {isComplete ? "Thank You!" : showContactForm ? "Final Step: Business & Contact Details" : "Partner Survey"}
             </DialogTitle>
             <DialogDescription className="text-center">
               {isComplete
                 ? "Your responses have been recorded. Our team will get in touch with you soon!"
                 : showContactForm
-                  ? "Please share your contact details so our team can reach out."
+                  ? "Please share your business and contact details so our team can reach out."
                   : `Question ${currentQuestion + 1} of ${partnerSurveyQuestions.length}`}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="px-6 pb-6 min-h-[200px] flex items-center justify-center">
+          <div className="px-6 pb-6 overflow-y-auto flex-1 flex items-center justify-center">
             <AnimatePresence mode="wait">
               {isComplete ? (
                 <motion.div
@@ -190,16 +198,17 @@ export const PartnerSurveyModal = ({ open, onOpenChange }: PartnerSurveyModalPro
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.4 }}
-                    className="text-muted-foreground"
+                    className="text-muted-foreground max-w-sm mx-auto"
                   >
-                    Thank you for your interest in partnering with HashView. We'll reach out to you shortly!
+                    Thank you for your interest in partnering with HashView. We&apos;ll reach out shortly to get verified reviews started for{" "}
+                    <strong className="text-foreground">{contactDetails.businessName || "your business"}</strong>!
                   </motion.p>
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
                   >
-                    <Button onClick={handleClose} variant="hero" size="lg" className="mt-4">
+                    <Button onClick={handleClose} variant="hero" size="lg" className="mt-4 px-8">
                       Close
                     </Button>
                   </motion.div>
@@ -257,61 +266,132 @@ export const PartnerSurveyModal = ({ open, onOpenChange }: PartnerSurveyModalPro
                   className="w-full"
                 >
                   <form onSubmit={handleContactSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="partner-name">Name</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="partner-name"
-                          value={contactDetails.name}
-                          onChange={(e) =>
-                            setContactDetails({ ...contactDetails, name: e.target.value })
-                          }
-                          required
-                          placeholder="Your Name"
-                          className="pl-9"
-                        />
+                    {/* Business Details Section */}
+                    <div className="space-y-3 p-3.5 rounded-xl bg-muted/40 border border-border/60">
+                      <div className="text-xs font-semibold uppercase tracking-wider text-hashview-purple flex items-center gap-1.5">
+                        <Building2 className="w-3.5 h-3.5" />
+                        <span>Business Details</span>
+                      </div>
+
+                      {/* Business Name */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="partner-business-name" className="text-sm font-medium">
+                          Business Name <span className="text-hashview-orange">*</span>
+                        </Label>
+                        <div className="relative">
+                          <Building2 className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+                          <Input
+                            id="partner-business-name"
+                            value={contactDetails.businessName}
+                            onChange={(e) =>
+                              setContactDetails({ ...contactDetails, businessName: e.target.value })
+                            }
+                            required
+                            placeholder="e.g. Royal Oak Cafe, Bella Salon"
+                            className="pl-9 h-10 text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Business Address */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="partner-business-address" className="text-sm font-medium">
+                          Business Address <span className="text-hashview-orange">*</span>
+                        </Label>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+                          <Input
+                            id="partner-business-address"
+                            value={contactDetails.businessAddress}
+                            onChange={(e) =>
+                              setContactDetails({ ...contactDetails, businessAddress: e.target.value })
+                            }
+                            required
+                            placeholder="e.g. 123 High Street, London, EC1A 1BB"
+                            className="pl-9 h-10 text-sm"
+                          />
+                        </div>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="partner-email">Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="partner-email"
-                          type="email"
-                          value={contactDetails.email}
-                          onChange={(e) =>
-                            setContactDetails({ ...contactDetails, email: e.target.value })
-                          }
-                          required
-                          placeholder="your@email.com"
-                          className="pl-9"
-                        />
+
+                    {/* Contact Details Section */}
+                    <div className="space-y-3 p-3.5 rounded-xl bg-muted/40 border border-border/60">
+                      <div className="text-xs font-semibold uppercase tracking-wider text-hashview-purple flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5" />
+                        <span>Contact Details</span>
+                      </div>
+
+                      {/* Name + Phone — 2 col on sm+ */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {/* Name */}
+                        <div className="space-y-1.5">
+                          <Label htmlFor="partner-name" className="text-sm font-medium">
+                            Full Name <span className="text-hashview-orange">*</span>
+                          </Label>
+                          <div className="relative">
+                            <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+                            <Input
+                              id="partner-name"
+                              value={contactDetails.name}
+                              onChange={(e) =>
+                                setContactDetails({ ...contactDetails, name: e.target.value })
+                              }
+                              required
+                              placeholder="John Smith"
+                              className="pl-9 h-10 text-sm"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Phone */}
+                        <div className="space-y-1.5">
+                          <Label htmlFor="partner-phone" className="text-sm font-medium">
+                            Phone Number <span className="text-hashview-orange">*</span>
+                          </Label>
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+                            <Input
+                              id="partner-phone"
+                              type="tel"
+                              value={contactDetails.phone}
+                              onChange={(e) =>
+                                setContactDetails({ ...contactDetails, phone: e.target.value })
+                              }
+                              required
+                              placeholder="+44 7700 900000"
+                              className="pl-9 h-10 text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Email */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="partner-email" className="text-sm font-medium">
+                          Email Address <span className="text-hashview-orange">*</span>
+                        </Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+                          <Input
+                            id="partner-email"
+                            type="email"
+                            value={contactDetails.email}
+                            onChange={(e) =>
+                              setContactDetails({ ...contactDetails, email: e.target.value })
+                            }
+                            required
+                            placeholder="john@example.com"
+                            className="pl-9 h-10 text-sm"
+                          />
+                        </div>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="partner-phone">Phone</Label>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="partner-phone"
-                          type="tel"
-                          value={contactDetails.phone}
-                          onChange={(e) =>
-                            setContactDetails({ ...contactDetails, phone: e.target.value })
-                          }
-                          required
-                          placeholder="Your Phone Number"
-                          className="pl-9"
-                        />
-                      </div>
-                    </div>
+
                     <Button
                       type="submit"
                       variant="hero"
                       size="lg"
-                      className="w-full mt-4"
+                      className="w-full h-11 text-sm font-semibold mt-2"
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? "Submitting..." : "Complete Registration"}
@@ -323,7 +403,6 @@ export const PartnerSurveyModal = ({ open, onOpenChange }: PartnerSurveyModalPro
           </div>
         </div>
       </DialogContent>
-    </Dialog >
+    </Dialog>
   );
 };
-

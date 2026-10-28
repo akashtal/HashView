@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IQrInquiry extends Document {
+  businessName?: string;
   name: string;
   email: string;
   phone: string;
@@ -13,6 +14,7 @@ export interface IQrInquiry extends Document {
 
 const QrInquirySchema: Schema = new Schema(
   {
+    businessName:   { type: String, trim: true },
     name:           { type: String, required: true, trim: true },
     email:          { type: String, required: true, trim: true, lowercase: true },
     phone:          { type: String, required: true, trim: true },

@@ -11,6 +11,8 @@ const surveySchema = z.object({
     name: z.string().min(1, "Name is required"),
     email: z.string().email("Invalid email address"),
     phone: z.string().min(1, "Phone number is required"),
+    businessName: z.string().max(150).optional(),
+    businessAddress: z.string().max(300).optional(),
   }),
 });
 
@@ -35,7 +37,13 @@ export async function POST(request: NextRequest) {
       await sendSurveyNotification({
         type: validatedData.type,
         answers: validatedData.answers,
-        contactDetails: validatedData.contactDetails as { name: string; email: string; phone: string },
+        contactDetails: validatedData.contactDetails as {
+          name: string;
+          email: string;
+          phone: string;
+          businessName?: string;
+          businessAddress?: string;
+        },
       });
       console.log("✅ [SURVEY API] Email notification process completed");
     } catch (emailError) {
@@ -95,4 +103,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Failed to fetch surveys" }, { status: 500 });
   }
 }
-
