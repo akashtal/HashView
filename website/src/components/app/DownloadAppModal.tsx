@@ -1,16 +1,30 @@
 "use client";
 
 import { X, Smartphone, Apple, Download } from "lucide-react";
-import { getGate, type FeatureGateKey, APP_STORE_URL, PLAY_STORE_URL } from "@/lib/feature-gates";
+import { getGate, type FeatureGateKey, buildAppStoreUrl, buildPlayStoreUrl, buildUniversalLink, PLAY_STORE_URL } from "@/lib/feature-gates";
 
 interface DownloadAppModalProps {
   feature: FeatureGateKey | null;
   onClose: () => void;
+  /** Business ID to deep-link into. When provided, the app/store links will
+   *  open directly on this business screen. */
+  businessId?: string;
 }
 
-export function DownloadAppModal({ feature, onClose }: DownloadAppModalProps) {
+export function DownloadAppModal({ feature, onClose, businessId }: DownloadAppModalProps) {
   if (!feature) return null;
   const gate = getGate(feature);
+
+  // iOS: Universal Link opens the installed app directly; if not installed → website page
+  const iosUrl = buildUniversalLink(businessId);
+  // Android: intent:// tries the app first; if not installed → Play Store (with referrer)
+  const androidUrl = buildPlayStoreUrl(businessId);
+  // Fallback App Store URL (carries campaign token for deferred analytics)
+  const appStoreUrl = buildAppStoreUrl(businessId);
+
+  // Detect platform to show the most useful link prominently
+  const isAndroid = typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent);
+  const isIOS = typeof navigator !== 'undefined' && /iphone|ipad|ipod/i.test(navigator.userAgent);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
@@ -29,7 +43,13 @@ export function DownloadAppModal({ feature, onClose }: DownloadAppModalProps) {
         <div className="-mt-5 bg-card rounded-t-3xl pt-6 px-6 pb-6">
           <p className="text-sm text-muted-foreground text-center mb-5">Download the free HashView app to unlock this feature</p>
           <div className="space-y-3">
-            <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 rounded-2xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all duration-200">
+            {/* iOS link — Universal Link that opens app directly if installed */}
+            <a
+              href={isAndroid ? appStoreUrl : iosUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 p-4 rounded-2xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
+            >
               <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center shrink-0">
                 <Apple className="w-5 h-5 text-white" />
               </div>
@@ -39,7 +59,13 @@ export function DownloadAppModal({ feature, onClose }: DownloadAppModalProps) {
               </div>
               <Download className="w-4 h-4 text-muted-foreground ml-auto" />
             </a>
-            <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 rounded-2xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all duration-200">
+            {/* Android link — intent:// opens app directly; falls back to Play Store */}
+            <a
+              href={isIOS ? PLAY_STORE_URL : androidUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 p-4 rounded-2xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
+            >
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center shrink-0">
                 <Smartphone className="w-5 h-5 text-white" />
               </div>

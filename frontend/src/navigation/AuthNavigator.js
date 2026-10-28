@@ -10,20 +10,22 @@ import LoginWithPhoneScreen from '../screens/auth/LoginWithPhoneScreen';
 import ConfirmEmailScreen from '../screens/auth/ConfirmEmailScreen';
 import VerifyOTPScreen from '../screens/auth/VerifyOTPScreen';
 import TermsAndConditionsScreen from '../screens/auth/TermsAndConditionsScreen';
+import OnboardingScreen from '../screens/auth/OnboardingScreen';
 
 import BusinessDetailScreen from '../screens/user/BusinessDetailScreen';
 
 const Stack = createStackNavigator();
 
-export default function AuthNavigator() {
+export default function AuthNavigator({ hasSeenOnboarding = false }) {
   return (
     <Stack.Navigator
-      initialRouteName="RoleSelection"
+      initialRouteName={hasSeenOnboarding ? 'RoleSelection' : 'Onboarding'}
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: '#2D1B69' },
       }}
     >
+      <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="SignUp" component={SignUpScreen} />

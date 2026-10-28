@@ -30,11 +30,11 @@ const CATEGORY_ICONS = [
   { name: 'sparkles', icon: Sparkles, label: 'Beauty' },
   { name: 'paw', icon: PawPrint, label: 'Pets' },
   { name: 'leaf', icon: Leaf, label: 'Nature' },
-  { name: 'store', icon: Store, label: 'Store' },
+  { name: 'storefront', icon: Store, label: 'Store' }, // Updated from 'store' to 'storefront' for Ionicons compatibility
   { name: 'cart', icon: ShoppingCart, label: 'Shop' },
   { name: 'hammer', icon: Hammer, label: 'Tools' },
   { name: 'laptop', icon: Laptop, label: 'Tech' },
-  { name: 'phone', icon: Phone, label: 'Telecom' },
+  { name: 'call', icon: Phone, label: 'Telecom' }, // Updated from 'phone' to 'call' for Ionicons compatibility
 ];
 
 const COMMON_COLORS = [

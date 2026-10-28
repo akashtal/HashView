@@ -327,22 +327,51 @@ class OpenAIAdapter extends AIProviderInterface {
 
   _parseIntentJSON(content) {
     try {
-      const clean = content.replace(/```json?\n?/gi, '').replace(/```/g, '').trim();
-      const parsed = JSON.parse(clean);
+      // Strip <think>...</think> blocks produced by reasoning models (qwen, deepseek, etc.)
+      let clean = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+      // Strip markdown code fences
+      clean = clean.replace(/```json?\n?/gi, '').replace(/```/g, '').trim();
+      // Extract the first JSON object if there's surrounding text
+      const jsonMatch = clean.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON object found');
+      const parsed = JSON.parse(jsonMatch[0]);
+
       return {
-        category: parsed.category || null,
-        menu_keyword: parsed.menu_keyword || null,
-        price_max: parsed.price_max !== undefined ? Number(parsed.price_max) || null : null,
-        price_min: parsed.price_min !== undefined ? Number(parsed.price_min) || null : null,
-        near_me: Boolean(parsed.near_me ?? true),
-        city: parsed.city || null,
-        area: parsed.area || null,
-        min_rating: parsed.min_rating !== undefined ? Number(parsed.min_rating) || null : null,
-        sort_by: parsed.sort_by || 'distance',
-        has_coupons: Boolean(parsed.has_coupons),
-        is_open_now: Boolean(parsed.is_open_now),
-        dietary: Array.isArray(parsed.dietary) && parsed.dietary.length > 0 ? parsed.dietary : null,
-        is_off_topic: Boolean(parsed.is_off_topic),
+        // Core search filters
+        intent_type:        parsed.intent_type || 'search',
+        category:           parsed.category || null,
+        menu_keyword:       parsed.menu_keyword || null,
+        menu_keywords:      Array.isArray(parsed.menu_keywords) && parsed.menu_keywords.length > 0 ? parsed.menu_keywords : null,
+        menu_items:         Array.isArray(parsed.menu_items) && parsed.menu_items.length > 0 ? parsed.menu_items : null,
+        menu_category:      parsed.menu_category || null,
+        meal_time:          parsed.meal_time || null,
+        corrected_query:    parsed.corrected_query || null,
+        // Entity resolution (new)
+        business_name:      parsed.business_name || null,
+        // Price / budget
+        price_max:          parsed.price_max !== undefined ? Number(parsed.price_max) || null : null,
+        price_min:          parsed.price_min !== undefined ? Number(parsed.price_min) || null : null,
+        budget_total:       parsed.budget_total !== undefined ? Number(parsed.budget_total) || null : null,
+        // Location
+        near_me:            Boolean(parsed.near_me ?? false),
+        city:               parsed.city || null,
+        area:               parsed.area || null,
+        distance_max:       parsed.distance_max !== undefined ? Number(parsed.distance_max) || null : null,
+        // Sorting & filters
+        min_rating:         parsed.min_rating !== undefined ? Number(parsed.min_rating) || null : null,
+        review_sentiment:   parsed.review_sentiment || null,
+        sort_by:            parsed.sort_by || 'distance',
+        has_coupons:        Boolean(parsed.has_coupons),
+        is_open_now:        Boolean(parsed.is_open_now),
+        // Dietary & facilities
+        dietary:            Array.isArray(parsed.dietary) && parsed.dietary.length > 0 ? parsed.dietary : null,
+        facility_filters:   Array.isArray(parsed.facility_filters) && parsed.facility_filters.length > 0 ? parsed.facility_filters : null,
+        // Comparison / ordinal
+        comparison_intent:  Boolean(parsed.comparison_intent),
+        comparison_targets: Array.isArray(parsed.comparison_targets) && parsed.comparison_targets.length > 0 ? parsed.comparison_targets : null,
+        ordinal_reference:  parsed.ordinal_reference || null,
+        // Off-topic guard
+        is_off_topic:       Boolean(parsed.is_off_topic),
       };
     } catch (err) {
       throw new Error(`Failed to parse OpenAI intent JSON: ${err.message}. Raw: ${content.slice(0, 200)}`);

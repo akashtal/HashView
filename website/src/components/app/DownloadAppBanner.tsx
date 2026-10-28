@@ -2,20 +2,33 @@
 
 import { Smartphone, Apple, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getGate, type FeatureGateKey, APP_STORE_URL, PLAY_STORE_URL } from "@/lib/feature-gates";
+import { getGate, type FeatureGateKey, buildAppStoreUrl, buildPlayStoreUrl, buildUniversalLink, PLAY_STORE_URL } from "@/lib/feature-gates";
 
 interface DownloadAppBannerProps {
   feature: FeatureGateKey;
   className?: string;
   variant?: "inline" | "card";
+  /** Business ID to deep-link into. When provided the store/app links will
+   *  navigate directly to this business screen. */
+  businessId?: string;
 }
 
 export function DownloadAppBanner({
   feature,
   className,
   variant = "card",
+  businessId,
 }: DownloadAppBannerProps) {
   const gate = getGate(feature);
+
+  // Smart links: detect platform and pick the best deep-link
+  const isAndroid = typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent);
+  const isIOS = typeof navigator !== 'undefined' && /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const iosUrl = buildUniversalLink(businessId); // Universal Link — opens app if installed
+  const androidUrl = buildPlayStoreUrl(businessId); // intent:// — opens app, fallback Play Store
+  const appStoreUrl = buildAppStoreUrl(businessId);
+  // For the single-button inline variant, pick the platform-appropriate link
+  const primaryUrl = isIOS ? iosUrl : isAndroid ? androidUrl : appStoreUrl;
 
   if (variant === "inline") {
     return (
@@ -31,7 +44,7 @@ export function DownloadAppBanner({
           <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{gate.ctaDescription}</p>
         </div>
         <a
-          href={PLAY_STORE_URL}
+          href={primaryUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="shrink-0 flex items-center gap-1 bg-primary text-white text-xs font-semibold rounded-lg px-3 py-1.5 hover:bg-primary/90 transition-colors"
@@ -60,7 +73,7 @@ export function DownloadAppBanner({
 
       <div className="flex gap-3 mt-5">
         <a
-          href={APP_STORE_URL}
+          href={isAndroid ? appStoreUrl : iosUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="flex-1 flex items-center justify-center gap-2 bg-white/15 hover:bg-white/25 border border-white/20 rounded-xl py-2.5 transition-all duration-200 font-semibold text-sm"
@@ -69,7 +82,7 @@ export function DownloadAppBanner({
           App Store
         </a>
         <a
-          href={PLAY_STORE_URL}
+          href={isIOS ? PLAY_STORE_URL : androidUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="flex-1 flex items-center justify-center gap-2 bg-white text-violet-700 hover:bg-white/90 rounded-xl py-2.5 transition-all duration-200 font-semibold text-sm"

@@ -25,6 +25,8 @@ const BARE_ROUTES = [
   "/help",
   "/claim-business",
   "/register-business",
+  "/qr",
+  "/qr-code",
 ];
 
 export function ConditionalLayout({ children }: { children: React.ReactNode }) {

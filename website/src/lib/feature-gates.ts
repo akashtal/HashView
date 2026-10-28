@@ -18,6 +18,47 @@
 export const APP_STORE_URL = 'https://apps.apple.com/us/app/hashview/id6756681321';
 export const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.hashview.apps&pcampaignid=web_share';
 
+/**
+ * Build an iOS App Store URL.
+ * If a businessId is provided we pass the deep-link as the `referrer` param
+ * so that when the user opens the app after install it can read it.
+ * For already-installed apps on iOS, Universal Links (hashview.co.uk/business/:id)
+ * are handled by the OS — they open the app directly.
+ */
+export function buildAppStoreUrl(businessId?: string): string {
+  if (!businessId) return APP_STORE_URL;
+  // The at= parameter is ignored by App Store but we use ct= as campaign token
+  // to carry the business id. The real deep link for already-installed apps
+  // happens via the Universal Link returned by buildUniversalLink().
+  return `${APP_STORE_URL}&ct=business_${businessId}`;
+}
+
+/**
+ * Build an Android intent:// URI.
+ * This tries to open the app directly on the business screen.
+ * If the app is NOT installed, Android falls back to the Play Store URL.
+ * The `S.browser_fallback_url` param is the Play Store page.
+ */
+export function buildPlayStoreUrl(businessId?: string): string {
+  if (!businessId) return PLAY_STORE_URL;
+  // Build the intent URI: tries hashview://business/:id first, fallback to Play Store
+  const fallback = encodeURIComponent(
+    `${PLAY_STORE_URL}&referrer=business_${businessId}`
+  );
+  return `intent://business/${businessId}#Intent;scheme=hashview;package=com.hashview.apps;S.browser_fallback_url=${fallback};end`;
+}
+
+/**
+ * Build a Universal Link for iOS.
+ * When the HashView app IS installed, iOS intercepts this https:// link
+ * and opens the app directly on the business screen (via Associated Domains).
+ * When NOT installed, Safari opens the website page instead.
+ */
+export function buildUniversalLink(businessId?: string): string {
+  if (!businessId) return 'https://hashview.co.uk';
+  return `https://hashview.co.uk/business/${businessId}`;
+}
+
 export interface FeatureGate {
   /** Is this feature restricted on web? */
   restricted: boolean;

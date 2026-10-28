@@ -22,6 +22,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   getAllActiveBusinesses,
   getNearbyBusinesses,
@@ -33,6 +34,7 @@ import COLORS from '../../config/colors';
 import { FLATLIST_OPTIMIZATIONS, optimizeImageUri } from '../../utils/performanceHelpers';
 import { FlashList } from '@shopify/flash-list';
 import useOrderSocket from '../../hooks/useOrderSocket';
+import AwarenessScratchCardModal from '../../components/AwarenessScratchCardModal';
 
 const RatingBadge = ({ source, rating, reviews }) => {
   const colors = {
@@ -304,6 +306,8 @@ export default function UserHomeScreen({ navigation }) {
     businessName: '',
   });
 
+  const [showScratchAwareness, setShowScratchAwareness] = useState(false);
+
   // Active order live tracking
   const [activeOrder, setActiveOrder] = useState(null);
 
@@ -359,7 +363,20 @@ export default function UserHomeScreen({ navigation }) {
       fetchUnreadNotifications();
     }
     loadCategories();
+    checkDailyAwareness();
   }, [user]);
+
+  const checkDailyAwareness = async () => {
+    // Show every time the screen mounts as requested
+    // Added a small delay to avoid "detached view controller" warnings during app launch/navigation
+    setTimeout(() => {
+      setShowScratchAwareness(true);
+    }, 1000);
+  };
+
+  const closeAwarenessModal = () => {
+    setShowScratchAwareness(false);
+  };
 
   const initializeScreen = async () => {
     // Always fetch on mount (do not skip even if Redux already has data)
@@ -1315,6 +1332,12 @@ export default function UserHomeScreen({ navigation }) {
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
+
+      {/* Daily Scratch Card Awareness Modal */}
+      <AwarenessScratchCardModal 
+        visible={showScratchAwareness} 
+        onClose={closeAwarenessModal} 
+      />
     </View>
   );
 }

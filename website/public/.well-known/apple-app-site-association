@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TJ77UDBJ4N.com.hashview.app",
+        "paths": [
+          "/business/*",
+          "/invite/*"
+        ]
+      }
+    ]
+  }
+}

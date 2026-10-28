@@ -26,7 +26,12 @@ import OrderTrackingScreen from '../screens/user/OrderTrackingScreen';
 const Stack = createStackNavigator();
 
 // Deep Linking Configuration
-const prefixes = [Linking.createURL('/'), 'hashview://'];
+const prefixes = [
+  Linking.createURL('/'),
+  'hashview://',
+  'https://hashview.co.uk',
+  'https://www.hashview.co.uk',
+];
 
 const mainLinking = {
   prefixes,
@@ -84,6 +89,7 @@ export default function AppNavigator() {
   const { isAuthenticated, loading, token } = useSelector((state) => state.auth);
   const [isReady, setIsReady] = React.useState(false);
   const [showPermissionBanner, setShowPermissionBanner] = useState(false);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
   const authTokenRef = React.useRef(null);
 
   // Create a navigation ref to pass to notification service
@@ -104,6 +110,11 @@ export default function AppNavigator() {
         if (!hasPermission) {
           console.log('[Push] Requesting permission early (pre-login)...');
           await NotificationService.requestPermission();
+        }
+
+        const seenOnboarding = await AsyncStorage.getItem('@has_seen_onboarding');
+        if (seenOnboarding === 'true') {
+          setHasSeenOnboarding(true);
         }
 
         const result = await dispatch(loadUser()).unwrap();
@@ -274,7 +285,9 @@ export default function AppNavigator() {
         {isAuthenticated ? (
           <Stack.Screen name="Main" component={MainNavigator} />
         ) : (
-          <Stack.Screen name="Auth" component={AuthNavigator} />
+          <Stack.Screen name="Auth">
+            {(props) => <AuthNavigator {...props} hasSeenOnboarding={hasSeenOnboarding} />}
+          </Stack.Screen>
         )}
         <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
         <Stack.Screen name="Cart" component={CartScreen} />

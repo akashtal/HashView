@@ -12,9 +12,10 @@ import {
   Share,
   Modal,
   Alert,
+  Animated,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { Video, ResizeMode } from 'expo-av';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import ToastService from '../../utils/ToastService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
@@ -60,11 +61,37 @@ export default function BusinessDetailScreen({ navigation, route }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  
+  const videoPlayer = useVideoPlayer(selectedVideo, player => {
+    player.loop = true;
+    if (selectedVideo) player.play();
+  });
   const [videoViewerVisible, setVideoViewerVisible] = useState(false);
   const [showOldReviews, setShowOldReviews] = useState(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState(null);
   const [menuModalVisible, setMenuModalVisible] = useState(false);
+  const [showDiversionModal, setShowDiversionModal] = useState(false);
+  const [googleLink, setGoogleLink] = useState(null);
   const visitTrackedRef = useRef(false);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  // Pulse animation for Write Review button
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.2,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [pulseAnim]);
 
   // Fetch business data — depends only on route params, NOT on user object
   useEffect(() => {
@@ -220,25 +247,32 @@ export default function BusinessDetailScreen({ navigation, route }) {
     const googleProfile = displayBusiness?.externalProfiles?.googleBusiness;
     if (!googleProfile) return;
 
+    let url = null;
     if (googleProfile.profileUrl) {
-      Linking.openURL(googleProfile.profileUrl).catch(() => {
-        ToastService.showError('Error', 'Could not open Google Business profile');
-      });
+      url = googleProfile.profileUrl;
     } else if (googleProfile.placeId) {
-      const url = `https://search.google.com/local/reviews?placeid=${googleProfile.placeId}`;
-      Linking.openURL(url).catch(() => {
-        ToastService.showError('Error', 'Could not open Google Business profile');
-      });
+      url = `https://search.google.com/local/reviews?placeid=${googleProfile.placeId}`;
     } else if (displayBusiness.name && displayBusiness.address?.fullAddress) {
       const searchQuery = encodeURIComponent(
         `${displayBusiness.name} ${displayBusiness.address.fullAddress}`
       );
-      const url = `https://www.google.com/search?q=${searchQuery}`;
-      Linking.openURL(url).catch(() => {
-        ToastService.showError('Error', 'Could not open Google Search');
-      });
+      url = `https://www.google.com/search?q=${searchQuery}`;
+    }
+
+    if (url) {
+      setGoogleLink(url);
+      setShowDiversionModal(true);
     } else {
       ToastService.showInfo('Info', 'Google Business profile link not available');
+    }
+  };
+
+  const proceedToGoogle = () => {
+    setShowDiversionModal(false);
+    if (googleLink) {
+      Linking.openURL(googleLink).catch(() => {
+        ToastService.showError('Error', 'Could not open Google Search');
+      });
     }
   };
 
@@ -827,11 +861,11 @@ export default function BusinessDetailScreen({ navigation, route }) {
                   end={{ x: 1, y: 0 }}
                   className="rounded-2xl py-4 items-center flex-row justify-center border border-white/20"
                 >
-                  <View className="bg-white/20 w-9 h-9 rounded-full items-center justify-center mr-3">
-                    <Icon name="star" size={20} color="#FFF" />
-                  </View>
+                  <Animated.View style={{ transform: [{ scale: pulseAnim }] }} className="bg-white/20 w-9 h-9 rounded-full items-center justify-center mr-3">
+                    <Icon name="ticket" size={20} color="#FDE68A" />
+                  </Animated.View>
                   <Text className="text-white text-[17px] font-bold tracking-wide">
-                    Write a Review
+                    Write a Review (£)
                   </Text>
                   <Icon
                     name="arrow-forward"
@@ -916,15 +950,68 @@ export default function BusinessDetailScreen({ navigation, route }) {
           {/* Video Player */}
           <View className="flex-1 items-center justify-center">
             {selectedVideo && (
-              <Video
-                source={{ uri: selectedVideo }}
+              <VideoView
+                player={videoPlayer}
                 style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.5 }}
-                useNativeControls
-                resizeMode={ResizeMode.CONTAIN}
-                shouldPlay
-                isLooping
+                allowsFullscreen
+                allowsPictureInPicture
               />
             )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Diversion Modal for Google Reviews */}
+      <Modal
+        visible={showDiversionModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowDiversionModal(false)}
+      >
+        <View className="flex-1 bg-black/60 justify-center items-center px-6">
+          <View className="bg-white rounded-3xl w-full p-6 items-center overflow-hidden">
+            <View className="absolute top-0 w-full h-24 bg-blue-50" />
+            
+            <View className="w-20 h-20 bg-white rounded-full items-center justify-center shadow-lg border-4 border-blue-100 mt-2 mb-4">
+              <Icon name="logo-google" size={36} color="#4285F4" />
+            </View>
+
+            <Text className="text-xl font-black text-gray-900 text-center mb-2">
+              Wait a minute!
+            </Text>
+            
+            <Text className="text-[15px] text-gray-600 text-center mb-6 leading-relaxed">
+              Did you know you can earn a <Text className="font-bold text-amber-600">Scratch Card (£)</Text> by writing a verified review right here on HashView first?
+            </Text>
+
+            <TouchableOpacity 
+              onPress={() => {
+                setShowDiversionModal(false);
+                handleAddReview();
+              }} 
+              activeOpacity={0.8}
+              className="w-full mb-3"
+            >
+              <LinearGradient
+                colors={['#F59E0B', '#D97706']}
+                className="py-4 rounded-xl items-center justify-center w-full flex-row"
+              >
+                <Icon name="ticket" size={20} color="#FFF" className="mr-2" />
+                <Text className="text-white font-bold text-[16px] ml-2">
+                  Give Review & Earn (£)
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              onPress={proceedToGoogle} 
+              activeOpacity={0.7}
+              className="w-full py-3 items-center justify-center"
+            >
+              <Text className="text-gray-500 font-semibold text-[15px]">
+                No thanks, continue to Google
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>

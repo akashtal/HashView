@@ -135,6 +135,25 @@ async function detectBusinessMention(message, session) {
  * @returns {Promise<{ contextText, contextType, needsNewSearch, updatedSession }>}
  */
 async function loadContext(message, session, location = null) {
+  // ─── Ideas Fest 2026 Short-Circuit ──────────────────────────────────────────
+  const isIdeasFestExplicit = message.toLowerCase().includes('ideas fest');
+  const isIdeasFestFocused = session.focusedBusinessName?.toLowerCase().includes('ideas fest');
+  const isIdeasFestInSearch = session.rankedBusinessList?.some(b => b.name.toLowerCase().includes('ideas fest'));
+
+  if (isIdeasFestExplicit || isIdeasFestFocused || isIdeasFestInSearch) {
+    try {
+      const { buildIdeasFestAIContext } = require('./ideasFestContext');
+      return {
+        contextText: buildIdeasFestAIContext(location?.latitude, location?.longitude, message),
+        contextType: 'business',
+        needsNewSearch: false,
+        updatedSession: session,
+      };
+    } catch (err) {
+      console.warn('[Context Loader] Failed to inject Ideas Fest Context:', err.message);
+    }
+  }
+
   const needs = detectContextNeeds(message, session);
   const contextParts = [];
   let contextType = 'conversation';
@@ -306,6 +325,7 @@ async function loadContext(message, session, location = null) {
       }
     } catch { /* non-fatal */ }
   }
+
 
   return {
     contextText:    contextParts.join('\n\n'),
